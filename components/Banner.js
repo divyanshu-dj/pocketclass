@@ -10,7 +10,7 @@ function Banner() {
 
         <div className='absolute top-1/2 w-full text-center'>
             <p className='text-sm sm:text-lg'>A one-stop shop for all your extracurriculars.</p>
-            <button className='text-logo-red bg-white px-10 py-4 shadow-md rounded-full font-bold my-3 hover:shadow-2xl active:scale-90 transition duration-150'>Explore Classes</button>
+            <button className='text-logo-red bg-white px-10 py-4 shadow-md rounded-full font-bold my-3 hover:shadow-2xl hover:scale-105 active:scale-90 transition duration-150'>Explore Classes</button>
         </div>
     </div>
   )
