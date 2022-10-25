@@ -29,10 +29,15 @@ function Header({ placeholder }) {
     }
 
     const search = () => {
+        const lowerCase = searchInput.toLowerCase();
+        const firstLetterUpperCase = lowerCase.substring(0, 1).toUpperCase();
+        const exceptFirstLetter = lowerCase.substring(1, lowerCase.length)
+        const finalSearchInput = firstLetterUpperCase + exceptFirstLetter
+
         router.push({
             pathname: '/search',
             query: {
-                searchInput: searchInput,
+                searchInput: finalSearchInput,
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
                 noOfGuests,

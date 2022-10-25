@@ -9,8 +9,15 @@ import SmallCard from "../components/SmallCard";
 import styles from "../styles/Home.module.css";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query } from "firebase/firestore";
+import { Router } from "next/router";
 
 export default function Home({ exploreData, cardsData }) {
+  const uniqueCategory = [];
+  exploreData.map((item) => {
+    var findItem = uniqueCategory.find((x) => x.type === item.type);
+    if (!findItem) uniqueCategory.push(item);
+  });
+
   return (
     <div className="">
       <Head>
@@ -30,7 +37,7 @@ export default function Home({ exploreData, cardsData }) {
           </h2>
           {/* APIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-            {exploreData?.map(
+            {uniqueCategory?.map(
               ({
                 id,
                 type,
@@ -46,12 +53,12 @@ export default function Home({ exploreData, cardsData }) {
               }) => (
 
                 <SmallCard
-                  key={id}
-                  img={images[0]}
-                  type={type}
-                  category={category}
+                key={id}
+                id={id}
+                img={images[0]}
+                type={type}
+                category={category}
                 />
-
               )
             )}
           </div>
@@ -75,9 +82,16 @@ export default function Home({ exploreData, cardsData }) {
                 category
               }) => (
                 <MediumCard
-                  key={id}
-                  img={images[0]}
-                  title={type}
+                key={id}
+                id={id}
+                name={name}
+                img={images[0]}
+                type={type}
+                description={description}
+                ratings={ratings}
+                address={address}
+                price={price}
+                category={category}
                 />
               )
             )}
