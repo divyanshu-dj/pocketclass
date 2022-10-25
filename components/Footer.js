@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link';
 
 function Footer() {
   return (
@@ -13,7 +14,7 @@ function Footer() {
             <h5 className='font-bold'>COMMUNITY</h5>
             <p>Instructor Guide</p>
             <p>Student Guide</p>
-            <p>Terms and Conditions</p>
+            <p><Link href="/community/termsandconditions">Terms and Conditions</Link></p>
         </div>
         <div className='text-center space-y-4 text-xs text-gray-800'>
             <h5 className='font-bold'>SUPPORT</h5>

@@ -8,6 +8,8 @@ import Mapper from "../components/Mapper";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
+
+
 function Search({ searchResults }) {
     const router = useRouter();
     const { searchInput, startDate, endDate, noOfGuests } = router.query;
@@ -49,17 +51,18 @@ function Search({ searchResults }) {
                                 category
                             }) => (
                                 <InfoCard
-                                    key={id} // should have an id
-                                    type={type}
-                                    latitude={latitude}
-                                    name={name}
-                                    images={images}
-                                    description={description}
-                                    longitude={longitude}
-                                    ratings={ratings}
-                                    address={address}
-                                    price={price}
-                                    category={category}
+                                key={id} // should have an id
+                                id={id}
+                                type={type}
+                                latitude={latitude}
+                                name={name}
+                                images={images}
+                                description={description}
+                                longitude={longitude}
+                                ratings={ratings}
+                                address={address}
+                                price={price}
+                                category={category}
                                 />
                             )
                         )}
@@ -82,12 +85,16 @@ export async function getServerSideProps(context) {
     const { searchInput } = context.query;
     var searchResults = [];
 
-    const q = query(
-        collection(db, "classes"),
-        where("Type", "==", searchInput),
-    );
-
-    const querySnapshot = await getDocs(q);
+    if (searchInput !== "all") {
+        const q = query(
+            collection(db, "classes"),
+            where("Type", "==", searchInput),
+        );
+        var querySnapshot = await getDocs(q);
+    } else {
+        const q = query(collection(db, "classes"));
+        var querySnapshot = await getDocs(q);
+    }
 
 querySnapshot.forEach((doc) => {
     console.log(doc.data.Type);

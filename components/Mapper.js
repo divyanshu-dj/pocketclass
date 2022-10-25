@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Map, {Marker,Popup} from 'react-map-gl';
 import getCenter from "geolib/es/getCenter"
 import "mapbox-gl/dist/mapbox-gl.css"
+import {MapPinIcon} from "@heroicons/react/solid";
 
 function Mapper({ searchResults }) {
 const [selectedLocation, setSelectedLocation] = useState({});
