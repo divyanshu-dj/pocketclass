@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import Login from "./Login";
+import Login from "./login";
 import LoginForm from "../components/LoginForm"
 import Register from "./Register";
 import { auth } from "/firebaseConfig"
