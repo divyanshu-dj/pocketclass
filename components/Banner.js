@@ -18,13 +18,13 @@ function Banner() {
   }
   return (
     <div className='relative h-[300px] sm:h-[400px] lg:h-[500px] xl:h-[600px] 2xl:h-[700px]'>
-        <Image src="/airbnb-hero.jpeg" //https://links.papareact.com/0fm
-        layout="fill" objectFit="cover"/>
+      <Image src="/airbnb-hero.jpeg" //https://links.papareact.com/0fm
+        layout="fill" objectFit="cover" />
 
-        <div className='absolute top-1/2 w-full text-center'>
-            <p className='text-sm sm:text-lg'>A one-stop shop for all your extracurriculars.</p>
-            <button onClick={() => handleButtonClick()} className='text-logo-red bg-white px-10 py-4 shadow-md rounded-full font-bold my-3 hover:shadow-2xl hover:scale-105 active:scale-90 transition duration-150'>Explore Classes</button>
-        </div>
+      <div className='absolute top-1/2 w-full max-w-[100%] text-center'>
+        <p className='lg:text-5xl md:text-xl  font-sans sm:text-xl font-extrabold text-logo-red'>UNLOCK YOUR POTENTIAL</p>
+        <button onClick={() => handleButtonClick()} className='text-white bg-logo-red px-10 py-4 shadow-md rounded-full font-bold my-8 hover:shadow-2xl hover:scale-105 active:scale-90 transition duration-150'>Explore Classes</button>
+      </div>
     </div>
   )
 }

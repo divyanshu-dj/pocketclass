@@ -1,11 +1,13 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { StarIcon } from "@heroicons/react/solid";
 
 function MediumCard({
   id,
   img,
   name,
+  reviews,
   type,
   description,
   ratings,
@@ -23,16 +25,29 @@ function MediumCard({
       },
     });
   };
+
+  let currentClassReview = reviews.filter((rev) => rev[0].classID === id)
+  let averageReview = 0;
+
+  if (currentClassReview.length !== 0) {
+    currentClassReview.map(rv => {
+      averageReview = averageReview + rv[0].qualityRating + rv[0].recommendRating + rv[0].safetyRating
+    })
+
+    averageReview = averageReview / (currentClassReview.length * 3)
+
+  }
+  
   return (
     <div
       onClick={classSearch}
       className="cursor-pointer hover:scale-105 transform transition duration-300 ease-out"
     >
       <div className="relative h-80 w-80">
-        <Image src={img} layout="fill" className="rounded-xl" />
+        <Image src={img} layout="fill" className="rounded-xl" unoptimized />
       </div>
       <div>
-        
+
         <div className="flex mt-3">
           <svg
             class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
@@ -49,7 +64,14 @@ function MediumCard({
             <path d="M3 15.055v-.684c.126.053.255.1.39.142 2.092.642 4.313.987 6.61.987 2.297 0 4.518-.345 6.61-.987.135-.041.264-.089.39-.142v.684c0 1.347-.985 2.53-2.363 2.686a41.454 41.454 0 01-9.274 0C3.985 17.585 3 16.402 3 15.055z" />
           </svg>
           <h3 className="text-l">{name}</h3>
+          
         </div>
+        <p className="flex">
+            <StarIcon className="h-5 text-logo-red" />
+            {
+              currentClassReview.length !== 0 ? Math.round(averageReview) + ".0" : "N/A"
+            }
+          </p>
       </div>
     </div>
   );

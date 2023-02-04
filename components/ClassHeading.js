@@ -1,12 +1,21 @@
 import Image from 'next/image';
 import React from 'react';
-import { BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, MapIcon, StarIcon } from '@heroicons/react/solid';
+import { BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, StarIcon, UserCircleIcon } from '@heroicons/react/solid';
 import Rating from 'react-rating';
 import { useState } from 'react';
 import { addDoc, collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
 import { useEffect } from 'react';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper";
 import { useRouter } from 'next/router';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+
+
 
 const ClassHeading = ({
     type,
@@ -32,9 +41,19 @@ const ClassHeading = ({
     const [safety, setSafety] = useState(0)
     const [loading, setLoading] = useState(false)
     const [reviews, setReviews] = useState([])
+    const [classCreatorData, setClassCreatorData] = useState()
+
+    const [user, authStateLoading, error] = useAuthState(auth);
+
+    const reviewerName = user?.displayName || user?.email.split("@")[0]
+    const photo = user?.photoURL || " "
+
+
 
     let currentClassReview = reviews.filter((rev) => rev[0].classID === id)
     let avgReview = 0;
+
+
     currentClassReview.map(d => {
         avgReview = avgReview + d[0].safetyRating + d[0].recommendRating + d[0].qualityRating
     })
@@ -47,7 +66,8 @@ const ClassHeading = ({
             setLoading(true)
             const docRef = addDoc(collection(db, "Reviews"), {
                 classID: id,
-                name: e.target.name.value,
+                name: reviewerName,
+                photo: photo,
                 recommendRating: recommend,
                 qualityRating: quality,
                 safetyRating: safety,
@@ -55,7 +75,6 @@ const ClassHeading = ({
             })
                 .finally((f) => {
                     setLoading(false)
-                    e.target.name.value = " "
                     e.target.review.value = " "
                     setSafety(0)
                     setQuality(0)
@@ -68,11 +87,12 @@ const ClassHeading = ({
 
     }
 
-    const getData = async () => {
-        const docRef = doc(db, "classes", id);
-        const docSnap = await getDoc(docRef);
-    }
+    const getClassCreatorData = async (userId) => {
+        const docRef = doc(db, "Users", userId);
+        const data = await getDoc(docRef);
+        setClassCreatorData(data.data())
 
+    }
 
     useEffect(() => {
         setLoading(true)
@@ -82,40 +102,80 @@ const ClassHeading = ({
         })
     }, [])
 
+    if (!classCreatorData && data?.classCreator) {
+        getClassCreatorData(data?.classCreator)
+    }
+
+
+    const handleEditButton = () => {
+        router.push({
+            pathname: `/updateClass/${id}`,
+        })
+    }
+
     return (
         <div className="py-7 px-2">
             <h2 className="text-2xl font-extrabold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">{name}</h2>
 
-            <div className="icons my-3 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6 mt-1">
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <BriefcaseIcon className='h-5 w-5 mr-1' fill="#AF816C"/>
-                    {category} / {type}
-                </div>
-                {/* <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                        <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                    </svg>
-                    Full-time
-                </div> */}
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <CurrencyDollarIcon className='h-5 w-5 mr-1' fill="#58C18E"/>
-                    {price}
-                </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500">
-                    <CalendarIcon className='h-5 w-5 mr-1' fill="#E73F2B"/>
-                    Available
-                </div>
-            </div>
+            <div className="classLinks flex justify-between items-center flex-wrap">
+                <div className="icons my-3 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6 mt-1">
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <BriefcaseIcon className='h-5 w-5 mr-1' fill="#AF816C" />
+                        {category} / {type}
+                    </div>
 
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <CurrencyDollarIcon className='h-5 w-5 mr-1' fill="#58C18E" />
+                        {price}
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <CalendarIcon className='h-5 w-5 mr-1' fill="#E73F2B" />
+                        Available
+                    </div>
+                    {
+                        classCreatorData &&
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <a href={`/profile/${data?.classCreator}`} className="hover:underline flex justify-center items-center">
+                                <UserCircleIcon className='h-5 w-5 mr-1 inline-block' fill="#E73F2B" />
+                                {classCreatorData.firstName + " " + classCreatorData.lastName}
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                {user && user?.uid === data?.classCreator &&
+                    <div className="editButton mb-5">
+                        <button
+                            onClick={() => handleEditButton()}
+                            type="submit"
+                            className='active:scale-105 w-[200px] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-2 bg-logo-red rounded-xl text-white font-semibold text-sm'>
+                            Edit
+                        </button>
+                    </div>
+                }
+
+            </div>
             <div className="topimageContainer flex flex-wrap w-full ">
                 <div className="leftSide lg:w-[70%] xl:w-[70%] xs:w-full sm:w-full">
-                    <div className="relative w-[80%px] h-[300px]">
-                        <Image
-                            src={images?.length ? images[0] : images}
-                            layout="fill"
-                            objectFit="cover"
-                            className="rounded-xl border-2 border-[green]"
-                        />
+                    <div className="relative w-[100%] h-[450px] max-w-[80vw]">
+
+                        <Swiper navigation={true} pagination={true} modules={[Navigation, Pagination]} className="mySwiper">
+
+
+                            {
+
+                                images && images.map(img => {
+                                    return (
+                                        <SwiperSlide>
+                                            <img className='object-cover rounded-xl h-[450px] w-full' src={img} alt="images" />
+                                        </SwiperSlide>
+                                    )
+                                })
+                            }
+
+                        </Swiper>
+
+
                     </div>
 
                     <div className="description mt-5 mb-14">
@@ -206,13 +266,21 @@ const ClassHeading = ({
             }
 
             {
-                !loading ?
+                !loading && !authStateLoading ?
                     reviews.filter((rev) => rev[0].classID === id)?.length !== 0 ?
                         reviews.filter((rev) => rev[0].classID === id).map((review) => {
                             return (
                                 <div className="reviewShow my-10 flex flex-col">
                                     <div className="img flex gap-6 items-center">
-                                        <img class="inline-block h-12 w-12 rounded-full ring-2 ring-white" src="./avataricon.png" alt="avatar" />
+
+                                        {
+                                            review[0]?.photo !== " " ?
+                                                <img class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+                                                    src={review[0]?.photo} alt="avatar1" />
+                                                :
+                                                <img class="inline-block h-12 w-12 rounded-full ring-2 ring-white" src="./avataricon.png" alt="avatar" />
+                                        }
+
                                         <p className='m-0 p-0 text-md text-gray-700'>{review[0]?.name}</p>
                                     </div>
                                     <div className="name_ratings w-full">
@@ -291,104 +359,111 @@ const ClassHeading = ({
             }
 
 
-            <div className='reviewFormContainer my-3'>
-                <p className='text-2xl font-extrabold mb-6'>Write a Review!</p>
-                <form onSubmit={(e) => handleFormSubmit(e)}>
+            {
+                user ?
+                    <div className='reviewFormContainer my-3'>
+                        <p className='text-2xl font-extrabold mb-6'>Write a Review!</p>
+                        <form onSubmit={(e) => handleFormSubmit(e)}>
 
-                    <div className='my-3'>
+                            {/* <div className='my-3'>
                         <label for="price" class="block text-sm font-medium text-gray-700">Name</label>
                         <div class="relative mt-1 rounded-md shadow-sm">
                             <input type="text" required name="name" id="name" class="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm" placeholder="Your Name" />
 
                         </div>
+                    </div> */}
+
+                            <div className="ratings flex flex-wrap justify-between items-center lg:w-[70%] sm:w-[100%] xl:w-[70%] ">
+                                <div className="recommended flex flex-col justify-center ">
+                                    <p className='px-0 mx-0 text-gray-700 text-sm'>Would Recommend </p>
+                                    <Rating
+                                        className='block'
+                                        initialRating={recommend}
+                                        readonly={false}
+                                        emptySymbol={
+                                            <span className='block '>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                                </svg>
+                                            </span>
+                                        }
+                                        placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        onChange={(event) => {
+                                            setRecommend(event);
+                                        }}
+                                    />
+                                </div>
+                                <div className="quality flex flex-col justify-center ">
+                                    <p className='px-0 mx-0 text-gray-700 text-sm'>Instructor Quality</p>
+                                    <Rating
+                                        className='block'
+                                        readonly={false}
+                                        initialRating={quality}
+                                        emptySymbol={
+                                            <span className='block '>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                                </svg>
+                                            </span>
+                                        }
+                                        placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        onChange={(event) => {
+                                            setQuality(event);
+                                        }}
+                                    />
+                                </div>
+                                <div className="safety flex flex-col justify-center ">
+                                    <p className='px-0 mx-0 text-gray-700 text-sm'>Safety </p>
+                                    <Rating
+                                        className='block'
+                                        readonly={false}
+                                        initialRating={safety}
+                                        emptySymbol={
+                                            <span className='block '>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                                </svg>
+                                            </span>
+                                        }
+                                        placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
+                                        onChange={(event) => {
+                                            setSafety(event);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className='my-3'>
+                                <label for="price" class="block text-sm font-medium text-gray-700">Review</label>
+                                <div class="relative mt-1 rounded-md shadow-sm">
+                                    <textarea rows={6} type="text" required name="review" id="review" class="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm" placeholder="Your Review" />
+                                </div>
+                            </div>
+
+                            {
+                                !loading ?
+
+                                    <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-logo-red py-2 px-4 text-sm font-medium text-white hover:bg-logo-red focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2">
+                                        Post
+                                    </button>
+
+                                    :
+
+                                    <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-slate-400 py-2 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2 disabled:">
+                                        Posting
+                                    </button>
+
+                            }
+                        </form>
                     </div>
-
-                    <div className="ratings flex flex-wrap justify-between items-center lg:w-[70%] sm:w-[100%] xl:w-[70%] ">
-                        <div className="recommended flex flex-col justify-center ">
-                            <p className='px-0 mx-0 text-gray-700 text-sm'>Would Recommend </p>
-                            <Rating
-                                className='block'
-                                initialRating={recommend}
-                                readonly={false}
-                                emptySymbol={
-                                    <span className='block '>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                        </svg>
-                                    </span>
-                                }
-                                placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                onChange={(event) => {
-                                    setRecommend(event);
-                                }}
-                            />
-                        </div>
-                        <div className="quality flex flex-col justify-center ">
-                            <p className='px-0 mx-0 text-gray-700 text-sm'>Instructor Quality</p>
-                            <Rating
-                                className='block'
-                                readonly={false}
-                                initialRating={quality}
-                                emptySymbol={
-                                    <span className='block '>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                        </svg>
-                                    </span>
-                                }
-                                placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                onChange={(event) => {
-                                    setQuality(event);
-                                }}
-                            />
-                        </div>
-                        <div className="safety flex flex-col justify-center ">
-                            <p className='px-0 mx-0 text-gray-700 text-sm'>Safety </p>
-                            <Rating
-                                className='block'
-                                readonly={false}
-                                initialRating={safety}
-                                emptySymbol={
-                                    <span className='block '>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                        </svg>
-                                    </span>
-                                }
-                                placeholderSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                fullSymbol={<StarIcon className='text-logo-red  text-5xl inline-block' />}
-                                onChange={(event) => {
-                                    setSafety(event);
-                                }}
-                            />
-                        </div>
+                    :
+                    <div className="reviewRequest">
+                        <p className="text-xl font-bold text-center pt-10">Please sign in to give reviews!</p>
                     </div>
-
-                    <div className='my-3'>
-                        <label for="price" class="block text-sm font-medium text-gray-700">Review</label>
-                        <div class="relative mt-1 rounded-md shadow-sm">
-                            <textarea rows={6} type="text" required name="review" id="review" class="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm" placeholder="Your Review" />
-                        </div>
-                    </div>
-
-                    {
-                        !loading ?
-
-                            <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-logo-red py-2 px-4 text-sm font-medium text-white hover:bg-logo-red focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2">
-                                Post
-                            </button>
-
-                            :
-
-                            <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-slate-400 py-2 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2 disabled:">
-                                Posting
-                            </button>
-
-                    }
-                </form>
-            </div>
+            }
         </div>
     );
 };
