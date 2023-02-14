@@ -108,7 +108,12 @@ export default function Profile() {
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Profile Information
               </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">xxx</p>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                  {userData.profileDescription ? (
+                      <p>{userData.profileDescription}</p>
+                    ) : (
+                      <p className="">Not Given</p>
+                    )}</p>
             </div>
             <div className="border-t border-gray-200">
               <dl>
