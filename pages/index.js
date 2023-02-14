@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LargeCard from "../components/LargeCard";
 import MediumCard from "../components/MediumCard";
+import FeaturedClass from "../components/FeaturedClasses";
 import SmallCard from "../components/SmallCard";
 import styles from "../styles/Home.module.css";
 import { db } from "../firebaseConfig";
@@ -15,7 +16,7 @@ import { useEffect } from "react";
 
 export default function Home({ exploreData, cardsData }) {
   const uniqueCategory = [];
-  const featuredClasses = cardsData.slice(0, 5);
+  const featuredClasses = cardsData.slice(0, 8);
   exploreData.map((item) => {
     var findItem = uniqueCategory.find((x) => x.type === item.type);
     if (!findItem) uniqueCategory.push(item);
@@ -37,7 +38,8 @@ export default function Home({ exploreData, cardsData }) {
     <div className="">
       <Head>
         <title>pocketclass</title>
-        <meta name="pocketclass" content="Pocketclass is a platform for affordable and convenient access to a wide range of classes taught by experienced instructors with personalized options, secure payments, and a sense of community." />
+        <meta http-equic="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="description" content="Pocketclass is a platform for affordable and convenient access to a wide range of classes taught by experienced instructors with personalized options, secure payments, and a sense of community." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
@@ -79,8 +81,44 @@ export default function Home({ exploreData, cardsData }) {
             )}
           </div>
         </section>
-
+        
+        {/* New Featured Classes Section */}
         <section>
+          <h2 className="text-4xl font-semibold py-8 pb-5">Featured Classes</h2>
+          <div className="flex p-3 flex-wrap">
+            {featuredClasses?.map(
+              ({
+                id,
+                type,
+                latitude,
+                name,
+                images,
+                description,
+                longitude,
+                ratings,
+                address,
+                price,
+                category
+              }) => (
+                <FeaturedClass
+                  key={id}
+                  id={id}
+                  name={name}
+                  reviews={reviews}
+                  img={images[0]}
+                  type={type}
+                  description={description}
+                  ratings={ratings}
+                  address={address}
+                  price={price}
+                  category={category}
+                />
+              )
+            )}
+          </div>
+        </section>
+
+        {/* <section>
           <h2 className="text-4xl font-semibold py-8 pb-5">Featured Classes</h2>
           <div className="flex space-x-3 overflow-scroll scrollbar-hide p-3">
             {featuredClasses?.map(
@@ -113,7 +151,7 @@ export default function Home({ exploreData, cardsData }) {
               )
             )}
           </div>
-        </section>
+        </section> */}
 
         <section>
           <LargeCard

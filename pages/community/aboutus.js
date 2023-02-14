@@ -25,7 +25,7 @@ export default function AboutUs() {
           <h1 className="text-4xl font-semibold py-5">Our Story</h1>
           <div className="relative h-96 min-w-[300px]">
             <Image
-              src="https://links.papareact.com/4cj"
+              src="/hero-tester-ai.png"
               layout="fill"
               objectFit="cover"
               className="rounded-2xl"

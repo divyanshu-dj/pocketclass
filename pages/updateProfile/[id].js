@@ -48,6 +48,7 @@ function UpdateProfile() {
         const gender = e.target.gender.value
         const phoneNumber = e.target.phoneNumber.value
         const dob = e.target.dob.value
+        const profileDescription = e.target.profileDescription.value
 
         for (let i = 0; i < e.target.images.files.length; i++) {
             images.push(e.target.images.files[i])
@@ -61,7 +62,8 @@ function UpdateProfile() {
             gender,
             phoneNumber,
             dob,
-            images: e.target.images.files.length ? imagesURL : userData?.images
+            images: e.target.images.files.length ? imagesURL : userData?.images,
+            profileDescription
         }
 
         console.log(e.target.images.files.length)
@@ -193,8 +195,16 @@ function UpdateProfile() {
                                 </div>
                             </div>
 
-
-
+                            <div className='grid lg:grid-cols-1 lg:gap-x-2 sm:grid-cols-1'>
+                                <div className="gender">
+                                    <label className='text-medium font-medium'>Description</label>
+                                    <input
+                                            defaultValue={userData?.profileDescription}
+                                            name="profileDescription"
+                                            className='w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                            placeholder="Enter a profile description" />
+                                </div>
+                            </div>
 
                             <div className="col-span-12 mt-10">
                                 {

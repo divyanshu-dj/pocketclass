@@ -23,7 +23,7 @@ function Banner() {
 
       <div className='absolute top-1/2 w-full max-w-[100%] text-center'>
         <p className='lg:text-5xl md:text-xl  font-sans sm:text-xl font-extrabold text-logo-red'>UNLOCK YOUR POTENTIAL</p>
-        <button onClick={() => handleButtonClick()} className='text-white bg-logo-red px-10 py-4 shadow-md rounded-full font-bold my-8 hover:shadow-2xl hover:scale-105 active:scale-90 transition duration-150'>Explore Classes</button>
+        <button onClick={() => handleButtonClick()} className='text-white bg-logo-red px-10 py-4 shadow-md rounded-full font-bold my-8 hover:shadow-2xl hover:scale-105 active:scale-90 transition duration-150'>Explore All Classes</button>
       </div>
     </div>
   )
