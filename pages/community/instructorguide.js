@@ -21,7 +21,7 @@ export default function InstructorGuide() {
       <Header />
 
       {/*body*/}
-      <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
+      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
         <section>
           <h1 className="text-4xl font-semibold py-5">Join Our Team</h1>
           <h1 className="text-xl font-semibold mt-5">
@@ -59,7 +59,7 @@ export default function InstructorGuide() {
             </div>
             <div className="border-t border-gray-200">
               <dl>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+                <div className="bg-gray-50 px-4 py-5 xl:grid xl:grid-cols-4 lg:grid lg:grid-cols-4 sm:grid sm:grid-cols-1 sm:gap-2 sm:px-5">
                   <dt className="text-sm font-medium text-gray-500">Skill</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                     Pocketclass will verify that you have adept skill or the
@@ -67,7 +67,7 @@ export default function InstructorGuide() {
                     licenses will accelerate this process.
                   </dd>
                 </div>
-                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+                <div className="bg-white px-4 py-5 xl:grid xl:grid-cols-4 lg:grid lg:grid-cols-4 sm:grid sm:grid-cols-1 sm:gap-2 sm:px-5">
                   <dt className="text-sm font-medium text-gray-500">
                     Experience
                   </dt>
@@ -78,7 +78,7 @@ export default function InstructorGuide() {
                     reference from a previous student or colleague.
                   </dd>
                 </div>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+                <div className="bg-gray-50 px-4 py-5 xl:grid xl:grid-cols-4 lg:grid lg:grid-cols-4 sm:grid sm:grid-cols-1 sm:gap-2 sm:px-5">
                   <dt className="text-sm font-medium text-gray-500">
                     Infrastructure
                   </dt>
@@ -88,7 +88,7 @@ export default function InstructorGuide() {
                     subject of teaching.
                   </dd>
                 </div>
-                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+                <div className="bg-white px-4 py-5 xl:grid xl:grid-cols-4 lg:grid lg:grid-cols-4 sm:grid sm:grid-cols-1 sm:gap-2 sm:px-5">
                   <dt className="text-sm font-medium text-gray-500">Safety</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                     PocketClass will conduct a standard background check and
