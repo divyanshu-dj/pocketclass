@@ -39,9 +39,6 @@ export default function Class() {
     fetch(id)
   }, [router.isReady, router.query])
 
-
-
-
   return (
     <div>
       <Head>
@@ -68,6 +65,9 @@ export default function Class() {
               name={data.Name}
               images={data.Images}
               description={data.Description}
+              about={data.About}
+              experience={data.Experience}
+              funfact={data.FunFact}
               ratings={[data.Ratings]}
               location={data.Location}
               // longitude={data.Location.toJSON().getLongitude()}
