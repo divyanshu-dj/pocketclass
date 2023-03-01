@@ -52,6 +52,9 @@ export default function EditClass() {
         const latitude = e.target.latitude.value
         const longitude = e.target.longitude.value
         const description = e.target.description.value
+        const funfact = e.target.funfact.value
+        const experience = e.target.experience.value
+        const about = e.target.about.value
         const category = e.target.category.value
 
         if (e.target.images.files.length) {
@@ -71,6 +74,9 @@ export default function EditClass() {
             Address: address,
             Category: category,
             Description: description,
+            FunFact:funfact,
+            About: about,
+            Experience:experience,
             Name: className,
             Price: price,
             Type: classType,
@@ -235,8 +241,29 @@ export default function EditClass() {
                                     type={"file"}
                                 />
                             </div>
+                            
                             <div className="col-span-12">
-                                <label className='text-lg font-medium'>Description</label>
+                                <label className='text-lg font-medium'>About</label>
+                                <textarea
+                                    name='about'
+                                    className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                    placeholder="Tell your students a little big about yourself!"
+                                    defaultValue={classData.About}
+                                    type={"text"}
+                                />
+                            </div>
+                            <div className="col-span-12">
+                                <label className='text-lg font-medium'>Experience</label>
+                                <textarea
+                                    name='experience'
+                                    className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                    placeholder="Impress students with your experience!"
+                                    defaultValue={classData.Experience}
+                                    type={"text"}
+                                />
+                            </div>
+                            <div className="col-span-12">
+                                <label className='text-lg font-medium'>Class Description</label>
                                 <textarea
                                     name='description'
                                     className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
@@ -245,6 +272,17 @@ export default function EditClass() {
                                     type={"text"}
                                 />
                             </div>
+                            <div className="col-span-12">
+                                <label className='text-lg font-medium'>Fun Fact</label>
+                                <textarea
+                                    name='funfact'
+                                    className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                    placeholder="Tell your students a fun fact about yourself!"
+                                    defaultValue={classData.FunFact}
+                                    type={"text"}
+                                />
+                            </div>
+
                             <div className="col-span-12">
                                 {
                                     !loading ?

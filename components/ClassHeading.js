@@ -23,6 +23,9 @@ const ClassHeading = ({
     name,
     images,
     description,
+    about,
+    experience,
+    funfact,
     address,
     location,
     longitude,
@@ -177,10 +180,24 @@ const ClassHeading = ({
 
 
                     </div>
-
-                    <div className="description mt-5 mb-14">
+                    
+                    <div className="about mb-3 mt-5">
+                    <h1 className="text-xl font-semibold text-logo-red">About</h1>
+                        <p className="text-md text-gray-700">{about}</p>
+                    </div>
+                    <div className="experience my-3">
+                    <h1 className="text-xl font-semibold text-logo-red">Experience</h1>
+                        <p className="text-md text-gray-700">{experience}</p>
+                    </div>
+                    <div className="description my-3">
+                        <h1 className="text-xl font-semibold text-logo-red">Class Description</h1>
                         <p className="text-md text-gray-700">{description}</p>
                     </div>
+                    <div className="funfact my-3">
+                    <h1 className="text-xl font-semibold text-logo-red">Fun Fact</h1>
+                        <p className="text-md text-gray-700">{funfact}</p>
+                    </div>
+                    
                 </div>
                 <div className="rightSide lg:w-[30%] xl:w-[30%] xs:w-full sm:w-full text-gray-700 text-md">
                     <section className={`ml-10`}>
