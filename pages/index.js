@@ -37,9 +37,18 @@ export default function Home({ exploreData, cardsData }) {
 
     <div className="">
       <Head>
-        <title>pocketclass</title>
+        <title>Pocketclass</title>
         <meta http-equic="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="description" content="Pocketclass is a platform for affordable and convenient access to a wide range of classes taught by experienced instructors with personalized options, secure payments, and a sense of community." />
+        <meta name="description" content="Pocketclass is a platform for affordable and convenient access to a wide range of classes taught by experienced instructors with personalized options, secure payments, and a sense of community. Pocketclass offers nearby affordable fitness classes, music classes, art classes, tennis classes, ice hockey classes, personal trainers, sport classes, experienced fitness instructors, and cello lessons" />
+        <meta property="og:title" content="Pocketclass: For all your extracurriculars" />
+        <meta
+          property="og:description"
+          content="Pocketclass offers a platform for students and instructors to access a wide range of classes, taught by experienced instructors, at an affordable price, with convenient and flexible options, secure payment systems, personalized learning experiences, and a sense of community."
+        />
+        <meta
+          property="og:image"
+          content="/pc_favicon.ico"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
@@ -50,9 +59,9 @@ export default function Home({ exploreData, cardsData }) {
 
       <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
         <section>
-          <h2 className="text-4xl font-semibold py-5">
+          <h1 className="text-4xl font-semibold py-5">
             Explore Classes Nearby
-          </h2>
+          </h1>
           {/* APIs */}
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
             {uniqueCategory?.map(

@@ -10,10 +10,10 @@ export default function WhyPocketclass() {
   return (
     <div>
       <Head>
-        <title>pocketclass</title>
+        <title>Pocketclass: Why Pocketclass?</title>
         <meta
-          name="why pocketclass"
-          content="why pocketclass"
+          name="Pocketclass: Why Pocketclass?"
+          content="Convenient Platform for Instructors, Fitness Classes, Sport Classes, Increased Revenue for Instructors, Wide range of classes, Convenient and accessible classes for students, Experienced Instructors, Easy payment systems"
         />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
