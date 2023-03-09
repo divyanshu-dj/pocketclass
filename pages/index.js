@@ -39,7 +39,7 @@ export default function Home({ exploreData, cardsData }) {
       <Head>
         <title>Pocketclass</title>
         <meta http-equic="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="description" content="Pocketclass is a platform for affordable and convenient access to a wide range of classes taught by experienced instructors with personalized options, secure payments, and a sense of community. Pocketclass offers nearby affordable fitness classes, music classes, art classes, tennis classes, ice hockey classes, personal trainers, sport classes, experienced fitness instructors, and cello lessons" />
+        <meta name="description" content="Pocketclass offers nearby affordable fitness classes, music classes, art classes, tennis classes, ice hockey classes, personal trainers, sport classes, experienced fitness instructors, and cello lessons." />
         <meta property="og:title" content="Pocketclass: For all your extracurriculars" />
         <meta
           property="og:description"
@@ -47,7 +47,7 @@ export default function Home({ exploreData, cardsData }) {
         />
         <meta
           property="og:image"
-          content="/pc_favicon.ico"
+          content="https://www.pocketclass.ca/_next/image?url=%2Fpc_logo3.png&w=1920&q=75"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/pc_favicon.ico" />
@@ -60,7 +60,7 @@ export default function Home({ exploreData, cardsData }) {
       <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
         <section>
           <h1 className="text-4xl font-semibold py-5">
-            Explore Classes Nearby
+            Explore Class Categories
           </h1>
           {/* APIs */}
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
