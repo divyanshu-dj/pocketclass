@@ -36,6 +36,7 @@ export default function CreateClass() {
         const latitude = e.target.latitude.value
         const longitude = e.target.longitude.value
         const description = e.target.description.value
+        const pricing = e.target.pricing.value
         const funfact = e.target.funfact.value
         const experience = e.target.experience.value
         const about = e.target.about.value
@@ -52,6 +53,7 @@ export default function CreateClass() {
             Address: address,
             Category: category,
             Description: description,
+            Pricing: pricing,
             FunFact: funfact,
             Experience: experience,
             About:about,
@@ -85,6 +87,7 @@ export default function CreateClass() {
                             e.target.latitude.value = " "
                             e.target.longitude.value = " "
                             e.target.description.value = " "
+                            e.target.pricing.value = " "
                             e.target.funfact.value = " "
                             e.target.experience.value = " "
                             e.target.about.value = " "
@@ -225,6 +228,7 @@ export default function CreateClass() {
                             <div className="col-span-12">
                                 <label className='text-lg font-medium'>About</label>
                                 <textarea
+                                    required
                                     name='about'
                                     className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
                                     placeholder="Tell your students a little big about yourself!"
@@ -234,6 +238,7 @@ export default function CreateClass() {
                             <div className="col-span-12">
                                 <label className='text-lg font-medium'>Experience</label>
                                 <textarea
+                                    required
                                     name='experience'
                                     className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
                                     placeholder="Impress students with your experience!"
@@ -251,14 +256,26 @@ export default function CreateClass() {
                                 />
                             </div>
                             <div className="col-span-12">
+                                <label className='text-lg font-medium'>Pricing</label>
+                                <textarea
+                                    required
+                                    name='pricing'
+                                    className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                    placeholder="Explain your pricing packages!"
+                                    type={"text"}
+                                />
+                            </div>
+                            <div className="col-span-12">
                                 <label className='text-lg font-medium'>Fun Fact</label>
                                 <textarea
+                                    required
                                     name='funfact'
                                     className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
                                     placeholder="Tell your students a fun fact about yourself!"
                                     type={"text"}
                                 />
                             </div>
+                            
                             <div className="col-span-12">
                                 {
                                     !loading ?

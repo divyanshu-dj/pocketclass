@@ -65,6 +65,7 @@ export default function Class() {
               name={data.Name}
               images={data.Images}
               description={data.Description}
+              pricing ={data.Pricing}
               about={data.About}
               experience={data.Experience}
               funfact={data.FunFact}
