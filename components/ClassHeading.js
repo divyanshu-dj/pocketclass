@@ -23,6 +23,7 @@ const ClassHeading = ({
     name,
     images,
     description,
+    pricing,
     about,
     experience,
     funfact,
@@ -192,6 +193,10 @@ const ClassHeading = ({
                     <div className="description my-3">
                         <h1 className="text-xl font-semibold text-logo-red">Class Description</h1>
                         <p className="text-md text-gray-700">{description}</p>
+                    </div>
+                    <div className="pricing my-3">
+                        <h1 className="text-xl font-semibold text-logo-red">Pricing</h1>
+                        <p className="text-md text-gray-700">{pricing}</p>
                     </div>
                     <div className="funfact my-3">
                     <h1 className="text-xl font-semibold text-logo-red">Fun Fact</h1>

@@ -52,6 +52,7 @@ export default function EditClass() {
         const latitude = e.target.latitude.value
         const longitude = e.target.longitude.value
         const description = e.target.description.value
+        const pricing = e.target.pricing.value
         const funfact = e.target.funfact.value
         const experience = e.target.experience.value
         const about = e.target.about.value
@@ -74,7 +75,8 @@ export default function EditClass() {
             Address: address,
             Category: category,
             Description: description,
-            FunFact:funfact,
+            Pricing: pricing,
+            FunFact: funfact,
             About: about,
             Experience:experience,
             Name: className,
@@ -269,6 +271,16 @@ export default function EditClass() {
                                     className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
                                     placeholder="Enter a description"
                                     defaultValue={classData.Description}
+                                    type={"text"}
+                                />
+                            </div>
+                            <div className="col-span-12">
+                                <label className='text-lg font-medium'>Pricing</label>
+                                <textarea
+                                    name='pricing'
+                                    className='w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red'
+                                    placeholder="Enter your pricing packages"
+                                    defaultValue={classData.Pricing}
                                     type={"text"}
                                 />
                             </div>
