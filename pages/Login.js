@@ -56,7 +56,11 @@ function Login() {
                     return setErrorMessage("Please Sign up first!")
                 }
             } else {
-                router.push('/')
+                if (router.query.redirect) {
+                    router.push(router.query.redirect);
+                } else {
+                    router.push('/');
+                }
             }
         }
     }
@@ -102,8 +106,11 @@ function Login() {
                 setErrorMessage("Please verify Your email first!")
                 return
             }
-
-            router.push('/')
+            if (router.query.redirect) {
+                router.push(router.query.redirect);
+            } else {
+                router.push('/');
+            }
             return
         }
 

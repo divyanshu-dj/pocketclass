@@ -1,5 +1,6 @@
 import '../styles/globals.css'
 import '../styles/classHeading.css'
+import '../styles/stickyFooter.css'
 import 'react-toastify/dist/ReactToastify.css';
 import ProgressBar from '@badrap/bar-of-progress';
 import Router from 'next/router';

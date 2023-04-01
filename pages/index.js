@@ -1,7 +1,8 @@
+import dynamic from 'next/dynamic';
 import Head from "next/head";
 import Image from "next/image";
 import Banner from "../components/Banner";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import LargeCard from "../components/LargeCard";
@@ -13,25 +14,64 @@ import { db } from "../firebaseConfig";
 import { collection, onSnapshot, getDocs, query } from "firebase/firestore";
 import { Router } from "next/router";
 import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import StickyFooter from '../components/StickyFooter';
+
+
 
 export default function Home({ exploreData, cardsData }) {
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(false)
+  const swiperRef = useRef(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState()
+
+
   const uniqueCategory = [];
-  const featuredClasses = cardsData.slice(0, 8);
+  let featuredClasses
+
+  if (!selectedCategory) {
+    featuredClasses = cardsData
+  } else {
+    featuredClasses = cardsData.filter(product => product.type === selectedCategory);
+  }
+
   exploreData.map((item) => {
     var findItem = uniqueCategory.find((x) => x.type === item.type);
     if (!findItem) uniqueCategory.push(item);
   });
 
-  const [reviews, setReviews] = useState([])
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setLoading(true)
     return onSnapshot(collection(db, "Reviews"), (snapshot) => {
-        setReviews(snapshot.docs.map((doc) => [{ ...doc.data(), "id": doc.id }]))
-        setLoading(false)
+      setReviews(snapshot.docs.map((doc) => [{ ...doc.data(), "id": doc.id }]))
+      setLoading(false)
     })
-}, [])
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 120) {
+        setHasScrolled(true);
+      } else {
+        setHasScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
 
   return (
 
@@ -55,46 +95,86 @@ export default function Home({ exploreData, cardsData }) {
       {/* header */}
       <Header />
       {/* banner */}
-      <Banner />
+      {/* <Banner /> */}
 
-      <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
-        <section>
-          <h1 className="text-4xl font-semibold py-5">
+
+      <section className={!hasScrolled ? `category-section` : `category-section category-shadow `}>
+        {/* <h1 className="text-4xl font-semibold py-5">
             Explore Class Categories
-          </h1>
-          {/* APIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
-            {uniqueCategory?.map(
-              ({
-                id,
-                type,
-                latitude,
-                name,
-                images,
-                description,
-                longitude,
-                ratings,
-                address,
-                price,
-                category
-              }) => (
+          </h1> */}
+        {/* APIs */}
+        {/* grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-4 category */}
+        <div className="max-w-[1800px] mx-auto category pt-5 lg:pb-2 sm:pb-1">
 
-                <SmallCard
-                  key={id}
-                  id={id}
-                  img={images[0]}
-                  type={type}
-                  category={category}
-                />
-              )
-            )}
+          <Swiper
+            navigation={{
+              prevEl: '.swiper-button-prev',
+              nextEl: '.swiper-button-next',
+            }}
+            loop={true}
+            slidesPerView="auto"
+            breakpoints={{
+              320: {
+                slidesPerView: 4,
+                spaceBetween: 0,
+              },
+              640: {
+                slidesPerView: 4,
+                spaceBetween: 0,
+              },
+              768: {
+                slidesPerView: 8,
+                spaceBetween: 0,
+              },
+              1024: {
+                slidesPerView: 9,
+                spaceBetween: 0,
+              },
+            }}
+            modules={[Navigation]}
+            className="category-swiper mySwiper">
+            {
+
+              uniqueCategory?.map(
+                ({ id, type, latitude, name, images, description, longitude, ratings, address, price, category }) => (
+
+                  <SwiperSlide>
+
+                    <SmallCard
+                      key={id}
+                      id={id}
+                      img={images[0]}
+                      type={type}
+                      category={category}
+                      swiperRef={swiperRef}
+                      setSelectedCategory={setSelectedCategory}
+                    />
+
+                  </SwiperSlide>
+
+                ))
+            }
+          </Swiper>
+          <div className="swiper-button-prev">
+            <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-        </section>
-        
-        {/* New Featured Classes Section */}
-        <section>
-          <h2 className="text-4xl font-semibold py-8 pb-5">Featured Classes</h2>
-          <div className="flex p-3 flex-wrap">
+          <div className="swiper-button-next">
+            <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </section >
+
+
+
+      {/* New Featured Classes Section */}
+      <main className="max-w-[1800px] mx-auto lg:mx-10 ">
+        < section className='md:px-5 sm:px-5 xs:px-2'>
+          {/* <h2 className="text-4xl font-semibold py-8 pb-5">Featured Classes</h2> */}
+          <div className="flex flex-wrap">
             {featuredClasses?.map(
               ({
                 id,
@@ -114,7 +194,7 @@ export default function Home({ exploreData, cardsData }) {
                   id={id}
                   name={name}
                   reviews={reviews}
-                  img={images[0]}
+                  img={images}
                   type={type}
                   description={description}
                   ratings={ratings}
@@ -125,7 +205,7 @@ export default function Home({ exploreData, cardsData }) {
               )
             )}
           </div>
-        </section>
+        </section >
 
         {/* <section>
           <h2 className="text-4xl font-semibold py-8 pb-5">Featured Classes</h2>
@@ -170,10 +250,10 @@ export default function Home({ exploreData, cardsData }) {
             buttonText="I'm Interested"
           />
         </section>
-      </main>
+      </main >
 
-      <Footer />
-    </div>
+      <StickyFooter />
+    </div >
   );
 }
 
