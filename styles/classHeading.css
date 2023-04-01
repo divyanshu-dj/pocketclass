@@ -7,9 +7,56 @@
 }
 
 .swiper-pagination-bullet {
-    background-color: black !important;
+    background-color: white !important;
+
 }
 
 .swiper-pagination-bullet-active {
     background-color: #ef4444 !important;
+}
+
+.dropDown {
+    z-index: 9999999999999999999 !important;
+}
+
+.category-section {
+    position: sticky;
+    background: white;
+    top: 90px;
+    z-index: 1;
+}
+
+.category {
+    position: relative !important;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px) !important;
+}
+
+.category-section.category-shadow {
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px 0px;
+}
+
+.category .swiper-button-prev,
+.category .swiper-button-next {
+    position: absolute !important;
+    color: black !important;
+    background-color: white;
+    backdrop-filter: blur(5px) !important;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    top: 61%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+
+.category .swiper-button-prev {
+    margin-right: 20px;
+}
+
+
+.category .swiper-button-next::after,
+.category .swiper-button-prev::after {
+    content: "";
 }

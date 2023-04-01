@@ -84,7 +84,7 @@ function Header({ placeholder }) {
 
 
     return (
-        <header className='sticky top-0 z-50 grid grid-cols-12 bg-white shadow-md p-5 md:px-10'>
+        <header className='sticky top-0 z-50 grid grid-cols-12 bg-white shadow-sm p-5 md:px-10'>
             {/* left */}
             <div onClick={() => router.push('/')}
                 className='relative flex items-center h-10 cursor-pointer my-auto col-span-3'>
@@ -97,10 +97,12 @@ function Header({ placeholder }) {
             </div>
 
             {/* middle - search*/}
-            <div className='flex items-center md:border-2 rounded-full py-2 md:shadow-sm col-span-6'>
-                <input value={searchInput} id="searchInputId"
-                    onChange={(e) => setSearchInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && search()} type="text" placeholder={placeholder || "tennis, painting, violin..."} className='text-gray-600 placeholder-gray-400 max-w-[100%] text-sm flex-grow bg-transparent border-transparent focus:border-transparent focus:ring-0' />
-                <SearchIcon onClick={search} className='hidden md:inline-flex h-8 bg-logo-red text-white rounded-full p-2 mr-2 cursor-pointer hover:scale-105 transition transform duration-200 ease-out active:scale-90 ' />
+            <div className="searchContainer col-span-6 flex justify-center items-center">
+                <div className='flex items-center md:border-2 rounded-full py-2 md:shadow-sm sm:w-[100%] md:w-[100%] lg:w-[50%] xl:w-[50%]'>
+                    <input value={searchInput} id="searchInputId"
+                        onChange={(e) => setSearchInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && search()} type="text" placeholder={placeholder || "tennis, painting, violin..."} className=' text-gray-600 placeholder-gray-400 max-w-[100%] text-sm flex-grow bg-transparent border-transparent focus:border-transparent focus:ring-0' />
+                    <SearchIcon onClick={search} className='hidden md:inline-flex h-8 bg-logo-red text-white rounded-full p-2 mr-2 cursor-pointer hover:scale-105 transition transform duration-200 ease-out active:scale-90 ' />
+                </div>
             </div>
 
             {/* right */}
@@ -139,8 +141,7 @@ function Header({ placeholder }) {
                                                 <UserCircleIcon className='h-6 cursor-pointer' />
                                         }
 
-                                        <div className={`dropDown bg-[white] absolute top-[130%] right-3 rounded-md shadow-2xl	
-                                        h-[auto] w-[200px] p-5 ${showDropDown ? "block" : "hidden"}`}>
+                                        <div className={`dropDown bg-[white] absolute top-[130%] right-3 rounded-md shadow-2xl	h-[auto] w-[200px] p-5 ${showDropDown ? "block" : "hidden"}`}>
                                             <ul>
                                                 <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                                     <Link href={`/profile/${user.uid}`}>Profile</Link>
@@ -172,7 +173,7 @@ function Header({ placeholder }) {
 
                                     </div>
                                     :
-                                    <button onClick={() => router.push('/Login')} className='font-medium text-sm text-white lg:px-4 md:px-2 xl:px-4 sm:px-2 py-2 rounded-lg bg-red-500 hover:shadow-2xl active:scale-90 hover:scale-105 transition transform duration-200 ease-out'>Sign In</button>
+                                    <button onClick={() => router.push('/Login')} className='font-medium text-sm text-white lg:px-4 md:px-[20px] xl:px-4 sm:px-2 py-2 rounded-lg bg-red-500 hover:shadow-2xl active:scale-90 hover:scale-105 transition transform duration-200 ease-out'>Sign In</button>
                             }
 
                         </>

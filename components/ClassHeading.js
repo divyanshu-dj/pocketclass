@@ -3,7 +3,7 @@ import React from 'react';
 import { BriefcaseIcon, CalendarIcon, CurrencyDollarIcon, StarIcon, UserCircleIcon } from '@heroicons/react/solid';
 import Rating from 'react-rating';
 import { useState } from 'react';
-import { addDoc, collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 import { useEffect } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -13,9 +13,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
-
-
+import { toast, ToastContainer } from 'react-toastify';
 
 const ClassHeading = ({
     type,
@@ -46,12 +44,14 @@ const ClassHeading = ({
     const [loading, setLoading] = useState(false)
     const [reviews, setReviews] = useState([])
     const [classCreatorData, setClassCreatorData] = useState()
+    const [isInterested, setInterested] = useState(false)
+    const [userCategory, setUserCategory] = useState()
 
     const [user, authStateLoading, error] = useAuthState(auth);
 
     const reviewerName = user?.displayName || user?.email.split("@")[0]
     const photo = user?.photoURL || " "
-
+    const key = `interested-${id}-${user?.email}`;
 
 
     let currentClassReview = reviews.filter((rev) => rev[0].classID === id)
@@ -99,6 +99,12 @@ const ClassHeading = ({
     }
 
     useEffect(() => {
+        if (localStorage.getItem(key)) {
+            setInterested(true)
+        }
+    }, [key])
+
+    useEffect(() => {
         setLoading(true)
         return onSnapshot(collection(db, "Reviews"), (snapshot) => {
             setReviews(snapshot.docs.map((doc) => [{ ...doc.data(), "id": doc.id }]))
@@ -106,16 +112,130 @@ const ClassHeading = ({
         })
     }, [])
 
+    if (authStateLoading) {
+        return <section className="flex justify-center items-center min-h-[100vh]">
+            <Image src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
+        </section>
+    }
+
     if (!classCreatorData && data?.classCreator) {
         getClassCreatorData(data?.classCreator)
     }
 
+    async function getUserByEmail(email) {
+        const q = query(collection(db, 'Users'), where('email', '==', email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            return querySnapshot.docs[0];
+        } else {
+            return null;
+        }
+    }
 
     const handleEditButton = () => {
         router.push({
             pathname: `/updateClass/${id}`,
         })
     }
+
+
+    const handleInterestButton = async (e) => {
+        e.preventDefault()
+        let emailBody;
+
+        if (!user) {
+            return router.push('/Login?redirect=' + router.asPath);
+        }
+
+        const email = user.email
+
+        const doc = await getUserByEmail(email);
+        if (doc) {
+            emailBody = {
+                subject: `${doc.data()?.firstName + " " + doc.data()?.lastName} Showed interest in ${name}`,
+                text: `${doc.data()?.firstName + " " + doc.data()?.lastName} showed interest in ${name}.`,
+                html: `
+                <div style="font-family: Arial, sans-serif; font-size: 16px; max-width: 600px; margin: 0 auto;">
+                <p style="margin-bottom: 20px; text-align: center;">
+                  Hello,
+                </p>
+                <p style="margin-bottom: 20px; text-align:center">
+                <strong> ${doc.data()?.firstName + " " + doc.data()?.lastName}</strong> just showed interest in <strong>${name}</strong>.
+                </p>
+                <table style="border-collapse: collapse; width: 100%; text-align: left;">
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>Class Title:</strong> ${name}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>Class Category:</strong> ${category}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>User Email:</strong> ${email}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>Name:</strong> ${doc.data()?.firstName + " " + doc.data()?.lastName}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>Phone Number:</strong> ${doc.data()?.phoneNumber}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">
+                      <strong>User Category:</strong> ${doc.data()?.category}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin-top: 20px; text-align: center;">
+                  Thank you,
+                  <br />
+                  Pocket Class
+                </p>
+              </div>
+                `
+            };
+        } else {
+            toast.error("Something went wrong! Please try again.", {
+                toastId: "error1"
+            })
+        }
+
+
+
+
+        fetch('/api/sendEmail', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(emailBody)
+        }).then((res) => {
+            if (res.status === 200) {
+                localStorage.setItem(`interested-${id}-${email}`, true)
+                setInterested(true)
+                toast.success("Thank you for showing interest! We will contact with you shortly!", {
+                    toastId: "success1"
+                })
+            } else {
+                toast.error("Something went wrong! Please try again.", {
+                    toastId: "error1"
+                })
+            }
+        })
+    }
+
+    user && getUserByEmail(user.email).then((res) => {
+        setUserCategory(res.data().category)
+    })
 
     return (
         <div className="py-7 px-2">
@@ -159,13 +279,11 @@ const ClassHeading = ({
                 }
 
             </div>
-            <div className="topimageContainer flex flex-wrap w-full ">
+            <div className="topimageContainer flex flex-wrap w-full gap-3">
                 <div className="leftSide lg:w-[70%] xl:w-[70%] xs:w-full sm:w-full">
-                    <div className="relative w-[100%] h-[450px] max-w-[80vw]">
+                    <div className="relative w-[100%] h-[450px] xl:max-w-[80vw] lg:max-w-[80vw] sm:max-w-full">
 
                         <Swiper navigation={true} pagination={true} modules={[Navigation, Pagination]} className="mySwiper">
-
-
                             {
 
                                 images && images.map(img => {
@@ -181,13 +299,13 @@ const ClassHeading = ({
 
 
                     </div>
-                    
+
                     <div className="about mb-3 mt-5">
-                    <h1 className="text-xl font-semibold text-logo-red">About</h1>
+                        <h1 className="text-xl font-semibold text-logo-red">About</h1>
                         <p className="text-md text-gray-700">{about}</p>
                     </div>
                     <div className="experience my-3">
-                    <h1 className="text-xl font-semibold text-logo-red">Experience</h1>
+                        <h1 className="text-xl font-semibold text-logo-red">Experience</h1>
                         <p className="text-md text-gray-700">{experience}</p>
                     </div>
                     <div className="description my-3">
@@ -199,13 +317,13 @@ const ClassHeading = ({
                         <p className="text-md text-gray-700">{pricing}</p>
                     </div>
                     <div className="funfact my-3">
-                    <h1 className="text-xl font-semibold text-logo-red">Fun Fact</h1>
+                        <h1 className="text-xl font-semibold text-logo-red">Fun Fact</h1>
                         <p className="text-md text-gray-700">{funfact}</p>
                     </div>
-                    
+
                 </div>
-                <div className="rightSide lg:w-[30%] xl:w-[30%] xs:w-full sm:w-full text-gray-700 text-md">
-                    <section className={`ml-10`}>
+                <div className="rightSide lg:w-[20%] xl:w-[20%] xs:w-full sm:w-full text-gray-700 text-md">
+                    <section className="">
                         <div className="icon m-3 flex gap-2">
                             <span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#E73F2B" className="w-6 h-6">
@@ -216,6 +334,48 @@ const ClassHeading = ({
                             {/* <p>Lorem, ipsum.</p> */}
                             <p className='hover:text-logo-red'><a target='_blank' href={addresslink}>{address}</a></p>
                         </div>
+
+                        <div className="interestButton">
+                            {
+                                !user ? <button
+                                    onClick={(e) => handleInterestButton(e)}
+                                    className='active:scale-105 w-[200px] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-2 bg-logo-red rounded-xl text-white font-semibold text-sm'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline w-5 h-5 mr-2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                    </svg>
+                                    I am Interested
+                                </button>
+                                    :
+                                    user && !isInterested && userCategory === "student" ? <button
+                                        onClick={(e) => handleInterestButton(e)}
+                                        className='active:scale-105 w-[200px] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-2 bg-logo-red rounded-xl text-white font-semibold text-sm'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline w-5 h-5 mr-2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                        </svg>
+                                        I am Interested
+                                    </button>
+                                        :
+                                        !authStateLoading && isInterested ?
+                                            <button
+                                                disabled='true'
+                                                className='disabled:opacity-50 w-[200px] active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-2 bg-logo-red rounded-xl text-white font-semibold text-sm'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="inline w-5 h-5 mr-2">
+                                                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                                                </svg>
+                                                You showed Interest
+                                            </button>
+                                            :
+                                            user && userCategory !== "student" && !isInterested ?
+                                                ""
+                                                :
+                                                <section className="flex justify-center items-center">
+                                                    <Image src="/Rolling-1s-200px.svg" width={'30px'} height={"30px"} />
+                                                </section>
+                            }
+
+                        </div>
+
+
                         {/* <div className="icon m-3 flex gap-2">
                             <span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -376,7 +536,9 @@ const ClassHeading = ({
 
                     :
                     <>
-                        <p className='text-center mt-20 text-2xl font-bold'>Loading..</p>
+                        <section className="flex justify-center items-center min-h-[100vh]">
+                            <Image src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
+                        </section>
                     </>
             }
 
@@ -486,6 +648,18 @@ const ClassHeading = ({
                         <p className="text-xl font-bold text-center pt-10">Please sign in to give reviews!</p>
                     </div>
             }
+            <ToastContainer
+                position="top-center"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
         </div>
     );
 };

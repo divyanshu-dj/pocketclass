@@ -50,7 +50,7 @@ export default function Class() {
       <Header />
 
       {/* body */}
-      <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
+      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">
         {
           loading ?
             <section>
@@ -65,7 +65,7 @@ export default function Class() {
               name={data.Name}
               images={data.Images}
               description={data.Description}
-              pricing ={data.Pricing}
+              pricing={data.Pricing}
               about={data.About}
               experience={data.Experience}
               funfact={data.FunFact}

@@ -19,7 +19,7 @@ export default function TermsAndConditions() {
       <Header />
 
       {/* body */}
-      <main className="max-w-7xl mx-auto px-8 py-8 sm:px-16">
+      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">
         <section>
           <h1 className="text-4xl font-semibold py-5">Terms of Service</h1>
           <h2 className="text-2xl font-semibold py-7">OVERVIEW</h2>
