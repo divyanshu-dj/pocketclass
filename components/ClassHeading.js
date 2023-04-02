@@ -152,15 +152,15 @@ const ClassHeading = ({
         const doc = await getUserByEmail(email);
         if (doc) {
             emailBody = {
-                subject: `${doc.data()?.firstName + " " + doc.data()?.lastName} Showed interest in ${name}`,
-                text: `${doc.data()?.firstName + " " + doc.data()?.lastName} showed interest in ${name}.`,
+                subject: `${email} Showed interest in ${name}`,
+                text: `${email} showed interest in ${name}.`,
                 html: `
                 <div style="font-family: Arial, sans-serif; font-size: 16px; max-width: 600px; margin: 0 auto;">
                 <p style="margin-bottom: 20px; text-align: center;">
                   Hello,
                 </p>
                 <p style="margin-bottom: 20px; text-align:center">
-                <strong> ${doc.data()?.firstName + " " + doc.data()?.lastName}</strong> just showed interest in <strong>${name}</strong>.
+                <strong> ${email}</strong> just showed interest in <strong>${name}</strong>.
                 </p>
                 <table style="border-collapse: collapse; width: 100%; text-align: left;">
                   <tr>
