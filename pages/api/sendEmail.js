@@ -7,7 +7,7 @@ export default function (req, res) {
     const toMailList = [
         "contact.pocketclass@gmail.com",
         "aliu5454@gmail.com",
-        "lisahuh26@gmail.com"
+        "asifhossain976@gmail.com"
     ]
 
     var message = {
@@ -16,24 +16,20 @@ export default function (req, res) {
         ...req.body
     };
 
-
     nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "contact.pocketclass@gmail.com",
-            pass: "ltmhiybwbudheaiz",
+            user: process.env.EMAIL,
+            pass: process.env.PASS,
         },
         port: 465,
         host: 'smtp.gmail.com'
     }).sendMail(message, (err) => {
         if (err) {
-            return res.status(400).json({ err: err })
+            console.log(err)
+            res.status(400).json({ err: err })
         } else {
-            return res.status(200).json("Email Sent")
+            res.status(200).json("Email Sent")
         }
     })
-
-
-
-    return res.status(200).json(message)
 }
