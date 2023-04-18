@@ -22,7 +22,7 @@ export default function AboutUs() {
       <Header />
 
       {/*body*/}
-      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">
+      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
         <section>
           <h1 className="text-4xl font-semibold py-5">Our Story</h1>
           <div className="relative h-96 min-w-[300px]">
