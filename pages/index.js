@@ -31,6 +31,7 @@ export default function Home({ exploreData, cardsData }) {
   const swiperRef = useRef(null);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState()
+  const [isMobile, setIsMobile] = useState(false);
 
 
   const uniqueCategory = [];
@@ -73,6 +74,17 @@ export default function Home({ exploreData, cardsData }) {
   }, []);
 
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 480);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  console.log(isMobile)
+
   return (
 
     <div className="">
@@ -108,8 +120,8 @@ export default function Home({ exploreData, cardsData }) {
 
           <Swiper
             navigation={{
-              prevEl: '.swiper-button-prev',
-              nextEl: '.swiper-button-next',
+              prevEl: isMobile ? null : '.swiper-button-prev',
+              nextEl: isMobile ? null : '.swiper-button-next',
             }}
             loop={true}
             slidesPerView="auto"
@@ -155,16 +167,20 @@ export default function Home({ exploreData, cardsData }) {
                 ))
             }
           </Swiper>
-          <div className="swiper-button-prev">
-            <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div className="swiper-button-next">
-            <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          {
+            !isMobile && <div className="swiper-button-prev">
+              <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          }
+          {
+            !isMobile && <div className="swiper-button-next">
+              <svg fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          }
         </div>
       </section >
 
@@ -242,14 +258,14 @@ export default function Home({ exploreData, cardsData }) {
           </div>
         </section> */}
 
-        <section>
+        < section className="max-w-7xl mx-auto px-1 sm:px-5">
           <LargeCard
             img="https://links.papareact.com/4cj"
             title="Become an Instructor"
             description="Teach your Passion"
             buttonText="I'm Interested"
           />
-        </section>
+        </section >
       </main >
 
       <StickyFooter />

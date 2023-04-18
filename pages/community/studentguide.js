@@ -20,7 +20,7 @@ export default function StudentGuide() {
       <Header />
 
       {/*body*/}
-      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">
+      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
         <section>
           <h1 className="text-4xl font-semibold py-5">Our Student Guide</h1>
           <h1 className="text-xl font-semibold mt-5">
