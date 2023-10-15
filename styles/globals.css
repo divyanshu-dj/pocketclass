@@ -35,3 +35,19 @@ a {
     @apply px-4 py-2 shadow-lg border rounded-full cursor-pointer hover: shadow-lg active:scale-95 active:bg-gray-100 transition transform duration-100 ease-out;
   }
 } */
+
+
+.smallScrollbar::-webkit-scrollbar {
+  width: 4px;
+  border-radius: 100px;
+}
+
+.smallScrollbar::-webkit-scrollbar-thumb {
+  background-color: #88888832;
+  border-radius: 100px;
+}
+
+.smallScrollbar::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  border-radius: 100px;
+}
