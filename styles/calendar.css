@@ -1,0 +1,25 @@
+.rbc-toolbar {
+    padding: 10px 0px;
+    display: flex;
+}
+
+.rbc-toolbar button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.rbc-toolbar .rbc-toolbar-label {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+@media (max-width: 768px) {
+    .rbc-toolbar {
+        flex-direction: column;
+    }
+
+    .rbc-toolbar .rbc-toolbar-label {
+        margin: 10px;
+    }
+}
