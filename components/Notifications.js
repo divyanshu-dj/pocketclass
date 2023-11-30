@@ -221,7 +221,10 @@ const Notifications = ({ user }) => {
 											)}
 										</p>
 									</div>
-									<p className="text-sm text-gray-500">{notif?.text}</p>
+									<div
+										className="text-sm text-gray-500"
+										dangerouslySetInnerHTML={{ __html: notif?.heading }}
+									/>
 								</div>
 							))
 						) : (
