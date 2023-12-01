@@ -320,7 +320,7 @@ const Chat = () => {
 				${message ? `<p>${senderName + " says &quot;" + message + "&quot;"}</p> ` : ""}
 				${media ? `<p>Message contains media files.</p>` : ""}
 				<br />
-				<a href="pocketclass.ca/message/${notifId}">Click here to see message</a>
+				<a href="pocketclass.ca/message?nid=${notifId}">Click here to see message</a>
 				<p>Time:${moment(time?.toDate())?.format?.("DD-MM-YY / hh:mm A")}</p>
 			  </body>
 			</html>
