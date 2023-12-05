@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 // library
 import moment from "moment";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import useClickOutside from "../hooks/useClickOutside";
 // utils
 import { isBeforeNow } from "../utils/date";
 

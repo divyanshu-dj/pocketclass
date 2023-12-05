@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import useClickOutside from "../hooks/useClickOutside";
 // utils
 import { generateHourlySlotsForDate } from "../utils/slots";
 // stripe

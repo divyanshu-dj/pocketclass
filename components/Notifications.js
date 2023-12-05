@@ -14,7 +14,7 @@ import {
 	where,
 } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import useClickOutside from "../hooks/useClickOutside";
 // utils
 import { toast } from "react-toastify";
 import FlipMove from "react-flip-move";

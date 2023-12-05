@@ -30,8 +30,8 @@ export default function CreateClass() {
 	const [loading, setLoading] = useState(false);
 
 	//map
-	const [longitude, setLongitude] = useState(null);
-	const [latitude, setLatitude] = useState(null);
+	const [longitude, setLongitude] = useState("");
+	const [latitude, setLatitude] = useState("");
 	const [showMap, setShowMap] = useState(false);
 	const handleCoordinates = (lng, lat) => {
 		setLongitude(lng);
@@ -149,25 +149,7 @@ export default function CreateClass() {
 			<Header />
 			{/* banner */}
 
-			<div className="relative max-w-7xl mx-auto px-8 py-8 min-h-[80vh] sm:px-16">
-				{showMap === true && (
-					<div
-						className="absolute
-		            		bg-[#F8F9FD] 
-                            top-0 left-0
-                            p-2
-                            h-full w-full
-                            flex flex-col
-                            z-20
-                            "
-					>
-						<MapCoordinates
-							setCoordinates={handleCoordinates}
-							setShowMap={setShowMap}
-						/>
-					</div>
-				)}
-
+			<div className="max-w-7xl mx-auto px-8 py-8 min-h-[80vh] sm:px-16">
 				<h1 className="text-3xl font-extrabold text-center py-5">
 					Create Class
 				</h1>
@@ -299,6 +281,15 @@ export default function CreateClass() {
 							</div>
 						</div>
 
+						{/* map */}
+						{showMap && (
+							<div className={`py-4 mx-auto aspect-square w-full md:w-2/3`}>
+								<MapCoordinates
+									setCoordinates={handleCoordinates}
+									setShowMap={setShowMap}
+								/>
+							</div>
+						)}
 						<div className="grid grid-cols-1 gap-3 mt-2">
 							<div className="col-span-12">
 								<label className="text-lg font-medium">Images (png, jpg)</label>
