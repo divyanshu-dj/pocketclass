@@ -257,7 +257,6 @@ export default function Booking() {
 	// slot click
 	const handleSlotClick = (slot, isDirect = false) => {
 		const slotDate = getDateOnly(slot.start);
-		console.log(">>>", slot);
 		if (
 			isBeforeNow(slotDate) ||
 			(isInstructor && !showAvailability) ||
@@ -286,8 +285,6 @@ export default function Booking() {
 		setAppointmentDetails(appointment);
 		setShowAppointmentDetails(true);
 	};
-
-	console.log("-->", getFlatList(availability));
 
 	return isLoading || !classData || !userData || !classId ? (
 		<section className="flex justify-center items-center min-h-[100vh]">
@@ -460,6 +457,7 @@ export default function Booking() {
 							uEmail={userData?.email}
 							uid={uid}
 							classId={classId}
+							className={classData?.Name}
 							insId={classData?.classCreator}
 							price={classData?.Price}
 							initialStart={initialStart}

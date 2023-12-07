@@ -21,6 +21,7 @@ export default async function (req, res) {
 
 		res.status(200).json({
 			clientSecret: paymentIntent.client_secret,
+			cc: req.headers.referer,
 		});
 	} catch (error) {
 		console.error("Error creating Stripe session:", error);
