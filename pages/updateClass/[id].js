@@ -18,6 +18,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
+import MapCoordinates from "../../components/MapCoordinates";
 
 export default function EditClass() {
 	const router = useRouter();
@@ -25,12 +26,24 @@ export default function EditClass() {
 	const [loading, setLoading] = useState(false);
 	const [classData, setClassData] = useState(false);
 	const [user, userLoading, error] = useAuthState(auth);
+
+	//map
+	const [longitude, setLongitude] = useState("");
+	const [latitude, setLatitude] = useState("");
+	const [showMap, setShowMap] = useState(false);
+	const handleCoordinates = (lng, lat) => {
+		setLongitude(lng);
+		setLatitude(lat);
+	};
+
 	let images = [];
 	let imagesURL = [];
 
 	const getClassData = async (id) => {
 		const docRef = doc(db, "classes", id);
 		const data = await getDoc(docRef);
+		setLatitude(data.data().latitude);
+		setLongitude(data.data().longitude);
 		setClassData(data.data());
 	};
 
@@ -55,8 +68,8 @@ export default function EditClass() {
 		const classType = e.target.classType.value;
 		const address = e.target.address.value;
 		const price = e.target.price.value;
-		const latitude = e.target.latitude.value;
-		const longitude = e.target.longitude.value;
+		const lat = latitude;
+		const lng = longitude;
 		const description = e.target.description.value;
 		const pricing = e.target.pricing.value;
 		const funfact = e.target.funfact.value;
@@ -88,8 +101,8 @@ export default function EditClass() {
 			Name: className,
 			Price: price,
 			Type: classType,
-			latitude: latitude,
-			longitude: longitude,
+			latitude: lat,
+			longitude: lng,
 			Location: new GeoPoint(latitude, longitude),
 			Images: e.target.images.files.length ? imagesURL : classData.Images,
 			classCreator: user?.uid,
@@ -217,29 +230,74 @@ export default function EditClass() {
 									type={"number"}
 								/>
 							</div>
+						</div>
+
+						{/* coordinates */}
+						<div className="grid grid-cols-3 gap-3 mt-2">
 							<div className="grid-cols-6">
 								<label className="text-lg font-medium">Latitude</label>
-								<input
-									name="latitude"
-									defaultValue={classData.latitude}
-									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-									placeholder="Example: 43.84914"
-									step="any"
-									type={"number"}
-								/>
+								<div className="relative">
+									<input
+										name="latitude"
+										className="w-full border-2 border-transparent rounded-xl px-3 py-2 mt-1 bg-zinc-50 z-0"
+										step="any"
+										disabled
+										value={latitude}
+										type={"number"}
+									/>
+									<input
+										name="latitude"
+										required
+										className="absolute top-0 left-0 w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-1 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red pointer-events-none -z-10"
+										step="any"
+										value={latitude}
+										type={"number"}
+									/>
+								</div>
 							</div>
+
 							<div className="grid-cols-6">
 								<label className="text-lg font-medium">Longitude</label>
-								<input
-									name="longitude"
-									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-									placeholder="Example: -79.32399"
-									step="any"
-									defaultValue={classData.longitude}
-									type={"number"}
-								/>
+								<div className="relative">
+									<input
+										name="longitude"
+										className="w-full border-2 border-transparent rounded-xl px-3 py-2 mt-1 bg-zinc-50 z-0"
+										step="any"
+										disabled
+										value={longitude}
+										type={"number"}
+									/>
+									<input
+										name="longitude"
+										required
+										className="absolute top-0 left-0 w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-1 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red -z-10 pointer-events-none"
+										step="any"
+										value={longitude}
+										type={"number"}
+									/>
+								</div>
+							</div>
+
+							<div className="grid-cols-6">
+								<button
+									type="button"
+									className={`w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-8 bg-transparent bg-sky-50`}
+									onClick={() => setShowMap(true)}
+								>
+									Get Coordinates
+								</button>
 							</div>
 						</div>
+
+						{/* map */}
+						{showMap && (
+							<div className={`py-4 mx-auto aspect-square w-full md:w-2/3`}>
+								<MapCoordinates
+									setCoordinates={handleCoordinates}
+									setShowMap={setShowMap}
+								/>
+							</div>
+						)}
 
 						<div className="grid grid-cols-1 gap-3 mt-2">
 							<div className="col-span-12">

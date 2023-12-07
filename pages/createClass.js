@@ -293,6 +293,7 @@ export default function CreateClass() {
 								/>
 							</div>
 						)}
+
 						<div className="grid grid-cols-1 gap-3 mt-2">
 							<div className="col-span-12">
 								<label className="text-lg font-medium">
