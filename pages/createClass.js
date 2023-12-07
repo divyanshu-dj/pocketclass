@@ -67,7 +67,10 @@ export default function CreateClass() {
 		const category = e.target.category.value;
 
 		for (let i = 0; i < e.target.images.files.length; i++) {
-			images.push(e.target.images.files[i]);
+			images.push({
+				file: e.target.images.files[i],
+				type: e.target.images.files[i].type,
+			});
 		}
 
 		setLoading(true);
@@ -90,7 +93,7 @@ export default function CreateClass() {
 			classCreator: user?.uid,
 		});
 
-		images.map((img) => {
+		images.map(({ file: img, type }) => {
 			const fileRef = ref(
 				storage,
 				`images/${
@@ -103,7 +106,7 @@ export default function CreateClass() {
 				getDownloadURL(ref(storage, res.metadata.fullPath)).then(
 					async (url) => {
 						await updateDoc(doc(db, "classes", addingClass.id), {
-							Images: arrayUnion(url),
+							Images: arrayUnion({ url: url, type: type }),
 						});
 						toast.success("Class Added", {
 							toastId: "success66",
@@ -292,13 +295,15 @@ export default function CreateClass() {
 						)}
 						<div className="grid grid-cols-1 gap-3 mt-2">
 							<div className="col-span-12">
-								<label className="text-lg font-medium">Images (png, jpg)</label>
+								<label className="text-lg font-medium">
+									Media (png, jpg, mp4)
+								</label>
 								<input
 									required
 									name="images"
 									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
 									multiple
-									accept="image/png, image/jpeg, image/jpg"
+									accept="image/png, image/jpeg, image/jpg, video/mp4"
 									type={"file"}
 								/>
 							</div>
@@ -362,20 +367,20 @@ export default function CreateClass() {
 										Create
 									</button>
 								) : (
-									<div class="flex items-center justify-center">
+									<div className="flex items-center justify-center">
 										<button
 											type="button"
-											class="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-logo-red"
+											className="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-logo-red"
 											disabled=""
 										>
 											<svg
-												class="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
+												className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
 												xmlns="http://www.w3.org/2000/svg"
 												fill="none"
 												viewBox="0 0 24 24"
 											>
 												<circle
-													class="opacity-25"
+													className="opacity-25"
 													cx="12"
 													cy="12"
 													r="10"
@@ -383,7 +388,7 @@ export default function CreateClass() {
 													stroke-width="4"
 												></circle>
 												<path
-													class="opacity-75"
+													className="opacity-75"
 													fill="currentColor"
 													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 												></path>

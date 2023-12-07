@@ -67,6 +67,9 @@ export default function Booking() {
 	const isInstructor = user?.uid === classData?.classCreator;
 	const [showAvailability, setShowAvailability] = useState(false);
 
+	// if user is not instructor
+	const [showList, setShowList] = useState(true);
+
 	// appointment
 	const [availability, setAvailability] = useState([]);
 	const [appointments, setAppointments] = useState([]);
@@ -74,6 +77,8 @@ export default function Booking() {
 	// dialogs
 	const [showAddForm, setShowAddForm] = useState(false);
 	const [slotDate, setSlotDate] = useState(null);
+	const [initialStart, setInitialStart] = useState(null);
+	const [initialEnd, setInitialEnd] = useState(null);
 	const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
 	const [appointmentDetails, setAppointmentDetails] = useState(null);
 
@@ -250,8 +255,9 @@ export default function Booking() {
 	 */
 
 	// slot click
-	const handleSlotClick = (slot) => {
+	const handleSlotClick = (slot, isDirect = false) => {
 		const slotDate = getDateOnly(slot.start);
+		console.log(">>>", slot);
 		if (
 			isBeforeNow(slotDate) ||
 			(isInstructor && !showAvailability) ||
@@ -261,6 +267,10 @@ export default function Booking() {
 			(!isInstructor && !alreadyHasAvailability(availability, slotDate))
 		)
 			return;
+		if (!!isDirect) {
+			setInitialStart(slot.start);
+			setInitialEnd(slot.end);
+		}
 
 		setSlotDate(slotDate);
 		setShowAddForm(true);
@@ -276,6 +286,8 @@ export default function Booking() {
 		setAppointmentDetails(appointment);
 		setShowAppointmentDetails(true);
 	};
+
+	console.log("-->", getFlatList(availability));
 
 	return isLoading || !classData || !userData || !classId ? (
 		<section className="flex justify-center items-center min-h-[100vh]">
@@ -343,25 +355,91 @@ export default function Booking() {
 						</div>
 					)}
 
-					<Calendar
-						className="min-h-[750px] md:min-h-[600px] flex-1 w-full"
-						localizer={localizer}
-						events={
-							!isInstructor
-								? getDateList(appointments)?.filter?.((a) => a?.owner === uid)
-								: showAvailability
-								? getFlatList(availability)
-								: getDateList(appointments)
-						}
-						startAccessor="start"
-						endAccessor="end"
-						selectable={true}
-						onSelectSlot={handleSlotClick}
-						onSelectEvent={handleAppointmentClick}
-						eventPropGetter={eventStyleGetter}
-						dayPropGetter={dayPropGetter}
-						longPressThreshold={100}
-					/>
+					{/* availability display */}
+					{!!user && !isInstructor && (
+						<div className="flex mb-10 rounded-full border border-logo-red w-fit shadow-md">
+							<button
+								className={`w-[140px] md:w-[200px] py-1 rounded-l-full font-medium duration-300 ease-in-out ${
+									showList
+										? " bg-logo-red text-white"
+										: " bg-slate-100 text-gray-700"
+								}`}
+								onClick={() => setShowList(true)}
+							>
+								List
+							</button>
+
+							<button
+								className={`w-[140px] md:w-[200px] py-1 rounded-r-full font-medium duration-300 ease-in-out ${
+									!showList
+										? " bg-logo-red text-white"
+										: " bg-slate-100 text-gray-700"
+								}`}
+								onClick={() => setShowList(false)}
+							>
+								Calendar
+							</button>
+						</div>
+					)}
+
+					{!!user && !isInstructor && !!showList ? (
+						getFlatList(availability)
+							?.reverse()
+							?.map?.((a, i) => (
+								<div
+									key={`${a.start} ${i}`}
+									className={`flex items-center p-3  border-b ${
+										i === 0 && "border-t"
+									}`}
+								>
+									<div>
+										<p className="text-logo-red text-xs font-medium">
+											Available
+										</p>
+										<p className="font-medium">
+											{new Date(a.start).toLocaleDateString()}
+										</p>
+									</div>
+
+									<div className="flex items-center ml-40">
+										<p className="text-sm font-medium text-gray-600">
+											{new Date(a.start).toLocaleTimeString()}
+										</p>
+										<p className="mx-1">-</p>
+										<p className="text-sm font-medium text-gray-600">
+											{new Date(a.end).toLocaleTimeString()}
+										</p>
+									</div>
+
+									<button
+										className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300"
+										onClick={() => handleSlotClick(a, true)}
+									>
+										Open
+									</button>
+								</div>
+							))
+					) : (
+						<Calendar
+							className="min-h-[750px] md:min-h-[600px] flex-1 w-full"
+							localizer={localizer}
+							events={
+								!isInstructor
+									? getDateList(appointments)?.filter?.((a) => a?.owner === uid)
+									: showAvailability
+									? getFlatList(availability)
+									: getDateList(appointments)
+							}
+							startAccessor="start"
+							endAccessor="end"
+							selectable={true}
+							onSelectSlot={handleSlotClick}
+							onSelectEvent={handleAppointmentClick}
+							eventPropGetter={eventStyleGetter}
+							dayPropGetter={dayPropGetter}
+							longPressThreshold={100}
+						/>
+					)}
 				</div>
 
 				{showAddForm &&
@@ -384,6 +462,8 @@ export default function Booking() {
 							classId={classId}
 							insId={classData?.classCreator}
 							price={classData?.Price}
+							initialStart={initialStart}
+							initialEnd={initialEnd}
 						/>
 					))}
 

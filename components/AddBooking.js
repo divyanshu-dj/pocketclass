@@ -57,6 +57,8 @@ const AddBooking = ({
 	classId,
 	insId,
 	price,
+	initialEnd = null,
+	initialStart = null,
 }) => {
 	const [options, setOptions] = useState(null);
 	useEffect(() => {
@@ -124,8 +126,8 @@ const AddBooking = ({
 		instructor: insId,
 		title: uName,
 		class: classId,
-		start: null,
-		end: null,
+		start: initialStart,
+		end: initialEnd,
 		price: price,
 	};
 	const [newAppointment, setNewAppointment] = useState(initialState);

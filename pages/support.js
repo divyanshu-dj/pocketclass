@@ -188,8 +188,8 @@ export default function Support() {
 						</style>
 					</head>
 					<body>
-						<div class="container">
-							<div class="content">
+						<div className="container">
+							<div className="content">
 								<h2>Requesting User Information</h2>
 								<p>User ID: ${uid}</p>
 								<p>User Email: ${userData?.email}</p>

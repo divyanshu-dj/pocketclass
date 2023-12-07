@@ -164,14 +164,16 @@ export default function Dashboard() {
 	const renderTable = () => {
 		if (tab === "users") {
 			return (
-				<table class="w-full border-collapse border overflow-x-auto shadow">
-					<thead class="bg-logo-red bg-opacity-80 text-white">
+				<table className="w-full border-collapse border overflow-x-auto shadow">
+					<thead className="bg-logo-red bg-opacity-80 text-white">
 						<tr>
-							<th class="py-2 text-center max-w-[100px] border-r">User Id</th>
-							<th class="py-2 text-center max-w-[150px] border-r">Name</th>
-							<th class="py-2 text-center max-w-[150px] border-r">Email</th>
-							<th class="py-2 text-center max-w-[150px] border-r">Phone</th>
-							<th class="py-2 text-center max-w-[80px]">Appointments</th>
+							<th className="py-2 text-center max-w-[100px] border-r">
+								User Id
+							</th>
+							<th className="py-2 text-center max-w-[150px] border-r">Name</th>
+							<th className="py-2 text-center max-w-[150px] border-r">Email</th>
+							<th className="py-2 text-center max-w-[150px] border-r">Phone</th>
+							<th className="py-2 text-center max-w-[80px]">Appointments</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -204,18 +206,20 @@ export default function Dashboard() {
 			);
 		} else if (tab === "classes") {
 			return (
-				<table class="w-full border-collapse border overflow-x-auto shadow">
-					<thead class="bg-logo-red bg-opacity-80 text-white">
+				<table className="w-full border-collapse border overflow-x-auto shadow">
+					<thead className="bg-logo-red bg-opacity-80 text-white">
 						<tr>
-							<th class="py-2 text-center max-w-[100px] border-r">Class Id</th>
-							<th class="py-2 text-center max-w-[150px] border-r">Name</th>
-							<th class="py-2 text-center max-w-[150px] border-r">
+							<th className="py-2 text-center max-w-[100px] border-r">
+								Class Id
+							</th>
+							<th className="py-2 text-center max-w-[150px] border-r">Name</th>
+							<th className="py-2 text-center max-w-[150px] border-r">
 								Instructor Id
 							</th>
-							<th class="py-2 text-center max-w-[150px] border-r">
+							<th className="py-2 text-center max-w-[150px] border-r">
 								Instructor Name
 							</th>
-							<th class="py-2 text-center max-w-[80px]">Appointments</th>
+							<th className="py-2 text-center max-w-[80px]">Appointments</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -248,18 +252,18 @@ export default function Dashboard() {
 			);
 		} else if (tab === "appointments") {
 			return (
-				<table class="w-full border-collapse border overflow-x-auto shadow">
-					<thead class="bg-logo-red bg-opacity-80 text-white">
+				<table className="w-full border-collapse border overflow-x-auto shadow">
+					<thead className="bg-logo-red bg-opacity-80 text-white">
 						<tr>
-							<th class="py-2 text-center max-w-[100px] border-r">Id</th>
-							<th class="py-2 text-center max-w-[100px] border-r">Owner</th>
-							<th class="py-2 text-center max-w-[150px] border-r">
+							<th className="py-2 text-center max-w-[100px] border-r">Id</th>
+							<th className="py-2 text-center max-w-[100px] border-r">Owner</th>
+							<th className="py-2 text-center max-w-[150px] border-r">
 								Instructor
 							</th>
-							<th class="py-2 text-center max-w-[80px] border-r">Class</th>
-							<th class="py-2 text-center max-w-[100px] border-r">Price</th>
-							<th class="py-2 text-center max-w-[80px] border-r">Start</th>
-							<th class="py-2 text-center max-w-[80px]">End</th>
+							<th className="py-2 text-center max-w-[80px] border-r">Class</th>
+							<th className="py-2 text-center max-w-[100px] border-r">Price</th>
+							<th className="py-2 text-center max-w-[80px] border-r">Start</th>
+							<th className="py-2 text-center max-w-[80px]">End</th>
 						</tr>
 					</thead>
 					<tbody>
