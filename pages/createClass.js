@@ -11,7 +11,7 @@ const MapCoordinates = dynamic(() => import("../components/MapCoordinates"), {
 import { Router, useRouter } from "next/router";
 import { auth, db, storage } from "../firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	addDoc,
 	arrayUnion,
@@ -42,13 +42,13 @@ export default function CreateClass() {
 	let images = [];
 	let imagesURL = [];
 
-	if (userLoading || !user) {
-		return (
-			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
-			</section>
-		);
-	}
+	// redirect to main page
+	const goToMainPage = () => router.push("/");
+
+	// check user type
+	useEffect(() => {
+		if (!userLoading && !user) goToMainPage();
+	}, [userLoading]);
 
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
@@ -141,7 +141,11 @@ export default function CreateClass() {
 		handleCoordinates(null, null);
 	};
 
-	return (
+	return userLoading || !user ? (
+		<section className="flex justify-center items-center min-h-[100vh]">
+			<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+		</section>
+	) : (
 		<div className="mx-auto">
 			<Head>
 				<title>Create Class</title>
