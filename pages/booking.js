@@ -98,8 +98,9 @@ export default function Booking() {
 
 	// check id
 	useEffect(() => {
-		if (router.isReady && !classId) goToMainPage();
-	}, [classId, router.isReady]);
+		if ((router.isReady && !classId) || (router.isReady && !user))
+			goToMainPage();
+	}, [classId, router.isReady, user]);
 
 	// close modals
 	const handleCloseModal = () => {
@@ -382,40 +383,58 @@ export default function Booking() {
 					{!!user && !isInstructor && !!showList ? (
 						getFlatList(availability)
 							?.reverse()
-							?.map?.((a, i) => (
-								<div
-									key={`${a.start} ${i}`}
-									className={`flex items-center p-3  border-b ${
-										i === 0 && "border-t"
-									}`}
-								>
-									<div>
-										<p className="text-logo-red text-xs font-medium">
-											Available
-										</p>
-										<p className="font-medium">
-											{new Date(a.start).toLocaleDateString()}
-										</p>
-									</div>
-
-									<div className="flex items-center ml-40">
-										<p className="text-sm font-medium text-gray-600">
-											{new Date(a.start).toLocaleTimeString()}
-										</p>
-										<p className="mx-1">-</p>
-										<p className="text-sm font-medium text-gray-600">
-											{new Date(a.end).toLocaleTimeString()}
-										</p>
-									</div>
-
-									<button
-										className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300"
-										onClick={() => handleSlotClick(a, true)}
+							?.map?.((a, i) => {
+								const slotDate = getDateOnly(a.start);
+								const isDisabled =
+									isBeforeNow(slotDate) ||
+									(isInstructor && !showAvailability) ||
+									(isInstructor &&
+										showAvailability &&
+										alreadyHasAvailability(availability, slotDate)) ||
+									(!isInstructor &&
+										!alreadyHasAvailability(availability, slotDate));
+								return (
+									<div
+										key={`${a.start} ${i}`}
+										className={`flex items-center p-3  border-b ${
+											i === 0 && "border-t"
+										}`}
 									>
-										Open
-									</button>
-								</div>
-							))
+										<div>
+											{isDisabled ? (
+												<p className="text-gray-500-red text-xs font-medium">
+													Not Available
+												</p>
+											) : (
+												<p className="text-logo-red text-xs font-medium">
+													Available
+												</p>
+											)}
+											<p className="font-medium">
+												{new Date(a.start).toLocaleDateString()}
+											</p>
+										</div>
+
+										<div className="flex items-center ml-40">
+											<p className="text-sm font-medium text-gray-600">
+												{new Date(a.start).toLocaleTimeString()}
+											</p>
+											<p className="mx-1">-</p>
+											<p className="text-sm font-medium text-gray-600">
+												{new Date(a.end).toLocaleTimeString()}
+											</p>
+										</div>
+
+										<button
+											className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300 disabled:opacity-30 disabled:grayscale-[90%]"
+											onClick={() => handleSlotClick(a, true)}
+											disabled={isDisabled}
+										>
+											Open
+										</button>
+									</div>
+								);
+							})
 					) : (
 						<Calendar
 							className="min-h-[750px] md:min-h-[600px] flex-1 w-full"
