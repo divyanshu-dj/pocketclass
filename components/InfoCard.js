@@ -42,19 +42,33 @@ function InfoCard({
 		averageReview = averageReview / (currentClassReview.length * 3);
 	}
 
+	const img = images?.length ? images[0] : images;
+
 	return (
 		<div
 			className="flex py-7 px-2 border-b cursor-pointer hover:opacity-80 hover:shadow-lg pr-4 transition duration-200 ease-out first:border-t min-w-[100%] "
 			onClick={() => handleSmallCardClick()}
 		>
 			<div className="relative h-24 w-40 md:h-52 md:w-80 flex-shrink-0">
-				<Image
-					src={images?.length ? images[0] : images}
-					layout="fill"
-					unoptimized
-					objectFit="cover"
-					className="rounded-xl"
-				/>
+				{typeof img !== "object" ||
+				(typeof img === "object" && img.type.includes("image")) ? (
+					<Image
+						src={img?.url || img}
+						layout="fill"
+						unoptimized
+						objectFit="cover"
+						className="rounded-xl"
+					/>
+				) : (
+					<video
+						className="object-cover rounded-xl"
+						src={img.url}
+						alt="video"
+						loop={true}
+						autoPlay={true}
+						muted
+					/>
+				)}
 			</div>
 
 			<div className="flex flex-col flex-grow pl-5">
