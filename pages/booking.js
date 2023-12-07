@@ -104,6 +104,8 @@ export default function Booking() {
 
 	// close modals
 	const handleCloseModal = () => {
+		setInitialStart(null);
+		setInitialEnd(null);
 		setShowAppointmentDetails(false);
 		setShowAddForm(false);
 	};
@@ -287,7 +289,7 @@ export default function Booking() {
 		setShowAppointmentDetails(true);
 	};
 
-	return isLoading || !classData || !userData || !classId ? (
+	return isLoading || !classData || !userData || !classId || !user ? (
 		<section className="flex justify-center items-center min-h-[100vh]">
 			<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 		</section>
