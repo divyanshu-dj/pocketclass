@@ -48,7 +48,7 @@ export default function CreateClass() {
 	// check user type
 	useEffect(() => {
 		if (!userLoading && !user) goToMainPage();
-	}, [userLoading]);
+	}, [userLoading, user]);
 
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
