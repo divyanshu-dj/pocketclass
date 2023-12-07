@@ -533,13 +533,7 @@ const ClassHeading = ({
 									} else {
 										return (
 											<SwiperSlide key={`${img.url} ${index}`}>
-												<div className="relative h-[450px] w-full rounded-xl overflow-hidden">
-													<video
-														className="absolute top-0 left-0 h-full w-full -z-10 bg-black blur-sm object-cover brightness-70"
-														src={img.url}
-														alt="video"
-														muted
-													/>
+												<div className="relative h-[450px] w-full rounded-xl overflow-hidden bg-black bg-opacity-90">
 													<video
 														className="object-contain h-full mx-auto"
 														src={img.url}
