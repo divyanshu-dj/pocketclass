@@ -31,6 +31,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { toast } from "react-toastify";
+import Booking from "../pages/booking";
 
 const ClassHeading = ({
 	type,
@@ -807,6 +808,30 @@ const ClassHeading = ({
 					</section>
 				</div>
 			</div>
+
+			{/* Schedule */}
+			{!isInstructor && !loading && !authStateLoading && (
+				<div className="my-10">
+					{!user ? (
+						<>
+							<p className="text-3xl font-extrabold mb-2">Booking Schedule</p>
+							<p className="text-xl font-bold text-center pt-10">
+								Please sign in to view schedule!
+							</p>
+						</>
+					) : (
+						<>
+							<p className="text-3xl font-extrabold mb-2">Booking Schedule</p>
+							<Booking component={true} />
+						</>
+					)}
+				</div>
+			)}
+			<br />
+			<br />
+			<br />
+			<hr />
+			<br />
 
 			{/* Ratings */}
 			{currentClassReview.length !== 0 && (

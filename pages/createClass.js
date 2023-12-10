@@ -30,12 +30,14 @@ export default function CreateClass() {
 	const [loading, setLoading] = useState(false);
 
 	//map
+	const [address, setAddress] = useState("");
 	const [longitude, setLongitude] = useState("");
 	const [latitude, setLatitude] = useState("");
 	const [showMap, setShowMap] = useState(false);
-	const handleCoordinates = (lng, lat) => {
+	const handleCoordinates = (lng, lat, address) => {
 		setLongitude(lng);
 		setLatitude(lat);
+		setAddress(address);
 	};
 
 	const [user, userLoading, error] = useAuthState(auth);
@@ -55,7 +57,7 @@ export default function CreateClass() {
 
 		const className = e.target.className.value;
 		const classType = e.target.classType.value;
-		const address = e.target.address.value;
+		const add = address;
 		const price = e.target.price.value;
 		const lat = latitude;
 		const lng = longitude;
@@ -76,7 +78,7 @@ export default function CreateClass() {
 		setLoading(true);
 
 		const addingClass = await addDoc(collection(db, "classes"), {
-			Address: address,
+			Address: add,
 			Category: category,
 			Description: description,
 			Pricing: pricing,
@@ -200,16 +202,6 @@ export default function CreateClass() {
                             </div> */}
 
 							<div className="grid-cols-6">
-								<label className="text-lg font-medium">Address</label>
-								<input
-									required
-									name="address"
-									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-									placeholder="Example: 121 Richmond St W, Toronto"
-									type={"text"}
-								/>
-							</div>
-							<div className="grid-cols-6">
 								<label className="text-lg font-medium">Class Type</label>
 								<input
 									required
@@ -232,55 +224,24 @@ export default function CreateClass() {
 						</div>
 
 						{/* coordinates */}
-						<div className="grid grid-cols-3 gap-3 mt-2">
+						<div className="grid grid-cols-2 gap-3 mt-2">
 							<div className="grid-cols-6">
-								<label className="text-lg font-medium">Latitude</label>
-								<div className="relative">
-									<input
-										name="latitude"
-										className="w-full border-2 border-transparent rounded-xl px-3 py-2 mt-1 bg-zinc-50 z-0"
-										step="any"
-										disabled
-										value={latitude}
-										type={"number"}
-									/>
-									<input
-										name="latitude"
-										required
-										className="absolute top-0 left-0 w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-1 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red pointer-events-none -z-10"
-										step="any"
-										value={latitude}
-										type={"number"}
-									/>
-								</div>
-							</div>
-
-							<div className="grid-cols-6">
-								<label className="text-lg font-medium">Longitude</label>
-								<div className="relative">
-									<input
-										name="longitude"
-										className="w-full border-2 border-transparent rounded-xl px-3 py-2 mt-1 bg-zinc-50 z-0"
-										step="any"
-										disabled
-										value={longitude}
-										type={"number"}
-									/>
-									<input
-										name="longitude"
-										required
-										className="absolute top-0 left-0 w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-1 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red -z-10 pointer-events-none"
-										step="any"
-										value={longitude}
-										type={"number"}
-									/>
-								</div>
+								<label className="text-lg font-medium">Address</label>
+								<input
+									required
+									name="address"
+									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+									placeholder="Example: 121 Richmond St W, Toronto"
+									type={"text"}
+									value={address}
+									onChange={(e) => setAddress(e.target.value)}
+								/>
 							</div>
 
 							<div className="grid-cols-6">
 								<button
 									type="button"
-									className={`w-full border-2 border-gray-100 rounded-xl px-3 py-2 mt-8 bg-transparent bg-sky-50`}
+									className={`w-full border-2 border-gray-200 rounded-xl px-3 py-3 mt-8 bg-transparent bg-gray-100`}
 									onClick={() => setShowMap(true)}
 								>
 									Get Coordinates

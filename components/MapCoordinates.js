@@ -118,13 +118,13 @@ export default function MapCoordinates({ setCoordinates, setShowMap }) {
 						>
 							<Popup onClose={handlePopupClose}>
 								<div>{result.label}</div>
-								<div>Latitude: {result.y}</div>
-								<div>Longitude: {result.x}</div>
+								{/* <div>Latitude: {result.y}</div> */}
+								{/* <div>Longitude: {result.x}</div> */}
 
 								<button
 									className="mt-2 ml-auto bg-logo-red text-white px-3 py-1 rounded-full hover:opacity-70 duration-200 ease-in-out border-0"
 									onClick={() => {
-										setCoordinates(result.x, result.y);
+										setCoordinates(result.x, result.y, result.label);
 										setShowMap(false);
 									}}
 								>
