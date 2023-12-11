@@ -3,6 +3,7 @@ import Footer from "../../components/Footer";
 import Header from "../../components/Header";
 
 import { Router, useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { auth, db, storage } from "../../firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState, useEffect } from "react";
@@ -18,7 +19,11 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
-import MapCoordinates from "../../components/MapCoordinates";
+const MapCoordinates = dynamic(
+	() =>
+		import("../../components/MapCoordinates").then((module) => module.default),
+	{ ssr: false }
+);
 
 export default function EditClass() {
 	const router = useRouter();
