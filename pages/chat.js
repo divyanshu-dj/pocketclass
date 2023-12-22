@@ -256,6 +256,7 @@ const Chat = () => {
 				heading: targetHeading,
 				createdAt: now,
 				chatroom: chid,
+				class: cid,
 			};
 
 			const querySnapshot = await getDocs(

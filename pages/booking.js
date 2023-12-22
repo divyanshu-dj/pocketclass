@@ -293,6 +293,14 @@ export default function Booking({ component = false }) {
 		<section className="flex justify-center items-center min-h-[100vh]">
 			<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 		</section>
+	) : component &&
+	  getFlatList(availability).filter((a) => !isBeforeNow(getDateOnly(a.start)))
+			.length === 0 ? (
+		<>
+			<p className="text-center text-xl text-gray-700 my-20">
+				No upcomming availability
+			</p>
+		</>
 	) : (
 		<div className={`flex flex-col mx-auto ${!component && "min-h-screen"}`}>
 			{!component && (
