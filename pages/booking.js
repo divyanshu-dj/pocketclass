@@ -348,8 +348,9 @@ export default function Booking({ component = false }) {
 					</>
 				)}
 				<div
-					className={`p-4 pt-4 md:p-10 md:pt-8 w-full min-h-fit flex-1 flex flex-col overflow-hidden ${
-						!component && " bg-white shadow-lg border rounded-3xl"
+					className={`p-4 pt-4 md:p-10 md:pt-8 w-full min-h-fit flex-1 flex flex-col ${
+						!component &&
+						" bg-white shadow-lg border rounded-3xl overflow-hidden"
 					}`}
 				>
 					{/* availability */}
@@ -408,17 +409,17 @@ export default function Booking({ component = false }) {
 
 					{(!!user && !isInstructor && !!showList) || component ? (
 						getFlatList(availability)
-							?.reverse()
+							?.sort((a, b) => new Date(a.start) - new Date(b.start))
 							?.map?.((a, i) => {
 								const slotDate = getDateOnly(a.start);
-								const isDisabled =
-									isBeforeNow(slotDate) ||
-									(isInstructor && !showAvailability) ||
-									(isInstructor &&
-										showAvailability &&
-										alreadyHasAvailability(availability, slotDate)) ||
-									(!isInstructor &&
-										!alreadyHasAvailability(availability, slotDate));
+								const isDisabled = false;
+								// isBeforeNow(slotDate) ||
+								// (isInstructor && !showAvailability) ||
+								// (isInstructor &&
+								// 	showAvailability &&
+								// 	alreadyHasAvailability(availability, slotDate)) ||
+								// (!isInstructor &&
+								// 	!alreadyHasAvailability(availability, slotDate));
 								return (
 									!isDisabled && (
 										<div

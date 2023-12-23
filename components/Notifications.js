@@ -102,8 +102,6 @@ const Notifications = ({ user }) => {
 		}
 	};
 
-	console.log(notifications);
-
 	return (
 		<div className="relative" ref={myRef}>
 			{/* notification button */}
