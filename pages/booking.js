@@ -265,8 +265,7 @@ export default function Booking({ component = false }) {
 			(isInstructor && !showAvailability) ||
 			(isInstructor &&
 				showAvailability &&
-				alreadyHasAvailability(availability, slotDate)) ||
-			(!isInstructor && !alreadyHasAvailability(availability, slotDate))
+				alreadyHasAvailability(availability, slotDate))
 		)
 			return;
 		if (!!isDirect) {
@@ -412,19 +411,18 @@ export default function Booking({ component = false }) {
 							?.sort((a, b) => new Date(a.start) - new Date(b.start))
 							?.map?.((a, i) => {
 								const slotDate = getDateOnly(a.start);
-								const isDisabled = false;
-								// isBeforeNow(slotDate) ||
-								// (isInstructor && !showAvailability) ||
-								// (isInstructor &&
-								// 	showAvailability &&
-								// 	alreadyHasAvailability(availability, slotDate)) ||
-								// (!isInstructor &&
-								// 	!alreadyHasAvailability(availability, slotDate));
+								const isDisabled =
+									isBeforeNow(slotDate) ||
+									(isInstructor && !showAvailability) ||
+									(isInstructor &&
+										showAvailability &&
+										alreadyHasAvailability(availability, slotDate));
+
 								return (
 									!isDisabled && (
 										<div
 											key={`${a.start} ${i}`}
-											className={`flex items-center p-3  border-b ${
+											className={`flex flex-col md:flex-row md:items-center p-3  border-b ${
 												i === 0 && "border-t"
 											}`}
 										>
@@ -437,7 +435,7 @@ export default function Booking({ component = false }) {
 												</p>
 											</div>
 
-											<div className="flex items-center ml-40">
+											<div className="flex items-center md:ml-40">
 												<p className="text-sm font-medium text-gray-600">
 													{new Date(a.start).toLocaleTimeString()}
 												</p>
@@ -448,7 +446,7 @@ export default function Booking({ component = false }) {
 											</div>
 
 											<button
-												className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300 disabled:opacity-30 disabled:grayscale-[90%]"
+												className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300 disabled:opacity-30 disabled:grayscale-[90%] mt-4 sm:mt-0"
 												onClick={() => {
 													!!user
 														? handleSlotClick(a, true)
