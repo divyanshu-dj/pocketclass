@@ -117,8 +117,6 @@ export default function CreateClass() {
 						e.target.classType.value = " ";
 						e.target.address.value = " ";
 						e.target.price.value = " ";
-						e.target.latitude.value = " ";
-						e.target.longitude.value = " ";
 						e.target.description.value = " ";
 						e.target.pricing.value = " ";
 						e.target.funfact.value = " ";
