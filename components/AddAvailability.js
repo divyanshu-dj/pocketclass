@@ -105,7 +105,8 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
+			className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300`}
+			style={{ zIndex: "9999" }}
 		>
 			{loading ? (
 				<section className="flex justify-center items-center min-h-[100vh]">
