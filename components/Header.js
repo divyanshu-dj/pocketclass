@@ -104,7 +104,7 @@ function Header({ placeholder }) {
 				className="relative flex items-center h-10 cursor-pointer my-auto col-span-3"
 			>
 				<Image
-					src="/pc_logo3.png"
+					src="/pc_logo4.png"
 					layout="fill"
 					objectFit="contain"
 					objectPosition="left"

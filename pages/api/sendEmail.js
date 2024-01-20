@@ -6,7 +6,7 @@ export default function (req, res) {
 	const toMailList = [
 		"contact.pocketclass@gmail.com",
 		"aliu5454@gmail.com",
-		"asifhossain976@gmail.com",
+		"lisahuh26@gmail.com",
 	];
 
 	var message = {
