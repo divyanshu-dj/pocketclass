@@ -4,13 +4,13 @@ export default async function (req, res) {
 	try {
 		const { uid, uEmail, uName, classId, insId, price } = req.body;
 		const paymentIntent = await stripe.paymentIntents.create({
-			amount: price,
+			amount: price * 100, // convert dollar to cents,
 			currency: "usd",
 			automatic_payment_methods: {
 				enabled: true,
 			},
 			metadata: {
-				price: price,
+				price: "$" + price,
 				customer_id: uid,
 				customer_name: uName,
 				customer_email: uEmail,
@@ -21,6 +21,7 @@ export default async function (req, res) {
 
 		res.status(200).json({
 			clientSecret: paymentIntent.client_secret,
+			cc: req.headers.referer,
 		});
 	} catch (error) {
 		console.error("Error creating Stripe session:", error);

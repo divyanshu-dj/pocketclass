@@ -14,13 +14,15 @@ import {
 	where,
 } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import useClickOutside from "../hooks/useClickOutside";
 // utils
 import { toast } from "react-toastify";
 import FlipMove from "react-flip-move";
 import moment from "moment/moment";
+import { useRouter } from "next/router";
 
 const Notifications = ({ user }) => {
+	const router = useRouter();
 	// DROPDOWN STUFF
 	const myRef = useRef(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -208,6 +210,11 @@ const Notifications = ({ user }) => {
 								<div
 									key={`${index}${notif?.createdAt}`}
 									className="w-full min-h-24 mb-2 border bg-gray-100 rounded-lg shadow-sm hover:opacity-80 py-2 px-4 cursor-default"
+									onClick={() =>
+										router.push(
+											`/chat?cid=${notif?.class}&chid=${notif?.chatroom}`
+										)
+									}
 								>
 									<div className="flex mb-1 text-gray-400">
 										<p className="text-xs w-fit">
@@ -221,7 +228,10 @@ const Notifications = ({ user }) => {
 											)}
 										</p>
 									</div>
-									<p className="text-sm text-gray-500">{notif?.text}</p>
+									<div
+										className="text-sm text-gray-500"
+										dangerouslySetInnerHTML={{ __html: notif?.heading }}
+									/>
 								</div>
 							))
 						) : (

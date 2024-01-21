@@ -214,7 +214,7 @@ const Chat = () => {
 
 			// update last seen & send notification
 			updateLastSeens();
-			sendNotification();
+			sendNotification(data);
 		} catch (error) {
 			setIsSending(false);
 			console.warn(error);
@@ -226,8 +226,11 @@ const Chat = () => {
 	 */
 
 	// send notification
-	const sendNotification = async () => {
+	const sendNotification = async (messageData) => {
 		try {
+			const message = messageData?.text;
+			const media = messageData?.media;
+
 			const now = Timestamp?.now();
 			const tenMinutesAgo = moment(now?.toDate()).subtract(10, "minutes");
 			const twoMinutesAgo = moment(now?.toDate()).subtract(2, "minutes");
@@ -244,14 +247,16 @@ const Chat = () => {
 				? `${instructorData?.firstName} ${instructorData?.lastName}`
 				: `${studentData?.firstName} ${studentData?.lastName}`;
 
-			const targetText = `You have new messages in class '${classData?.Name}' by '${targetName}'.`;
+			const targetHeading = `<p>You have new messages in class <strong>${classData?.Name}</strong> by <strong>${targetName}</strong>.<p>`;
 
 			let data = {
+				...messageData,
 				isRead: false,
 				user: targetUid,
-				text: targetText,
+				heading: targetHeading,
 				createdAt: now,
 				chatroom: chid,
+				class: cid,
 			};
 
 			const querySnapshot = await getDocs(
@@ -271,11 +276,27 @@ const Chat = () => {
 				}
 
 				if (notifDate?.isBefore(tenMinutesAgo)) {
-					await sendEmail(targetEmail, targetText, now);
+					await sendEmail(
+						targetEmail,
+						classData?.Name,
+						targetName,
+						message,
+						media,
+						notifDoc?.id,
+						now
+					);
 				}
 			} else {
-				await addDoc(collection(db, "notifications"), data);
-				await sendEmail(targetEmail, targetText, now);
+				const newDoc = await addDoc(collection(db, "notifications"), data);
+				await sendEmail(
+					targetEmail,
+					classData?.Name,
+					targetName,
+					message,
+					media,
+					newDoc?.id,
+					now
+				);
 			}
 		} catch (error) {
 			console.warn(error);
@@ -283,8 +304,29 @@ const Chat = () => {
 	};
 
 	// send email
-	const sendEmail = async (targetEmail, targetText, now) => {
+	const sendEmail = async (
+		targetEmail,
+		className,
+		senderName,
+		message,
+		media,
+		notifId,
+		time
+	) => {
 		try {
+			const htmlContent = `
+			<html>
+			  <body>
+				<p>You have new messages in class <strong>${className}</strong></p>
+				${message ? `<p>${senderName + " says &quot;" + message + "&quot;"}</p> ` : ""}
+				${media ? `<p>Message contains media files.</p>` : ""}
+				<br />
+				<a href="pocketclass.ca/message?nid=${notifId}">Click here to see message</a>
+				<p>Time:${moment(time?.toDate())?.format?.("DD-MM-YY / hh:mm A")}</p>
+			  </body>
+			</html>
+		  `;
+
 			const res = await fetch("/api/sendEmail", {
 				method: "POST",
 				headers: {
@@ -293,9 +335,7 @@ const Chat = () => {
 				},
 				body: JSON.stringify({
 					subject: `Message Alert`,
-					text: `${targetText} \n\nTime:${moment(now?.toDate())?.format?.(
-						"DD-MM-YY / hh:mm A"
-					)}`,
+					html: htmlContent,
 					to: targetEmail,
 				}),
 			});

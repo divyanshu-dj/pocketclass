@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import useClickOutside from "../hooks/useClickOutside";
 // utils
 import { generateHourlySlotsForDate } from "../utils/slots";
 // stripe
@@ -18,6 +18,7 @@ import {
 	PaymentElement,
 	Elements,
 	AddressElement,
+	LinkAuthenticationElement,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(
@@ -55,8 +56,11 @@ const AddBooking = ({
 	uEmail,
 	uName,
 	classId,
+	className,
 	insId,
 	price,
+	initialEnd = null,
+	initialStart = null,
 }) => {
 	const [options, setOptions] = useState(null);
 	useEffect(() => {
@@ -124,8 +128,8 @@ const AddBooking = ({
 		instructor: insId,
 		title: uName,
 		class: classId,
-		start: null,
-		end: null,
+		start: initialStart,
+		end: initialEnd,
 		price: price,
 	};
 	const [newAppointment, setNewAppointment] = useState(initialState);
@@ -164,7 +168,8 @@ const AddBooking = ({
 
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
+			className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 transition-opacity duration-300`}
+			style={{ zIndex: "9999" }}
 		>
 			{loading || !options || hourlySlots?.length < 24 ? (
 				<section className="flex justify-center items-center min-h-[100vh]">
@@ -173,23 +178,85 @@ const AddBooking = ({
 			) : (
 				<div
 					ref={modalRef}
-					className={`bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] max-h-[95vh] transform transition-transform duration-300 ease-in-out shadow-xl`}
+					className={`bg-white rounded-lg p-4 md:p-8 md:px-12 w-[90%] sm:w-3/4 max-w-4xl max-h-[95vh] transform transition-transform duration-300 ease-in-out shadow-xl`}
 				>
 					{confirm ? (
-						<Elements
-							stripe={stripePromise}
-							options={{
-								clientSecret: options?.clientSecret,
-								appearance: { theme: "flat" },
-							}}
-						>
-							<CheckoutForm
-								onSuccess={handleAddAppointment}
-								closeModal={closeModal}
-								uEmail={uEmail}
-								price={price}
-							/>
-						</Elements>
+						<div className="h-full w-full flex">
+							<div className="hidden lg:block w-1/2 pr-8 border-r">
+								<div className="relative h-12">
+									<Image
+										src="/pc_logo3.png"
+										layout="fill"
+										objectFit="contain"
+										objectPosition="left"
+									/>
+								</div>
+
+								<div className="mt-10 border p-4 rounded">
+									<h1 className="text-logo-red font-medium text-xl mb-6">
+										Class Booking
+									</h1>
+
+									<div className="flex w-full items-center justify-between mb-1">
+										<h1 className="">- Class Name</h1>
+										<h1 className="font-medium">{className}</h1>
+									</div>
+
+									<div className="flex w-full items-center justify-between mb-1">
+										<h1 className="">- Booking Date</h1>
+										<h1 className="font-medium">
+											{new Date(newAppointment.start).toLocaleDateString()}
+										</h1>
+									</div>
+
+									<div className="flex w-full items-center justify-between mb-1">
+										<h1 className="">- Starting Time</h1>
+										<h1 className="font-medium">
+											{new Date(newAppointment.start).toLocaleTimeString()}
+										</h1>
+									</div>
+
+									<div className="flex w-full items-center justify-between">
+										<h1 className="">- Ending Time</h1>
+										<h1 className="font-medium">
+											{new Date(newAppointment.end).toLocaleTimeString()}
+										</h1>
+									</div>
+								</div>
+
+								<div className="flex w-full items-center justify-between mt-12 border rounded p-4">
+									<h1 className="">- Total Payment</h1>
+									<h1 className="text-lg font-medium text-logo-red">
+										${price}
+									</h1>
+								</div>
+							</div>
+
+							<div className="flex-1 lg:pl-4">
+								<Elements
+									stripe={stripePromise}
+									options={{
+										clientSecret: options?.clientSecret,
+										appearance: {
+											theme: "stripe",
+											labels: "floating",
+											variables: {
+												borderRadius: "4px",
+												spacingUnit: "4px",
+											},
+										},
+										loader: "always",
+									}}
+								>
+									<CheckoutForm
+										onSuccess={handleAddAppointment}
+										closeModal={closeModal}
+										uEmail={uEmail}
+										price={price}
+									/>
+								</Elements>
+							</div>
+						</div>
 					) : (
 						<>
 							<div className="flex items-center justify-between flex-wrap">
@@ -269,6 +336,7 @@ export default AddBooking;
 // CHECKOUT FORM
 const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 	const [loading, setLoading] = useState(false);
+	const [isLinkCompleted, setIsLinkCompleted] = useState(false);
 	const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
 	const [isAddressCompleted, setIsAddressCompleted] = useState(false);
 	const stripe = useStripe();
@@ -321,27 +389,26 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 			onSubmit={handleSubmit}
 			className=" max-h-[85vh] overflow-y-auto smallScrollbar p-4"
 		>
-			<div className="flex w-full items-center justify-between mb-8">
-				<h1 className="text-gray-700 font-bold text-xl">Payment</h1>
-
-				<h1 className="text-gray-700 font-bold">${price}</h1>
-			</div>
+			<LinkAuthenticationElement
+				onChange={(e) => setIsLinkCompleted(e?.complete)}
+			/>
 
 			<AddressElement
-				className=""
+				className="mt-6"
 				onChange={(e) => setIsAddressCompleted(e?.complete)}
 				options={{
 					mode: "billing",
-					autocomplete: { mode: "automatic" },
 					display: { name: "full" },
 				}}
 			/>
 
 			<PaymentElement
-				className="mt-4"
+				className="mt-6"
 				onChange={(e) => setIsPaymentCompleted(e?.complete)}
 				options={{
 					layout: "accordion",
+					business: { name: "Pocketclass" },
+					terms: { card: "always", googlePay: "always", applePay: "always" },
 				}}
 			/>
 
@@ -351,11 +418,12 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 					!elements ||
 					loading ||
 					!isPaymentCompleted ||
-					!isAddressCompleted
+					!isAddressCompleted ||
+					!isLinkCompleted
 				}
-				className="text-white bg-logo-red w-full mt-6 p-2 rounded-md disabled:opacity-50 hover:opacity-80"
+				className="text-white bg-logo-red w-full mt-6 p-2 rounded disabled:opacity-50 hover:opacity-80"
 			>
-				{loading ? "..." : "Pay"}
+				{loading ? "..." : `Pay $${price}`}
 			</button>
 		</form>
 	);
