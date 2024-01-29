@@ -24,433 +24,306 @@ export default function TermsAndConditions() {
           <h1 className="text-4xl font-semibold py-5">Terms of Service</h1>
           <h2 className="text-2xl font-semibold py-7">OVERVIEW</h2>
           <p>
-            This website is operated by PocketClass. Throughout the site, the
-            terms “we”, “us” and “our” refer to PocketClass. PocketClass offers
-            this website, including all information, tools and Services
-            available from this site to you, the user, conditioned upon your
-            acceptance of all terms, conditions, policies and notices stated
-            here.
-            <br></br>
-            <br></br>
-            By visiting our site and/ or purchasing something from us, you
-            engage in our “Service” and agree to be bound by the following terms
-            and conditions (“Terms of Service”, “Terms”), including those
-            additional terms and conditions and policies referenced herein
-            and/or available by hyperlink. These Terms of Service apply to all
-            users of the site, including without limitation users who are
-            browsers, vendors, customers, merchants, and/ or contributors of
-            content. Please read these Terms of Service carefully before
-            accessing or using our website. By accessing or using any part of
-            the site, you agree to be bound by these Terms of Service. If you do
-            not agree to all the terms and conditions of this agreement, then
-            you may not access the website or use any Services. If these Terms
-            of Service are considered an offer, acceptance is expressly limited
-            to these Terms of Service.
-            <br></br>
-            <br></br>
-            Any new features or tools which are added to the current store shall
-            also be subject to the Terms of Service. You can review the most
-            current version of the Terms of Service at any time on this page. We
-            reserve the right to update, change or replace any part of these
-            Terms of Service by posting updates and/or changes to our website.
-            It is your responsibility to check this page periodically for
-            changes. Your continued use of or access to the website following
-            the posting of any changes constitutes acceptance of those changes.
-            Our store is hosted on Shopify Inc. They provide us with the online
-            e-commerce platform that allows us to sell our products and Services
-            to you.
+          Welcome to PocketClass! These Terms of Use (“Terms”) are a contract between you and PocketClass Inc (“PocketClass” or “we”) and govern your access to and use of any PocketClass website, mobile application (such as for iPhone or Android) or content (the “Site”) or any fitness, recreational, wellness, or other classes, experiences, activities, events, services, recordings, and/or products made available through PocketClass (collectively, “Classes”). Please read these Terms carefully before accessing and using the Site or Classes.
           </p>
 
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 1 - ONLINE STORE TERMS
+            SECTION 1 - Terms of Service
           </h2>
           <p>
-            By agreeing to these Terms of Service, you represent that you are at
-            least the age of majority in your state or province of residence, or
-            that you are the age of majority in your state or province of
-            residence and you have given us your consent to allow any of your
-            minor dependents to use this site.
+          The PocketClass site is owned, edited and run by PocketClass Inc. PocketClass Inc is a Canadian company based in Toronto, Ontario.
+          <br></br>
             <br></br>
+          Use of the PocketClass site is subject to acceptance of these Terms and Conditions. By accessing and/or using the Site and/or Classes, or clicking any button to indicate your consent, you accept and agree to be bound by these Terms, just as if you had agreed to these Terms in writing. If you do not agree to these Terms, do not use the Site or any Classes.
+          <br></br>
             <br></br>
-            You may not use our products for any illegal or unauthorized purpose
-            nor may you, in the use of the Service, violate any laws in your
-            jurisdiction (including but not limited to copyright laws).
+In case of disagreement with these conditions or unacceptable behaviour towards a fellow user, this can include but is not limited to abusing the free lessons with no intention of paying for lessons with an instructor, discrimination or harassment, PocketClass reserves the right to prohibit or restrict access to the site.
+<br></br>
             <br></br>
+
+PocketClass may amend the Terms from time to time. Unless we provide a delayed effective date, all amendments will be effective upon posting of such updated Terms. Your continued access to or use of the Site or Classes after such posting constitutes your consent to be bound by the Terms, as amended.
+<br></br>
             <br></br>
-            You must not transmit any worms or viruses or any code of a
-            destructive nature.
-            <br></br>
-            <br></br>A breach or violation of any of the Terms will result in an
-            immediate termination of your Services.
+In addition to these Terms, certain plans, offers, products, services, elements or features may also be subject to additional terms, conditions guidelines or rules which may be posted, communicated or modified by us or applicable third parties at any time. Your use of any such plan, offer, product, service, element or feature is subject to those additional terms and conditions, which are hereby incorporated by reference into the Terms, provided that in the event of any conflict between such additional terms and the Terms, the Terms shall control. The PocketClass Privacy Policy is hereby incorporated by reference.
           </p>
 
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 2 - GENERAL CONDITIONS
+            SECTION 2 - Website description
           </h2>
           <p>
-            We reserve the right to refuse service to anyone for any reason at
-            any time.
+          PocketClass is the reference point for in-person & online extracurricular lessons whose purpose is to connect instructors, coaches, and professionals (“Instructor” or “Instructors”) with students. PocketClass facilitates learning, sharing knowledge and human connections.
+          <br></br>
+            <br></br>PocketClass is not responsible for any financial transactions that take place between members outside the website. This means that PocketClass cannot be engaged, directly or indirectly, in the transactions between students and instructors, or held responsible for the financial settlement of private lessons. PocketClass, in its capacity as an advertiser, cannot guarantee the payment of tuition fees for students or teachers.
             <br></br>
+            <br></br>PocketClass makes every effort to control the quality, the accuracy of information contained in advertisements, the veracity of instructor qualifications, contact information and availability, but cannot under any circumstances guarantee it.
             <br></br>
-            You understand that your content (not including credit card
-            information), may be transferred unencrypted and involve (a)
-            transmissions over various networks; and (b) changes to conform and
-            adapt to technical requirements of connecting networks or devices.
-            Credit card information is always encrypted during transfer over
-            networks.
+            <br></br>PocketClass members must create a profile to use and contact other members of the community. Users commit to create only one profile on the site. This profile can be modified, administered and deleted from the dashboard made available to users.
             <br></br>
+            <br></br>The services of the PocketClass site are exclusively reserved for those over the age of 18, legally able to subscribe to purchase and sale agreements under applicable national law. Use of the service as a student is limited to individuals and for their own personal use. Legal entities or their employees will not be able to use the service as students to contact professors.
             <br></br>
-            You agree not to reproduce, duplicate, copy, sell, resell or exploit
-            any portion of the Service, use of the Service, or access to the
-            Service or any contact on the website through which the service is
-            provided, without express written permission by us.
-            <br></br>
-            <br></br>
-            The headings used in this agreement are included for convenience
-            only and will not limit or otherwise affect these Terms.
+            <br></br>PocketClass reminds its users that they are subject to all national labour and corporate laws, as well as national payment and tax systems. Please visit the CRA website to learn more about taxes in Canada.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 3 - ACCURACY, COMPLETENESS AND TIMELINESS OF INFORMATION
+            SECTION 3 - Submitting Ads & Contacting Instructors
           </h2>
           <p>
-            We are not responsible if information made available on this site is
-            not accurate, complete or current. The material on this site is
-            provided for general information only and should not be relied upon
-            or used as the sole basis for making decisions without consulting
-            primary, more accurate, more complete or more timely sources of
-            information. Any reliance on the material on this site is at your
-            own risk.
+          Instructors create and publish their ads freely on PocketClass following the simple process provided on the site that can be found by clicking on: Instructor Jobs, on the home page menu. Members can submit as many teaching ads as they want, grouping their ads by subject type/category (arts, sports, science, for example) or by creating one per subject. Each registered teaching ad must be completely different from all others and must have a unique title in order to avoid referencing issues on Google.
+          <br></br>
+            <br></br>Any instructor placing an online ad on PocketClass must exclusively publish information, content, photographs and videos that belong to them and of which they hold the rights. The listing must not contain information that is incorrect, illegal or likely to mislead the recipient. The fees advertised in the ad must be accurate and the instructor must not change their fee once connected with a student through the platform.
             <br></br>
+            <br></br>The ads must not contain the contact details of the instructor: address, phone, email ... under penalty of having their ad suspended and may even be denied access to the site.
             <br></br>
-            This site may contain certain historical information. Historical
-            information, necessarily, is not current and is provided for your
-            reference only. We reserve the right to modify the contents of this
-            site at any time, but we have no obligation to update any
-            information on our site. You agree that it is your responsibility to
-            monitor changes to our site.
+            <br></br>Instructors are committed to being perfectly transparent about their lessons and their references. PocketClass will not be held responsible for any erroneous information provided by instructors. It is the student's responsibility to verify the information provided by the instructor on their listing and to notify PocketClass as soon as possible if this information proves to be inaccurate.
+            <br></br>
+            <br></br>The publication and distribution of advertisements is free for instructors.
+            <br></br>
+            <br></br>The instructor's contact information is never sent to students except in the case where the teacher accepts a lesson request, thus indicating that they wish to send their contact information to the student to organise the first class.
+            <br></br>
+            <br></br>All pages of the site are secured by the HTTPS protocol and navigation between pages is encrypted. All member information and data are encrypted. No banking data is ever kept by PocketClass.
+            <br></br>
+            <br></br>PocketClass does not sell or rent any information or data about its members.
+            <br></br>
+            <br></br>After consulting teaching ads, students can get in touch with instructors they have selected. They then send a lesson request and message to all or as many instructors that match their needs. These messages must not contain any contact details and must limit contact to the PocketClass website. i.e., neither telephone numbers nor e-mail addresses nor Internet addresses are permitted in lesson requests.
+            <br></br>
+            <br></br>A message containing any of this information will automatically be deleted and the student may still be charged for management fees without guarantee of connecting with the desired instructor(s).
+            <br></br>
+            <br></br>Once a lesson request is accepted by an instructor and the contact details are transmitted to the student, PocketClass will not be able to refund the student. The student can only be reimbursed if, due to the fault of the instructor, no lessons have taken place, including any free lessons. Proof will be requested that the instructor cancelled the lesson in order to be able to reimburse.
+            <br></br>
+            <br></br>If the student is able to provide proof which confirms the unavailability of the instructor, PocketClass will reimburse the lesson fee.
+            <br></br>
+            <br></br>In the case that an instructor has refused to give lessons because the student has asked them to complete homework, coursework, exams, or other work on the student’s behalf, a refund will not be given to the student. 
+            <br></br>
+            <br></br>If the instructor that a student initially contacted is not available and unable to accept the lesson request, the student will automatically be rematched with available instructors that meet the same criteria as the student’s initial search. The student will be notified if the instructor that they have been rematched with is available to give them lessons.
+            <br></br>
+            <br></br>In the event that a student wishes to take multiple hours with one instructor, they might opt to plan packs of lessons. Once a pack is accepted, the student will be immediately debited the full amount for the pack. The instructor will receive 50% straight away, and the other 50% when the pack is completed. Please note that you must plan and complete all hours within a lesson pack via the platform in order for the payment to be received successfully. In case a lesson pack is not completed, the instructor is required to refund the student outside of the platform for the remaining hours of incomplete lessons.
+            <br></br>
+            <br></br>In the event that a lesson does not take place and the payment has been transferred to the instructor, it is the instructor’s responsibility to refund the student directly.
+            <br></br>
+            <br></br>Stripe is currently the only method that is supported for receiving payments via pocketclass.ca. Our site is for users in Canada where Stripe payments from businesses are accepted. We do welcome instructors from other countries to advertise on our site but it is their responsibility to ensure they can receive payments via Stripe where they are located if they want to be paid directly on the platform.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 4 - MODIFICATIONS TO THE SERVICE AND PRICES
+            SECTION 4 - Use of dashboard
           </h2>
           <p>
-            Prices for our products are subject to change without notice.
+          By connecting to their dashboard, PocketClass members can control their messages and ads.
+          <br></br>
+            <br></br>The dashboard allows you to manage your profile information, announcements (add, delete, edit) and connect with instructors or students.
             <br></br>
+            <br></br>Instructors are required to respond as quickly as possible and to all students who have made requests. Without an answer, instructor announcements may be suspended until they have taken the time to answer their students.
             <br></br>
-            We reserve the right at any time to modify or discontinue the
-            Service (or any part or content thereof) without notice at any time.
+            <br></br>PocketClass reserves the right to filter these messages and directly contact the sender if it is deemed spam or messages do not match the purpose of the site.
             <br></br>
+            <br></br>PocketClass reserves the right to keep and delete the exchanged emails.
             <br></br>
-            We shall not be liable to you or to any third-party for any
-            modification, price change, suspension or discontinuance of the
-            Service.
+            <br></br>PocketClass reserves the right to make changes to the services offered by the site where instructors or students can expect any compensation.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 5 - PRODUCTS OR SERVICES
+            SECTION 5 - Promotions
           </h2>
           <p>
-            Certain products or Services may be available exclusively online
-            through the website. These products or Services may have limited
-            quantities and are subject to return or exchange only according to
-            our Return Policy. To view our Return Policy, please visit [LINK TO
-            RETURN POLICY]
-            <br></br>
-            <br></br>
-            We reserve the right, but are not obligated, to limit the sales of
-            our products or Services to any person, geographic region or
-            jurisdiction. We may exercise this right on a case-by-case basis. We
-            reserve the right to limit the quantities of any products or
-            Services that we offer. All descriptions of products or product
-            pricing are subject to change at anytime without notice, at the sole
-            discretion of us. We reserve the right to discontinue any product or
-            service at any time. Any offer for any product or service made on
-            this site is void where prohibited.
-            <br></br>
-            <br></br>
-            We do not warrant that the quality of any products, Services,
-            information, or other material purchased or obtained by you will
-            meet your expectations, or that any errors in the Service will be
-            corrected.
+          PocketClass may offer various types of offers and promotions which will be subject to additional terms and conditions that PocketClass may provide.
           </p>
           <h2 className="text-2xl font-semibold py-7">
             SECTION 6 - ACCURACY OF BILLING AND ACCOUNT INFORMATION
           </h2>
           <p>
-            We reserve the right to refuse any order you place with us. We may,
-            in our sole discretion, limit or cancel quantities purchased per
-            person, per household or per order. These restrictions may include
-            orders placed by or under the same customer account, the same credit
-            card, and/or orders that use the same billing and/or shipping
-            address. In the event that we make a change to or cancel an order,
-            we may attempt to notify you by contacting the e-mail and/or billing
-            address/phone number provided at the time the order was made. We
-            reserve the right to limit or prohibit orders that, in our sole
-            judgment, appear to be placed by dealers, resellers or distributors.
+          Without limiting the prohibitions and restrictions found elsewhere throughout the Terms, you agree not to:
             <br></br>
             <br></br>
-            You agree to provide current, complete and accurate purchase and
-            account information for all purchases made at our store. You agree
-            to promptly update your account and other information, including
-            your email address and credit card numbers and expiration dates, so
-            that we can complete your transactions and contact you as needed.
+            <li>
+            Harass, threaten, stalk, disrupt or defraud users, members or staff of PocketClass or Instructors or any other person, or otherwise create or contribute to an unsafe, harassing, threatening or disruptive environment;
+            </li>
+            <li>
+            Act in a deceptive or fraudulent manner by, among other things, impersonating another person or access another user’s account or signing up for more than one account;
+            </li>
+            <li>
+            Share PocketClass passwords with any third party or encourage any other user to do so;
+            </li>
+            <li>
+            Permit anyone to use any classes or services booked under your own membership, including other members;
+            </li>
+            <li>
+            Reserve or cancel any Class directly with an Instructor, rather than through the Site;
+            </li>
+            <li>
+            Reproduce, modify, prepare derivative works based upon, distribute, licence, lease, sell, resell, transfer, publicly display, publicly perform, transmit, stream, broadcast, use for commercial purposes or otherwise exploit any portion of the Site;
+            </li>
+            <li>
+            Misrepresent the source, identity, or content of information transmitted via the Site, including deleting the copyright or other proprietary rights or notices from any portion of the Site;
+            </li>
+            <li>
+            Upload material (e.g. virus) that is damaging to computer systems or data of PocketClass or users of the Site or otherwise use the Site in any manner that could damage, disable, overburden, or impair it or interfere with any other party’s use and enjoyment of the Site;
+            </li>
+            <li>
+            Upload copyrighted material that is not your own or that you do not have the legal right to distribute, display, and otherwise make available to others;
+            </li>
+            <li>
+            Upload or send to Site users pornographic, threatening, embarrassing, hateful, racially or ethnically insulting, libellous, or otherwise inappropriate content;
+            </li>
+            <li>
+            Decompile, reverse engineer or disassemble the Site, in whole or in part, except as may be permitted by applicable law;
+            </li>
+            <li>
+            Link to, mirror or frame any portion of the Site;
+            </li>
+            <li>
+            Cause or launch any programs or scripts for the purpose of scraping, indexing, surveying, or otherwise data mining any portion of the Site or unduly burdening or hindering the operation and/or functionality of any aspect of the Site;
+            </li>
+            <li>
+            Attempt to gain unauthorised access to or impair any aspect of the Site or its related systems or networks or interfere or attempt to interfere with the proper working of the Site or any activities conducted on the Site;
+            </li>
+            <li>
+            Make unsolicited offers, advertisements, proposals, or send junk mail or “spam” to users;
+            </li>
+            <li>
+            Remove, circumvent, disable, damage or otherwise interfere with security-related features of the Site, any features that prevent or restrict use or copying of any content accessible through the Site, or any features that enforce limitations on the use of the Site or the content therein;
+            </li>
+            <li>
+            Obtain or attempt to obtain any materials or information through any means not intentionally made available through the Site;
+            </li>
+            <li>
+            Modify the Site in any manner or form, nor to use modified versions of the Site, including (without limitation) for the purpose of obtaining unauthorised access to the Site
+            </li>
+            <li>
+            Use any robot, spider, scraper, or other automated means to access the Site for any purpose without our express written permission or bypass our robot exclusion headers or other measures we may use to prevent or restrict access to the Site;
+            </li>
+            <li>
+            Use the Site for or in connection with any purpose that is unlawful or prohibited by these Terms
+            </li>
             <br></br>
             <br></br>
-            For more detail, please review our Returns Policy.
+            PocketClass reserves the right to refuse service, terminate accounts, remove or edit content, or cancel orders in its sole discretion.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 7 - OPTIONAL TOOLS
+            SECTION 7 - User Submissions
           </h2>
           <p>
-            We may provide you with access to third-party tools over which we
-            neither monitor nor have any control nor input.
+          7.1. General. The Site provides certain features which enable you and other users to submit, post, share and search for content and information, which may include (without limitation) text, graphic and pictorial works, profile information, information about reserved or attended classes, friend connections or any other information submitted by you and other users or arising from your use of the Site (“User Submissions”). User Submissions also include reviews, ratings and other feedback (“Reviews”). We strongly recommend that you think carefully about what you upload to, share with or make accessible to the Site. PocketClass does not guarantee any anonymity or confidentiality with respect to any User Submissions. For information on how we use your personal information, please see our Privacy Policy.
             <br></br>
             <br></br>
-            You acknowledge and agree that we provide access to such tools ”as
-            is” and “as available” without any warranties, representations or
-            conditions of any kind and without any endorsement. We shall have no
-            liability whatsoever arising from or relating to your use of
-            optional third-party tools.
+            7.2. Reviews. You understand and agree that Reviews may be made public without any additional notice to or consent by you and you should assume that any person (whether or not a user of PocketClass’s platform), including any Instructor, may read or have access to your Reviews. PocketClass is not responsible for the use or disclosure of any information that you disclose in connection with Reviews, including any personal information. Reviews are displayed for information purposes only and reflect the opinions of the person making the submission. They are not controlled by, and may not reflect the opinion of, PocketClass. You understand that all Reviews are the sole responsibility of the person from whom such Review originated. This means that you, and not PocketClass, are entirely responsible for all Reviews that you upload, post, e-mail, transmit, or otherwise make available through the Site.
+
             <br></br>
             <br></br>
-            Any use by you of the optional tools offered through the site is
-            entirely at your own risk and discretion and you should ensure that
-            you are familiar with and approve of the terms on which tools are
-            provided by the relevant third-party provider(s).
+            7.3. Right to Remove or Edit User Submissions. PocketClass makes no representations that it will publish or make available on the Site any User Submissions, and reserves the right, in its sole discretion, to refuse to allow any User Submissions on the Site, or to edit or remove any User Submission at any time with or without notice. Without limiting the generality of the preceding sentence, PocketClass complies with the Copyright Act, and will remove User Submissions upon receipt of a notice from the copyright owner or the owner’s agent (see the “Copyright Act“ section below). PocketClass may, but is not obligated to, monitor and edit or remove any activity or content, in whole or in part, including but not limited to content that PocketClass determines in its sole discretion to violate the standards of this Site. PocketClass takes no responsibility and assumes no liability for any User Submissions.
+
             <br></br>
             <br></br>
-            We may also, in the future, offer new Services and/or features
-            through the website (including, the release of new tools and
-            resources). Such new features and/or Services shall also be subject
-            to these Terms of Service.
+            7.4. Licence Grant by You to PocketClass. By accessing and/or using our services, you hereby grant PocketClass and its affiliates, sublicensees, partners, designees, and assignees of the Site (collectively, the “PocketClass Licensees”) a worldwide, non-exclusive, fully paid-up, royalty-free, perpetual, irrevocable, sublicensable, and transferable licence to use, reproduce (including by making mechanical reproductions), distribute, modify, adapt, translate, prepare derivative works of, publicly display, publish, publicly perform, and otherwise exploit your User Submissions and derivatives thereof in connection with the Site and PocketClass’s (and its successors’) business for any purpose, including, without limitation, for marketing, promoting, and redistributing part or all of the Site (and derivative works thereof), in any media formats and through any media channels now known or hereafter discovered or developed. You acknowledge that you may have what are known as “moral rights” in your User Submissions, for example the right to be named as the creator and the right not to have work subjected to derogatory treatment. You agree to waive any such moral rights you may have in User Submissions.
+            <br></br>
+            <br></br>
+          7.5. User Submissions Representations and Warranties. You are solely responsible for your own User Submissions and the consequences of posting, sharing, displaying, publishing them or otherwise making them available. In connection with User Submissions, you affirm, represent, and warrant that: (i) you own, or have the necessary licenses, rights, consents, and permissions to use and authorize PocketClass to use all patent, trademark, copyright, or other proprietary rights in and to your User Submissions to enable inclusion and use of your User Submissions in the manner contemplated by PocketClass and these Terms, and to grant the rights and license set forth above, and (ii) your User Submissions, PocketClass’s or any PocketClass Licensee’s use of such User Submissions pursuant to these Terms, and PocketClass’s or any of PocketClass Licensee’s exercise of the license rights set forth above, do not and will not: (a) infringe, violate, or misappropriate any third-party right, including any copyright, trademark, patent, trade secret, moral right, privacy right, right of publicity, or any other intellectual property or proprietary right; (b) contain any material that is illegal, threatening, obscene, racist, defamatory, libelous, hateful, pornographic, purposely false or otherwise injurious to third parties, promotional in nature, promotes any illegal activity or harm to groups or individuals, or consists of or contain software, computer viruses, commercial solicitation, political campaigning, chain letters, mass mailings, any form of “spam“ or references to illegal activity, malpractice or false advertising; (c) violate any applicable law or regulation or these Terms; or (d) require obtaining a license from or paying fees or royalties to any third party for the exercise of any rights granted in these Terms, including, by way of example and not limitation, the payment of any royalties to any copyright owners, including any royalties to any agency, collection society, or other entity that administers such rights on behalf of others.
+          <br></br>
+            <br></br>7.6. Inaccurate or Offensive User Submissions. You understand that when using the Site, you may be exposed to User Submissions from a variety of sources and that PocketClass does not endorse and is not responsible for the accuracy, usefulness, safety, or intellectual property rights of or relating to such User Submissions. You further understand and acknowledge that you may be exposed to User Submissions that are inaccurate, offensive, indecent, or objectionable. YOU AGREE TO WAIVE, AND HEREBY DO WAIVE, ANY LEGAL OR EQUITABLE RIGHTS OR REMEDIES YOU HAVE OR MAY HAVE AGAINST POCKETCLASS WITH RESPECT THERETO.
+            <br></br>
+            <br></br>7.7. Feedback. If you provide PocketClass with any comments, bug reports, feedback, or modifications proposed or suggested by you to the Site (“Feedback“), PocketClass shall have the right to use such Feedback at its discretion, including, but not limited to the incorporation of such suggested changes into the Site. You hereby grant PocketClass a perpetual, irrevocable, nonexclusive licence under all rights necessary to incorporate and use your Feedback for any purpose without notice to, consent by or compensation to you or any third party, and you hereby waive moral rights in your Feedback in favour of PocketClass.
+            <br></br>
+            <br></br>7.8. Infringing or Illegal Activity. In the event of infringing or other illegal activities, we have no obligation to, but reserve the right to terminate access to the Site and remove all content submitted by any persons who are found to be infringers. Any suspected illegal activity may be referred to appropriate law enforcement authorities. These remedies are in addition to any other remedies PocketClass may have at law or in equity.
+            <br></br>
+            <br></br>7.9. Class Ratings. You may be required to rate your Classes and/or other PocketClass experiences that you reserve.
+            <br></br>
+            <br></br>7.10. Advertising. You give us permission to use and display your User Submissions next to or in connection with ads, offers, and other messages to your PocketClass friends, without any compensation or advance notice. We may, for example, send an email to one of your PocketClass friends to encourage them to join you in a class. You can update your preferences at any time by navigating to the Privacy Settings.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 8 - THIRD-PARTY LINKS
+            SECTION 8 - Ownership; Proprietary Rights
           </h2>
           <p>
-            Certain content, products and Services available via our Service may
-            include materials from third-parties.
-            <br></br>
-            <br></br>
-            Third-party links on this site may direct you to third-party
-            websites that are not affiliated with us. We are not responsible for
-            examining or evaluating the content or accuracy and we do not
-            warrant and will not have any liability or responsibility for any
-            third-party materials or websites, or for any other materials,
-            products, or Services of third-parties.
-            <br></br>
-            <br></br>
-            We are not liable for any harm or damages related to the purchase or
-            use of goods, Services, resources, content, or any other
-            transactions made in connection with any third-party websites.
-            Please review carefully the third-party's policies and practices and
-            make sure you understand them before you engage in any transaction.
-            Complaints, claims, concerns, or questions regarding third-party
-            products should be directed to the third-party.
+          The Site is owned and operated by PocketClass. The content, recordings, visual interfaces, graphics, design, compilation, information, computer code, products, software (including any downloadable software), services, and all other elements of the Site provided by PocketClass (“Materials“) are protected by the copyright, trade dress, patent, and trademark laws of Canada, the United States and other countries, international conventions, and all other relevant intellectual property and proprietary rights, and applicable laws. Except for a your User Submissions, all Materials contained on the Site are the copyrighted property of PocketClass or its subsidiaries or affiliated companies and/or third-party licensors whether registered or unregistered and may not be used in connection with any product or service or in any manner that is likely to cause confusion as to our endorsement, affiliation or sponsorship of any person, product or service. All trademarks, service marks, and trade names are proprietary to PocketClass or its affiliates and/or third-party licensors. Except as expressly authorised by PocketClass, you agree not to sell, licence, distribute, copy, modify, download, record, publicly perform or display, transmit, publish, edit, adapt, create derivative works from, or otherwise make unauthorised use of the Materials and may only access the Materials for your personal, non-commercial use. In the event that Materials are downloaded to your computer or mobile phone, you do not obtain any ownership interest in such Materials. All rights not expressly granted in this Agreement are reserved.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 9 - USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS
+            SECTION 9 - Third-Party Sites, Products and Services; Links
           </h2>
           <p>
-            If, at our request, you send certain specific submissions (for
-            example contest entries) or without a request from us you send
-            creative ideas, suggestions, proposals, plans, or other materials,
-            whether online, by email, by postal mail, or otherwise
-            (collectively, 'comments'), you agree that we may, at any time,
-            without restriction, edit, copy, publish, distribute, translate and
-            otherwise use in any medium any comments that you forward to us. We
-            are and shall be under no obligation (1) to maintain any comments in
-            confidence; (2) to pay compensation for any comments; or (3) to
-            respond to any comments.
-            <br></br>
-            <br></br>
-            We may, but have no obligation to, monitor, edit or remove content
-            that we determine in our sole discretion to be unlawful, offensive,
-            threatening, libelous, defamatory, pornographic, obscene or
-            otherwise objectionable or violates any party’s intellectual
-            property or these Terms of Service. You agree that your comments
-            will not violate any right of any third-party, including copyright,
-            trademark, privacy, personality or other personal or proprietary
-            right. You further agree that your comments will not contain
-            libelous or otherwise unlawful, abusive or obscene material, or
-            contain any computer virus or other malware that could in any way
-            affect the operation of the Service or any related website. You may
-            not use a false e-mail address, pretend to be someone other than
-            yourself, or otherwise mislead us or third-parties as to the origin
-            of any comments.
-            <br></br>
-            <br></br>
-            You are solely responsible for any comments you make and their
-            accuracy. We take no responsibility and assume no liability for any
-            comments posted by you or any third-party.
+          The Site may include links or access to other web sites or services (“Linked Sites“) solely as a convenience to users. PocketClass does not endorse any such Linked Sites or the information, material, products, or services contained on other linked sites or accessible through other Linked Sites. Furthermore, PocketClass makes no express or implied warranties with regard to the information, material, products, or services that are contained on or accessible through linked sites. ACCESS AND USE OF LINKED SITES, INCLUDING THE INFORMATION, MATERIAL, PRODUCTS, AND SERVICES ON LINKED SITES OR AVAILABLE THROUGH LINKED SITES, IS SOLELY AT YOUR OWN RISK.
+Sometimes promotional plans are offered in conjunction with the provision of third party products and/or services. We are not responsible for the products and services provided by such third parties, and use of such products and services is at your own risk.
+Your correspondence or business dealings with, or participation in promotions of, third parties found on or through the Site are solely between you and such third parties. YOU AGREE THAT POCKETCLASS WILL NOT BE RESPONSIBLE OR LIABLE FOR ANY LOSS OR DAMAGE OF ANY SORT INCURRED AS THE RESULT OF ANY SUCH DEALINGS OR AS THE RESULT OF THE PRESENCE OF SUCH THIRD PARTIES ON THE SITE.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 10 - PERSONAL INFORMATION
+            SECTION 10 - General Disclaimers; No Warranties
           </h2>
           <p>
-            Your submission of personal information through the store is
-            governed by our Privacy Policy. To view our Privacy Policy, please
-            see [LINK TO PRIVACY POLICY]
+          CLASSES AND ANY OTHER PRODUCTS AND SERVICES MADE AVAILABLE VIA THE SITE ARE OFFERED AND PROVIDED BY THIRD PARTIES (AND THE DESCRIPTIONS OF THE FOREGOING POSTED ON THE SITE ARE PROVIDED BY SUCH THIRD PARTIES), NOT POCKETCLASS. YOU AGREE THAT YOUR USE OF THE SITE AND YOUR ATTENDANCE AT , PARTICIPATION IN, PURCHASE OF AND/OR USE OF ANY SUCH CLASSES IS SOLELY AT YOUR OWN RISK. WE DO NOT ASSUME ANY LIABILITY OR MAKE ANY WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, ARISING OUT OF, IN CONNECTION WITH OR WITH RESPECT TO THE SITE AND/OR CLASSES.
+IN NO EVENT SHALL POCKETCLASS BE LIABLE FOR ANY INJURY, LOSS, CLAIM, DAMAGE OR ANY SPECIAL, EXEMPLARY, PUNITIVE, INCIDENTAL OR CONSEQUENTIAL DAMAGES OF ANY KIND, WHETHER BASED IN CONTRACT, TORT OR OTHERWISE, WHICH ARISES OUT OF OR IS ANY WAY CONNECTED WITH A USER’S ATTENDANCE, USE OF OR PARTICIPATION IN A CLASS, OR THE PERFORMANCE OR NON-PERFORMANCE OF ANY THIRD PARTY. IN ADDITION, ALL USERS SPECIFICALLY UNDERSTAND AND AGREE THAT ANY THIRD PARTY DIRECTING USERS TO THE SITE BY REFERRAL, LINK OR ANY OTHER MEANS IS NOT LIABLE TO THE USER FOR ANY REASON WHATSOEVER, INCLUDING BUT NOT LIMITED TO DAMAGES OR LOSS ASSOCIATED WITH THE USE OF THE SERVICES, THE SITE OR ANY CONTENT ON THE SITE. POCKETCLASS IS NEITHER AN AGENT OF NOR IS CONNECTED WITH ANY THIRD PARTY WITH WHICH A USER HAS MADE A RESERVATION, OTHER THAN AS THE PROVIDERS OF THE CLASSES PROVIDED ON OR THROUGH THE SITE. WITHOUT LIMITING ANYTHING HEREIN, POCKETCLASS DISCLAIMS ALL WARRANTIES, WHETHER STATUTORY, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, RELATED TO ANY CLASSES OFFERED VIA THE SITE.
+UNLESS OTHERWISE EXPRESSLY STATED BY POCKETCLASS, ALL ASPECTS OF OR CONTENT OR FEATURES MADE AVAILABLE THROUGH THE SITE AND/OR CLASSES ARE PROVIDED “AS IS“ AND “AS AVAILABLE“ WITHOUT WARRANTIES OF ANY KIND EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMISSIBLE PURSUANT TO APPLICABLE LAW, POCKETCLASS, ITS SUPPLIERS AND PARTNERS DISCLAIM ALL WARRANTIES, STATUTORY, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT OF PROPRIETARY RIGHTS. UNLESS OTHERWISE EXPRESSLY STATED BY POCKETCLASS, POCKETCLASS, ITS SUPPLIERS AND PARTNERS DO NOT WARRANT OR MAKE ANY REPRESENTATIONS (I) THAT THE SITE AND AND/OR ANY CLASS IS SUITABLE FOR YOU OR WILL MEET YOUR PERSONAL NEEDS, (II) REGARDING THE ADEQUACY OR SAFETY OF ANY CLASS OR RECOMMENDATION, (III) THAT THE SITE AND/OR ANY CLASS, OR ANY ASPECT THEREOF, WILL BE AVAILABLE OR PERMITTED IN YOUR JURISDICTION, (IV) THAT THE SITE, OR ANY ASPECT THEREOF, WILL BE UNINTERRUPTED OR ERROR-FREE, THAT DEFECTS WILL BE CORRECTED, OR THAT THE SITE AND ANY DOWNLOADABLE SOFTWARE, CONTENT, SERVICES, OR APPLICATIONS MADE AVAILABLE IN CONJUNCTION WITH OR THROUGH THE SITE OR THE SERVER THAT MAKES THEM AVAILABLE ARE FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS, OR (V) REGARDING THE USE OF THE SITE AND ANY DOWNLOADABLE SOFTWARE, CONTENT, SERVICES, OR APPLICATIONS MADE AVAILABLE IN CONJUNCTION WITH OR THROUGH THE SITE IN TERMS OF CORRECTNESS, ACCURACY, RELIABILITY, OR OTHERWISE. YOU UNDERSTAND AND AGREE THAT YOU DOWNLOAD OR OTHERWISE OBTAIN MATERIAL OR DATA THROUGH THE USE OF THE SITE AT YOUR OWN DISCRETION AND RISK AND THAT YOU WILL BE SOLELY RESPONSIBLE FOR ANY INJURY, LOSS OR DAMAGES, INCLUDING DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE DOWNLOAD OF SUCH MATERIAL OR DATA.
+CERTAIN PROVINCIAL LAWS DO NOT ALLOW LIMITATIONS ON IMPLIED WARRANTIES OR THE EXCLUSION OR LIMITATION OF CERTAIN DAMAGES. IF THESE LAWS APPLY TO YOU, SOME OR ALL OF THE ABOVE DISCLAIMERS, EXCLUSIONS, OR LIMITATIONS MAY NOT APPLY TO YOU. TO THE EXTENT ANY DISCLAIMER OR LIMITATION OF LIABILITY DOES NOT APPLY, ALL APPLICABLE EXPRESS, IMPLIED, AND STATUTORY WARRANTIES WILL BE LIMITED IN DURATION TO A PERIOD OF 30 DAYS AFTER THE DATE ON WHICH YOU FIRST USED THE SITE, AND NO WARRANTIES SHALL APPLY AFTER SUCH PERIOD.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 11 - ERRORS, INACCURACIES AND OMISSIONS
+            SECTION 11 - Indemnification; Hold Harmless
           </h2>
           <p>
-            Occasionally there may be information on our site or in the Service
-            that contains typographical errors, inaccuracies or omissions that
-            may relate to product descriptions, pricing, promotions, offers,
-            product shipping charges, transit times and availability. We reserve
-            the right to correct any errors, inaccuracies or omissions, and to
-            change or update information or cancel orders if any information in
-            the Service or on any related website is inaccurate at any time
-            without prior notice (including after you have submitted your
-            order).
-            <br></br>
-            <br></br>
-            We undertake no obligation to update, amend or clarify information
-            in the Service or on any related website, including without
-            limitation, pricing information, except as required by law. No
-            specified update or refresh date applied in the Service or on any
-            related website, should be taken to indicate that all information in
-            the Service or on any related website has been modified or updated.
+          You agree to indemnify and hold PocketClass, its affiliated entities, subsidiaries, its suppliers, service providers and partners and each of their respective officers, directors, members, employees, consultants, contract employees, representatives and agents, and each of their respective successors and assigns, harmless from any claims, actions, suits, costs, expenses, losses, damages, liabilities, including attorneys’ fees, arising out of or in connection with your misuse of the Site, Classes, violation of these Terms, violation of the rights of any other person or entity, or any breach of your representations, warranties, and covenants set forth in these Terms.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 12 - PROHIBITED USES
+            SECTION 12 - Waiver and Release
           </h2>
           <p>
-            In addition to other prohibitions as set forth in the Terms of
-            Service, you are prohibited from using the site or its content:
+          YOU UNDERSTAND THAT POCKETCLASS IS NOT A GYMNASIUM, PLACE OF AMUSEMENT OR RECREATION, HEALTH CLUB, FACILITY, FITNESS STUDIO OR SIMILAR ESTABLISHMENT AND THE CLASSES THEY PROVIDE ARE OPERATED AND DELIVERED BY THE APPLICABLE INSTRUCTOR AND NOT BY POCKETCLASS. POCKETCLASS IS NOT RESPONSIBLE FOR THE QUALITY OF ANY CLASS PROVIDED BY AN INSTRUCTOR OR THIRD PARTY (INCLUDING BUT NOT LIMITED TO THE FACILITY, INSTRUCTOR OR CURRICULUM). YOU ARE SOLELY RESPONSIBLE FOR DETERMINING WHETHER THE CLASS OR RECOMMENDATIONS AVAILABLE ON OR THROUGH THE SITE AND/OR CLASSES ARE RIGHT FOR YOU.
+          <br></br>
+            <br></br>YOU UNDERSTAND THAT THERE ARE CERTAIN INHERENT RISKS AND DANGERS IN EXERCISING AND THAT THE CLASSES YOU MAY ATTEND OR PARTICIPATE IN OFFER A RANGE OF ACTIVITY AND INTENSITY LEVELS. BY USING POCKETCLASS (INCLUDING BUT NOT LIMITED TO ATTENDING, PARTICIPATING IN OR USING A CLASS), YOU ACKNOWLEDGE AND AGREE, ON BEHALF OF YOURSELF, YOUR HEIRS, PERSONAL REPRESENTATIVES AND/OR ASSIGNS THAT YOU ARE AWARE OF THESE RISKS WHICH INCLUDE, BUT ARE NOT LIMITED TO, PROPERTY DAMAGE, ILLNESS, LOSS AND BODILY INJURY OR DEATH. YOU ACKNOWLEDGE THAT SOME OF THESE RISKS CANNOT BE ELIMINATED AND YOU SPECIFICALLY ASSUME THE RISK OF INJURY OR HARM.
             <br></br>
+            <br></br>YOU ACKNOWLEDGE AND AGREE THAT IT IS YOUR RESPONSIBILITY TO CONSULT WITH YOUR PHYSICIAN OR OTHER HEALTH CARE PROFESSIONAL PRIOR TO USING POCKETCLASS (INCLUDING BUT NOT LIMITED TO ATTENDING, PARTICIPATING IN OR USING A CLASS) AND TO DETERMINE IF AND HOW PARTICIPATING IS APPROPRIATE FOR YOU. DO NOT USE CLASSES IF YOUR PHYSICIAN OR HEALTH CARE PROVIDER ADVISES AGAINST IT. IF YOU EXPERIENCE FAINTNESS, DIZZINESS, PAIN OR SHORTNESS OF BREATH AT ANY TIME WHILE EXERCISING, YOU SHOULD STOP IMMEDIATELY.
             <br></br>
-            (a) for any unlawful purpose; (b) to solicit others to perform or
-            participate in any unlawful acts; (c) to violate any international,
-            federal, provincial or state regulations, rules, laws, or local
-            ordinances; (d) to infringe upon or violate our intellectual
-            property rights or the intellectual property rights of others; (e)
-            to harass, abuse, insult, harm, defame, slander, disparage,
-            intimidate, or discriminate based on gender, sexual orientation,
-            religion, ethnicity, race, age, national origin, or disability; (f)
-            to submit false or misleading information; (g) to upload or transmit
-            viruses or any other type of malicious code that will or may be used
-            in any way that will affect the functionality or operation of the
-            Service or of any related website, other websites, or the Internet;
-            (h) to collect or track the personal information of others; (i) to
-            spam, phish, pharm, pretext, spider, crawl, or scrape; (j) for any
-            obscene or immoral purpose; or (k) to interfere with or circumvent
-            the security features of the Service or any related website, other
-            websites, or the Internet. We reserve the right to terminate your
-            use of the Service or any related website for violating any of the
-            prohibited uses.
+            <br></br>YOU ALSO UNDERSTAND AND AGREE THAT THE SITE OFFERS FITNESS AND RELATED INFORMATION THAT IS DESIGNED FOR INFORMATIONAL, EDUCATIONAL AND ENTERTAINMENT PURPOSES ONLY. NOTHING STATED OR POSTED ON OR OTHERWISE AVAILABLE THROUGH ANY ASPECT OF THE SITE AND/OR A CLASS IS INTENDED TO BE, AND MUST NOT BE TAKEN TO BE, THE PRACTICE OF MEDICAL, PROFESSIONAL OR COUNSELLING CARE. YOU SHOULD NOT RELY ON ANY INFORMATION ON OR THROUGH THE SITE AND/OR A CLASS AS A SUBSTITUTE FOR, NOR DOES IT REPLACE, PROFESSIONAL MEDICAL ADVICE, DIAGNOSIS, OR TREATMENT. IF YOU HAVE ANY CONCERNS OR QUESTIONS ABOUT YOUR HEALTH OR FITNESS LEVEL, YOU SHOULD ALWAYS CONSULT A PHYSICIAN OR OTHER HEALTH-CARE PROFESSIONAL. DO NOT EVER DISREGARD, AVOID OR DELAY OBTAINING MEDICAL OR HEALTH RELATED ADVICE FROM YOUR HEALTH-CARE PROFESSIONAL BECAUSE OF SOMETHING YOU MAY HAVE READ OR HEARD ON OR THROUGH THE SITE AND/OR A CLASS. THE USE OF ANY OF THE CONTENT, RECOMMENDATIONS AND INFORMATION PROVIDED ON OR THROUGH POCKETCLASS IS SOLELY AT YOUR OWN RISK.
+            <br></br>
+            <br></br>THE SITE IS CONTINUALLY UNDER DEVELOPMENT AND POCKETCLASS MAKES NO WARRANTY OF ANY KIND, IMPLIED OR EXPRESS, AS TO ITS ACCURACY, COMPLETENESS OR APPROPRIATENESS FOR ANY PURPOSE. IN THAT REGARD, DEVELOPMENTS IN RESEARCH MAY IMPACT THE FITNESS OR RELATED ADVICE THAT APPEARS ON OR IN CONNECTION WITH THE SITE. NO ASSURANCE CAN BE GIVEN THAT THE ADVICE OR RECOMMENDATIONS CONTAINED IN OR THROUGH THE SITE AND/OR A CLASS WILL ALWAYS INCLUDE THE MOST RECENT FINDINGS OR DEVELOPMENTS WITH RESPECT TO THE PARTICULAR MATERIAL.
+            <br></br>
+            <br></br>THEREFORE, TO THE FULLEST EXTENT PERMITTED BY LAW, YOU RELEASE, INDEMNIFY, AND HOLD HARMLESS POCKETCLASS, ITS PARENT, SUBSIDIARIES OR AFFILIATED ENTITIES, AND EACH OF THEIR RESPECTIVE OFFICERS, DIRECTORS, MEMBERS, EMPLOYEES, CONSULTANTS, CONTRACT EMPLOYEES, REPRESENTATIVES AND AGENTS, AND EACH OF THEIR RESPECTIVE SUCCESSORS AND ASSIGNS, FROM ANY AND ALL RESPONSIBILITY, CLAIMS, ACTIONS, SUITS, PROCEDURES, COSTS, EXPENSES, DAMAGES AND LIABILITIES ARISING OUT OF OR IN ANY WAY RELATED TO YOUR PARTICIPATION IN OR USE OF THE SITE AND/OR ATTENDANCE AT, PARTICIPATION IN, PURCHASE OF AND/OR USE OF ANY CLASS) INCLUDING BUT NOT LIMITED TO WITH RESPECT TO BODILY INJURY, PHYSICAL HARM, LOSS, ILLNESS, DEATH OR PROPERTY DAMAGE.
+            
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 13 - DISCLAIMER OF WARRANTIES; LIMITATION OF LIABILITY
+            SECTION 13 - Limitation of Liability and Damages
           </h2>
           <p>
-            We do not guarantee, represent or warrant that your use of our
-            service will be uninterrupted, timely, secure or error-free.
-            <br></br>
-            <br></br>
-            We do not warrant that the results that may be obtained from the use
-            of the service will be accurate or reliable.
-            <br></br>
-            <br></br>
-            You agree that from time to time we may remove the service for
-            indefinite periods of time or cancel the service at any time,
-            without notice to you. You expressly agree that your use of, or
-            inability to use, the service is at your sole risk. The service and
-            all products and Services delivered to you through the service are
-            (except as expressly stated by us) provided 'as is' and 'as
-            available' for your use, without any representation, warranties or
-            conditions of any kind, either express or implied, including all
-            implied warranties or conditions of merchantability, merchantable
-            quality, fitness for a particular purpose, durability, title, and
-            non-infringement. In no case shall PocketClass, our directors,
-            officers, employees, affiliates, agents, contractors, interns,
-            suppliers, service providers or licensors be liable for any injury,
-            loss, claim, or any direct, indirect, incidental, punitive, special,
-            or consequential damages of any kind, including, without limitation
-            lost profits, lost revenue, lost savings, loss of data, replacement
-            costs, or any similar damages, whether based in contract, tort
-            (including negligence), strict liability or otherwise, arising from
-            your use of any of the service or any products procured using the
-            service, or for any other claim related in any way to your use of
-            the service or any product, including, but not limited to, any
-            errors or omissions in any content, or any loss or damage of any
-            kind incurred as a result of the use of the service or any content
-            (or product) posted, transmitted, or otherwise made available via
-            the service, even if advised of their possibility. Because some
-            states or jurisdictions do not allow the exclusion or the limitation
-            of liability for consequential or incidental damages, in such states
-            or jurisdictions, our liability shall be limited to the maximum
-            extent permitted by law.
+          UNDER NO CIRCUMSTANCES, INCLUDING, BUT NOT LIMITED TO, NEGLIGENCE, WILL POCKETCLASS OR ITS AFFILIATES, CONTRACTORS, EMPLOYEES, AGENTS, OR THIRD-PARTY PARTNERS OR SUPPLIERS BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES ARISING FROM OR RELATED TO THE USE OF THE SITE, INCLUDING THOSE THAT RESULT FROM THE USE OR THE INABILITY TO USE THE MATERIALS ON THE SITE, OR ANY OTHER INTERACTIONS WITH POCKETCLASS, EVEN IF POCKETCLASS OR A POCKETCLASS AUTHORISED REPRESENTATIVE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. APPLICABLE LAW MAY NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY OR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE ABOVE LIMITATION OR EXCLUSION MAY NOT APPLY TO YOU. IN SUCH CASES, POCKETCLASS’S LIABILITY WILL BE LIMITED TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW.
+          <br></br>
+            <br></br>IN NO EVENT WILL POCKETCLASS OR ITS AFFILIATES, CONTRACTORS, EMPLOYEES, AGENTS, OR THIRD-PARTY PARTNERS OR SUPPLIERS HAVE ANY LIABILITY TO YOU FOR DAMAGES, LOSSES, AND CAUSES OF ACTION ARISING OUT OF OR RELATING TO THESE TERMS OR YOUR USE OF THE SITE (WHETHER IN CONTRACT, TORT INCLUDING NEGLIGENCE, WARRANTY, OR OTHERWISE).
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 14 - INDEMNIFICATION
+            SECTION 14 - Instructor Waivers and Terms
           </h2>
           <p>
-            You agree to indemnify, defend and hold harmless PocketClass and our
-            parent, subsidiaries, affiliates, partners, officers, directors,
-            agents, contractors, licensors, service providers, subcontractors,
-            suppliers, interns and employees, harmless from any claim or demand,
-            including reasonable attorneys’ fees, made by any third-party due to
-            or arising out of your breach of these Terms of Service or the
-            documents they incorporate by reference, or your violation of any
-            law or the rights of a third-party.
+          Members taking Classes are deemed to agree to the liability waivers and terms of individual Instructors. Your participation in any Class may be subject to additional policies, rules or conditions of the applicable Instructor and you understand and agree that you may not be permitted to reserve or attend classes or services if you do not comply with these Terms or the policies of the Instructors or as otherwise determined by an Instructor. If you have questions about a Instructor’s waiver or other terms, please see the applicable Instructor’s website or contact the Instructor directly.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 15 - SEVERABILITY
+            SECTION 15 - Infringement Policy
           </h2>
           <p>
-            In the event that any provision of these Terms of Service is
-            determined to be unlawful, void or unenforceable, such provision
-            shall nonetheless be enforceable to the fullest extent permitted by
-            applicable law, and the unenforceable portion shall be deemed to be
-            severed from these Terms of Service, such determination shall not
-            affect the validity and enforceability of any other remaining
-            provisions.
+          If you are a copyright owner or an agent thereof, and you believe that any content hosted on the Site infringes your copyrights, please contact us.
           </p>
           <h2 className="text-2xl font-semibold py-7">
-            SECTION 16 - TERMINATION
+            SECTION 16 - Dispute Resolution
           </h2>
           <p>
-            The obligations and liabilities of the parties incurred prior to the
-            termination date shall survive the termination of this agreement for
-            all purposes.
+          16.1. General. Generally, if a dispute arises between PocketClass and you, our goal is to provide you with a neutral and cost effective means of resolving the dispute quickly. Accordingly, you and PocketClass agree that the parties will resolve any claim or controversy at law or equity that arises out of this Agreement or the Site (a “Claim“) in accordance with one of the subsections below or as you and we otherwise agree in writing. Before resorting to these alternatives, we strongly encourage you to first contact us directly to seek a resolution. We will consider reasonable requests to resolve the dispute through alternative dispute resolution procedures, such as mediation or arbitration, as alternatives to litigation.
+          <br></br>
+            <br></br>16.2. Choice of Law; Forum. These Terms shall be governed in all respects by the laws of the Province of Ontario, without regard to conflict of law provisions. You agree that any claim or dispute you may have against PocketClass must be resolved by a court located in Toronto, Ontario, except as otherwise agreed by the parties or as described in the Arbitration Option paragraph below. You agree to submit to the personal jurisdiction of the courts located within Toronto, Ontario for the purpose of litigating all such claims or disputes.
+          </p>
+          <h2 className="text-2xl font-semibold py-7">
+            SECTION 17 - Miscellaneous
+          </h2>
+          <p>
+          17.1. Assignment. We may assign our rights and obligations under these Terms. The Terms will insure to the benefit of our successors, assigns and licensees.
+          <br></br>
+            <br></br>17.2. Severability. If any provision of these Terms shall be unlawful, void, or for any reason unenforceable, then that provision will be deemed severable from these Terms and will not affect the validity and enforceability of any remaining provisions.
             <br></br>
+            <br></br>17.3. Headings. The heading references herein are for convenience purposes only, do not constitute a part of these Terms, and will not be deemed to limit or affect any of the provisions hereof.
             <br></br>
-            These Terms of Service are effective unless and until terminated by
-            either you or us. You may terminate these Terms of Service at any
-            time by notifying us that you no longer wish to use our Services, or
-            when you cease using our site. If in our sole judgment you fail, or
-            we suspect that you have failed, to comply with any term or
-            provision of these Terms of Service, we also may terminate this
-            agreement at any time without notice and you will remain liable for
-            all amounts due up to and including the date of termination; and/or
-            accordingly may deny you access to our Services (or any part
-            thereof).
+            <br></br>17.4. Entire Agreement. These Terms and any applicable Additional Terms, as each may be amended as set forth herein, are the entire agreement between you and PocketClass relating to the subject matter herein.
+            <br></br>
+            <br></br>17.5. Claims; Statute of Limitations. IN THE EVENT YOU HAVE A CAUSE OF ACTION THAT IS NOT OTHERWISE BARRED BY THESE TERMS, YOU AND POCKETCLASS AGREE THAT ANY CAUSE OF ACTION ARISING OUT OF OR RELATED TO THESE TERMS OR THE SITE AND/OR ATTENDANCE AT, PARTICIPATION IN, USE OF OR PURCHASE OF CLASSES) MUST COMMENCE WITHIN ONE (1) YEAR AFTER THE CAUSE OF ACTION ACCRUES. OTHERWISE, SUCH CAUSE OF ACTION IS PERMANENTLY BARRED.
+            <br></br>
+            <br></br>17.6. Waiver. A provision of these Terms may be waived only by a written instrument executed by the party entitled to the benefit of such provision. The failure of any party at any time to require performance of any provision of these Terms will in no manner affect such party’s right at a later time to enforce the same. A waiver of any breach of any provision of these Terms will not be construed as a continuing waiver of other breaches of the same or other provisions of these Terms. Further, in the event we choose to grant an exception to these Terms, any such exception is in our sole discretion and does not entitle you or anyone else to any exceptions in the future for similar circumstances.
+            <br></br>
+            <br></br>17.7. Notice. Except as explicitly stated otherwise, legal notices will be served, with respect to PocketClass, on PocketClass’s national registered agent, and, with respect to you, to the email address you provide to PocketClass during the registration process. Notice will be deemed given 24 hours after email is sent, unless the sending party is notified that the email address is invalid. Alternatively, we may give you legal notice by mail to the address provided during the registration process. In such a case, notice will be deemed given three days after the date of mailing.
           </p>
-          <h2 className="text-2xl font-semibold py-7">
-            SECTION 17 - ENTIRE AGREEMENT
-          </h2>
-          <p>
-            The failure of us to exercise or enforce any right or provision of
-            these Terms of Service shall not constitute a waiver of such right
-            or provision. These Terms of Service and any policies or operating
-            rules posted by us on this site or in respect to The Service
-            constitutes the entire agreement and understanding between you and
-            us and govern your use of the Service, superseding any prior or
-            contemporaneous agreements, communications and proposals, whether
-            oral or written, between you and us (including, but not limited to,
-            any prior versions of the Terms of Service). Any ambiguities in the
-            interpretation of these Terms of Service shall not be construed
-            against the drafting party.
-          </p>
-          <h2 className="text-2xl font-semibold py-7">
+          {/* <h2 className="text-2xl font-semibold py-7">
             SECTION 18 - GOVERNING LAW
           </h2>
           <p>
             These Terms of Service and any separate agreements whereby we
             provide you Services shall be governed by and construed in
             accordance with the laws of Canada.
-          </p>
+          </p> */}
         </section>
       </main>
       <Footer />
