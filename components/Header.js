@@ -104,7 +104,7 @@ function Header({ placeholder }) {
 				className="relative flex items-center h-10 cursor-pointer my-auto col-span-3"
 			>
 				<Image
-					src="/pc_logo4.png"
+					src="/pc_logo3.png"
 					layout="fill"
 					objectFit="contain"
 					objectPosition="left"
@@ -237,7 +237,32 @@ function Header({ placeholder }) {
 													</p>
 												</li>
 											)}
-
+											{category !== "" && user && category === "instructor" && (
+												<li>
+													<p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+														<a
+														
+															href="/withdraw"
+														>
+															My Wallet
+														</a>
+													</p>
+												</li>
+											) 
+											}
+											{category !== "" && user && userData?.isAdmin && (
+												<li>
+													<p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+														<a
+														
+															href="/vouchers"
+														>
+															Vouchers
+														</a>
+													</p>
+												</li>
+											) 
+											}
 											<li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
 												<a href={`/support`}>Support</a>
 											</li>

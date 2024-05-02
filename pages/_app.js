@@ -10,7 +10,7 @@ import { ToastContainer } from "react-toastify";
 
 const progress = new ProgressBar({
 	size: 4,
-	color: "#f16722",
+	color: "#E73F2B",
 	className: "z-50",
 	delay: 100,
 });

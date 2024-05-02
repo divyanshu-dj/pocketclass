@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/useClickOutside";
+import useClickOutside from "../hooks/OnClickOutside";
 // utils
 import { generateHourlySlotsForDate } from "../utils/slots";
 // stripe
@@ -18,7 +18,6 @@ import {
 	PaymentElement,
 	Elements,
 	AddressElement,
-	LinkAuthenticationElement,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(
@@ -56,45 +55,46 @@ const AddBooking = ({
 	uEmail,
 	uName,
 	classId,
-	className,
 	insId,
 	price,
-	initialEnd = null,
-	initialStart = null,
 }) => {
 	const [options, setOptions] = useState(null);
-	useEffect(() => {
-		const getOptions = async () => {
-			try {
-				const checkoutSession = await fetch("/api/create-stripe-session", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						uid,
-						uEmail,
-						uName,
-						classId,
-						insId,
-						price,
-					}),
-				});
-				const data = await checkoutSession.json();
-				const result = {
-					clientSecret: data?.clientSecret,
-				};
+	const [voucher, setVoucher] = useState("");
+	const [voucherVerified, setVoucherVerified] = useState(false);
+	const getOptions = async (newPrice=null) => {
+		try {
+			console.log(price);
+			console.log(newAppointment.price);
+			const checkoutSession = await fetch("/api/create-stripe-session", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					uid,
+					uEmail,
+					uName,
+					classId,
+					insId,
+					price:newPrice??price,
+				}),
+			});
+			const data = await checkoutSession.json();
+			const result = {
+				clientSecret: data?.clientSecret,
+			};
 
-				setOptions(result);
-			} catch (error) {
-				console.warn(error);
-				toast.error("Payments error !" + error?.message || "", {
-					toastId: "apError2",
-				});
-			} finally {
-				setLoading(false);
-			}
-		};
+			setOptions(result);
+		} catch (error) {
+			console.warn(error);
+			toast.error("Payments error !" + error?.message || "", {
+				toastId: "apError2",
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+	useEffect(() => {
 
 		getOptions();
 	}, []);
@@ -128,12 +128,14 @@ const AddBooking = ({
 		instructor: insId,
 		title: uName,
 		class: classId,
-		start: initialStart,
-		end: initialEnd,
+		start: null,
+		end: null,
 		price: price,
+		paid: false,
 	};
 	const [newAppointment, setNewAppointment] = useState(initialState);
 	const [confirm, setConfirm] = useState(false);
+	const [error, setError] = useState(null);
 
 	const handleTime = (start, end) => {
 		setNewAppointment({ ...newAppointment, start: start, end: end });
@@ -165,11 +167,49 @@ const AddBooking = ({
 			});
 		}
 	};
-
+	const handleVoucher = async () => {
+		try {
+			const response = await fetch("/api/verifyVoucher", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ code: voucher}),
+			});
+			const data = await response.json();
+			console.log(data);
+			if (data?.verified) {
+				setVoucherVerified(true);
+				let discountType = data?.discountType;
+				let discountedPrice
+				if(discountType==='percentage'){
+				 discountedPrice = price - (price * data?.discount) / 100;
+				}
+				else{
+					discountedPrice = price - data?.discount;
+				}
+				if(discountedPrice<0){
+					discountedPrice=1;
+				}
+				setNewAppointment({ ...newAppointment, price:discountedPrice });
+				getOptions(discountedPrice);
+				toast.success("Voucher verified !");
+			} 
+			if(data?.message){
+				console.log(data?.message);
+				toast.error(data?.message);
+				setError(data?.message);
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("Voucher verification error !", {
+				toastId: "vError2",
+			});
+		}
+	}
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 transition-opacity duration-300`}
-			style={{ zIndex: "9999" }}
+			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
 		>
 			{loading || !options || hourlySlots?.length < 24 ? (
 				<section className="flex justify-center items-center min-h-[100vh]">
@@ -178,85 +218,23 @@ const AddBooking = ({
 			) : (
 				<div
 					ref={modalRef}
-					className={`bg-white rounded-lg p-4 md:p-8 md:px-12 w-[90%] sm:w-3/4 max-w-4xl max-h-[95vh] transform transition-transform duration-300 ease-in-out shadow-xl`}
+					className={`bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] max-h-[95vh] transform transition-transform duration-300 ease-in-out shadow-xl`}
 				>
 					{confirm ? (
-						<div className="h-full w-full flex">
-							<div className="hidden lg:block w-1/2 pr-8 border-r">
-								<div className="relative h-12">
-									<Image
-										src="/pc_logo3.png"
-										layout="fill"
-										objectFit="contain"
-										objectPosition="left"
-									/>
-								</div>
-
-								<div className="mt-10 border p-4 rounded">
-									<h1 className="text-logo-red font-medium text-xl mb-6">
-										Class Booking
-									</h1>
-
-									<div className="flex w-full items-center justify-between mb-1">
-										<h1 className="">- Class Name</h1>
-										<h1 className="font-medium">{className}</h1>
-									</div>
-
-									<div className="flex w-full items-center justify-between mb-1">
-										<h1 className="">- Booking Date</h1>
-										<h1 className="font-medium">
-											{new Date(newAppointment.start).toLocaleDateString()}
-										</h1>
-									</div>
-
-									<div className="flex w-full items-center justify-between mb-1">
-										<h1 className="">- Starting Time</h1>
-										<h1 className="font-medium">
-											{new Date(newAppointment.start).toLocaleTimeString()}
-										</h1>
-									</div>
-
-									<div className="flex w-full items-center justify-between">
-										<h1 className="">- Ending Time</h1>
-										<h1 className="font-medium">
-											{new Date(newAppointment.end).toLocaleTimeString()}
-										</h1>
-									</div>
-								</div>
-
-								<div className="flex w-full items-center justify-between mt-12 border rounded p-4">
-									<h1 className="">- Total Payment</h1>
-									<h1 className="text-lg font-medium text-logo-red">
-										${price}
-									</h1>
-								</div>
-							</div>
-
-							<div className="flex-1 lg:pl-4">
-								<Elements
-									stripe={stripePromise}
-									options={{
-										clientSecret: options?.clientSecret,
-										appearance: {
-											theme: "stripe",
-											labels: "floating",
-											variables: {
-												borderRadius: "4px",
-												spacingUnit: "4px",
-											},
-										},
-										loader: "always",
-									}}
-								>
-									<CheckoutForm
-										onSuccess={handleAddAppointment}
-										closeModal={closeModal}
-										uEmail={uEmail}
-										price={price}
-									/>
-								</Elements>
-							</div>
-						</div>
+						<Elements
+							stripe={stripePromise}
+							options={{
+								clientSecret: options?.clientSecret,
+								appearance: { theme: "flat" },
+							}}
+						>
+							<CheckoutForm
+								onSuccess={handleAddAppointment}
+								closeModal={closeModal}
+								uEmail={uEmail}
+								price={newAppointment.price??price}
+							/>
+						</Elements>
 					) : (
 						<>
 							<div className="flex items-center justify-between flex-wrap">
@@ -305,13 +283,42 @@ const AddBooking = ({
 											})}
 										</div>
 									</div>
+									{/* Voucer Code  */}
+									{!voucherVerified&&<div className="flex flex-col mt-6">
+										<label htmlFor="voucher" className="font-bold text-center">
+											Voucher Code
+										</label>
+										<input
+											type="text"
+											name="voucher"
+											id="voucher"
+											placeholder="Enter your voucher code"
+											className="bg-gray-100 border !border-gray-100 rounded-md shadow-md mt-2 px-4 py-2 focus:!outline-none"
+											value={voucher}
+											onChange={(e) => { if(e.target.value===''){setError(null)}setVoucher(e.target.value)}}
+										/>
+										<span className="text-xs text-gray-400 mt-2">*If you have any voucher code, apply here</span>
+										<button className="mx-auto bg-logo-red text-white py-2 px-8 rounded-lg mt-2 w-1/3" onClick={handleVoucher} >
+											Apply
+										</button>
+										{error && <div className="text-red-500 text-center">
+											{error
+											}
+											</div>}
+											
+									</div>}
+											{
+												voucherVerified&&<div className="text-green-500 text-center">
+													Voucher Verified
+												</div>
+											}
 
 									{/* add btn */}
 									<div className="mt-6 mx-auto">
 										<button
 											onClick={() => setConfirm(true)}
 											className="bg-logo-red text-white py-2 px-8 rounded-lg opacity-80 hover:opacity-100 duration-150 ease-in-out disabled:grayscale-[50%] disabled:!opacity-80"
-											disabled={!newAppointment.start || !newAppointment.end}
+											disabled={!newAppointment.start || !newAppointment.end||(voucher.length>0&&!voucherVerified)}
 										>
 											Confirm Appointment
 										</button>
@@ -336,7 +343,6 @@ export default AddBooking;
 // CHECKOUT FORM
 const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 	const [loading, setLoading] = useState(false);
-	const [isLinkCompleted, setIsLinkCompleted] = useState(false);
 	const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
 	const [isAddressCompleted, setIsAddressCompleted] = useState(false);
 	const stripe = useStripe();
@@ -389,26 +395,27 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 			onSubmit={handleSubmit}
 			className=" max-h-[85vh] overflow-y-auto smallScrollbar p-4"
 		>
-			<LinkAuthenticationElement
-				onChange={(e) => setIsLinkCompleted(e?.complete)}
-			/>
+			<div className="flex w-full items-center justify-between mb-8">
+				<h1 className="text-gray-700 font-bold text-xl">Payment</h1>
+
+				<h1 className="text-gray-700 font-bold">${price}</h1>
+			</div>
 
 			<AddressElement
-				className="mt-6"
+				className=""
 				onChange={(e) => setIsAddressCompleted(e?.complete)}
 				options={{
 					mode: "billing",
+					autocomplete: { mode: "automatic" },
 					display: { name: "full" },
 				}}
 			/>
 
 			<PaymentElement
-				className="mt-6"
+				className="mt-4"
 				onChange={(e) => setIsPaymentCompleted(e?.complete)}
 				options={{
 					layout: "accordion",
-					business: { name: "Pocketclass" },
-					terms: { card: "always", googlePay: "always", applePay: "always" },
 				}}
 			/>
 
@@ -418,12 +425,11 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 					!elements ||
 					loading ||
 					!isPaymentCompleted ||
-					!isAddressCompleted ||
-					!isLinkCompleted
+					!isAddressCompleted
 				}
-				className="text-white bg-logo-red w-full mt-6 p-2 rounded disabled:opacity-50 hover:opacity-80"
+				className="text-white bg-logo-red w-full mt-6 p-2 rounded-md disabled:opacity-50 hover:opacity-80"
 			>
-				{loading ? "..." : `Pay $${price}`}
+				{loading ? "..." : "Pay"}
 			</button>
 		</form>
 	);

@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 // library
 import moment from "moment";
 // hooks
-import useClickOutside from "../hooks/useClickOutside";
+import useClickOutside from "../hooks/OnClickOutside";
 // utils
 import { isBeforeNow } from "../utils/date";
 
@@ -14,8 +14,7 @@ const Details = ({ appointmentDetails, closeModal, isInstructor }) => {
 
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300`}
-			style={{ zIndex: "9999" }}
+			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
 		>
 			<div
 				ref={modalRef}
