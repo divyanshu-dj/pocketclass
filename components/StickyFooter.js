@@ -13,7 +13,7 @@ function StickyFooter() {
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/termsandconditions">Terms and Conditions</Link></p>
                 </div>
                 <div className="rightSide flex sm:justify-center md:justify-center xl:justify-end lg:justify-end gap-x-5">
-                    <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/privacypolicy">Privacy Policy</Link></p>
+                    <h5 className='font-normal font-light'>Support</h5>
                 </div>
             </div>
         </div>

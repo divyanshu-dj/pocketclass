@@ -1,9 +1,9 @@
 .swiper-button-prev {
-    color: #f16722 !important;
+    color: #ef4444 !important;
 }
 
 .swiper-button-next {
-    color: #f16722 !important;
+    color: #ef4444 !important;
 }
 
 .swiper-pagination-bullet {
@@ -12,7 +12,7 @@
 }
 
 .swiper-pagination-bullet-active {
-    background-color: #f16722 !important;
+    background-color: #ef4444 !important;
 }
 
 .dropDown {

@@ -21,7 +21,7 @@ function Footer() {
       <div className='text-center space-y-4 text-xs text-gray-800'>
         <h5 className='font-bold'>SUPPORT</h5>
         <p>Contact Us</p>
-        <p className='hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/privacypolicy">Privacy Policy</Link></p>
+        <p>Help Center</p>
         <p className='hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/cancellationpolicy">Cancellation Policy</Link></p>
       </div>
     </div>

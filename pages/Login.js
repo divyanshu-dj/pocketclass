@@ -52,7 +52,8 @@ function Login() {
 					return setErrorMessage("Please Sign up first!");
 				}
 			} else {
-				if (router.query.redirect) {
+				await shouldRedirectToStripe(googleSignIn.user);
+				 if (router.query.redirect) {
 					router.push(router.query.redirect);
 				} else {
 					router.push("/");
@@ -101,6 +102,9 @@ function Login() {
 				setErrorMessage("Please verify Your email first!");
 				return;
 			}
+			//get user data from firestore
+			const docRef = doc(db, "Users", user.user.uid);
+			shouldRedirectToStripe(user);
 			if (router.query.redirect) {
 				router.push(router.query.redirect);
 			} else {
@@ -109,6 +113,18 @@ function Login() {
 			return;
 		}
 	}, [user, error]);
+	const shouldRedirectToStripe =  async(user) => {
+		const docRef = doc(db, "Users", user.user.uid);
+		const docSnap = await getDoc(docRef);
+		if (docSnap.exists()) {
+			const data = docSnap.data();
+			if (!data.stripeAccountId&&data.category==="instructor") {
+				router.push("/addStripe");
+			}
+		}
+	};
+
+
 
 	if (signOutError) {
 		console.warn(signOutError);
@@ -153,10 +169,10 @@ function Login() {
 
 							{errorMessage && (
 								<div
-									className="bg-red-100 border border-red-400 text-red-700 px-4 py-1 rounded relative mt-5"
+									class="bg-red-100 border border-red-400 text-red-700 px-4 py-1 rounded relative mt-5"
 									role="alert"
 								>
-									<strong className="font-bold text-center block">
+									<strong class="font-bold text-center block">
 										{errorMessage.toLocaleUpperCase()}
 									</strong>
 								</div>
@@ -165,7 +181,7 @@ function Login() {
 							<div className="mt-8 flex justify-between items-center">
 								{/* <div>
                                     <input type="checkbox" id='remember' />
-                                    <label className='ml-2 font-medium text-base' htmlFor="remember">Remember for 30 days</label>
+                                    <label className='ml-2 font-medium text-base' for="remember">Remember for 30 days</label>
                                 </div> */}
 								<p
 									onClick={() => handelForgotPassword()}
@@ -183,20 +199,20 @@ function Login() {
 										Sign in
 									</button>
 								) : (
-									<div className="flex items-center justify-center">
+									<div class="flex items-center justify-center">
 										<button
 											type="button"
-											className="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-violet-500"
+											class="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-violet-500"
 											disabled=""
 										>
 											<svg
-												className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
+												class="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
 												xmlns="http://www.w3.org/2000/svg"
 												fill="none"
 												viewBox="0 0 24 24"
 											>
 												<circle
-													className="opacity-25"
+													class="opacity-25"
 													cx="12"
 													cy="12"
 													r="10"
@@ -204,7 +220,7 @@ function Login() {
 													stroke-width="4"
 												></circle>
 												<path
-													className="opacity-75"
+													class="opacity-75"
 													fill="currentColor"
 													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 												></path>
@@ -247,17 +263,17 @@ function Login() {
 								) : (
 									<button
 										type="button"
-										className="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 transition duration-150 w-full ease-in-out border-2 border-gray-100 shadow cursor-not-allowed"
+										class="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 transition duration-150 w-full ease-in-out border-2 border-gray-100 shadow cursor-not-allowed"
 										disabled=""
 									>
 										<svg
-											className="w-5 h-5 mr-3 -ml-1  animate-spin"
+											class="w-5 h-5 mr-3 -ml-1  animate-spin"
 											xmlns="http://www.w3.org/2000/svg"
 											fill="none"
 											viewBox="0 0 24 24"
 										>
 											<circle
-												className="opacity-25"
+												class="opacity-25"
 												cx="12"
 												cy="12"
 												r="10"
@@ -265,7 +281,7 @@ function Login() {
 												stroke-width="4"
 											></circle>
 											<path
-												className="opacity-75"
+												class="opacity-75"
 												fill="currentColor"
 												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 											></path>

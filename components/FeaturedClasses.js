@@ -76,30 +76,24 @@ function FeaturedClass({
 					navigation={isMouseOver}
 					pagination={true}
 					modules={[Navigation, Pagination]}
-					className="mySwiper rounded-xl overflow-hidden"
+					className="mySwiper"
 				>
 					{img &&
-						img.map((img, index) => {
-							if (
-								typeof img !== "object" ||
-								(typeof img === "object" && img.type.includes("image"))
-							) {
-								const url = img?.url || img;
-								return (
-									<SwiperSlide key={index + url}>
-										<div
-											className="w-full rounded-xl overflow-hidden"
-											style={{ aspectRatio: "1 / 1", paddingBottom: "100%" }}
-										>
-											<img
-												className="object-cover object-center absolute top-0 left-0 w-full h-full rounded-xl"
-												src={url}
-												alt="images"
-											/>
-										</div>
-									</SwiperSlide>
-								);
-							}
+						img.map((image, index) => {
+							return (
+								<SwiperSlide key={index + image}>
+									<div
+										className="w-full"
+										style={{ aspectRatio: "1 / 1", paddingBottom: "100%" }}
+									>
+										<img
+											className="object-cover object-center absolute top-0 left-0 w-full h-full rounded-xl"
+											src={image}
+											alt="images"
+										/>
+									</div>
+								</SwiperSlide>
+							);
 						})}
 				</Swiper>
 
@@ -133,4 +127,4 @@ function FeaturedClass({
 	);
 }
 
-export default React.memo(FeaturedClass);
+export default FeaturedClass;

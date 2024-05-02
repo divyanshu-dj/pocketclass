@@ -22,7 +22,7 @@ export default function InstructorGuide() {
       {/*body*/}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
         <section>
-          <h1 className="text-4xl font-semibold py-5">Teach Your Passion</h1>
+          <h1 className="text-4xl font-semibold py-5">Join Our Team</h1>
           <h1 className="text-xl font-semibold mt-5">
             Partner with PocketClass
           </h1>
