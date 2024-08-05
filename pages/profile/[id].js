@@ -40,7 +40,7 @@ export default function Profile() {
 
     if (!userData) {
         return <section className="flex justify-center items-center min-h-[100vh]">
-            <Image src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
+            <Image priority={true} src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
         </section>
     }
 
@@ -69,11 +69,10 @@ export default function Profile() {
                 {userData?.images?.map((img) => {
                   return (
                     <SwiperSlide className="flex justify-center items-center">
-                      <img
-                        className="rounded-xl h-[auto] lg:w-[50%] sm:w-[70%]"
+                 
+                      <Image priority={true}  className="rounded-xl h-[auto] lg:w-[50%] sm:w-[70%]"
                         src={img}
-                        alt="images"
-                      />
+                        alt="images" width={500} height={500} />
                     </SwiperSlide>
                   );
                 })}
@@ -82,11 +81,11 @@ export default function Profile() {
           )}
 
           {userData.profileImage && (
-            <img
-              src={userData?.profileImage}
-              referrerpolicy="no-referrer"
-              className="rounded-full block w-[80px] mx-auto"
-            />
+         
+            <Image priority={true} src={userData?.profileImage}
+            referrerpolicy="no-referrer"
+            className="rounded-full block w-[80px] mx-auto"
+           width={"80px"} height={"50px"} />
           )}
 
           {user && user.uid === id && (

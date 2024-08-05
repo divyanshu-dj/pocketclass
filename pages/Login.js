@@ -91,7 +91,7 @@ function Login() {
 	useEffect(() => {
 		if (error) {
 			return setErrorMessage(
-				error.message.split("Error")[1].split("/")[1].split(")")[0]
+				error.message.split("Error")[1]?.split("/")[1]?.split(")")[0]
 			);
 		}
 	}, [error]);

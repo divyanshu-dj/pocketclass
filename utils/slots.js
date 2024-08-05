@@ -4,7 +4,8 @@ export const generateHourlySlotsForDate = (
 	slotDate,
 	availability,
 	appointments,
-	check = false
+	check = false,
+	allClassStudent,
 ) => {
 	const slots = [];
 	const selectedDate = moment(slotDate).format("YYYY-MM-DD");
@@ -31,12 +32,14 @@ export const generateHourlySlotsForDate = (
 			!isAppointmentOverlapping(
 				getDateList(appointments),
 				slot.start,
-				slot.end
+				slot.end,
+				allClassStudent,
 			) &&
 			isAppointmentOverlapping(getFlatList(availability), slot.start, slot.end)
 		) {
 			slot.isAvailable = true;
 		}
+		console.log(slot);
 
 		slots.push(slot);
 	}
@@ -44,19 +47,27 @@ export const generateHourlySlotsForDate = (
 	return slots;
 };
 
-export const isAppointmentOverlapping = (appointments, newStart, newEnd) => {
+export const isAppointmentOverlapping = (appointments, newStart, newEnd, allClassStudent) => {
 	return appointments?.some?.((appointment) => {
 		const appointmentStart = moment(appointment.start);
 		const appointmentEnd = moment(appointment.end);
-		return (
-			(moment(newStart).isSameOrAfter(appointmentStart) &&
-				moment(newStart).isBefore(appointmentEnd)) ||
-			(moment(newEnd).isSameOrBefore(appointmentEnd) &&
-				moment(newEnd).isAfter(appointmentStart)) ||
-			moment(newEnd).isBefore(moment())
+
+		// Check if the appointment overlaps and if the classStudents match allClassStudent
+		const isOverlapping = (
+			(moment(newStart).isSameOrAfter(appointmentStart) && moment(newStart).isBefore(appointmentEnd)) ||
+			(moment(newEnd).isSameOrBefore(appointmentEnd) && moment(newEnd).isAfter(appointmentStart))
 		);
+		if(allClassStudent > 0){
+			return isOverlapping && appointment.classStudents == allClassStudent;
+		}else{
+			return isOverlapping;
+		}
+
+		// Return true if it overlaps and the classStudents match allClassStudent
 	});
 };
+
+
 
 export const alreadyHasAvailability = (availability, newStart) => {
 	return availability?.some?.((avl) => {

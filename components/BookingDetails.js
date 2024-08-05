@@ -3,14 +3,14 @@ import React, { useRef } from "react";
 // library
 import moment from "moment";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import onClickOutside from "../hooks/onClickOutside";
 // utils
 import { isBeforeNow } from "../utils/date";
 
 const Details = ({ appointmentDetails, closeModal, isInstructor }) => {
 	// for closing modal
 	const modalRef = useRef();
-	useClickOutside(modalRef, closeModal);
+	onClickOutside(modalRef, closeModal);
 
 	return (
 		<div

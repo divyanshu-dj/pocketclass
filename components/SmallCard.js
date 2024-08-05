@@ -32,7 +32,7 @@ function SmallCard({ img, type, category, swiperRef, setSelectedCategory }) {
     <div className='flex flex-col justify-center items-center rounded-xl cursor-pointer' onClick={(e) => handleSmallCardClick(e)}>
       {/* Left */}
       <div className='relative h-12 w-12'>
-        <Image src={img} layout="fill" className='rounded-lg' unoptimized />
+        <Image priority={true} src={img} layout="fill" className='rounded-lg' unoptimized />
       </div>
 
       {/* Right */}

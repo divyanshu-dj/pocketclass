@@ -45,10 +45,11 @@ function InfoCard({
     >
       <div className="relative h-24 w-40 md:h-52 md:w-80 flex-shrink-0">
         <Image
+        priority={true}
           src={images?.length ? images[0] : images}
           layout="fill"
           unoptimized
-          objectFit="cover"
+          objectFit="contain"
           className="rounded-xl"
         />
       </div>

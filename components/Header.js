@@ -104,6 +104,7 @@ function Header({ placeholder }) {
 				className="relative flex items-center h-10 cursor-pointer my-auto col-span-3"
 			>
 				<Image
+				priority={true}
 					src="/pc_logo3.png"
 					layout="fill"
 					objectFit="contain"
@@ -158,6 +159,7 @@ function Header({ placeholder }) {
 							)
 						) : user ? (
 							<Image
+							priority={true}
 								src="/Rolling-1s-200px.svg"
 								width={"30px"}
 								height={"30px"}
@@ -176,6 +178,7 @@ function Header({ placeholder }) {
 						{/* Notifications */}
 						{loading ? (
 							<Image
+							priority={true}
 								src="/Rolling-1s-200px.svg"
 								width={"30px"}
 								height={"30px"}
@@ -193,19 +196,18 @@ function Header({ placeholder }) {
 								>
 									<MenuIcon className="h-6 cursor-pointer" />
 									{user?.photoURL ? (
-										<img
-											src={user?.photoURL}
+
+										<Image
+										priority={true} src={user?.photoURL}
 											referrerpolicy="no-referrer"
-											className="rounded-full w-10 cursor-pointer"
-										/>
+											className="rounded-full w-10 cursor-pointer" width={"40px"} height={"48px"} />
 									) : (
 										<UserCircleIcon className="h-6 cursor-pointer" />
 									)}
 
 									<div
-										className={`dropDown bg-[white] absolute top-[130%] right-3 rounded-md shadow-2xl	h-[auto] w-[200px] p-5 ${
-											showDropDown ? "block" : "hidden"
-										}`}
+										className={`dropDown bg-[white] absolute top-[130%] right-3 rounded-md shadow-2xl	h-[auto] w-[200px] p-5 ${showDropDown ? "block" : "hidden"
+											}`}
 									>
 										<ul>
 											<li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -241,27 +243,27 @@ function Header({ placeholder }) {
 												<li>
 													<p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
 														<a
-														
+
 															href="/withdraw"
 														>
 															My Wallet
 														</a>
 													</p>
 												</li>
-											) 
+											)
 											}
 											{category !== "" && user && userData?.isAdmin && (
 												<li>
 													<p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
 														<a
-														
+
 															href="/vouchers"
 														>
 															Vouchers
 														</a>
 													</p>
 												</li>
-											) 
+											)
 											}
 											<li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
 												<a href={`/support`}>Support</a>
@@ -294,7 +296,8 @@ function Header({ placeholder }) {
 						}
 					</>
 				) : (
-					<Image src="/Rolling-1s-200px.svg" width={"30px"} height={"30px"} />
+					<Image
+					priority={true} src="/Rolling-1s-200px.svg" width={"30px"} height={"30px"} />
 				)}
 			</div>
 

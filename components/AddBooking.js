@@ -1,30 +1,17 @@
-// ADD APPOINTMENT
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-// library
 import moment from "moment";
 import { toast } from "react-toastify";
-// firebase
 import { db } from "../firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
-// hooks
-import useClickOutside from "../hooks/OnClickOutside";
-// utils
+import { addDoc, collection, doc, updateDoc, getDoc } from "firebase/firestore";
+import onClickOutside from "../hooks/onClickOutside";
 import { generateHourlySlotsForDate } from "../utils/slots";
-// stripe
-import {
-	useStripe,
-	useElements,
-	PaymentElement,
-	Elements,
-	AddressElement,
-} from "@stripe/react-stripe-js";
+import { useStripe, useElements, PaymentElement, Elements, AddressElement } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-const stripePromise = loadStripe(
-	process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
 
-// send email
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
 const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 	try {
 		const res = await fetch("/api/sendEmail", {
@@ -57,14 +44,35 @@ const AddBooking = ({
 	classId,
 	insId,
 	price,
+	groupType,
+	classStudents,
+	remainingSeats,
+	bookingslotInfo
 }) => {
 	const [options, setOptions] = useState(null);
 	const [voucher, setVoucher] = useState("");
+	const [bookingSeats, setBookingSeats] = useState(0);
 	const [voucherVerified, setVoucherVerified] = useState(false);
-	const getOptions = async (newPrice=null) => {
+	const [loading, setLoading] = useState(false);
+	const [hourlySlots, setHourlySlots] = useState([]);
+	const [newAppointment, setNewAppointment] = useState({
+		owner: uid,
+		instructor: insId,
+		title: uName,
+		class: classId,
+		start: null,
+		end: null,
+		price: price,
+		paid: false,
+	});
+	const [confirm, setConfirm] = useState(false);
+	const [error, setError] = useState(null);
+	const modalRef = useRef();
+	onClickOutside(modalRef, closeModal);
+
+	const getOptions = async (newPrice = null) => {
 		try {
-			console.log(price);
-			console.log(newAppointment.price);
+			setLoading(true);
 			const checkoutSession = await fetch("/api/create-stripe-session", {
 				method: "POST",
 				headers: {
@@ -76,36 +84,27 @@ const AddBooking = ({
 					uName,
 					classId,
 					insId,
-					price:newPrice??price,
+					price: newPrice ?? newAppointment.price,
 				}),
 			});
 			const data = await checkoutSession.json();
-			const result = {
-				clientSecret: data?.clientSecret,
-			};
-
-			setOptions(result);
+			if (data?.clientSecret) {
+				setOptions({ clientSecret: data.clientSecret });
+			}
 		} catch (error) {
 			console.warn(error);
-			toast.error("Payments error !" + error?.message || "", {
+			toast.error("Payments error !" + error.message || "", {
 				toastId: "apError2",
 			});
 		} finally {
 			setLoading(false);
 		}
 	};
-	useEffect(() => {
 
+	useEffect(() => {
 		getOptions();
 	}, []);
 
-	const [loading, setLoading] = useState(false);
-	// for closing modal
-	const modalRef = useRef();
-	useClickOutside(modalRef, closeModal);
-
-	// for displaying available slots
-	const [hourlySlots, setHourlySlots] = useState([]);
 	useEffect(() => {
 		const getSlots = () => {
 			setLoading(true);
@@ -113,60 +112,109 @@ const AddBooking = ({
 				slotDate,
 				availability,
 				appointments,
-				true
+				true,
+				classStudents,
 			);
 			setHourlySlots(slots);
 			setLoading(false);
 		};
 
 		getSlots();
-	}, []);
-
-	// for adding new appointment
-	const initialState = {
-		owner: uid,
-		instructor: insId,
-		title: uName,
-		class: classId,
-		start: null,
-		end: null,
-		price: price,
-		paid: false,
-	};
-	const [newAppointment, setNewAppointment] = useState(initialState);
-	const [confirm, setConfirm] = useState(false);
-	const [error, setError] = useState(null);
+	}, [slotDate, availability, appointments]);
 
 	const handleTime = (start, end) => {
 		setNewAppointment({ ...newAppointment, start: start, end: end });
 	};
 
-	const handleAddAppointment = () => {
+	const handleAddAppointment = async () => {
 		try {
 			setLoading(true);
-			addDoc(collection(db, "appointments"), newAppointment).then(() => {
-				toast.success("Appointment added !", {
-					toastId: "apSuccess",
+			if (groupType === "group" && bookingslotInfo && bookingslotInfo[newAppointment.start] && bookingSeats > bookingslotInfo[newAppointment.start].remainingSeats) {
+				toast.error("Please select the available seats", {
+					toastId: "apError3",
 				});
-				const targetText = `Your appointment was added successfully. Followings are the details:\n\nClass Id: ${
-					newAppointment.class
-				}\n\nStart Time: ${moment(newAppointment.start)?.format?.(
-					"DD-MM-YY / hh:mm A"
-				)}\n\nEnd Time: ${moment(newAppointment.end)?.format?.(
-					"DD-MM-YY / hh:mm A"
-				)}\n\nPrice: ${newAppointment.price}`;
-				sendEmail(uEmail, `Appointment add success`, targetText);
 				setLoading(false);
-				closeModal();
-			});
+				return;
+			}
+
+			await addDoc(collection(db, "appointments"), newAppointment);
+			toast.success("Appointment added!", { toastId: "apSuccess" });
+
+			if (groupType === "group") {
+				const newAppointmentData = {
+					start: newAppointment.start,
+					end: newAppointment.end,
+					bookSeats: bookingSeats,
+					remainingSeats: classStudents - bookingSeats,
+				};
+				const classDocRef = doc(db, "classes", classId);
+				const classDoc = await getDoc(classDocRef);
+				if (!classDoc.exists()) {
+					throw new Error("Class document does not exist");
+				}
+				const classData = classDoc.data();
+				const updatedBookings = classData.bookings ? { ...classData.bookings } : {};
+
+				if (updatedBookings[newAppointment.start]) {
+					updatedBookings[newAppointment.start] = {
+						...updatedBookings[newAppointment.start],
+						...newAppointmentData,
+						remainingSeats: updatedBookings[newAppointment.start].remainingSeats - bookingSeats,
+						bookingSeats: updatedBookings[newAppointment.start].bookSeats + bookingSeats
+					};
+				} else {
+					updatedBookings[newAppointment.start] = newAppointmentData;
+				}
+
+				await updateDoc(classDocRef, {
+					bookings: updatedBookings,
+				});
+
+				const targetText = `Your group appointment was added successfully. Followings are the details:\n\nClass Id: ${newAppointment.class
+					}\n\nStart Time: ${moment(newAppointment.start).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nEnd Time: ${moment(newAppointment.end).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nPrice: ${newAppointment.price}`;
+				await sendEmail(uEmail, "Group Appointment add success", targetText);
+			} else {
+				const targetText = `Your appointment was added successfully. Followings are the details:\n\nClass Id: ${newAppointment.class
+					}\n\nStart Time: ${moment(newAppointment.start).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nEnd Time: ${moment(newAppointment.end).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nPrice: ${newAppointment.price}`;
+				await sendEmail(uEmail, "Appointment add success", targetText);
+			}
+
+			setLoading(false);
+			closeModal();
+			
 		} catch (error) {
 			setLoading(false);
-			console.warn(error);
-			toast.error("Appointment adding error !", {
+			console.log(error);
+			toast.error("Appointment adding error!", {
 				toastId: "apError2",
 			});
 		}
 	};
+
+	const checkSlots = () => {
+		if (groupType === "group") {
+			if (remainingSeats === 0) {
+				toast.error("No available seats in this group!");
+			} else if (bookingslotInfo && (bookingSeats > bookingslotInfo[newAppointment.start]?.remainingSeats) || bookingSeats > remainingSeats) {
+				toast.error("Please enter valid available seats!");
+			} else {
+				newAppointment.price = price * bookingSeats;
+				newAppointment.classStudents = bookingSeats;
+				setConfirm(true);
+			}
+		} else {
+			setConfirm(true);
+		}
+	};
+
 	const handleVoucher = async () => {
 		try {
 			const response = await fetch("/api/verifyVoucher", {
@@ -174,65 +222,56 @@ const AddBooking = ({
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ code: voucher}),
+				body: JSON.stringify({ code: voucher }),
 			});
 			const data = await response.json();
-			console.log(data);
-			if (data?.verified) {
+			if (data.verified) {
 				setVoucherVerified(true);
-				let discountType = data?.discountType;
-				let discountedPrice
-				if(discountType==='percentage'){
-				 discountedPrice = price - (price * data?.discount) / 100;
+				let discountType = data.discountType;
+				let discountedPrice;
+				if (discountType === 'percentage') {
+					discountedPrice = newAppointment.price - (price * data.discount) / 100;
+				} else {
+					discountedPrice = newAppointment.price - data.discount;
 				}
-				else{
-					discountedPrice = price - data?.discount;
+				if (discountedPrice < 0) {
+					discountedPrice = 1;
 				}
-				if(discountedPrice<0){
-					discountedPrice=1;
-				}
-				setNewAppointment({ ...newAppointment, price:discountedPrice });
+				setNewAppointment({ ...newAppointment, price: discountedPrice });
 				getOptions(discountedPrice);
-				toast.success("Voucher verified !");
-			} 
-			if(data?.message){
-				console.log(data?.message);
-				toast.error(data?.message);
-				setError(data?.message);
+				toast.success("Voucher verified!");
+			} else if (data.message) {
+				toast.error(data.message);
+				setError(data.message);
 			}
 		} catch (error) {
 			console.error(error);
-			toast.error("Voucher verification error !", {
+			toast.error("Voucher verification error!", {
 				toastId: "vError2",
 			});
 		}
-	}
+	};
+
 	return (
 		<div
 			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
 		>
-			{loading || !options || hourlySlots?.length < 24 ? (
+			{loading || !options || hourlySlots.length < 24 ? (
 				<section className="flex justify-center items-center min-h-[100vh]">
-					<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+					<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 				</section>
 			) : (
 				<div
 					ref={modalRef}
-					className={`bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] max-h-[95vh] transform transition-transform duration-300 ease-in-out shadow-xl`}
+					className={`bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] max-h-[95vh] overflow-y-auto  transform transition-transform duration-300 ease-in-out shadow-xl`}
 				>
 					{confirm ? (
-						<Elements
-							stripe={stripePromise}
-							options={{
-								clientSecret: options?.clientSecret,
-								appearance: { theme: "flat" },
-							}}
-						>
+						<Elements stripe={stripePromise} options={options}>
 							<CheckoutForm
 								onSuccess={handleAddAppointment}
 								closeModal={closeModal}
 								uEmail={uEmail}
-								price={newAppointment.price??price}
+								price={newAppointment.price ?? price}
 							/>
 						</Elements>
 					) : (
@@ -248,7 +287,7 @@ const AddBooking = ({
 								)}
 							</div>
 
-							{hourlySlots?.some((s) => s.isAvailable) ? (
+							{hourlySlots.some((s) => s.isAvailable) ? (
 								<div className="flex flex-col w-full mt-6">
 									{/* slots */}
 									<div className="mt-6 w-full">
@@ -257,14 +296,14 @@ const AddBooking = ({
 										</h1>
 
 										<div className="mt-3 flex justify-center flex-wrap max-h-[300px] overflow-y-auto smallScrollbar">
-											{hourlySlots?.map?.((slot) => {
+											{hourlySlots.map((slot) => {
 												const isSelected =
 													moment(newAppointment.start).isSame(slot.start) &&
 													moment(newAppointment.end).isSame(slot.end);
 
 												const handleClick = () => {
 													isSelected
-														? handleTime(initialState.start, initialState.end)
+														? handleTime(null, null)
 														: handleTime(slot.start, slot.end);
 												};
 
@@ -283,42 +322,70 @@ const AddBooking = ({
 											})}
 										</div>
 									</div>
-									{/* Voucer Code  */}
-									{!voucherVerified&&<div className="flex flex-col mt-6">
-										<label htmlFor="voucher" className="font-bold text-center">
-											Voucher Code
-										</label>
-										<input
-											type="text"
-											name="voucher"
-											id="voucher"
-											placeholder="Enter your voucher code"
-											className="bg-gray-100 border !border-gray-100 rounded-md shadow-md mt-2 px-4 py-2 focus:!outline-none"
-											value={voucher}
-											onChange={(e) => { if(e.target.value===''){setError(null)}setVoucher(e.target.value)}}
-										/>
-										<span className="text-xs text-gray-400 mt-2">*If you have any voucher code, apply here</span>
-										<button className="mx-auto bg-logo-red text-white py-2 px-8 rounded-lg mt-2 w-1/3" onClick={handleVoucher} >
-											Apply
-										</button>
-										{error && <div className="text-red-500 text-center">
-											{error
-											}
-											</div>}
-											
-									</div>}
-											{
-												voucherVerified&&<div className="text-green-500 text-center">
-													Voucher Verified
-												</div>
-											}
+									{groupType === "group" && (
+										<div className="grid gap-2 grid-cols-2 mb-2 mt-5">
+											<div className="grid-cols-3 gap-2">
+												<label className='text-lg font-medium'>Remaining Seats:</label>
+												<span className="ml-2"> {bookingslotInfo && bookingslotInfo[newAppointment.start] && bookingslotInfo[newAppointment.start]?.remainingSeats >= 0
+													? bookingslotInfo[newAppointment.start]?.remainingSeats
+													: remainingSeats}</span>
+											</div>
+											<div className="grid-cols-6 gap-6">
+												<label className='text-lg font-medium'>Price Per Seat:</label>
+												<span className="ml-2">{price}</span>
+											</div>
+										</div>
+									)}
+
+									{groupType === "group" && (
+										<div className="flex flex-col mt-6">
+											<label htmlFor="voucher" className="font-bold text-center">
+												Booking Seats
+											</label>
+											<input
+												type="number"
+												name="bookSeats"
+												id="bookSeats"
+												placeholder="Enter number of seats you want to book"
+												className="bg-gray-100 border !border-gray-100 rounded-md shadow-md mt-2 px-4 py-2 focus:!outline-none"
+												value={bookingSeats}
+												onChange={(e) => { if (e.target.value === '') { setError(null) } setBookingSeats(e.target.value) }}
+											/>
+										</div>
+									)}
+
+									{!voucherVerified && (
+										<div className="flex flex-col mt-6">
+											<label htmlFor="voucher" className="font-bold text-center">
+												Voucher Code
+											</label>
+											<input
+												type="text"
+												name="voucher"
+												id="voucher"
+												placeholder="Enter your voucher code"
+												className="bg-gray-100 border !border-gray-100 rounded-md shadow-md mt-2 px-4 py-2 focus:!outline-none"
+												value={voucher}
+												onChange={(e) => { if (e.target.value === '') { setError(null) } setVoucher(e.target.value) }}
+											/>
+											<span className="text-xs text-gray-400 mt-2">*If you have any voucher code, apply here</span>
+											<button className="mx-auto bg-logo-red text-white py-2 px-8 rounded-lg mt-2 w-1/3  disabled:grayscale-[50%] disabled:!opacity-80" onClick={handleVoucher} disabled={(groupType === "group" && bookingslotInfo && bookingslotInfo[newAppointment.start]?.remainingSeats === 0)} >
+												Apply
+											</button>
+											{error && <div className="text-red-500 text-center">{error}</div>}
+										</div>
+									)}
+
+									{voucherVerified && (
+										<div className="text-green-500 text-center">Voucher Verified</div>
+									)}
 
 									{/* add btn */}
 									<div className="mt-6 mx-auto">
 										<button
-											onClick={() => setConfirm(true)}
+											onClick={checkSlots}
 											className="bg-logo-red text-white py-2 px-8 rounded-lg opacity-80 hover:opacity-100 duration-150 ease-in-out disabled:grayscale-[50%] disabled:!opacity-80"
-											disabled={!newAppointment.start || !newAppointment.end||(voucher.length>0&&!voucherVerified)}
+											disabled={!newAppointment.start || !newAppointment.end || (voucher.length > 0 && !voucherVerified) || (groupType === "group" && bookingSeats == 0) || (groupType === "group" && bookingslotInfo && bookingslotInfo[newAppointment.start]?.remainingSeats === 0)}
 										>
 											Confirm Appointment
 										</button>
@@ -338,6 +405,7 @@ const AddBooking = ({
 		</div>
 	);
 };
+
 export default AddBooking;
 
 // CHECKOUT FORM
@@ -375,8 +443,8 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 			} else {
 				sendEmail(
 					uEmail,
-					`Payment Successfull`,
-					`Your payment of $${price} is successfull for class appointment.`
+					'Payment Successfull',
+					`Your payment of $${price} is successfull for class appointment`
 				);
 				await onSuccess();
 			}
@@ -434,3 +502,4 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
 		</form>
 	);
 };
+

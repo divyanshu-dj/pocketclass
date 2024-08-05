@@ -27,6 +27,7 @@ export default function AboutUs() {
           <h1 className="text-4xl font-semibold py-5">Our Story</h1>
           <div className="relative h-96 min-w-[300px]">
             <Image
+            priority={true}
               src="/hero-tester-ai.png"
               layout="fill"
               objectFit="cover"
@@ -114,6 +115,7 @@ export default function AboutUs() {
               <div class="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
                 <a href="#">
                   <Image
+                  priority={true}
                     class="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
                     src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/bonnie-green.png"
                     alt="Bonnie Avatar"
@@ -209,6 +211,7 @@ export default function AboutUs() {
               <div class="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
                 <a href="#">
                   <Image
+                  priority={true}
                     class="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
                     src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
                     alt="Jese Avatar"
@@ -302,6 +305,7 @@ export default function AboutUs() {
               <div class="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
                 <a href="#">
                   <Image
+                  priority={true}
                     class="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
                     src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gouch.png"
                     alt="Michael Avatar"
@@ -397,6 +401,7 @@ export default function AboutUs() {
               <div class="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
                 <a href="#">
                   <Image
+                  priority={true}
                     class="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
                     src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/sofia-mcguire.png"
                     alt="Sofia Avatar"

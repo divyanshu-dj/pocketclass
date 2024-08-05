@@ -3,6 +3,10 @@
       {
         "path": "/api/payCompleteAppointment",
         "schedule": "0 0 * * *"
+      },
+      {
+        "path": "/api/classReminder",
+        "schedule": "0 0 * * *"
       }
     ]
   }

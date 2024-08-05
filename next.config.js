@@ -2,9 +2,22 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  images: {
+  images: { 
+     remotePatterns: [
+    {
+      protocol: 'https',
+      
+      hostname: '*',
+    },
+    {
+      protocol: 'http',
+      hostname: '*',
+    },
+  
+  ],
+  
     domains: ["images.unsplash.com", "links.papareact.com", "content.active.com", "plus.unsplash.com",
-      "lh3.googleusercontent.com"],
+      "lh3.googleusercontent.com","firebasestorage.googleapis.com"],
   },
   env: {
     mapbox_key:

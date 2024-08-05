@@ -14,7 +14,7 @@ import {
 	where,
 } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import onClickOutside from "../hooks/onClickOutside";
 // utils
 import { toast } from "react-toastify";
 import FlipMove from "react-flip-move";
@@ -27,7 +27,7 @@ const Notifications = ({ user }) => {
 	const toggleDropdown = () => {
 		setIsOpen(!isOpen);
 	};
-	useClickOutside(myRef, () => {
+	onClickOutside(myRef, () => {
 		setIsOpen(false);
 	});
 

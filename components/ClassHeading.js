@@ -154,11 +154,10 @@ const ClassHeading = ({
 							if (!student.empty) {
 								cRooms.push({
 									sid: student?.id,
-									studentName: `${
-										student?.data?.()?.firstName ??
+									studentName: `${student?.data?.()?.firstName ??
 										"" + " " + student?.data?.()?.lastName ??
 										""
-									}`,
+										}`,
 									profileImage: student?.data?.()?.profileImage ?? null,
 								});
 								resolve("found");
@@ -215,7 +214,7 @@ const ClassHeading = ({
 	if (authStateLoading) {
 		return (
 			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+				<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 			</section>
 		);
 	}
@@ -281,9 +280,8 @@ const ClassHeading = ({
                   </tr>
                   <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">
-                      <strong>Name:</strong> ${
-												doc.data()?.firstName + " " + doc.data()?.lastName
-											}
+                      <strong>Name:</strong> ${doc.data()?.firstName + " " + doc.data()?.lastName
+					}
                     </td>
                   </tr>
                   <tr>
@@ -510,11 +508,9 @@ const ClassHeading = ({
 								images.map((img) => {
 									return (
 										<SwiperSlide>
-											<img
-												className="object-cover rounded-xl h-[450px] w-full"
-												src={img}
-												alt="images"
-											/>
+
+											<Image priority={true} src={img} objectFit="contain" 
+												alt="images" width={450} height={450} className="object-cover rounded-xl h-[450px] w-full" />
 										</SwiperSlide>
 									);
 								})}
@@ -639,10 +635,11 @@ const ClassHeading = ({
 								""
 							) : (
 								<section className="flex justify-center items-center">
-									<Image
+									<Image 
+									priority={true}
 										src="/Rolling-1s-200px.svg"
-										width={"30px"}
-										height={"30px"}
+										width={"300px"}
+										height={"300px"}
 									/>
 								</section>
 							)}
@@ -673,11 +670,9 @@ const ClassHeading = ({
 														onClick={(e) => handleChatOpen(cr?.sid)}
 														className="flex rounded-md items-center border-t p-4 mb-1 cursor-pointer bg-gray-200 hover:opacity-80 duration-150 ease-in-out"
 													>
-														<img
-															src={cr?.profileImage ?? "/avatar.png"}
+														<Image priority={true} src={cr?.profileImage ?? "/avatar.png"}
 															alt="avatar_img"
-															className="h-12 object-contain rounded-full bg-gray-100 p-1"
-														/>
+															className="h-12 object-contain rounded-full bg-gray-100 p-1" width={"60px"} height={"48px"} />
 														<div className="ml-3">
 															<h1 className="font-medium font text-gray-700">
 																{cr?.studentName ?? "name not found"}
@@ -834,17 +829,16 @@ const ClassHeading = ({
 								<div key={index} className="reviewShow my-10 flex flex-col">
 									<div className="img flex gap-6 items-center">
 										{review[0]?.photo !== " " ? (
-											<img
-												class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+
+											<Image priority={true} class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
 												src={review[0]?.photo}
-												alt="avatar1"
-											/>
+												alt="avatar1" width={"48px"} height={"48px"} />
 										) : (
-											<img
-												class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+
+											<Image priority={true} class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+
 												src="./avataricon.png"
-												alt="avatar"
-											/>
+												alt="avatar" width={"48px"} height={"48px"} />
 										)}
 
 										<p className="m-0 p-0 text-md text-gray-700">
@@ -974,7 +968,7 @@ const ClassHeading = ({
 			) : (
 				<>
 					<section className="flex justify-center items-center min-h-[100vh]">
-						<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+						<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 					</section>
 				</>
 			)}

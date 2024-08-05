@@ -32,7 +32,7 @@ function UpdateProfile() {
 	if (!id || !userData) {
 		return (
 			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+				<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 			</section>
 		);
 	}
