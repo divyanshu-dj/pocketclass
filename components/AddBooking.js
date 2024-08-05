@@ -4,7 +4,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
 import { addDoc, collection, doc, updateDoc, getDoc } from "firebase/firestore";
-import onClickOutside from "../hooks/onClickOutside";
+import onClickOutside from "../hooks/OnClickOutside";
 import { generateHourlySlotsForDate } from "../utils/slots";
 import { useStripe, useElements, PaymentElement, Elements, AddressElement } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
