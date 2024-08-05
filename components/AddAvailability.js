@@ -1,4 +1,3 @@
-// ADD APPOINTMENT
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 // library
@@ -8,14 +7,14 @@ import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 // hooks
-import useClickOutside from "../hooks/OnClickOutside";
+import onClickOutside from "../hooks/onClickOutside";
 // utils
 import { generateHourlySlotsForDate } from "../utils/slots";
 
 // send email
 const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 	try {
-		const res = await fetch("/api/sendEmail", {
+		await fetch("/api/sendEmail", {
 			method: "POST",
 			headers: {
 				Accept: "application/json, text/plain, */*",
@@ -23,7 +22,7 @@ const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 			},
 			body: JSON.stringify({
 				subject: targetSubject,
-				text: `${targetText} \n\nTime:${moment(now?.toDate())?.format?.(
+				text: `${targetText} \n\nTime:${moment(now?.toDate()).format(
 					"DD-MM-YY / hh:mm A"
 				)}`,
 				to: targetEmail,
@@ -36,9 +35,10 @@ const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 
 const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 	const [loading, setLoading] = useState(false);
+
 	// for closing modal
 	const modalRef = useRef();
-	useClickOutside(modalRef, closeModal);
+	onClickOutside(modalRef, closeModal);
 
 	// for displaying available slots
 	const [hourlySlots, setHourlySlots] = useState([]);
@@ -51,7 +51,7 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 		};
 
 		getSlots();
-	}, []);
+	}, [slotDate]);
 
 	// new availability
 	const [newList, setNewList] = useState([]);
@@ -79,25 +79,24 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 	const handleAddAvailability = async () => {
 		try {
 			setLoading(true);
-			addDoc(collection(db, "schedule"), {
+			await addDoc(collection(db, "schedule"), {
 				class: classId,
 				date: moment(slotDate).toDate(),
 				availability: newList,
-			}).then(() => {
-				toast.success("Availability added !", {
-					toastId: "asSuccess",
-				});
-
-				const targetText = `Your availability was added successfully for ClassId: ${classId}`;
-				sendEmail(uEmail, `Appointment add success`, targetText);
-
-				setLoading(false);
-				closeModal();
 			});
+			toast.success("Availability added!", {
+				toastId: "asSuccess",
+			});
+
+			const targetText = `Your availability was added successfully for ClassId: ${classId}`;
+			sendEmail(uEmail, `Appointment add success`, targetText, new Date());
+
+			setLoading(false);
+			closeModal();
 		} catch (error) {
 			setLoading(false);
 			console.warn(error);
-			toast.error("Availability setting error !", {
+			toast.error("Availability setting error!", {
 				toastId: "asError2",
 			});
 		}
@@ -105,16 +104,17 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 
 	return (
 		<div
-			className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300`}
+			className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300"
+			style={{ zIndex: 9999 }}
 		>
 			{loading ? (
 				<section className="flex justify-center items-center min-h-[100vh]">
-					<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+					<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} alt="Loading" />
 				</section>
 			) : (
 				<div
 					ref={modalRef}
-					className={`bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] transform transition-transform duration-300 ease-in-out shadow-xl`}
+					className="bg-white rounded-2xl p-8 md:px-12 w-[90%] sm:w-3/4 max-w-[1000px] transform transition-transform duration-300 ease-in-out shadow-xl"
 				>
 					<div className="flex items-center justify-between flex-wrap">
 						<h1 className="text-gray-700 font-bold text-2xl uppercase">
@@ -135,7 +135,7 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 							</h1>
 
 							<div className="mt-3 flex justify-center flex-wrap max-h-[300px] overflow-y-auto smallScrollbar">
-								{hourlySlots?.map?.((slot) => {
+								{hourlySlots.map((slot) => {
 									const isSelected = newList.some(
 										(a) =>
 											moment(a.start).isSame(slot.start) &&
@@ -168,7 +168,7 @@ const AddAvailability = ({ slotDate, closeModal, classId, uEmail }) => {
 							<button
 								onClick={handleAddAvailability}
 								className="bg-logo-red text-white py-2 px-8 rounded-lg opacity-80 hover:opacity-100 duration-150 ease-in-out disabled:grayscale-[50%] disabled:!opacity-80"
-								disabled={newList?.length === 0 || loading}
+								disabled={newList.length === 0 || loading}
 							>
 								Confirm Availability
 							</button>

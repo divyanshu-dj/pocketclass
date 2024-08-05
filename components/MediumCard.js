@@ -44,7 +44,7 @@ function MediumCard({
       className="cursor-pointer hover:scale-105 transform transition duration-300 ease-out"
     >
       <div className="relative h-80 w-80">
-        <Image src={img} layout="fill" className="rounded-xl" unoptimized />
+        <Image priority={true} src={img} layout="fill" className="rounded-xl" unoptimized />
       </div>
       <div>
 

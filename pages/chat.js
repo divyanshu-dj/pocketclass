@@ -42,6 +42,12 @@ const Chat = () => {
 	const [classData, setClassData] = useState(null);
 	const [studentData, setStudentData] = useState(null);
 	const [instructorData, setInstructorData] = useState(null);
+	const [groupAppointments, setGroupAppointments] = useState([]);
+	const [groupMessages, setGroupMessages] = useState([]);
+	const [groupStudents, setGroupStudents] = useState([]);
+
+
+
 
 	// if user is instructor
 	const isInstructor = user?.uid === instructorData?.userUid;
@@ -77,13 +83,13 @@ const Chat = () => {
 			bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
 		scrollToBottom();
-	}, [messages]);
+	}, [messages, groupMessages]);
+	
 
 	/**
 	 * DATA FUNCTIONS
 	 */
 
-	// get all data
 	useEffect(() => {
 		const getAllData = async () => {
 			try {
@@ -92,11 +98,61 @@ const Chat = () => {
 				const chatRoomTemp = await getData(chid, "chatrooms");
 				setRoomData(chatRoomTemp);
 
-				setStudentData(await getData(await chatRoomTemp?.student, "Users"));
-				setInstructorData(
-					await getData(await chatRoomTemp?.instructor, "Users")
-				);
-				setClassData(await getData(await chatRoomTemp?.class, "classes"));
+				setStudentData(await getData(chatRoomTemp?.student, "Users"));
+				
+				setInstructorData(await getData(chatRoomTemp?.instructor, "Users"));
+				const classTempData = await getData(chatRoomTemp?.class, "classes");
+				setClassData(classTempData);
+
+					if (classTempData?.groupType === "group") {
+						
+							const chatroomsQuery = query(
+								collection(db, "chatrooms"),
+								where("class", "==", cid)
+							);
+							
+							const chatroomsSnapshot = await getDocs(chatroomsQuery);
+							const chatRoomTempData = chatroomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+					
+						// Merging messages from all chatrooms
+						const mergedMessages = chatRoomTempData.reduce((acc, chatRoom) => {
+							return acc.concat(chatRoom.messages);
+						}, []);
+
+						
+						// Sorting messages by createdAt timestamp
+						mergedMessages.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds || a.createdAt.nanoseconds - b.createdAt.nanoseconds);
+					
+						setGroupMessages(mergedMessages);
+
+						const appointmentsSnapshot = await getDocs(
+							query(
+								collection(db, "appointments"),
+								where("class", "==", cid)
+							)
+						);
+						const appointments = appointmentsSnapshot.docs.map(doc => doc.data());
+						setGroupAppointments(appointments);
+
+						const uniqueStudentIds = [
+							...new Set(
+								appointments
+									.map(appt => appt.owner)
+							),
+						];
+
+						const studentsDataPromises = uniqueStudentIds.map(uid =>
+							getData(uid, "Users")
+						);
+
+						const students = await Promise.all(studentsDataPromises);
+
+						const uniqueStudents = [
+							...new Map(students.map(student => [student.userUid, student])).values()
+						];
+						setGroupStudents(uniqueStudents);
+					}
+				
 
 				setIsLoading(false);
 			} catch (error) {
@@ -106,7 +162,8 @@ const Chat = () => {
 		};
 
 		if (chid) getAllData();
-	}, [chid]);
+	}, [chid, cid]);
+
 
 	/**
 	 * LAST SEEN FUNCTIONS
@@ -165,8 +222,7 @@ const Chat = () => {
 		const storage = getStorage();
 		const mediaRef = ref(
 			storage,
-			`chat-images/${
-				user?.uid?.split(" ").join("") + newMedia?.name ?? "" + v4()
+			`chat-images/${user?.uid?.split(" ").join("") + newMedia?.name ?? "" + v4()
 			}`
 		);
 		return await uploadBytes(mediaRef, newMedia, {
@@ -312,7 +368,7 @@ const Chat = () => {
 		!cid ||
 		!chid ? (
 		<section className="flex justify-center items-center min-h-[100vh]">
-			<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+			<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 		</section>
 	) : (
 		<div className="myClassesContainer mx-auto h-screen flex flex-col">
@@ -347,11 +403,9 @@ const Chat = () => {
 
 					{/* instructor */}
 					<div className="hidden md:flex items-center border-t p-4">
-						<img
-							src={instructorData?.profileImage ?? "/avatar.png"}
+						<Image priority={true} src={instructorData?.profileImage ?? "/avatar.png"}
 							alt="avatar_img"
-							className="h-12 object-contain rounded-full bg-gray-100 p-1"
-						/>
+							className="h-12 object-contain rounded-full bg-gray-100 p-1" width={"48px"} height={"48px"} />
 						<div className="ml-3">
 							<h1 className="font-medium font text-gray-700">
 								{instructorData?.firstName ??
@@ -366,11 +420,9 @@ const Chat = () => {
 
 					{/* you */}
 					<div className="hidden md:flex items-center border-y p-4">
-						<img
-							src={studentData?.profileImage ?? "/avatar.png"}
+						<Image priority={true} src={studentData?.profileImage ?? "/avatar.png"}
 							alt="avatar_img"
-							className="h-12 object-contain rounded-full bg-gray-100 p-1"
-						/>
+							className="h-12 object-contain rounded-full bg-gray-100 p-1" width={"48px"} height={"48px"} />
 						<div className="ml-3">
 							<h1 className="font-medium font text-gray-700">
 								{studentData?.firstName ??
@@ -382,6 +434,24 @@ const Chat = () => {
 							</h1>
 						</div>
 					</div>
+					
+
+					{/* group members */}
+					{classData?.groupType === "group" && groupStudents.filter(item => item?.userUid !== studentData?.userUid)?.map(student => (
+						<div key={student?.userUid} className="hidden md:flex items-center border-y p-4">
+							<Image priority={true} src={studentData?.profileImage ?? "/avatar.png"}
+								alt="avatar_img"
+								className="h-12 object-contain rounded-full bg-gray-100 p-1" width={"48px"} height={"48px"} />
+							<div className="ml-3">
+								<h1 className="font-medium font text-gray-700">
+									{student?.firstName + " " + student?.lastName}
+								</h1>
+								<h1 className="text-xs text-gray-400">
+									{"Student"}
+								</h1>
+							</div>
+						</div>
+					))}
 
 					{/* back */}
 					<button
@@ -403,8 +473,8 @@ const Chat = () => {
 
 						{/* messages */}
 						<FlipMove className="flex flex-col" enterAnimation="elevator">
-							{messages?.map?.((message, index) => (
-								<Message message={message} userId={user?.uid} key={index} />
+							{(classData.groupType == "group" ? groupMessages : messages)?.map?.((message, index) => (
+								<Message message={message} userId={user?.uid} key={index} groupStudents={groupStudents} />
 							))}
 						</FlipMove>
 
@@ -416,9 +486,8 @@ const Chat = () => {
 					<div className="w-full flex p-2 relative">
 						{/* media preview */}
 						<div
-							className={`absolute left-0 bottom-full w-[80%] sm:w-96 bg-gray-200 rounded-2xl mx-2 shadow-md overflow-hidden p-4 flex flex-col ${
-								!!newMedia ? "" : "!hidden"
-							}
+							className={`absolute left-0 bottom-full w-[80%] sm:w-96 bg-gray-200 rounded-2xl mx-2 shadow-md overflow-hidden p-4 flex flex-col ${!!newMedia ? "" : "!hidden"
+								}
 							${!!newMediaPreview ? "aspect-square sm:aspect-auto sm:h-80" : ""}
 							`}
 						>
@@ -461,11 +530,9 @@ const Chat = () => {
 							</form>
 
 							<div className="relative my-auto h-full md:mx-1 md:h-10 w-16 rounded-full bg-slate-100 flex items-center justify-center hover:opacity-80 ease-in-out cursor-pointer">
-								<img
-									src="/attach.png"
+								<Image priority={true} src="/attach.png"
 									alt="attach_img"
-									className="h-6 object-contain"
-								/>
+									className="h-6 object-contain" width={"24px"} height={"24px"} />
 								<AddMedia
 									setMediaPreview={setNewMediaPreview}
 									setMedia={setNewMedia}
@@ -482,9 +549,8 @@ const Chat = () => {
 							disabled={(newMessage.trim() === "" && !newMedia) || isSending}
 						>
 							<div
-								className={`border-t-2 m-auto border-white rounded-full animate-spin h-6 w-6 ${
-									!isSending && "hidden"
-								}`}
+								className={`border-t-2 m-auto border-white rounded-full animate-spin h-6 w-6 ${!isSending && "hidden"
+									}`}
 							/>
 							<span className={`${isSending && "hidden"}`}>Send</span>
 						</button>
@@ -498,25 +564,26 @@ const Chat = () => {
 export default Chat;
 
 // Message Card
-const Message = React.forwardRef(({ message, userId }, ref) => {
+const Message = React.forwardRef(({ message, userId, groupStudents }, ref) => {
 	const isMyMessage = message?.sender === userId;
+
+	const messageSender = groupStudents?.find((item) => item?.userUid == message?.sender);
+
 	const hasMedia = !!message?.media;
 
 	return (
 		<div
 			ref={ref}
-			className={`my-2 cursor-default max-w-[90%] ${
-				isMyMessage ? "ml-auto flex flex-col items-end" : "mr-auto"
-			}`}
+			className={`my-2 cursor-default max-w-[90%] ${isMyMessage ? "ml-auto flex flex-col items-end" : "mr-auto"
+				}`}
 		>
 			<div
 				className={`text-lg w-fit px-5 py-2 rounded-3xl 
 				hover:opacity-80
-				${
-					isMyMessage
+				${isMyMessage
 						? "rounded-br-none bg-logo-red text-white"
 						: "rounded-bl-none bg-gray-300 text-gray-700"
-				}`}
+					}`}
 			>
 				{!!hasMedia && (
 					<div className="max-w-xs max-h-xs md:max-w-sm md:max-h-sm overflow-hidden px-1 py-3">
@@ -533,12 +600,11 @@ const Message = React.forwardRef(({ message, userId }, ref) => {
 			</div>
 
 			<h1
-				className={`text-[10px] text-gray-400 flex ${
-					isMyMessage && "flex-row-reverse"
-				}`}
+				className={`text-[10px] text-gray-400 flex ${isMyMessage && "flex-row-reverse"
+					}`}
 			>
-				<span className="font-bold">&nbsp;{isMyMessage && ". You"}</span>
-				<span>
+				<span className="font-bold capitalize">&nbsp;{isMyMessage ? ". You" : messageSender && `. ${messageSender?.firstName} ${messageSender?.lastName}` || ". from Instructor"}</span>
+				<span className="ml-2">
 					{moment(message?.createdAt?.toDate?.())?.format?.("DD-MM-YY / hh:mm")}
 				</span>
 			</h1>

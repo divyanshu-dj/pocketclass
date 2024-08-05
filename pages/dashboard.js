@@ -304,7 +304,7 @@ export default function Dashboard() {
 
 	return isLoading || !classes || !users || !appointments || !userData ? (
 		<section className="flex justify-center items-center min-h-[100vh]">
-			<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+			<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 		</section>
 	) : (
 		<div className="mx-auto min-h-[100vh] flex flex-col">

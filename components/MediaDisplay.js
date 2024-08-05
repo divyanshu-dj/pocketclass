@@ -15,11 +15,10 @@ const MediaDisplay = ({ link, type, isMessage = false, isMyMessage }) => {
 	return (
 		<div className="rounded overflow-hidden text-center flex-1 flex w-full">
 			{checkFileType(type) === "image" ? (
-				<img
-					src={link}
-					alt="Media"
-					className="max-h-full max-w-full m-auto rounded"
-				/>
+			
+				<Image priority={true} src={link}
+				alt="Media"
+				className="max-h-full max-w-full m-auto rounded" width={600} height={600} />
 			) : checkFileType(type) === "video" ? (
 				<video controls className="max-h-full max-w-full m-auto rounded">
 					<source src={link} type="video/mp4" />

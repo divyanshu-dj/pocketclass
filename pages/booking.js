@@ -279,7 +279,7 @@
 
 		return isLoading || !classData || !userData || !classId ? (
 			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+				<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 			</section>
 		) : (
 			<div className="mx-auto min-h-screen flex flex-col">
@@ -371,6 +371,8 @@
 								closeModal={handleCloseModal}
 								classId={classId}
 								uEmail={userData?.email}
+								classStudents={classData?.classStudents}
+								remainingSeats={classData?.remainingSeats}
 							/>
 						) : (
 							<AddBooking
@@ -384,6 +386,10 @@
 								classId={classId}
 								insId={classData?.classCreator}
 								price={classData?.Price}
+								groupType={classData?.groupType}
+								classStudents={classData?.classStudents}
+								remainingSeats={classData?.remainingSeats}
+								bookingslotInfo={classData?.bookings}
 							/>
 						))}
 
