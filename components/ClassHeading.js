@@ -31,6 +31,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { toast } from "react-toastify";
+import Booking from "../pages/booking";
 
 const ClassHeading = ({
 	type,
@@ -154,10 +155,11 @@ const ClassHeading = ({
 							if (!student.empty) {
 								cRooms.push({
 									sid: student?.id,
-									studentName: `${student?.data?.()?.firstName ??
+									studentName: `${
+										student?.data?.()?.firstName ??
 										"" + " " + student?.data?.()?.lastName ??
 										""
-										}`,
+									}`,
 									profileImage: student?.data?.()?.profileImage ?? null,
 								});
 								resolve("found");
@@ -214,7 +216,7 @@ const ClassHeading = ({
 	if (authStateLoading) {
 		return (
 			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+				<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 			</section>
 		);
 	}
@@ -280,8 +282,9 @@ const ClassHeading = ({
                   </tr>
                   <tr>
                     <td style="padding: 10px; border: 1px solid #ccc;">
-                      <strong>Name:</strong> ${doc.data()?.firstName + " " + doc.data()?.lastName
-					}
+                      <strong>Name:</strong> ${
+												doc.data()?.firstName + " " + doc.data()?.lastName
+											}
                     </td>
                   </tr>
                   <tr>
@@ -453,21 +456,21 @@ const ClassHeading = ({
 
 			<div className="classLinks flex justify-between items-center flex-wrap">
 				<div className="icons my-3 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6 mt-1">
-					<div class="mt-2 flex items-center text-sm text-gray-500">
+					<div className="mt-2 flex items-center text-sm text-gray-500">
 						<BriefcaseIcon className="h-5 w-5 mr-1" fill="#AF816C" />
 						{category} / {type}
 					</div>
 
-					<div class="mt-2 flex items-center text-sm text-gray-500">
+					<div className="mt-2 flex items-center text-sm text-gray-500">
 						<CurrencyDollarIcon className="h-5 w-5 mr-1" fill="#58C18E" />
 						{price}
 					</div>
-					<div class="mt-2 flex items-center text-sm text-gray-500">
+					<div className="mt-2 flex items-center text-sm text-gray-500">
 						<CalendarIcon className="h-5 w-5 mr-1" fill="#E73F2B" />
 						Available
 					</div>
 					{classCreatorData && (
-						<div class="mt-2 flex items-center text-sm text-gray-500">
+						<div className="mt-2 flex items-center text-sm text-gray-500">
 							<a
 								href={`/profile/${data?.classCreator}`}
 								className="hover:underline flex justify-center items-center"
@@ -502,17 +505,48 @@ const ClassHeading = ({
 							navigation={true}
 							pagination={true}
 							modules={[Navigation, Pagination]}
-							className="mySwiper"
+							className="mySwiper rounded-xl overflow-hidden"
 						>
 							{images &&
-								images.map((img) => {
-									return (
-										<SwiperSlide>
-
-											<Image priority={true} src={img} objectFit="contain" 
-												alt="images" width={450} height={450} className="object-cover rounded-xl h-[450px] w-full" />
-										</SwiperSlide>
-									);
+								images.map((img, index) => {
+									if (
+										typeof img !== "object" ||
+										(typeof img === "object" && img.type.includes("image"))
+									) {
+										const url = img?.url || img;
+										return (
+											<SwiperSlide key={`${url} ${index}`}>
+												<div className="relative h-[450px] w-full rounded-xl overflow-hidden">
+													<div
+														className="absolute top-0 left-0 h-full w-full -z-10 overflow-hidden bg-cover bg-center bg-no-repeat blur-sm brightness-70"
+														style={{
+															backgroundImage: `url(${url})`,
+														}}
+													/>
+													<img
+														className="object-contain h-full mx-auto"
+														src={url}
+														alt="images"
+													/>
+												</div>
+											</SwiperSlide>
+										);
+									} else {
+										return (
+											<SwiperSlide key={`${img.url} ${index}`}>
+												<div className="relative h-[450px] w-full rounded-xl overflow-hidden bg-black bg-opacity-90">
+													<video
+														className="object-contain h-full mx-auto"
+														src={img.url}
+														alt="video"
+														loop={true}
+														autoPlay={true}
+														muted
+													/>
+												</div>
+											</SwiperSlide>
+										);
+									}
 								})}
 						</Swiper>
 					</div>
@@ -635,11 +669,10 @@ const ClassHeading = ({
 								""
 							) : (
 								<section className="flex justify-center items-center">
-									<Image 
-									priority={true}
+									<Image
 										src="/Rolling-1s-200px.svg"
-										width={"300px"}
-										height={"300px"}
+										width={"30px"}
+										height={"30px"}
 									/>
 								</section>
 							)}
@@ -670,9 +703,11 @@ const ClassHeading = ({
 														onClick={(e) => handleChatOpen(cr?.sid)}
 														className="flex rounded-md items-center border-t p-4 mb-1 cursor-pointer bg-gray-200 hover:opacity-80 duration-150 ease-in-out"
 													>
-														<Image priority={true} src={cr?.profileImage ?? "/avatar.png"}
+														<img
+															src={cr?.profileImage ?? "/avatar.png"}
 															alt="avatar_img"
-															className="h-12 object-contain rounded-full bg-gray-100 p-1" width={"60px"} height={"48px"} />
+															className="h-12 object-contain rounded-full bg-gray-100 p-1"
+														/>
 														<div className="ml-3">
 															<h1 className="font-medium font text-gray-700">
 																{cr?.studentName ?? "name not found"}
@@ -774,6 +809,30 @@ const ClassHeading = ({
 				</div>
 			</div>
 
+			{/* Schedule */}
+			{!isInstructor && !loading && !authStateLoading && (
+				<div className="my-10">
+					{!user ? (
+						<>
+							<p className="text-3xl font-extrabold mb-2">Booking Schedule</p>
+							<p className="text-xl font-bold text-center pt-10">
+								Please sign in to view schedule!
+							</p>
+						</>
+					) : (
+						<>
+							<p className="text-3xl font-extrabold mb-2">Booking Schedule</p>
+							<Booking component={true} />
+						</>
+					)}
+				</div>
+			)}
+			<br />
+			<br />
+			<br />
+			<hr />
+			<br />
+
 			{/* Ratings */}
 			{currentClassReview.length !== 0 && (
 				<div className="avgReview mt-3">
@@ -829,16 +888,17 @@ const ClassHeading = ({
 								<div key={index} className="reviewShow my-10 flex flex-col">
 									<div className="img flex gap-6 items-center">
 										{review[0]?.photo !== " " ? (
-
-											<Image priority={true} class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
+											<img
+												className="inline-block h-12 w-12 rounded-full ring-2 ring-white"
 												src={review[0]?.photo}
-												alt="avatar1" width={"48px"} height={"48px"} />
+												alt="avatar1"
+											/>
 										) : (
-
-											<Image priority={true} class="inline-block h-12 w-12 rounded-full ring-2 ring-white"
-
+											<img
+												className="inline-block h-12 w-12 rounded-full ring-2 ring-white"
 												src="./avataricon.png"
-												alt="avatar" width={"48px"} height={"48px"} />
+												alt="avatar"
+											/>
 										)}
 
 										<p className="m-0 p-0 text-md text-gray-700">
@@ -968,7 +1028,7 @@ const ClassHeading = ({
 			) : (
 				<>
 					<section className="flex justify-center items-center min-h-[100vh]">
-						<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
+						<Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
 					</section>
 				</>
 			)}
@@ -978,9 +1038,9 @@ const ClassHeading = ({
 					<p className="text-2xl font-extrabold mb-6">Write a Review!</p>
 					<form onSubmit={(e) => handleFormSubmit(e)}>
 						{/* <div className='my-3'>
-                        <label for="price" class="block text-sm font-medium text-gray-700">Name</label>
-                        <div class="relative mt-1 rounded-md shadow-sm">
-                            <input type="text" required name="name" id="name" class="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm" placeholder="Your Name" />
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">Name</label>
+                        <div className="relative mt-1 rounded-md shadow-sm">
+                            <input type="text" required name="name" id="name" className="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm" placeholder="Your Name" />
 
                         </div>
                     </div> */}
@@ -1099,19 +1159,19 @@ const ClassHeading = ({
 
 						<div className="my-3">
 							<label
-								for="price"
-								class="block text-sm font-medium text-gray-700"
+								htmlFor="price"
+								className="block text-sm font-medium text-gray-700"
 							>
 								Review
 							</label>
-							<div class="relative mt-1 rounded-md shadow-sm">
+							<div className="relative mt-1 rounded-md shadow-sm">
 								<textarea
 									rows={6}
 									type="text"
 									required
 									name="review"
 									id="review"
-									class="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm"
+									className="block w-full rounded-md border-gray-300 pl-2 pr-2 focus:border-logo-red focus:ring-logo-red sm:text-sm"
 									placeholder="Your Review"
 								/>
 							</div>
@@ -1120,14 +1180,14 @@ const ClassHeading = ({
 						{!loading ? (
 							<button
 								type="submit"
-								class="group relative flex w-full justify-center rounded-md border border-transparent bg-logo-red py-2 px-4 text-sm font-medium text-white hover:bg-logo-red focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2"
+								className="group relative flex w-full justify-center rounded-md border border-transparent bg-logo-red py-2 px-4 text-sm font-medium text-white hover:bg-logo-red focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2"
 							>
 								Post
 							</button>
 						) : (
 							<button
 								type="submit"
-								class="group relative flex w-full justify-center rounded-md border border-transparent bg-slate-400 py-2 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2 disabled:"
+								className="group relative flex w-full justify-center rounded-md border border-transparent bg-slate-400 py-2 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-logo-red focus:ring-offset-2 disabled:"
 							>
 								Posting
 							</button>
