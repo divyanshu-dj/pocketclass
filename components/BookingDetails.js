@@ -31,7 +31,7 @@ const Details = ({ appointmentDetails, closeModal, isInstructor }) => {
 						</p>
 					) : (
 						<p className="text-sm uppercase tracking-wide font-mono bg-green-400 text-green-800 rounded-full text-center">
-							Upcomming
+							Upcoming
 						</p>
 					)}
 				</div>
