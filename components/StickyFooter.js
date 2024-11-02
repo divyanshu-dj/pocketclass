@@ -11,9 +11,10 @@ function StickyFooter() {
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/instructorguide">Instructor Guide</Link></p>
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/studentguide">Student Guide</Link></p>
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/termsandconditions">Terms and Conditions</Link></p>
+                    <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="https://medium.com/@pocketclass"><a target="_blank">Blog</a></Link></p>
                 </div>
                 <div className="rightSide flex sm:justify-center md:justify-center xl:justify-end lg:justify-end gap-x-5">
-                    <h5 className='font-normal font-light'>Support</h5>
+                    <h5 className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href={`/support`}>Support</Link></h5>
                 </div>
             </div>
         </div>
