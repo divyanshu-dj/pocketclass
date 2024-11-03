@@ -72,23 +72,51 @@ function FeaturedClass({
           className="mySwiper"
         >
           {img &&
-            img.map((image, index) => (
-              <SwiperSlide key={index + image}>
-                <div className="w-full" style={{ aspectRatio: "1 / 1" }}>
-                  <Image
-                    priority={index === 0} 
-                    className="absolute top-0 left-0 w-full rounded-xl"
-                    src={image}
-                    layout="responsive"
-                    objectFit="cover"
-                    objectPosition={"center"}
-                    alt={`Image of ${name}`} 
-                    width={300}
-                    height={300}
-                  />
-                </div>
-              </SwiperSlide>
-            ))}
+            img.map((img, index) => {
+              const url = img?.url || img;
+              if (
+                typeof img !== "object" ||
+                (typeof img === "object" && img.type.includes("image"))
+              ) {
+										return (
+											<SwiperSlide key={`${url} ${index}`}>
+                        <div className="w-full" style={{ aspectRatio: "1 / 1" }}>
+                          <Image
+                            priority={index === 0} 
+                            className="absolute top-0 left-0 w-full rounded-xl"
+                            src={url}
+                            layout="responsive"
+                            objectFit="cover"
+                            objectPosition={"center"}
+                            alt={`Image of ${name}`} 
+                            width={300}
+                            height={300}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    );
+              } else {
+                return (
+                  <SwiperSlide key={`${url} ${index}`}>
+                    <div className="w-full" style={{ aspectRatio: "1 / 1" }}>
+                    <video 
+                      priority={index === 0} 
+                      className="absolute top-0 left-0 w-full rounded-xl"
+                      src={img.url}
+                      layout="responsive"
+                      objectFit="cover"
+                      objectPosition={"center"}
+                      alt={`Video of ${name}`} 
+                      width={300}
+                      height={300}
+                      loop={true}
+                      muted
+                    />
+                    </div>
+                  </SwiperSlide>
+                );
+              }}
+            )}
         </Swiper>
       </div>
 
