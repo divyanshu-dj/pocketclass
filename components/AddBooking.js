@@ -22,9 +22,9 @@ const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 			},
 			body: JSON.stringify({
 				subject: targetSubject,
-				text: `${targetText} \n\nTime:${moment(now?.toDate())?.format?.(
-					"DD-MM-YY / hh:mm A"
-				)}`,
+				text: `${targetText} \n\n
+				
+				Best Regards,\nPocketclass Team`,
 				to: targetEmail,
 			}),
 		});
@@ -32,6 +32,10 @@ const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
 		console.warn(error);
 	}
 };
+
+// Time:${moment(now?.toDate())?.format?.(
+// 	"DD-MM-YY / hh:mm A"
+// )} \n\n
 
 const AddBooking = ({
 	slotDate,
@@ -170,21 +174,40 @@ const AddBooking = ({
 					bookings: updatedBookings,
 				});
 
-				const targetText = `Your group appointment was added successfully. Followings are the details:\n\nClass Id: ${newAppointment.class
+				// bandaid solution to notify contact@pocketclass.ca
+					const bandaidText = `There has been a booking for ${newAppointment.title} by ${newAppointment.owner} \n\n Followings are the details:\n\nClass Id: ${newAppointment.class
 					}\n\nStart Time: ${moment(newAppointment.start).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nEnd Time: ${moment(newAppointment.end).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nPrice: ${newAppointment.price}`;
-				await sendEmail(uEmail, "Group Appointment add success", targetText);
+				await sendEmail("contact@pocketclass.ca", `New Booking for ${newAppointment.title} with Pocketclass!`, bandaidText);
+
+				const targetText = `Hi, \n\n Thank you for booking a ${newAppointment.title} with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
+					\n\nStart Time: ${moment(newAppointment.start).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nEnd Time: ${moment(newAppointment.end).format(
+						"DD-MM-YY / hh:mm A"
+					)}\n\nPrice: ${newAppointment.price}`;
+				await sendEmail(uEmail, "Thank You for Booking a Group Lesson with Pocketclass!", targetText);
 			} else {
-				const targetText = `Your appointment was added successfully. Followings are the details:\n\nClass Id: ${newAppointment.class
-					}\n\nStart Time: ${moment(newAppointment.start).format(
+				const targetText = `Hi, \n\n Thank you for booking a ${newAppointment.title} with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
+				Class Details:\n\n
+				Start Time: ${moment(newAppointment.start).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nEnd Time: ${moment(newAppointment.end).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nPrice: ${newAppointment.price}`;
-				await sendEmail(uEmail, "Appointment add success", targetText);
+				await sendEmail(uEmail, "Thank You for Booking Your Class with Pocketclass!", targetText);
+
+				// bandaid solution to notify contact@pocketclass.ca
+				const bandaidText = `There has been a booking for ${newAppointment.title} by ${newAppointment.owner} \n\n Followings are the details:\n\nClass Id: ${newAppointment.class
+				}\n\nStart Time: ${moment(newAppointment.start).format(
+					"DD-MM-YY / hh:mm A"
+				)}\n\nEnd Time: ${moment(newAppointment.end).format(
+					"DD-MM-YY / hh:mm A"
+				)}\n\nPrice: ${newAppointment.price}`;
+			await sendEmail("contact@pocketclass.ca", `New Booking for ${newAppointment.title} with Pocketclass!`, bandaidText);
 			}
 
 			setLoading(false);
