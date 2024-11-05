@@ -175,7 +175,7 @@ const AddBooking = ({
 				});
 
 				// bandaid solution to notify contact@pocketclass.ca
-					const bandaidText = `There has been a booking for ${newAppointment.title} by ${newAppointment.owner} \n\n Followings are the details:\n\nClass Id: ${newAppointment.class
+					const bandaidText = `There has been a booking by ${newAppointment.title} \n\n Followings are the details:\n\nClass Id: ${newAppointment.class
 					}\n\nStart Time: ${moment(newAppointment.start).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nEnd Time: ${moment(newAppointment.end).format(
@@ -183,7 +183,7 @@ const AddBooking = ({
 					)}\n\nPrice: ${newAppointment.price}`;
 				await sendEmail("contact@pocketclass.ca", `New Booking for ${newAppointment.title} with Pocketclass!`, bandaidText);
 
-				const targetText = `Hi, \n\n Thank you for booking a ${newAppointment.title} with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
+				const targetText = `Hi ${newAppointment.title}, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
 					\n\nStart Time: ${moment(newAppointment.start).format(
 						"DD-MM-YY / hh:mm A"
 					)}\n\nEnd Time: ${moment(newAppointment.end).format(
@@ -191,7 +191,7 @@ const AddBooking = ({
 					)}\n\nPrice: ${newAppointment.price}`;
 				await sendEmail(uEmail, "Thank You for Booking a Group Lesson with Pocketclass!", targetText);
 			} else {
-				const targetText = `Hi, \n\n Thank you for booking a ${newAppointment.title} with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
+				const targetText = `Hi ${newAppointment.title}, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
 				Class Details:\n\n
 				Start Time: ${moment(newAppointment.start).format(
 						"DD-MM-YY / hh:mm A"

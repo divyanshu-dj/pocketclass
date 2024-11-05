@@ -607,7 +607,7 @@ const ClassHeading = ({
 						</div>
 
 						{/* interested button */}
-						<div className="interestButton">
+						{/* <div className="interestButton">
 							{!user ? (
 								<button
 									onClick={(e) => handleInterestButton(e)}
@@ -676,7 +676,7 @@ const ClassHeading = ({
 									/>
 								</section>
 							)}
-						</div>
+						</div> */}
 
 						{/* chat/schedule button */}
 						{!!user ? (
