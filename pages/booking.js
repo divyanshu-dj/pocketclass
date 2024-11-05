@@ -493,6 +493,7 @@ export default function Booking({ component = false }) {
 							uEmail={userData?.email}
 						/>
 					) : (
+						<>
 						<AddBooking
 							slotDate={slotDate}
 							availability={availability}
@@ -507,7 +508,13 @@ export default function Booking({ component = false }) {
 							price={classData?.Price}
 							initialStart={initialStart}
 							initialEnd={initialEnd}
+
+							groupType={classData?.groupType}
+							classStudents={classData?.classStudents}
+							remainingSeats={classData?.remainingSeats}
+							bookingslotInfo={classData?.bookings}						
 						/>
+						</>
 					))}
 
 				{showAppointmentDetails && (
