@@ -208,7 +208,7 @@ const handleTime = (start, end) => {
         // bandaid solution to notify contact@pocketclass.ca
         const bandaidText = `There has been a booking by ${
           newAppointment.title
-        } \n\n Followings are the details:\n\nClass Id: ${
+        } \n\n Followings are the details:\n\n User Email: ${uEmail} \n\n Class Id: ${
           newAppointment.class
         }\n\nStart Time: ${moment(newAppointment.start).format(
           "DD-MM-YY / hh:mm A"
@@ -255,7 +255,7 @@ const handleTime = (start, end) => {
           newAppointment.title
         } by ${
           newAppointment.owner
-        } \n\n Followings are the details:\n\nClass Id: ${
+        } \n\n Followings are the details:\n\n User Email: ${uEmail} \n\nClass Id: ${
           newAppointment.class
         }\n\nStart Time: ${moment(newAppointment.start).format(
           "DD-MM-YY / hh:mm A"
