@@ -29,9 +29,7 @@ const sendEmail = async (targetEmail, targetSubject, targetText, now) => {
       },
       body: JSON.stringify({
         subject: targetSubject,
-        text: `${targetText} \n\n
-				
-				Best Regards,\nPocketclass Team`,
+        text: `${targetText} \n\nBest Regards,\nPocketclass Team`,
         to: targetEmail,
       }),
     });
@@ -223,8 +221,8 @@ const handleTime = (start, end) => {
 
         const targetText = `Hi ${
           newAppointment.title
-        }, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
-					\n\nStart Time: ${moment(newAppointment.start).format(
+        }, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session.\n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com
+        \n\nStart Time: ${moment(newAppointment.start).format(
             "DD-MM-YY / hh:mm A"
           )}\n\nEnd Time: ${moment(newAppointment.end).format(
           "DD-MM-YY / hh:mm A"
@@ -597,8 +595,8 @@ const CheckoutForm = ({ onSuccess, closeModal, uEmail, price }) => {
       } else {
         sendEmail(
           uEmail,
-          "Payment Successfull",
-          `Your payment of $${price} is successfull for class appointment`
+          "Your Pocketclass Payment was Successful",
+          `Your payment of $${price} was successful for the Pocketclass appointment. Thank you and hope you have a great class!`
         );
         await onSuccess();
       }
