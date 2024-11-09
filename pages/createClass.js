@@ -51,9 +51,10 @@ export default function CreateClass() {
 		if (!userLoading && !user) goToMainPage();
 	}, [userLoading, user]);
 
+	
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
-
+	
 		try {
 			const className = e.target.className.value;
 			const classType = e.target.classType.value;
@@ -69,22 +70,21 @@ export default function CreateClass() {
 			const experience = e.target.experience.value;
 			const about = e.target.about.value;
 			const category = e.target.category.value;
-
-			// Validate group class students
+	
 			if (groupType === "group" && classStudents == 0) {
 				toast.error("Class must have at least one student");
 				return;
 			}
-
+	
 			for (let i = 0; i < e.target.images.files.length; i++) {
 				images.push({
 					file: e.target.images.files[i],
 					type: e.target.images.files[i].type,
 				});
 			}
-
+	
 			setLoading(true);
-
+	
 			const addingClass = await addDoc(collection(db, "classes"), {
 				Address: add,
 				Category: category,
@@ -104,8 +104,10 @@ export default function CreateClass() {
 				Location: new GeoPoint(lat, lng),
 				Images: imagesURL,
 				classCreator: user?.uid,
+				status: 'active', 
 			});
 
+	
 			images.map(({ file: img, type }) => {
 				const fileRef = ref(
 					storage,
@@ -124,19 +126,6 @@ export default function CreateClass() {
 							toast.success("Class Added", {
 								toastId: "success66",
 							});
-							e.target.className.value = " ";
-							e.target.classType.value = " ";
-							e.target.address.value = " ";
-							e.target.price.value = " ";
-							e.target.latitude.value = " ";
-							e.target.longitude.value = " ";
-							e.target.description.value = " ";
-							e.target.pricing.value = " ";
-							e.target.funfact.value = " ";
-							e.target.experience.value = " ";
-							e.target.about.value = " ";
-							e.target.category.value = " ";
-
 							setTimeout(() => {
 								setLoading(false);
 								router.push({
@@ -150,7 +139,7 @@ export default function CreateClass() {
 					);
 				});
 			});
-
+	
 			handleCoordinates(null, null, "");
 		} catch (error) {
 			console.warn(error);
