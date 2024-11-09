@@ -152,6 +152,7 @@ const handleTime = (start, end) => {
   const handleAddAppointment = async () => {
     try {
       setLoading(true);
+      
       if (
         groupType === "group" &&
         bookingslotInfo &&
@@ -164,10 +165,15 @@ const handleTime = (start, end) => {
         setLoading(false);
         return;
       }
-
-      await addDoc(collection(db, "appointments"), newAppointment);
+  
+      const newAppointmentWithStatus = {
+        ...newAppointment,
+        status: "pending",  
+      };
+  
+      await addDoc(collection(db, "appointments"), newAppointmentWithStatus);
       toast.success("Appointment added!", { toastId: "apSuccess" });
-
+  
       if (groupType === "group") {
         const newAppointmentData = {
           start: newAppointment.start,
@@ -181,29 +187,25 @@ const handleTime = (start, end) => {
           throw new Error("Class document does not exist");
         }
         const classData = classDoc.data();
-        const updatedBookings = classData.bookings
-          ? { ...classData.bookings }
-          : {};
-
+        const updatedBookings = classData.bookings ? { ...classData.bookings } : {};
+  
         if (updatedBookings[newAppointment.start]) {
           updatedBookings[newAppointment.start] = {
             ...updatedBookings[newAppointment.start],
             ...newAppointmentData,
             remainingSeats:
-              updatedBookings[newAppointment.start].remainingSeats -
-              bookingSeats,
+              updatedBookings[newAppointment.start].remainingSeats - bookingSeats,
             bookingSeats:
               updatedBookings[newAppointment.start].bookSeats + bookingSeats,
           };
         } else {
           updatedBookings[newAppointment.start] = newAppointmentData;
         }
-
+  
         await updateDoc(classDocRef, {
           bookings: updatedBookings,
         });
-
-        // bandaid solution to notify contact@pocketclass.ca
+  
         const bandaidText = `There has been a booking by ${
           newAppointment.title
         } \n\n Followings are the details:\n\n User Email: ${uEmail} \n\n Class Id: ${
@@ -218,7 +220,7 @@ const handleTime = (start, end) => {
           `New Booking for ${newAppointment.title} with Pocketclass!`,
           bandaidText
         );
-
+  
         const targetText = `Hi ${
           newAppointment.title
         }, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session.\n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com
@@ -236,8 +238,8 @@ const handleTime = (start, end) => {
         const targetText = `Hi ${
           newAppointment.title
         }, \n\n Thank you for booking a class with Pocketclass! 🎉 We are excited to be part of your learning journey and cannot wait to see you in your upcoming session. \n\n If you have any questions, need to reschedule, or just want to say hi, feel free to reach out to us at contact@pocketclass.com \n\n
-				Class Details:\n\n
-				Start Time: ${moment(newAppointment.start).format(
+        Class Details:\n\n
+        Start Time: ${moment(newAppointment.start).format(
           "DD-MM-YY / hh:mm A"
         )}\n\nEnd Time: ${moment(newAppointment.end).format(
           "DD-MM-YY / hh:mm A"
@@ -247,8 +249,7 @@ const handleTime = (start, end) => {
           "Thank You for Booking Your Class with Pocketclass!",
           targetText
         );
-
-        // bandaid solution to notify contact@pocketclass.ca
+  
         const bandaidText = `There has been a booking for ${
           newAppointment.title
         } by ${
@@ -266,7 +267,7 @@ const handleTime = (start, end) => {
           bandaidText
         );
       }
-
+  
       setLoading(false);
       closeModal();
     } catch (error) {
@@ -277,14 +278,15 @@ const handleTime = (start, end) => {
       });
     }
   };
-
+  
   const checkSlots = () => {
     if (groupType === "group") {
       if (remainingSeats === 0) {
         toast.error("No available seats in this group!");
       } else if (
         bookingslotInfo &&
-        bookingSeats > bookingslotInfo[newAppointment.start]?.remainingSeats
+        (bookingSeats > bookingslotInfo[newAppointment.start]?.remainingSeats || 
+        bookingslotInfo[newAppointment.start]?.remainingSeats === undefined)
       ) {
         toast.error("Please enter valid available seats!");
       } else {
@@ -424,7 +426,7 @@ const handleTime = (start, end) => {
                             ?.remainingSeats >= 0
                             ? bookingslotInfo[newAppointment.start]
                                 ?.remainingSeats
-                            : remainingSeats}
+                            : 0}
                         </span>
                       </div>
                       <div className="grid-cols-6 gap-6">
