@@ -158,9 +158,6 @@ function Header({ placeholder }) {
                   className="text-sm hidden lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150"
                 >
                   Create Class
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-semibold px-1 py-0.5 rounded-full ml-1">
-                    Beta
-                  </span>
                 </p>
               )
             ) : user ? (
