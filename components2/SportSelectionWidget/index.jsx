@@ -4,10 +4,6 @@ import SvgIcon2 from "./icons/SvgIcon2";
 function SportSelectionWidget() {
   return (
     <div className="box-border flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto -mt-8 pt-[5px] pb-10">
-      <div className="flex justify-between items-center flex-row gap-2 grow-0 shrink-0 basis-auto pl-[182px] pr-12">
-        <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">Sport</p>
-        <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">Art</p>
-      </div>
       <div className="flex justify-start items-center flex-row gap-[43px] self-center grow-0 shrink-0 basis-auto mt-9">
         <SvgIcon1 className="w-8 h-8 flex grow-0 shrink-0 basis-auto" />
         <div className="flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto">

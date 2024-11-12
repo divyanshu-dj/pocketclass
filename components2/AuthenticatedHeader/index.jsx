@@ -18,7 +18,7 @@ function AuthenticatedHeader() {
               Log in
             </p>
           </Link>
-          <Link className="cursor-pointer" href="/Signup">
+          <Link className="cursor-pointer" href="/Register">
           <Button className="bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] min-w-[91px] h-[43px] w-[91px] cursor-pointer block box-border grow-0 shrink-0 basis-auto ml-[31px] rounded-[100px] border-2 border-solid border-[#261f22]">
             Sign up
           </Button>

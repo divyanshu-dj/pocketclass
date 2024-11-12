@@ -1,16 +1,85 @@
-import { Button } from "@mui/base";
+import { Tag } from "antd";
 import SportSelectionWidget from "../SportSelectionWidget";
+import { useState } from "react";
 
 function MusicSelector() {
+  const [activeKey, setActiveKey] = useState("music");
+
+  const handleTagClick = (key) => {
+    setActiveKey(key);
+    console.log("Active category:", key);
+  };
+
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 0,
+    flexShrink: 0
+  };
+
+  const tagContainerStyle = {
+    paddingLeft: '64px',
+    paddingRight: '48px',
+    display: 'flex',
+    gap: '10px'
+  };
+
   return (
-    <div className="flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto">
-      <div className="grow-0 shrink-0 basis-auto pl-16 pr-12">
-        {/* Button Component starts here. We've generated code using MUI Base. See other options in "Component library" dropdown in Settings */}
-        <Button className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] min-w-[79px] h-[35px] w-[79px] cursor-pointer block box-border rounded-[100px] border-[none]">
+    <div style={containerStyle}>
+      <div style={tagContainerStyle}>
+        <Tag.CheckableTag
+          checked={activeKey === "music"}
+          onChange={() => handleTagClick("music")}
+          style={{
+            minWidth: '79px',
+            height: '35px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '100px',
+            border: '2px solid black',
+            backgroundColor: activeKey === "music" ? '#261f22' : 'white',
+            color: activeKey === "music" ? 'white' : 'black'
+          }}
+        >
           Music
-        </Button>
+        </Tag.CheckableTag>
+        <Tag.CheckableTag
+          checked={activeKey === "sport"}
+          onChange={() => handleTagClick("sport")}
+          style={{
+            minWidth: '79px',
+            height: '35px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '100px',
+            border: '2px solid black',
+            backgroundColor: activeKey === "sport" ? '#261f22' : 'white',
+            color: activeKey === "sport" ? 'white' : 'black'
+          }}
+        >
+          Sport
+        </Tag.CheckableTag>
+        <Tag.CheckableTag
+          checked={activeKey === "art"}
+          onChange={() => handleTagClick("art")}
+          style={{
+            minWidth: '79px',
+            height: '35px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '100px',
+            border: '2px solid black',
+            backgroundColor: activeKey === "art" ? '#261f22' : 'white',
+            color: activeKey === "art" ? 'white' : 'black'
+          }}
+        >
+          Art
+        </Tag.CheckableTag>
       </div>
-      <SportSelectionWidget />
+      <SportSelectionWidget category={activeKey} />
     </div>
   );
 }

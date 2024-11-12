@@ -82,6 +82,7 @@ const AddBooking = ({
   onClickOutside(modalRef, closeModal);
 
   const getOptions = async (newPrice = null) => {
+    console.log('fr ->:  ',newPrice)
     try {
       setLoading(true);
       const checkoutSession = await fetch("/api/create-stripe-session", {
@@ -95,7 +96,7 @@ const AddBooking = ({
           uName,
           classId,
           insId,
-          price: newAppointment.price,
+          price: newPrice,
         }),
       });
       const data = await checkoutSession.json();
@@ -113,7 +114,7 @@ const AddBooking = ({
   };
 
   useEffect(() => {
-    getOptions();
+    getOptions(newAppointment.price);
   }, []);
 
   useEffect(() => {
@@ -324,6 +325,7 @@ const handleTime = (start, end) => {
           discountedPrice = 1;
         }
         setNewAppointment({ ...newAppointment, price: discountedPrice });
+        console.log(discountedPrice)
         getOptions(discountedPrice);
         toast.success("Voucher verified!");
       } else if (data.message) {

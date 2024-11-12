@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { HeartIcon } from "@heroicons/react/outline";
-import { StarIcon, MapPinIcon } from "@heroicons/react/solid";
+import { StarIcon } from "@heroicons/react/solid";
 import { useRouter } from "next/router";
 
 function InfoCard({
@@ -16,8 +16,12 @@ function InfoCard({
   address,
   price,
   category,
+  start = null,
+  end = null,
 }) {
   const router = useRouter();
+
+  
   const handleSmallCardClick = () => {
     router.push({
       pathname: "/classes",
@@ -27,9 +31,26 @@ function InfoCard({
     });
   };
 
+  const formatTime = (timeString) => {
+    const date = new Date(timeString);
+    return date.toLocaleString('en-US', { 
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
+
+
   let currentClassReview = Array.isArray(reviews)
-    ? reviews.filter((rev) => rev && rev[0] && rev[0].classID === id)
-    : [];
+  ? reviews.filter((rev) => {
+      console.log('Review exists:', !!rev);
+      console.log('Review[0] exists:', rev[0]);
+      console.log('ClassID match:', rev.classID,' ', id);
+      return rev && rev.classID == id;
+    })
+  : [];
 
   let averageReview = 0;
 
@@ -40,25 +61,18 @@ function InfoCard({
           rv[0].qualityRating + rv[0].recommendRating + rv[0].safetyRating;
       }
     });
-
     averageReview = averageReview / (currentClassReview.length * 3);
   }
-  console.log(images);
+
   return (
     <div
-      className="flex py-7 px-2 border-b cursor-pointer hover:opacity-80 hover:shadow-lg pr-4 transition duration-200 ease-out first:border-t min-w-[100%] "
+      className="flex py-7 px-2 border-b cursor-pointer hover:opacity-80 hover:shadow-lg pr-4 transition duration-200 ease-out first:border-t min-w-[100%]"
       onClick={() => handleSmallCardClick()}
     >
       <div className="relative h-24 w-40 md:h-52 md:w-80 flex-shrink-0">
         <Image
           priority={true}
-          src={
-            images?.length
-              ? typeof images[0] === "string"
-                ? images[0]
-                : images[0]?.url
-              : images
-          }
+          src={images?.length ? typeof images[0] === "string" ? images[0] : images[0]?.url : images}
           layout="fill"
           unoptimized
           objectFit="contain"
@@ -126,6 +140,21 @@ function InfoCard({
             <span>{address}</span>
           </div>
         </div>
+
+        {start && end && (
+          <div className="mt-2 flex items-center text-sm text-gray-500">
+            <svg
+              className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="#4B5563"
+              aria-hidden="true"
+            >
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            <span>{formatTime(start)} - {formatTime(end)}</span>
+          </div>
+        )}
 
         <div className="flex mt-2">
           {averageReview > 0 ? (

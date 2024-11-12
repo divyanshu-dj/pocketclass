@@ -1,7 +1,7 @@
 import { Button } from "@mui/base";
 import SvgIcon1 from "./icons/SvgIcon1";
 
-function SuperBox() {
+function SuperBox({ instructor }) {
   return (
     <div className="box-border flex justify-start items-stretch flex-row grow-0 shrink-0 basis-auto pt-4 pb-[172px] px-4 rounded-2xl">
       <div className="w-[55.15%] grow-0 shrink-0 basis-auto box-border pb-3.5">
