@@ -58,7 +58,6 @@ const AddBooking = ({
   remainingSeats,
   bookingslotInfo,
 }) => {
-  console.log(slotDate);
   const [options, setOptions] = useState(null);
   const [voucher, setVoucher] = useState("");
   const [bookingSeats, setBookingSeats] = useState(0);
@@ -95,7 +94,7 @@ const AddBooking = ({
           uName,
           classId,
           insId,
-          price: newAppointment.price,
+          price: newPrice,
         }),
       });
       const data = await checkoutSession.json();
@@ -113,7 +112,7 @@ const AddBooking = ({
   };
 
   useEffect(() => {
-    getOptions();
+    getOptions(newAppointment.price);
   }, []);
 
   useEffect(() => {
