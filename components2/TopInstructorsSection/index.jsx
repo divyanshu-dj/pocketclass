@@ -2,25 +2,49 @@
 
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import InstructorSection from "../InstructorSection";
+import InstructorSection from "../InstructorSection/index";
 import { db } from "../../firebaseConfig";
 
 function TopInstructorsSection({ showAll = false }) {
   const [instructors, setInstructors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInstructors = async () => {
-      const q = query(
-        collection(db, "Users"),
-        where("category", "==", "instructor")
-      );
-      const querySnapshot = await getDocs(q);
-      const instructorData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log("Filtered Instructors:", instructorData);
-      setInstructors(instructorData);
+      try {
+        const q = query(
+          collection(db, "Users"),
+          where("category", "==", "instructor")
+        );
+        const querySnapshot = await getDocs(q);
+        const instructorData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setInstructors(instructorData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstructors();
+  }, []);
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const q = query(
+          collection(db, "Users"),
+          where("category", "==", "instructor")
+        );
+        const querySnapshot = await getDocs(q);
+        const instructorData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setInstructors(instructorData);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchInstructors();
@@ -41,14 +65,20 @@ function TopInstructorsSection({ showAll = false }) {
         </p>
       </div>
       <div className="grid grid-cols-4 gap-8 w-[100.00%] box-border mt-8">
-        {displayedInstructors.map((instructor) => (
-          <InstructorSection key={instructor.id} instructor={instructor} />
-        ))}
+        {loading
+          ? Array(4)
+              .fill(null)
+              .map((_, index) => (
+                <InstructorSection key={index} loading={true} />
+              ))
+          : displayedInstructors.map((instructor) => (
+              <InstructorSection
+                key={instructor.id}
+                instructor={instructor}
+                loading={false}
+              />
+            ))}
       </div>
-      <button
-        onClick={() => setShowAll(!showAll)}
-        className="mt-4 text-blue-600 hover:text-blue-800 cursor-pointer"
-      ></button>
     </div>
   );
 }

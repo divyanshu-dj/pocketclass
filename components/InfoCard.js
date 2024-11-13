@@ -45,25 +45,23 @@ function InfoCard({
 
   let currentClassReview = Array.isArray(reviews)
   ? reviews.filter((rev) => {
-      console.log('Review exists:', !!rev);
-      console.log('Review[0] exists:', rev[0]);
-      console.log('ClassID match:', rev.classID,' ', id);
-      return rev && rev.classID == id;
+      console.log('Review:', rev);
+      console.log('Review classID:', rev.classID);
+      console.log('Current class id:', id);
+      return rev.classID === id;
     })
   : [];
+
 
   let averageReview = 0;
 
   if (currentClassReview.length !== 0) {
     currentClassReview.forEach((rv) => {
-      if (rv[0]) {
-        averageReview +=
-          rv[0].qualityRating + rv[0].recommendRating + rv[0].safetyRating;
-      }
+      averageReview += rv.qualityRating + rv.recommendRating + rv.safetyRating;
     });
     averageReview = averageReview / (currentClassReview.length * 3);
   }
-
+  
   return (
     <div
       className="flex py-7 px-2 border-b cursor-pointer hover:opacity-80 hover:shadow-lg pr-4 transition duration-200 ease-out first:border-t min-w-[100%]"
