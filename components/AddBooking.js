@@ -58,7 +58,6 @@ const AddBooking = ({
   remainingSeats,
   bookingslotInfo,
 }) => {
-  console.log(slotDate);
   const [options, setOptions] = useState(null);
   const [voucher, setVoucher] = useState("");
   const [bookingSeats, setBookingSeats] = useState(0);
