@@ -113,7 +113,7 @@ const AddBooking = ({
 
   useEffect(() => {
     getOptions(newAppointment.price);
-  }, []);
+  }, [newAppointment.price]);
 
   useEffect(() => {
     const getSlots = () => {
