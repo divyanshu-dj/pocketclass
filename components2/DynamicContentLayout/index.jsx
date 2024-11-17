@@ -7,28 +7,28 @@ import Link from "next/link";
 function DynamicContentLayout() {
   return (
     <div className="flex justify-start items-stretch flex-col w-[100.00%] box-border mt-10">
-      <div className="flex justify-between items-start flex-row gap-[30px] grow-0 shrink-0 basis-auto">
-        <div className="max-w-[343px] grow shrink basis-[0.00] box-border">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-[30px] grow-0 shrink-0 basis-auto">
+        <div className="max-w-[343px] grow shrink basis-[0.00] box-border text-center md:text-left">
           <img
             src="/assets/image_42111b0a.png"
             alt=""
-            className="h-[104px] max-w-[initial] w-[104px] block box-border"
+            className="h-[104px] w-[104px] mx-auto md:ml-auto"
           />
           <ActivityDiscoverySection />
         </div>
-        <div className="max-w-[343px] grow shrink basis-[0.00] box-border">
+        <div className="max-w-[343px] grow shrink basis-[0.00] box-border text-center md:text-left">
           <img
             src="/assets/image_c8a477f5.png"
             alt=""
-            className="h-[104px] max-w-[initial] w-[104px] block box-border"
+            className="h-[104px] w-[104px] mx-auto md:ml-auto"
           />
           <StepConnect />
         </div>
-        <div className="max-w-[343px] grow shrink basis-[0.00] box-border">
+        <div className="max-w-[343px] grow shrink basis-[0.00] box-border text-center md:text-left">
           <img
             src="/assets/image_abe63efd.png"
             alt=""
-            className="h-[104px] max-w-[initial] w-[104px] block box-border"
+            className="h-[104px] w-[104px] mx-auto md:ml-auto"
           />
           <ProgressTrackerWidget />
         </div>

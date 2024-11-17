@@ -18,15 +18,13 @@ function MusicSelector() {
   };
 
   const tagContainerStyle = {
-    paddingLeft: '64px',
-    paddingRight: '48px',
     display: 'flex',
     gap: '10px'
   };
 
   return (
     <div style={containerStyle}>
-      <div style={tagContainerStyle}>
+      <div style={tagContainerStyle} className="px-6 md:px-10 lg:px-16">
         {categories.map((category) => (
           <Tag.CheckableTag
             key={category.name}

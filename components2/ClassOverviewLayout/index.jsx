@@ -4,7 +4,7 @@ import DynamicContentLayout from "../DynamicContentLayout";
 function ClassOverviewLayout() {
   return (
     <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto">
-      <div className="w-[1090px] box-border">
+      <div className="w-full lg:w-[1090px] box-border">
         <PocketClassOverview />
         <DynamicContentLayout />
       </div>

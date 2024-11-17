@@ -2,7 +2,7 @@ function SvgIcon1({ className }) {
   return (
     <div className={`${className} w-8 h-8 flex grow-0 shrink-0 basis-auto`}>
       <svg fill="none" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" x="0" y="0">
-        <g id="Icon-Outline_3" opacity="0.2" xmlns="http://www.w3.org/2000/svg" data-node-id="I161:8105;161:6204">
+        <g id="Icon-Outline_3" xmlns="http://www.w3.org/2000/svg" data-node-id="I161:8105;161:6204">
           <path
             id="Vector_5"
             d="M16,29.333c7.3638,0 13.3334,-5.969 13.3334,-13.333c0,-7.364 -5.9696,-13.333 -13.3334,-13.333c-7.3638,0 -13.3333,5.969 -13.3333,13.333c0,7.364 5.9695,13.333 13.3333,13.333z"
