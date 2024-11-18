@@ -12,10 +12,21 @@ import { useEffect, useState } from "react";
 import InstructorSection from "../InstructorSection/index";
 import { db } from "../../firebaseConfig";
 
-function TopClassesSection({ showAll = false, activeFilter = null }) {
+function TopClassesSection({
+  showAll = false,
+  activeFilter = null,
+  onClassesLoad,
+}) {
   const [classes, setClasses] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const filteredClasses = activeFilter
+      ? classes.filter((classItem) => classItem.Type === activeFilter)
+      : classes;
+    onClassesLoad?.(filteredClasses.length);
+  }, [classes, activeFilter, onClassesLoad]);
 
   // Fetch reviews
   useEffect(() => {
