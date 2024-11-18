@@ -1,10 +1,10 @@
 import TopInstructorsSectionWithButton from "../TopInstructorsSectionWithButton";
 import ExtracurricularInfoBlock from "../ExtracurricularInfoBlock";
 
-function InstructorInfoSection() {
+function InstructorInfoSection({ activeFilter }) {
   return (
     <div>
-      <TopInstructorsSectionWithButton />
+      <TopInstructorsSectionWithButton activeFilter={activeFilter} />
       <ExtracurricularInfoBlock />
     </div>
   );

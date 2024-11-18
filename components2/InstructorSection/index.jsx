@@ -1,8 +1,9 @@
 import { Skeleton } from "@mui/material";
+import Link from "next/link";
 import SuperInstructorCard from "../SuperInstructorCard";
 import MusicianProfileCard1 from "../MusicianProfileCard1";
 
-function InstructorSection({ instructor, loading }) {
+function InstructorSection({ classId, instructor, loading }) {
   if (loading) {
     return (
       <div className="shrink-0 bg-[white] box-border flex justify-start items-stretch flex-col grow basis-[0.00] rounded-2xl">
@@ -34,10 +35,12 @@ function InstructorSection({ instructor, loading }) {
 
 
   return (
-    <div className="bg-[white] box-border flex justify-start items-stretch flex-col grow shrink basis-[0.00] rounded-2xl">
+    <Link href={`/classes?id=${classId}`} className="cursor-pointer">
+    <div className="cursor-pointer bg-[white] box-border flex justify-start items-stretch flex-col grow shrink basis-[0.00] rounded-2xl cursor-pointer">
       <SuperInstructorCard instructorImg={instructor?.profileImage} />
       <MusicianProfileCard1 instructor={instructor} />
     </div>
+  </Link>
   );
 }
 

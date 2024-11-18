@@ -33,21 +33,6 @@ export default function Home({ exploreData, cardsData }) {
   const uniqueCategory = [];
   let featuredClasses;
 
-  // if (!selectedCategory) {
-  // 	featuredClasses = cardsData;
-  // } else {
-  // 	featuredClasses = cardsData.filter(
-  // 		(product) => product.type === selectedCategory
-  // 	);
-  // }
-  // Replace this existing code:
-//   if (!selectedCategory) {
-//     featuredClasses = cardsData;
-//   } else {
-//     featuredClasses = cardsData.filter(
-//       (product) => product.type === selectedCategory
-//     );
-//   }
 
   featuredClasses = cardsData
     .filter((product) => !selectedCategory || product.type === selectedCategory)

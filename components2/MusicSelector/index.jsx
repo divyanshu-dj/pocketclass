@@ -3,11 +3,19 @@ import SportSelectionWidget from "../SportSelectionWidget";
 import { useState } from "react";
 import { categories } from "../../utils/categories";
 
-function MusicSelector() {
+function MusicSelector({ onFilterChange }) {
   const [activeKey, setActiveKey] = useState(categories[0].name.toLowerCase());
+  const [activeSubCategory, setActiveSubCategory] = useState(null);
 
   const handleTagClick = (key) => {
     setActiveKey(key);
+    setActiveSubCategory(null); // Reset subcategory when main category changes
+    onFilterChange(null); // Reset filter when changing main category
+  };
+
+  const handleSubCategorySelect = (subCategory) => {
+    setActiveSubCategory(subCategory);
+    onFilterChange(subCategory);
   };
 
   const containerStyle = {
@@ -46,7 +54,11 @@ function MusicSelector() {
           </Tag.CheckableTag>
         ))}
       </div>
-      <SportSelectionWidget category={activeKey} />
+      <SportSelectionWidget 
+        category={activeKey} 
+        onSubCategorySelect={handleSubCategorySelect}
+        activeSubCategory={activeSubCategory}
+      />
     </div>
   );
 }
