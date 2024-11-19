@@ -31,6 +31,26 @@ export const categories = [
         name: "Cello",
         imagePath: "/assets/Music/cello_icon.png",
       },
+      {
+        name: "Clarinet",
+        imagePath: "/assets/Music/clarinet_icon.png",
+      },
+      {
+        name: "Cello",
+        imagePath: "/assets/Music/cello_icon.png",
+      },
+      {
+        name: "Cello",
+        imagePath: "/assets/Music/cello_icon.png",
+      },
+      {
+        name: "Clarinet",
+        imagePath: "/assets/Music/clarinet_icon.png",
+      },
+      {
+        name: "Cello",
+        imagePath: "/assets/Music/cello_icon.png",
+      },
     ],
   },
   {

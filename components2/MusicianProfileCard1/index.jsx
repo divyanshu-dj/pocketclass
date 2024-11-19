@@ -62,7 +62,7 @@ function MusicianProfileCard1({ instructor }) {
                 {rating}
               </p>
               <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto ml-1.5 m-0 p-0">
-                {`${reviews} ${reviews === 1 ? "(review)" : "(reviews)"}`}
+                {`${reviews} ${reviews === 1 || reviews === 0  ? "(review)" : "(reviews)"}`}
               </p>{" "}
             </div>
           </div>

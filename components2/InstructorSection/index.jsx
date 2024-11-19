@@ -36,7 +36,7 @@ function InstructorSection({ classId, instructor, loading }) {
 
   return (
     <Link href={`/classes?id=${classId}`} className="cursor-pointer">
-    <div className="cursor-pointer bg-[white] box-border flex justify-start items-stretch flex-col grow shrink basis-[0.00] rounded-2xl cursor-pointer">
+    <div className="min-w-[305px] bg-[white] box-border flex flex-none justify-start items-stretch flex-col rounded-2xl cursor-pointer">
       <SuperInstructorCard instructorImg={instructor?.profileImage} />
       <MusicianProfileCard1 instructor={instructor} />
     </div>

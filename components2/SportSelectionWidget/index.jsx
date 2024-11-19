@@ -29,14 +29,14 @@ function SportSelectionWidget({
   }, []);
 
   return (
-    <div className="box-border flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto -mt-8 pt-[5px] pb-10">
+    <div className="box-border flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto -mt-8 pt-[5px] pb-6 md:pb-10">
       <div className="section-spacing mt-9">
         <div className="max-w-[1800px] mx-auto category music-categories mt-5 lg:mb-2 sm:mb-1">
           <div className="relative px-0 md:px-8 lg:px-14">
             <Swiper
               navigation={{
-                prevEl: isMobile ? null : ".swiper-button-prev",
-                nextEl: isMobile ? null : ".swiper-button-next",
+                prevEl: isMobile || selectedCategoryData?.subCategories.length <= 10 ? null : ".swiper-button-prev",
+                nextEl: isMobile || selectedCategoryData?.subCategories.length <= 10 ? null : ".swiper-button-next",
               }}
               loop={true}
               slidesPerView="auto"
@@ -86,13 +86,13 @@ function SportSelectionWidget({
             </Swiper>
 
             {!isMobile && (
-              <div className="swiper-button-prev left-0">
+              <div className={`swiper-button-prev left-0 ${selectedCategoryData?.subCategories.length <= 10 ? 'opacity-30 !cursor-not-allowed' : ''}`}>
                 <SvgIcon1 className="h-6 w-6" />
               </div>
             )}
 
             {!isMobile && (
-              <div className="swiper-button-next right-0">
+              <div className={`swiper-button-next right-0 ${selectedCategoryData?.subCategories.length <= 10 ? 'opacity-30 !cursor-not-allowed' : ''}`}>
                 <SvgIcon2 className="h-6 w-6" />
               </div>
             )}

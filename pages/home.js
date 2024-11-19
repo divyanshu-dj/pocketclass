@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import AuthenticatedHeader from "../components2/AuthenticatedHeader";
 

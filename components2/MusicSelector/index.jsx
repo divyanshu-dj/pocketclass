@@ -31,8 +31,8 @@ function MusicSelector({ onFilterChange }) {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={tagContainerStyle} className="px-6 md:px-10 lg:px-16">
+    <div style={containerStyle} className="sticky top-[80px] md:top-[90px] bg-white z-40">
+      <div style={tagContainerStyle} className="section-spacing">
         {categories.map((category) => (
           <Tag.CheckableTag
             key={category.name}
@@ -54,8 +54,8 @@ function MusicSelector({ onFilterChange }) {
           </Tag.CheckableTag>
         ))}
       </div>
-      <SportSelectionWidget 
-        category={activeKey} 
+      <SportSelectionWidget
+        category={activeKey}
         onSubCategorySelect={handleSubCategorySelect}
         activeSubCategory={activeSubCategory}
       />
