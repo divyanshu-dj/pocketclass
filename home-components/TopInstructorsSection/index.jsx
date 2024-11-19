@@ -124,9 +124,9 @@ function TopClassesSection({
       </div>
       <div>
         <div
-          className={`flex gap-8 max-w-[100%] ${
-            showAll ? "overflow-auto" : ""
-          } box-border mt-8`}
+          className="flex gap-8 max-w-[100%]
+            overflow-auto
+           box-border mt-8"
         >
           {loading
             ? Array(4)
