@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import AuthenticatedHeader from "../components2/AuthenticatedHeader";
+import AuthenticatedHeader from "../home-components/AuthenticatedHeader";
 
 export default function Home() {
   return (
