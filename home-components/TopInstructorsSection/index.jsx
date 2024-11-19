@@ -7,6 +7,7 @@ import {
   doc as firestoreDoc,
   getDoc,
   onSnapshot,
+  where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import InstructorSection from "../InstructorSection/index";
@@ -38,9 +39,14 @@ function TopClassesSection({
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     const fetchClassesAndInstructors = async () => {
       try {
-        const classesQuery = query(collection(db, "classes"));
+        // Create appropriate query based on whether filter is active
+        const classesQuery = activeFilter
+          ? query(collection(db, "classes"))
+          : query(collection(db, "classes"), where("TopRated", "==", true));
+
         const classesSnapshot = await getDocs(classesQuery);
 
         const classesWithInstructors = await Promise.all(
@@ -89,7 +95,6 @@ function TopClassesSection({
           })
         );
 
-        // Sort classes by rating
         const sortedClasses = classesWithInstructors.sort(
           (a, b) => b.averageRating - a.averageRating
         );
@@ -100,9 +105,7 @@ function TopClassesSection({
     };
 
     fetchClassesAndInstructors();
-  }, [reviews]);
-
-  // const displayedClasses = showAll ? classes.slice(0, 12) : classes.slice(0, 4);
+  }, [reviews, activeFilter]);
 
   const displayedClasses = showAll
     ? activeFilter
@@ -117,17 +120,15 @@ function TopClassesSection({
   return (
     <div className="grow-0 shrink-0">
       <div className="">
-        <p className="section-heading !text-left">Top-Rated Classes</p>
+        {!activeFilter && (
+          <p className="section-heading !text-left">Top-Rated Classes</p>
+        )}
         <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-[#261f22] mt-4 m-0 p-0">
           Discover amazing learning experiences
         </p>
       </div>
       <div>
-        <div
-          className="flex gap-8 max-w-[100%]
-            overflow-auto
-           box-border mt-8"
-        >
+        <div id="classes-grid" className="gap-8 max-w-[100%] box-border mt-8">
           {loading
             ? Array(4)
                 .fill(null)

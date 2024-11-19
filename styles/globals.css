@@ -213,3 +213,27 @@ a {
 .section-heading{
   @apply [font-family:'DM_Sans',sans-serif] text-[40px] md:text-5xl font-bold text-center leading-[48px] md:leading-[56px] text-[#261f22]
 }
+
+
+#classes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media screen and (max-width: 1350px) {
+  #classes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 1150px) {
+  #classes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 700px) {
+  #classes-grid {
+    grid-template-columns: 1fr;
+  }
+}
