@@ -7,7 +7,7 @@ import { categories } from "../../utils/categories";
 function AuthenticatedHeader() {
   return (
     <div className="bg-[white] box-border max-w-[1440px] mx-auto sticky top-0">
-      <div className="bg-white sticky top-0 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] h-20 md:h-24 section-spacing">
+      <div className="bg-white sticky top-0 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] h-20 section-spacing">
         <Link className="cursor-pointer" href="/">
           <img
             src="/assets/image_5c0480a2.png"

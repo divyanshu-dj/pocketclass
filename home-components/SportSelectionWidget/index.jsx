@@ -29,7 +29,7 @@ function SportSelectionWidget({
   }, []);
 
   return (
-    <div className="box-border flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto -mt-8 pt-[5px] pb-6 md:pb-10">
+    <div className="box-border flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto -mt-8 pt-[5px] pb-6">
       <div className="section-spacing mt-9">
         <div className="max-w-[1800px] mx-auto category music-categories mt-5 lg:mb-2 sm:mb-1">
           <div className="relative px-0 md:px-8 lg:px-14">
