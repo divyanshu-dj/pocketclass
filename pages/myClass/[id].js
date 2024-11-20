@@ -25,6 +25,7 @@ import {
 	const [classDetails, setClassDetails] = useState({});
 	const [reviews, setReviews] = useState([]);
 	const [user, loading] = useAuthState(auth);
+
   
 	const { id } = router.query;
 	const [selectedStatus, setSelectedStatus] = useState("All");
@@ -150,7 +151,6 @@ import {
 		  <Tabs.TabPane tab="Active" key="Active" />
 		  <Tabs.TabPane tab="Completed" key="Completed" />
 		</Tabs>
-  
 		{userData?.category === "instructor" && (
 		  <div className="instructorContainer max-w-[1450px] mx-auto">
 			<div className="flex flex-col w-full">
@@ -201,6 +201,8 @@ import {
 					price={appointment.price}
 					category={classData.category}
 					status={appointment.status} 
+					start={appointment.start}
+					end={appointment.end}	
 				  />
 				) : null;
 			  })

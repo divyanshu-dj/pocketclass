@@ -151,7 +151,7 @@ const Notifications = ({ user }) => {
 			</button>
 
 			{isOpen && (
-				<div className="origin-top-right absolute right-0 -mr-12 md:-mr-0 mt-3 w-[240px] sm:w-[320px] md:w-[370px] rounded-xl shadow-lg bg-white ring-2 ring-black ring-opacity-5 overflow-hidden px-1 py-4">
+				<div className="origin-top-right absolute right-0 -mr-12 md:-mr-0 mt-3 w-[240px] sm:w-[250px] md:w-[370px] rounded-xl shadow-lg bg-white ring-2 ring-black ring-opacity-5 overflow-hidden px-1 py-4">
 					{/* header */}
 					<div className="px-2 mx-2 mb-4 flex items-center">
 						{/* heading */}

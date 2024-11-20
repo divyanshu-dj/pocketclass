@@ -8,7 +8,6 @@ import { Navigation, Pagination } from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import imageKitLoader from "./ImageLoader";
 
 function FeaturedClass({
   id,
