@@ -8,7 +8,7 @@ import LoginForm from "../components/LoginForm"
 import Register from "./Register";
 import { auth } from "/firebaseConfig"
 import { onAuthStateChanged } from "firebase/auth";
-import Home from "./home";
+import Home from "../components/home";
 
 export default function Account() {
   const [user, setUser] = React.useState(null);
