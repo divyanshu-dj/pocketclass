@@ -31,7 +31,7 @@ function MusicSelector({ onFilterChange }) {
   };
 
   return (
-    <div style={containerStyle} className="sticky top-[80px] md:top-[80px] bg-white z-40 pt-[3px]">
+    <div style={containerStyle} className="sticky top-[80px] md:top-[80px] bg-white z-40 pt-[3px] z-[11]">
       <div style={tagContainerStyle} className="section-spacing">
         {categories.map((category) => (
           <Tag.CheckableTag
