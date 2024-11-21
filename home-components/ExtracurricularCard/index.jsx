@@ -1,6 +1,6 @@
 function ExtracurricularCard() {
   return (
-    <div className="w-full max-w-[1312px] self-center grow-0 shrink-0 basis-auto box-border mt-10 lg:px-10">
+    <div className="max-w-[1312px] self-center grow-0 shrink-0 basis-auto box-border lg:px-10">
       <p className="[font-family:'DM_Sans',sans-serif] text-[32px] md:text-[40px] font-bold text-center leading-[40px] md:leading-[48px] text-[#261f22] max-w-[642px] mx-auto box-border m-0 p-0">
         Transforming Extracurriculars, One Class at a Time
       </p>
@@ -11,7 +11,7 @@ function ExtracurricularCard() {
           </div>
           <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] mt-[17px] m-0 p-0">Convenience</p>
           <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[100.00%] box-border mt-4 m-0 p-0">
-            Easily find and book classes that fit your family&apos;s schedule.
+            Easily find and book classes that fit your schedule.
           </p>
         </div>
         <div className="max-w-[343px] grow shrink basis-[0.00] box-border pb-6">
