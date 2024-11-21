@@ -144,7 +144,13 @@ function AuthenticatedHeader() {
                     Request a Class
                   </a>
                 </p>
-                <Link className="cursor-pointer" href="/Login">
+                <Link
+                  className="cursor-pointer"
+                  href={{
+                    pathname: "/Login",
+                    query: { returnUrl: router.asPath },
+                  }}
+                >
                   <p className="cursor-pointer [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22]">
                     Log in
                   </p>
