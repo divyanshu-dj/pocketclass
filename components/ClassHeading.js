@@ -557,7 +557,7 @@ const ClassHeading = ({
 					</div>
 					<div className="experience my-3">
 						<h1 className="text-xl font-semibold text-logo-red">Experience</h1>
-						<p className="text-md text-gray-700">{experience}</p>
+						<p className="text-md text-gray-700 whitespace-pre-line">{experience}</p>
 					</div>
 					<div className="description my-3">
 						<h1 className="text-xl font-semibold text-logo-red">

@@ -11,16 +11,16 @@ import {useEffect, useState} from "react";
 function InstructorFinderView() {
   const parentsTestimonials = [
     {
-      parentName: 'Katie',
-      image: '/assets/image_abb30eb7.png',
-      testimonial: '“PocketClass made it so easy to find a painting class for my son. He loves it, and we love the convenience!”',
-      aboutText: 'Badminton learner parent'
+      parentName: 'Aaron',
+      image: '/assets/DSCF2239.jpg',
+      testimonial: '“PocketClass made finding a golf coach so easy! I booked a lesson in minutes and received expert coaching tailored to my level.”',
+      aboutText: 'Golf Beginner'
     },
     {
-      parentName: 'Jane Holmes',
-      image: '/assets/image_abb30eb7.png',
-      testimonial: '“PocketClass helped me in the best upbringing of my children. PocketClass is best"”',
-      aboutText: 'Kids Learning Center'
+      parentName: 'Ivan',
+      image: '/assets/Yoga_Testamonial.jpg',
+      testimonial: '“PocketClass helped me find an amazing yoga session effortlessly! Highly recommend PocketClass for anyone looking to find quality classes!”',
+      aboutText: 'Yoga Enthusiast'
     }
   ]
 
@@ -39,11 +39,11 @@ function InstructorFinderView() {
     <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto">
       <div className="flex justify-start items-stretch flex-col gap-12 md:gap-16 w-full max-w-[1182px] box-border">
         <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto">
-          <div className="flex justify-start items-stretch flex-col max-w-[642px] box-border">
+          <div className="flex justify-start items-stretch flex-col max-w-[720px] box-border">
             <p className="section-heading">
-              Find the right instructor for your child
+              Find the right instructor for you
             </p>
-            <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-center text-[#261f22] grow-0 shrink-0 basis-auto mt-6 m-0 p-0">With over 30,000 instructors and 1M+ learners</p>
+            <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-center text-[#261f22] grow-0 shrink-0 basis-auto mt-6 m-0 p-0">With over 30 instructors and 100+ learners</p>
           </div>
         </div>
         <div className="testimonial-swiper-wrap relative md:px-10 lg:px-24 pt-6 pb-20">

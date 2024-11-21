@@ -15,10 +15,10 @@ export const categories = [
         name: "Saxophone",
         imagePath: "/assets/Music/saxophone_icon.png",
       },
-      // {
-      //   name: "Fiddle",
-      //   imagePath: "/assets/Music/guitar_icon.png",  
-      // },
+      {
+        name: "Fiddle",
+        imagePath: "/assets/Music/guitar_icon.png",  
+      },
       {
         name: "Trumpet",
         imagePath: "/assets/Music/trumpet_icon.png",
@@ -34,23 +34,7 @@ export const categories = [
       {
         name: "Clarinet",
         imagePath: "/assets/Music/clarinet_icon.png",
-      },
-      {
-        name: "Cello",
-        imagePath: "/assets/Music/cello_icon.png",
-      },
-      {
-        name: "Cello",
-        imagePath: "/assets/Music/cello_icon.png",
-      },
-      {
-        name: "Clarinet",
-        imagePath: "/assets/Music/clarinet_icon.png",
-      },
-      {
-        name: "Cello",
-        imagePath: "/assets/Music/cello_icon.png",
-      },
+      }
     ],
   },
   {

@@ -9,14 +9,14 @@ function ClassroomFooter() {
       <div className="flex justify-between items-center flex-col md:flex-row gap-10 md:gap-2 w-full md:w-[80%] self-center mt-24 [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
         <div className="flex justify-start items-center flex-col md:flex-row gap-1 md:gap-[30px]">
           <p className="hidden md:block">© pocketclass</p>
-          <p className="">About us</p>
-          <p className="">Instructor Guide</p>
-          <p className="">Student Guide</p>
-          <p className="">Blog</p>
+          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href="/community/aboutus">About Us</Link></p>
+          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href="/community/instructorguide">Instructor Guide</Link></p>
+          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href="/community/studentguide">Student Guide</Link></p>
+          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href="https://medium.com/@pocketclass"><a target="_blank">Blog</a></Link></p>
         </div>
         <div className="flex gap-0.5 md: justify-start items-center flex-col md:flex-row">
-          <p className="">Help center</p>
-          <p className="md:ml-[30px]">Terms and Conditions</p>
+          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href={`/support`}>Help Center</Link></p>
+          <p className="md:ml-[30px] hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150"><Link href="/community/termsandconditions">Terms and Conditions</Link></p>
         </div>
 
         <p className="block md:hidden">© pocketclass</p>
