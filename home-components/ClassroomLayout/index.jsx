@@ -5,7 +5,7 @@ import TeachingPassionBanner from "../TeachingPassionBanner";
 
 function ClassroomLayout() {
   return (
-    <div className="flex justify-start items-stretch flex-col gap-[150px] md:gap-[180px]">
+    <div className="flex justify-start items-stretch flex-col gap-[120px] md:gap-[100px]">
       <ClassOverviewLayout />
       <InstructorFinderView />
       <ExtracurricularCard />

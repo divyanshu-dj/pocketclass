@@ -7,8 +7,8 @@ import {
   UserCircleIcon,
   UsersIcon,
 } from "@heroicons/react/solid";
-import "react-date-range/dist/styles.css"; // main style file
-import "react-date-range/dist/theme/default.css"; // theme css file
+import "react-date-range/dist/styles.css"; 
+import "react-date-range/dist/theme/default.css";
 import { DateRangePicker } from "react-date-range";
 import { useRouter } from "next/router";
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
@@ -99,21 +99,21 @@ function Header({ placeholder }) {
   return (
     <header className="sticky top-0 z-50 grid grid-cols-12 bg-white shadow-sm p-5 md:px-10">
       {/* left */}
-	  <div
-  onClick={() => router.push("/")}
-  className="relative flex items-center h-10 cursor-pointer my-auto col-span-3"
->
-  <Image
-    priority={true}
-    src="/pc_logo3.png"
-    layout="fill"
-    objectFit="contain"
-    objectPosition="left"
-  />
-  <span className="absolute -top-2 left-0 bg-logo-red text-white px-1.5 py-0.5 rounded-sm text-[7px] font-bold transform rounded-full">
-    BETA
-  </span>
-</div>
+      <div
+        onClick={() => router.push("/")}
+        className="relative flex items-center h-10 cursor-pointer my-auto col-span-3"
+      >
+        <Image
+          priority={true}
+          src="/pc_logo3.png"
+          layout="fill"
+          objectFit="contain"
+          objectPosition="left"
+        />
+        <span className="absolute -top-2 left-0 bg-logo-red text-white px-1.5 py-0.5 rounded-sm text-[7px] font-bold transform rounded-full">
+          BETA
+        </span>
+      </div>
 
       {/* middle - search*/}
       <div className="searchContainer col-span-5 md:col-span-6 flex justify-center items-center">
@@ -282,7 +282,12 @@ function Header({ placeholder }) {
                 </div>
               ) : (
                 <button
-                  onClick={() => router.push("/Login")}
+                  onClick={() =>
+                    router.push({
+                      pathname: "/Login",
+                      query: { returnUrl: router.asPath },
+                    })
+                  }
                   className="font-medium text-sm text-white lg:px-4 md:px-[20px] xl:px-4 sm:px-2 py-2 rounded-lg bg-red-500 hover:shadow-2xl active:scale-90 hover:scale-105 transition transform duration-200 ease-out"
                 >
                   Sign In

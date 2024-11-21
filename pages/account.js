@@ -1,10 +1,8 @@
 "use client"
-import { useRouter } from "next/router";
 import React from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Login from "./Login";
-import LoginForm from "../components/LoginForm"
 import Register from "./Register";
 import { auth } from "/firebaseConfig"
 import { onAuthStateChanged } from "firebase/auth";
