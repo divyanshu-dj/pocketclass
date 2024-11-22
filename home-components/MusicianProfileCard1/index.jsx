@@ -7,7 +7,7 @@ import { categories } from "../../utils/categories";
 function MusicianProfileCard1({ instructor }) {
   console.log(instructor);
   // Default values if data is missing
-  const fullName = `${instructor?.name?.split(" ")[0] || "N/A"}`.trim();
+  const fullName = `${instructor?.name?.split(" ").slice(0, 4).join(" ") || "N/A"}`.trim();
   const rating = instructor?.averageRating; // Static as not in DB
   const reviews = instructor?.reviewCount; // Static as not in DB
   const price = instructor?.Price; // Static as not in DB
@@ -27,7 +27,7 @@ function MusicianProfileCard1({ instructor }) {
     <div className="box-border grow-0 shrink-0 basis-auto px-[15px] py-4">
       <div className="flex justify-between items-start flex-row gap-2 w-[100.00%] box-border">
         <div className="grow-0 shrink-0 basis-auto">
-          <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold text-[#261f22] m-0 p-0">
+          <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold text-[#261f22] m-0 p-0 text-[13px]">
             {fullName}
           </p>
           <div className="flex justify-start items-center flex-row">
@@ -41,7 +41,7 @@ function MusicianProfileCard1({ instructor }) {
                 />
               )}
               <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
-                {instructor.category}
+                {instructor.category.split(" ")[0]}
               </p>
             </div>
             <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[3px]">

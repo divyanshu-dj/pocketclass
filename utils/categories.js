@@ -1,43 +1,5 @@
 export const categories = [
   {
-    name: "Music",
-    imagePath: "/assets/music.png",
-    subCategories: [
-      {
-        name: "Piano",
-        imagePath: "/assets/Music/piano_icon.png",
-      },
-      {
-        name: "Violin",
-        imagePath: "/assets/Music/violin_icon.png",
-      },
-      {
-        name: "Saxophone",
-        imagePath: "/assets/Music/saxophone_icon.png",
-      },
-      {
-        name: "Fiddle",
-        imagePath: "/assets/Music/guitar_icon.png",  
-      },
-      {
-        name: "Trumpet",
-        imagePath: "/assets/Music/trumpet_icon.png",
-      },
-      {
-        name: "Clarinet",
-        imagePath: "/assets/Music/clarinet_icon.png",
-      },
-      {
-        name: "Cello",
-        imagePath: "/assets/Music/cello_icon.png",
-      },
-      {
-        name: "Clarinet",
-        imagePath: "/assets/Music/clarinet_icon.png",
-      }
-    ],
-  },
-  {
     name: "Sport",
     imagePath: "/assets/sport.png",
     subCategories: [
@@ -81,6 +43,44 @@ export const categories = [
         name: "Badminton",
         imagePath: "/assets/Sport/badminton_icon.png",
       },
+    ],
+  },
+  {
+    name: "Music",
+    imagePath: "/assets/music.png",
+    subCategories: [
+      {
+        name: "Piano",
+        imagePath: "/assets/Music/piano_icon.png",
+      },
+      {
+        name: "Violin",
+        imagePath: "/assets/Music/violin_icon.png",
+      },
+      {
+        name: "Saxophone",
+        imagePath: "/assets/Music/saxophone_icon.png",
+      },
+      {
+        name: "Fiddle",
+        imagePath: "/assets/Music/guitar_icon.png",  
+      },
+      {
+        name: "Trumpet",
+        imagePath: "/assets/Music/trumpet_icon.png",
+      },
+      {
+        name: "Clarinet",
+        imagePath: "/assets/Music/clarinet_icon.png",
+      },
+      {
+        name: "Cello",
+        imagePath: "/assets/Music/cello_icon.png",
+      },
+      {
+        name: "Clarinet",
+        imagePath: "/assets/Music/clarinet_icon.png",
+      }
     ],
   },
   {

@@ -13,7 +13,7 @@ function InstructorSection({ classId, instructor, loading }) {
             width="100%"
             height={200}
             animation="wave"
-            sx={{ borderRadius: '16px' }}
+            sx={{ borderRadius: "16px" }}
           />
         </div>
         <div className="px-[15px] py-4">
@@ -25,7 +25,7 @@ function InstructorSection({ classId, instructor, loading }) {
               width={220}
               height={45}
               animation="wave"
-              sx={{ borderRadius: '100px' }}
+              sx={{ borderRadius: "100px" }}
             />
           </div>
         </div>
@@ -33,14 +33,16 @@ function InstructorSection({ classId, instructor, loading }) {
     );
   }
 
-
   return (
     <Link href={`/classes?id=${classId}`} className="cursor-pointer">
-    <div className="min-w-[305px] bg-[white] box-border flex flex-none justify-start items-stretch flex-col rounded-2xl cursor-pointer">
-      <SuperInstructorCard instructorImg={instructor?.profileImage} superInstructor={instructor?.TopRated} />
-      <MusicianProfileCard1 instructor={instructor} />
-    </div>
-  </Link>
+      <div className="min-w-[305px] bg-[white] box-border flex flex-none justify-start items-stretch flex-col rounded-2xl cursor-pointer">
+        <SuperInstructorCard
+          instructorImg={instructor?.profileImage}
+          superInstructor={instructor?.TopRated}
+        />
+        <MusicianProfileCard1 instructor={instructor} />
+      </div>
+    </Link>
   );
 }
 
