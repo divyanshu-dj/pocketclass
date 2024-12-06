@@ -130,7 +130,7 @@ function FitnessClassDetailsSection({
     };
   };
   return (
-    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing">
+    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing" style={{marginTop:'5rem'}}>
       <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
           <div className="grow-0 shrink-0 basis-auto animate-pulse">
@@ -288,7 +288,7 @@ function FitnessClassDetailsSection({
                 </div>
               ) : (
                 <p
-                  className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[100.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]"
+                  className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[90.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]"
                 >
                   {classCreatorData?.profileDescription}
                 </p>
@@ -315,7 +315,7 @@ function FitnessClassDetailsSection({
             reviewCountsArray1={reviewCountsArray1}
           />
         </div>
-        <div className="shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-full lg:max-w-[416px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3xl">
+        <div className="shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-full lg:max-w-[416px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]">
           <DynamicButtonSection classId={classId} instructorId={classCreatorData?.userUid} />
         </div>
       </div>

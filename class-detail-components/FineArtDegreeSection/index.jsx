@@ -19,11 +19,11 @@ function ExperienceSection({ instructorData }) {
         </div>
       ) : (
         <div className="flex justify-start items-start flex-col md:flex-row gap-[15px]">
-          <img
+          {/* <img
             src="/assets/image_95ed60a9.png"
             alt=""
             className="h-14 max-w-[initial] w-14 block box-border flex-shrink-0"
-          />
+          /> */}
           <div className="grow-0 shrink-0 basis-auto w-full lg:w-[calc(100%-4rem)]">
             <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-[black] mt-2 m-0 p-0">
               {isReadMore ? instructorData?.experience?.slice(0, 150) : instructorData?.experience}

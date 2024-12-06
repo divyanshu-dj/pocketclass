@@ -49,17 +49,18 @@ function ReviewDisplaySection({ classId = null }) {
   return (
     <div className="flex flex-col gap-2 md:ml-8">
       {[5, 4, 3, 2, 1].map((stars) => (
-        <div key={stars} className="flex items-center gap-4">
-          <span className="w-auto md:w-12" style={{ textAlign: "center" }}>
-            {stars}
+        <div key={stars} className="flex items-center">
+          <span className="w-auto md:w-12" style={{ textAlign: "center", fontWeight:'bold' }}>
+          🌟{stars}
           </span>
+          
           <Progress
             percent={(starCounts[stars] / totalReviews) * 100}
             showInfo={false}
-            strokeColor="#DAA520"  // Golden color
-            // trailColor="#d4d2d3"
+            strokeColor="#DAA520"  
             strokeWidth={12}
             className="w-[175px] md:w-[200px]"
+            style={{marginRight:'1rem'}}
           />
           <span>{starCounts[stars]}</span>
         </div>

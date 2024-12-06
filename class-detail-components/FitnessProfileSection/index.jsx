@@ -5,7 +5,7 @@ import EducationSection from "../EducationSection";
 function FitnessProfileSection({ classData, instructorData }) {
 
   return (
-    <div className="w-[100.00%] box-border mt-[68px]">
+    <div className="w-[74.00%] box-border mt-[68px]">
       <FitnessLayout1 classAbout={classData?.About} />
       <div className="w-[100.00%] box-border mt-[15.5px]">
         {!classData ? (
