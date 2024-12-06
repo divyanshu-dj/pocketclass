@@ -50,12 +50,9 @@ const [selectedLocation, setSelectedLocation] = useState({});
 
           {/* Popup that shows when we hover */}
           {selectedLocation.longitude === result.location.longitude && (
-            // console.log(selectedLocation),
             <Popup
               longitude={result.location.longitude}
               latitude={result.location.latitude}
-              // offsetLeft={-20}
-              //offsetTop={100}
               onClose={() => setSelectedLocation({})}
               closeOnClick={false}
               className='border-rounded-2xl'

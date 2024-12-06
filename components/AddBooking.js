@@ -74,14 +74,12 @@ const AddBooking = ({
     price: price,
     paid: false,
   });
-  console.log(bookingslotInfo);
   const [confirm, setConfirm] = useState(false);
   const [error, setError] = useState(null);
   const modalRef = useRef();
   onClickOutside(modalRef, closeModal);
 
   const getOptions = async (newPrice = null) => {
-    console.log('fr ->:  ',newPrice)
     try {
       setLoading(true);
       const checkoutSession = await fetch("/api/create-stripe-session", {
@@ -126,7 +124,6 @@ const AddBooking = ({
         true,
         classStudents
       );
-      console.log(slotDate, availability);
       setHourlySlots(slots);
       setLoading(false);
     };
@@ -290,8 +287,6 @@ const handleTime = (start, end) => {
       ) {
         toast.error("Please enter valid available seats!");
       } else {
-        console.log(bookingslotInfo);
-        console.log(newAppointment.start);
         newAppointment.price = newAppointment.price * bookingSeats;
         newAppointment.classStudents = bookingSeats;
         setConfirm(true);
@@ -324,7 +319,6 @@ const handleTime = (start, end) => {
           discountedPrice = 1;
         }
         setNewAppointment({ ...newAppointment, price: discountedPrice });
-        console.log(discountedPrice)
         getOptions(discountedPrice);
         toast.success("Voucher verified!");
       } else if (data.message) {
@@ -378,7 +372,6 @@ const handleTime = (start, end) => {
                   </h1>
                 )}
               </div>
-              {console.log(hourlySlots)}
               {hourlySlots.some((s) => s.isAvailable) ? (
                 <div className="flex flex-col w-full mt-6">
                   {/* slots */}
