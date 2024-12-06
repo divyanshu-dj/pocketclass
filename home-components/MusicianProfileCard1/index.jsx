@@ -27,12 +27,11 @@ function MusicianProfileCard1({ instructor }) {
     <div className="box-border grow-0 shrink-0 basis-auto px-[15px] py-4">
       <div className="flex justify-between items-start flex-row gap-2 w-[100.00%] box-border">
         <div className="grow-0 shrink-0 basis-auto">
-          <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold text-[#261f22] m-0 p-0 text-[13px]">
+          <p className="[font-family:'DM_Sans',sans-serif] text-md font-bold text-[#261f22] m-0 p-0 text-[13px]">
             {fullName}
           </p>
           <div className="flex justify-start items-center flex-row">
             <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
-              {/* <SvgIcon1 className="w-4 h-4 flex grow-0 shrink-0 basis-auto" /> */}
               {getCategoryIcon(instructor.category, instructor.Type) && (
                 <img
                   src={getCategoryIcon(instructor.category, instructor.Type)}
@@ -59,7 +58,7 @@ function MusicianProfileCard1({ instructor }) {
             <SvgIcon2 className="w-5 h-5 text-[#261f22] flex grow-0 shrink-0 basis-auto" />
             <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[3px]">
               <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
-                {rating}
+                {rating.toFixed(1)}
               </p>
               <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto ml-1.5 m-0 p-0">
                 {`${reviews} ${reviews === 1 || reviews === 0  ? "(review)" : "(reviews)"}`}
@@ -68,7 +67,7 @@ function MusicianProfileCard1({ instructor }) {
           </div>
         </div>
         <div className="flex justify-start items-end flex-col grow-0 shrink-0 basis-auto">
-          <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold leading-6 text-[#261f22] grow-0 shrink-0 basis-auto m-0 pl-[21px] p-0">
+          <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold leading-6 text-[#261f22] grow-0 shrink-0 basis-auto m-0 pl-[21px] p-0">
             ${price}
           </p>
           <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">

@@ -14,8 +14,6 @@ Chart.register(CategoryScale, LinearScale, PointElement, LineElement);
 function MyBalance({ payouts, accountBalance }) {
   const [showPayouts, setShowPayouts] = useState(true);
   const user = useAuthState(auth);
-  // Sort payouts by date ascending
-  console.log("payouts", payouts);
   if (!payouts) return null;
   if(payouts.length<=0)return null;
   payouts.sort((a, b) => new Date(a.created) - new Date(b.created));
@@ -23,13 +21,9 @@ function MyBalance({ payouts, accountBalance }) {
 
   let totalWithdrawn = 0;
   payouts.forEach((item) => {
-    console.log("item.amount", item.amount);
     totalWithdrawn += item.amount
-    console.log(totalWithdrawn)
   });
   let totalBalance = accountBalance + totalWithdrawn;
-  console.log("totalBalance", totalBalance);
-  console.log('accountBalance',accountBalance)
 
   // Calculate cumulative balance
   let balanceData = [];
@@ -38,7 +32,6 @@ function MyBalance({ payouts, accountBalance }) {
     cumulativeBalance += item.amount;
     balanceData.push(totalBalance - cumulativeBalance);
   });
-  console.log("balanceData", balanceData);
 
   const data = {
     labels: payouts.map((item) => {

@@ -29,13 +29,10 @@ const AddStripe = () => {
       };
       getUser();
       setEmail(user.email);
-      console.log(email);
     }
     //check if the user has a stripe account id and redirect to the onboarding link if they do
     if (user) {
-      console.log(user)
       const userRef = doc(db, "Users", user.uid);
-      console.log(userRef)
       const unsub = onSnapshot(userRef, (doc) => {
         if (doc.exists()) {
           const data = doc.data();

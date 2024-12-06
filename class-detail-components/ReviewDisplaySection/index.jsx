@@ -41,17 +41,16 @@ function ReviewDisplaySection({ classId = null }) {
 
   reviews.forEach((review) => {
     const rating = getReviewRating(review);
-    console.log("rating: ", rating);
     starCounts[rating]++;
   });
 
   const totalReviews = reviews.length;
 
   return (
-    <div className="flex flex-col gap-2 ml-8">
+    <div className="flex flex-col gap-2 md:ml-8">
       {[5, 4, 3, 2, 1].map((stars) => (
         <div key={stars} className="flex items-center gap-4">
-          <span className="w-12" style={{ textAlign: "center" }}>
+          <span className="w-auto md:w-12" style={{ textAlign: "center" }}>
             {stars}
           </span>
           <Progress
@@ -60,7 +59,7 @@ function ReviewDisplaySection({ classId = null }) {
             strokeColor="#DAA520"  // Golden color
             // trailColor="#d4d2d3"
             strokeWidth={12}
-            className="w-[200px]"
+            className="w-[175px] md:w-[200px]"
           />
           <span>{starCounts[stars]}</span>
         </div>

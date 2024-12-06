@@ -60,7 +60,6 @@ function FitnessClassDetailsSection({
       if (classId) {
         const classRef = doc(db, "classes", classId);
         const docSnap = await getDoc(classRef);
-        console.log(docSnap.data());
         if (docSnap.exists()) {
           setClassData(docSnap.data());
         }
@@ -131,14 +130,14 @@ function FitnessClassDetailsSection({
     };
   };
   return (
-    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-14">
-      <div className="flex justify-between items-start flex-row gap-2 min-w-[1314px] grow-0 shrink-0 basis-auto box-border">
+    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing">
+      <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
           <div className="grow-0 shrink-0 basis-auto animate-pulse">
             {/* Title skeleton */}
-            <div className="h-14 bg-gray-200 rounded-lg w-3/4 mb-4"></div>
+            <div className="h-14 bg-gray-200 rounded-lg w-3/4 md:mb-4"></div>
 
-            <div className="flex items-center mt-4">
+            <div className="flex items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-4">
               {/* Rating skeleton */}
               <div className="flex items-center">
                 <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
@@ -146,15 +145,15 @@ function FitnessClassDetailsSection({
               </div>
 
               {/* Category skeleton */}
-              <div className="flex items-center ml-8">
+              <div className="flex items-center flex-row flex-wrap md:flex-nowrap gap-2">
                 <div className="w-4 h-4 bg-gray-200 rounded-full"></div>
-                <div className="w-20 h-4 bg-gray-200 rounded ml-2"></div>
-                <div className="w-1 h-1 bg-gray-200 rounded-full mx-2"></div>
+                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                <div className="w-4 h-4 bg-gray-200 rounded-full"></div>
                 <div className="w-20 h-4 bg-gray-200 rounded"></div>
               </div>
 
               {/* Price skeleton */}
-              <div className="flex items-center ml-8">
+              <div className="flex items-center">
                 <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
                 <div className="w-24 h-4 bg-gray-200 rounded ml-2"></div>
               </div>
@@ -162,10 +161,10 @@ function FitnessClassDetailsSection({
           </div>
         ) : (
           <div className="grow-0 shrink-0 basis-auto">
-            <p className="[font-family:'DM_Sans',sans-serif] text-5xl font-bold leading-[56px] text-[#261f22] m-0 p-0">
+            <p className="[font-family:'DM_Sans',sans-serif] text-3xl md:text-4xl lg:text-5xl font-bold lg:leading-[56px] text-[#261f22] m-0 p-0">
               {classData?.Name || ""}
             </p>
-            <div className="flex justify-start items-center flex-row mt-4">
+            <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-2 md:mt-4">
               <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                 <SvgIcon1 className="w-5 h-5 text-[#261f22] flex grow-0 shrink-0 basis-auto" />
                 <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#261f22] grow-0 shrink-0 basis-auto ml-[3px] m-0 p-0">
@@ -175,7 +174,7 @@ function FitnessClassDetailsSection({
                   ({currentClassReview?.length || 0} reviews)
                 </p>
               </div>
-              <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[35px]">
+              <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-[20px] md:gap-[35px] grow-0 shrink-0 basis-auto">
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                     <img
@@ -203,7 +202,7 @@ function FitnessClassDetailsSection({
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[31px]">
+                <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   <SvgIcon3 className="w-5 h-5 text-[#7d797a] flex grow-0 shrink-0 basis-auto" />
                   <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
                     ${classData?.Price || "0"} per hour
@@ -241,20 +240,20 @@ function FitnessClassDetailsSection({
           )}
         </div>
       </div>
-      <div className="flex justify-start items-start flex-row max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
+      <div className="flex justify-start items-start flex-col-reverse lg:flex-row gap-7 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
         <div className="grow-0 shrink basis-auto">
           <EnhancedImageGallery images={classData?.Images || []} />
-          <div className="flex justify-start items-start flex-row w-[100.00%] box-border mt-8">
+          <div className="flex justify-start items-start gap-2 flex-col md:flex-row w-[100.00%] box-border mt-8">
             {!classCreatorData?.profileImage ? (
-              <div className="h-[122px] w-[124px] rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-20 h-20 md:h-[122px] md:w-[124px] rounded-full bg-gray-200 animate-pulse" />
             ) : (
               <img
                 src={classCreatorData.profileImage}
-                className="h-[122px] max-w-[initial] object-contain w-[124px] [clip-path:path('M124.009,61c0,33.6894_-27.76,61_-62.0043,61c-34.2442,0_-62.0047,-27.3106_-62.0047,-61c0,-33.6894_27.7605,-61_62.0047,-61c34.2443,0_62.0043,27.3106_62.0043,61z')] block box-border"
+                className="w-20 h-20 md:h-[122px] md:w-[124px] max-w-[initial] object-cover rounded-full block box-border shrink-0"
               />
             )}
 
-            <div className="grow-0 shrink basis-auto ml-[31.5px]">
+            <div className="grow-0 shrink basis-auto md:ml-[31.5px]">
               {!classCreatorData ? (
                 <div className="animate-pulse">
                   <div className="h-8 bg-gray-200 rounded w-48"></div>
@@ -289,8 +288,7 @@ function FitnessClassDetailsSection({
                 </div>
               ) : (
                 <p
-                  className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[100.00%] box-border mt-[18px] m-0 p-0"
-                  style={{ paddingLeft: "0.4rem" }}
+                  className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[100.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]"
                 >
                   {classCreatorData?.profileDescription}
                 </p>
@@ -317,7 +315,7 @@ function FitnessClassDetailsSection({
             reviewCountsArray1={reviewCountsArray1}
           />
         </div>
-        <div className="shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-[416px] grow-0 shrink-0 basis-auto ml-[29px] pt-6 px-6 rounded-3xl">
+        <div className="shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-full lg:max-w-[416px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3xl">
           <DynamicButtonSection classId={classId} instructorId={classCreatorData?.userUid} />
         </div>
       </div>

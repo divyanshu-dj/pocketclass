@@ -16,11 +16,11 @@ const NewHeader = () => {
     const [showDropDown, setDropDown] = useState(false);
     const [category, setCategory] = useState("");
     const router = useRouter();
-  
+
     const toggleDropDown = () => {
       setDropDown(!showDropDown);
     };
-  
+
     useEffect(() => {
       const getData = async () => {
         const docRef = doc(db, "Users", user?.uid);
@@ -28,7 +28,7 @@ const NewHeader = () => {
         setUserData(data?.data());
         setCategory(data?.data()?.category);
       };
-  
+
       user && getData();
     }, [user]);
   return (
@@ -75,16 +75,14 @@ const NewHeader = () => {
             {user && <Notifications user={user} />}
 
             <div
-              className="relative flex items-center space-x-2 border-2 p-2 rounded-full hover:bg-gray-100 cursor-pointer z-[999]"
+              className="relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer z-[999]"
               onClick={toggleDropDown}
             >
-              <MenuIcon className="h-6 cursor-pointer" />
+              <MenuIcon className="h-6 cursor-pointer ml-1" />
               {user?.photoURL ? (
-                <Image
+                <img
                   src={user.photoURL}
-                  width={40}
-                  height={48}
-                  className="rounded-full cursor-pointer"
+                  className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12"
                   alt="User"
                 />
               ) : (
@@ -152,7 +150,7 @@ const NewHeader = () => {
               </p>
             </Link>
             <Link className="cursor-pointer" href="/Register">
-              <Button className="bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] min-w-[91px] h-[43px] w-[91px] ml-[31px] rounded-[100px] border-2 border-solid border-[#261f22]">
+              <Button className="bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] min-w-[91px] h-[43px] w-[91px] md:ml-4 lg:ml-[31px] rounded-[100px] border-2 border-solid border-[#261f22]">
                 Sign up
               </Button>
             </Link>

@@ -25,7 +25,6 @@ function PaymentSelect({ setWithdrawDisabled ,accountNumber}) {
         if(finalItems.length > 0){
         setBankAccounts(finalItems);
         }
-        console.log("Bank accounts fetched: ", finalItems);
       });
     });
   }, []);

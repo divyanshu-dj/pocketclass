@@ -35,7 +35,6 @@ function ReviewCard({ classId }) {
       review: reviewText,
       createdAt: Timestamp.now(),
     };
-    console.log(reviewData);
     try {
       await addDoc(collection(db, "Reviews"), reviewData);
       toast.success("Review submitted successfully!");
@@ -52,7 +51,7 @@ function ReviewCard({ classId }) {
   return (
     <>
       <div className="flex justify-start items-stretch flex-col grow-0 shrink-0 basis-auto">
-        <div className="flex justify-between items-center flex-row gap-[38px] min-w-[617px] self-center grow-0 shrink-0 basis-auto box-border">
+        <div className="flex justify-center items-center flex-wrap 2xl:flex-nowrap gap-[38px] w-full max-w-[617px] self-center grow-0 shrink-0 basis-auto box-border">
           <div className="flex justify-center items-stretch flex-col w-[174px] grow-0 shrink-0 basis-auto box-border">
             <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-center text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0 mb-[1rem]">
               Would Recommend

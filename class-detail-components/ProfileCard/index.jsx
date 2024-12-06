@@ -60,8 +60,7 @@ function ProfileCard({ classId }) {
     <>
       <div className="w-[100.00%] box-border">
         <div
-          className="flex justify-between items-start flex-row gap-[78px] w-[100.00%] box-border"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}
+          className="grid grid-cols-1 md:grid-cols-2 justify-start items-start gap-8 md:gap-14 w-[100.00%] box-border"
         >
           {reviewsToShow.map((review) => (
             <div
@@ -71,10 +70,10 @@ function ProfileCard({ classId }) {
               <div className="flex justify-start items-start flex-row">
                 <img
                   src={review.photo || "/assets/image_7814b352.jpeg"}
-                  className="h-[85px] max-w-[initial] object-fill w-[99px] [clip-path:path('M99.1667,42.5c0,23.4721_-22.1992,42.5_-49.5834,42.5c-27.3841,0_-49.5833,-19.0279_-49.5833,-42.5c0,-23.4721_22.1992,-42.5_49.5833,-42.5c27.3842,0_49.5834,19.0279_49.5834,42.5z')] block box-border"
+                  className="h-[60px] w-[60px] md:h-[80px] md:w-[80px] lg:h-[99px] lg:w-[99px] max-w-[initial] object-cover rounded-full block box-border"
                 />
                 <div className="w-[177px] grow-0 shrink-0 basis-auto box-border ml-5">
-                  <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0">
+                  <p className="[font-family:'DM_Sans',sans-serif] text-xl md:text-2xl font-bold text-[#261f22] m-0 p-0">
                     {review.name}
                   </p>
                   <Rate

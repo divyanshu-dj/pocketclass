@@ -6,7 +6,7 @@ import "swiper/css/pagination";
 
 function EnhancedImageGallery({ images = [] }) {
   return (
-    <div className="relative w-full h-[450px] max-w-[800px] mx-auto">
+    <div className="relative w-[calc(100vw_-_2rem)] h-[350px] md:w-[calc(100vw_-_3rem)] lg:w-[calc(70vw_-_4rem)] xl:w-[calc(65vw_-_4rem)] 2xl:w-[850px]">
       {images?.length > 0 ? (
         <Swiper
           navigation={true}

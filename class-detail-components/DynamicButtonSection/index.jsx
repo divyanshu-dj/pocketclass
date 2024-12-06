@@ -67,14 +67,14 @@ function DynamicButtonSection({ classId, instructorId }) {
 
   return (
     <div className="flex justify-center items-stretch flex-col grow-0 shrink-0 basis-auto">
-      <Button className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] min-w-[368px] h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105">
+      <Button className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105">
         <span className="[font-family:Inter,sans-serif] text-base font-semibold">
           Booking schedule
         </span>
       </Button>
-      <Button 
+      <Button
         onClick={handleChatButton}
-        className="mb-[1rem] bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] min-w-[368px] h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto mt-4 rounded-[100px] border-2 border-solid border-[#261f22] transition-all duration-300 ease-in-out hover:bg-[#f8f8f8] hover:shadow-md hover:scale-105"
+        className="mb-[1rem] bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto mt-4 rounded-[100px] border-2 border-solid border-[#261f22] transition-all duration-300 ease-in-out hover:bg-[#f8f8f8] hover:shadow-md hover:scale-105"
       >
         Send message
       </Button>

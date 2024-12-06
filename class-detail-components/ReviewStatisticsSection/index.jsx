@@ -41,7 +41,7 @@ function ReviewStatisticsSection({ classId }) {
   }, [classId]);
 
   return (
-    <div className="flex justify-start items-start flex-row grow-0 shrink-0 basis-auto">
+    <div className="flex justify-start items-start flex-col md:flex-row gap-3 md:gap-0 grow-0 shrink-0 basis-auto">
       <div className="flex justify-start items-stretch flex-col gap-[15px] w-[135px] grow-0 shrink-0 basis-auto box-border pb-[5px]">
         <p className="[font-family:'DM_Sans',sans-serif] text-[64px] font-bold text-center leading-8 text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
           {avgRating?.toFixed(1)}

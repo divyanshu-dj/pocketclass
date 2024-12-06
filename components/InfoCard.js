@@ -45,9 +45,6 @@ function InfoCard({
 
   let currentClassReview = Array.isArray(reviews)
   ? reviews.filter((rev) => {
-      console.log('Review:', rev);
-      console.log('Review classID:', rev.classID);
-      console.log('Current class id:', id);
       return rev.classID === id;
     })
   : [];
