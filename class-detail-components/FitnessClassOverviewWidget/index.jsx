@@ -5,7 +5,7 @@ import ClassroomFooter from "../../home-components/ClassroomFooter";
 function FitnessClassOverviewWidget({ timeSlotOptions, reviewCountsArray1, mindfulClassCardOptions, reviewCountsArray2, dynamicReviewCountsArray, dynamicReviewCountsArray1, reviewCountsArray, classId, userId }) {
   return (
     <div className="bg-[white] box-border flex justify-start items-stretch flex-col md:pt-6 pb-4">
-      <NewHeader />
+      <NewHeader isHome={false} />
       <FitnessClassDetailsSection
         timeSlotOptions={timeSlotOptions}
         reviewCountsArray1={reviewCountsArray1}

@@ -9,9 +9,9 @@ import Image from "next/image";
 import Notifications from "./Notifications";
 import { useRouter } from "next/router";
 
-const NewHeader = () => {
-  const [user, loading, error] = useAuthState(auth);
-  const [signOut, signOutLoading, signOutError] = useSignOut(auth);
+const NewHeader = ({ isHome = true }) => {
+  const [user, loading] = useAuthState(auth);
+  const [signOut] = useSignOut(auth);
   const [userData, setUserData] = useState(null);
   const [showDropDown, setDropDown] = useState(false);
   const [category, setCategory] = useState("");
@@ -35,7 +35,7 @@ const NewHeader = () => {
     <div>
       <div
         className="bg-white sticky top-0 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] h-20 section-spacing"
-        style={{ position: "fixed" }}
+        style={{ position: `${isHome ? "relative" : "fixed"}` }}
       >
         <Link className="cursor-pointer" href="/">
           <img
