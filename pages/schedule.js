@@ -243,7 +243,7 @@ export default function Schedule() {
                 title: "Available",
                 start: start.toDate(),
                 end: end.toDate(),
-                color: "#f5bdb6",
+                color: "#d8f5b6",
               });
             }
             current = next;
@@ -282,7 +282,7 @@ export default function Schedule() {
               title: "Available",
               start: start.toDate(),
               end: end.toDate(),
-              color: "#f5bdb6",
+              color: "#d8f5b6",
             });
 
             current = next;
@@ -321,14 +321,14 @@ export default function Schedule() {
       <Header />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
-          <h2 className="text-2xl font-bold text-gray-700 mb-3">Schedule</h2>
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">Appointment Duration</h2>
 
           <div className="mb-6">
             <label
               htmlFor="appointment-duration"
               className="block font-semibold text-gray-600 mb-2"
             >
-              Appointment Duration (in minutes)
+              How long should each appointment last?
             </label>
 
             <Select
@@ -341,9 +341,15 @@ export default function Schedule() {
             />
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-700 mb-6">
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">
             General Availability
           </h2>
+          <label
+              htmlFor="general-availability"
+              className="block font-semibold text-gray-600 mb-4"
+            >
+            Set when you're regularly available for appointments
+            </label>
           {generalAvailability.map((day, dayIndex) => (
             <div key={dayIndex} className="mb-6">
               <div className="grid grid-cols-5 items-start gap-4">
@@ -393,7 +399,7 @@ export default function Schedule() {
                         <button
                           onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
                           className="text-red-500 flex justify-center items-center hover:text-red-600"
-                          title="Remove Slot"
+                          title="Unavailable All Day"
                         >
                           <span className="material-symbols-outlined text-xs">
                             block
@@ -407,7 +413,7 @@ export default function Schedule() {
                   <button
                     onClick={() => addGeneralSlot(dayIndex)}
                     className="text-blue-500 hover:text-blue-600"
-                    title="Add Slot"
+                    title="Add another period to this day"
                   >
                     <span className="material-symbols-outlined">
                       add_circle
@@ -416,7 +422,7 @@ export default function Schedule() {
                   <button
                     onClick={() => copyToAllDays(dayIndex)}
                     className="text-gray-500 hover:text-gray-600"
-                    title="Copy Slots"
+                    title="Copy To All"
                   >
                     <span className="material-symbols-outlined">
                       content_copy
@@ -481,7 +487,7 @@ export default function Schedule() {
                       <button
                         onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
                         className="text-red-500 flex justify-center items-center hover:text-red-600"
-                        title="Remove Slot"
+                        title="Unavailable All Day"
                       >
                         <span className="material-symbols-outlined text-xs">
                           block
@@ -496,9 +502,15 @@ export default function Schedule() {
           <h2 className="text-2xl font-bold text-gray-700 mb-6">
             Adjusted Availability
           </h2>
+          <label
+              htmlFor="general-availability"
+              className="block font-semibold text-gray-600 mb-4"
+            >
+            Indivate times you are available for specific dates
+            </label>
           <div className="mb-6">
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 mb-4"
+              className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-600 mb-4"
               onClick={() => setShowDatePicker(true)}
             >
               Change a Date's Availability
@@ -589,7 +601,7 @@ export default function Schedule() {
                             removeAdjustedSlot(item.date, slotIndex)
                           }
                           className="text-red-500 flex items-center justify-center hover:text-red-600"
-                          title="Remove Slot"
+                          title="Unavailable All Day"
                         >
                           <span className="text-xs material-symbols-outlined  ">
                             block
@@ -603,7 +615,7 @@ export default function Schedule() {
                   <button
                     onClick={() => addAdjustedSlot(item.date)}
                     className="text-blue-500 hover:text-blue-600"
-                    title="Add Slot"
+                    title="Add another period to this day"
                   >
                     <span className="material-symbols-outlined">
                       add_circle
@@ -675,7 +687,7 @@ export default function Schedule() {
                       <button
                         onClick={() => removeAdjustedSlot(item.date, slotIndex)}
                         className="text-red-500 flex items-center justify-center hover:text-red-600"
-                        title="Remove Slot"
+                        title="Unavailable All Day"
                       >
                         <span className="text-xs material-symbols-outlined  ">
                           block
