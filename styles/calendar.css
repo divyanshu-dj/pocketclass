@@ -23,3 +23,50 @@
         margin: 10px;
     }
 }
+
+/* Calendar CSS For Scheduler */
+.rbc-header{
+    background-color: #e73f2b;
+    color: white;
+}
+.rbc-header.rbc-today{
+    background-color: rgb(0, 179, 0)!important;
+}
+.rbc-allday-cell{
+    display: none;
+}
+.rbc-event-label{
+    display: none!important;
+}
+.rbc-event{
+    border: rgb(255, 116, 116) 1px solid!important;
+}
+.rbc-events-container{
+    margin-right: 6px!important;
+    margin-left: 6px!important;
+    border: 0!important;
+}
+.rbc-time-gutter{
+    background-color: white;
+    border-bottom: rgb(90, 90, 90) 1px solid!important;
+    color: black;
+}
+.rbc-timeslot-group{
+    padding: 0 6px!important;
+}
+.rbc-toolbar{
+    margin: 0!important;
+    background-color: white;
+    padding: 16px 20px;
+    border-radius: 16px 16px 0 0;
+}
+.rbc-agenda-date-cell{
+    background-color: white;
+    color: black;
+}
+.rbc-agenda-content{
+    color: white;
+}
+.rbc-event-content{
+    display: none;
+}

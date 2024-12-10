@@ -110,7 +110,7 @@ function Header({ placeholder }) {
           objectFit="contain"
           objectPosition="left"
         />
-        <span className="absolute -top-2 left-0 bg-logo-red text-white px-1.5 py-0.5 rounded-sm text-[7px] font-bold transform rounded-full">
+        <span className="absolute -top-2 left-0 bg-logo-red text-white px-1.5 py-0.5 text-[7px] font-bold transform rounded-full">
           BETA
         </span>
       </div>
