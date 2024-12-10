@@ -5,6 +5,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 function EnhancedImageGallery({ images = [] }) {
+  console.log(images);
   return (
     <div className="relative w-[calc(100vw_-_2rem)] h-[350px] md:w-[calc(100vw_-_3rem)] lg:w-[calc(70vw_-_4rem)] xl:w-[calc(65vw_-_4rem)] 2xl:w-[850px]">
       {images?.length > 0 ? (
@@ -16,17 +17,17 @@ function EnhancedImageGallery({ images = [] }) {
           className="mySwiper rounded-xl overflow-hidden h-full"
         >
           {images?.map((imageUrl, index) => (
-            <SwiperSlide key={`${imageUrl.url}-${index}`}>
+            <SwiperSlide key={`${imageUrl}-${index}`}>
               <div className="relative h-full w-full rounded-xl overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full w-full -z-10 overflow-hidden bg-cover bg-center bg-no-repeat blur-sm brightness-70"
                   style={{
-                    backgroundImage: `url(${imageUrl.url})`
+                    backgroundImage: `url(${imageUrl})`
                   }}
                 />
                 <img
                   className="object-contain h-full w-full"
-                  src={imageUrl.url}
+                  src={imageUrl}
                   alt={`Class image ${index + 1}`}
                 />
               </div>
