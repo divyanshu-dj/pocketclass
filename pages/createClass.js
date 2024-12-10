@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import dynamic from "next/dynamic";
 import { categories } from "../utils/categories";
+import { useDropzone } from "react-dropzone";
 
 const MapCoordinates = dynamic(() => import("../components/MapCoordinates"), {
   ssr: false,
@@ -25,130 +26,200 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
+import { set } from "date-fns";
 
 export default function CreateClass() {
+  const [previewImages, setPreviewImages] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [classLoading, setClassLoading] = useState(false);
+  const [form, setForm] = useState({
+    Name: "",
+    Category: "",
+    SubCategory: "",
+    Address: "",
+    Price: "",
+    Pricing: "",
+    // Location: { Extra in actual response getting sent..
+    //   _lat: "",
+    //   _long: "",
+    // },
+    Images: [],
+    About: "",
+    Experience: "",
+    Description: "",
+    FunFact: "",
+    TopRated: false,
+    classCreator: "",
+    status: "pending",
+    latitude: "",
+    longitude: "",
+  });
+
+  const addClass = async (e) => {
+    e.preventDefault();
+
+    if (
+      !form.Name ||
+      !form.Category ||
+      !form.SubCategory ||
+      !form.Address ||
+      !form.Price ||
+      !form.Pricing ||
+      !form.About ||
+      !form.Experience ||
+      !form.Description ||
+      !form.FunFact
+    ) {
+      toast.error("Please fill all fields");
+      return;
+    }
+    setLoading(true);
+    let images = [];
+    let imagesURL = [];
+    const addingClass = await addDoc(collection(db, "classes"), {
+      ...form,
+      Images: imagesURL,
+      classCreator: user?.uid,
+      Packages: packages,
+    });
+    console.log(form.Images);
+    form.Images.forEach((img) => {
+      const fileRef = ref(
+        storage,
+        `images/${
+          Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
+          "-" +
+          img.name
+        }`
+      );
+    
+      uploadBytes(fileRef, img).then(async (res) => {
+        getDownloadURL(ref(storage, res.metadata.fullPath)).then(async (url) => {
+          await updateDoc(doc(db, "classes", addingClass.id), {
+            Images: arrayUnion({ url: url, type: img.type }),
+          });
+        });
+      });
+    });
+    
+
+    setForm({
+      Name: "",
+      Category: "",
+      SubCategory: "",
+      Address: "",
+      Price: "",
+      Pricing: "",
+      Images: [],
+      About: "",
+      Experience: "",
+      Description: "",
+      FunFact: "",
+      TopRated: false,
+      classCreator: "",
+      status: "pending",
+    });
+    setPackages([
+      {
+        Name: "",
+        Price: 0,
+        num_sessions: 0,
+        Discount: 0,
+      },
+    ]);
+    setPreviewImages([]);
+    setUploadedFiles([]);
+    toast.success("Class Added");
+    setLoading(false);
+  };
+  const [packages, setPackages] = useState([
+    {
+      Name: "",
+      Price: 0,
+      num_sessions: 0,
+      Discount: 0,
+    },
+  ]);
+
+  const addNewPackage = (e) => {
+    e.preventDefault();
+    setPackages([
+      ...packages,
+      {
+        Name: "",
+        Price: 0,
+        num_sessions: 0,
+        Discount: 0,
+      },
+    ]);
+  };
+
+  const RemoveImg = (e, name) => {
+    e.preventDefault();
+
+    setPreviewImages(previewImages.filter((img) => img.name !== name));
+    setForm({
+      ...form,
+      Images: form.Images.filter((file) => file.name !== name),
+    });
+
+    console.log("Updated form.Images:", form.Images);
+    console.log("Updated previewImages:", previewImages);
+  };
+
+  const onDrop = (acceptedFiles) => {
+    setUploadedFiles(acceptedFiles);
+
+    const previews = acceptedFiles.map((file) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      return new Promise((resolve) => {
+        reader.onload = () => resolve({ src: reader.result, name: file.name });
+      });
+    });
+
+    setForm({ ...form, Images: [...form.Images, ...acceptedFiles] });
+
+    Promise.all(previews).then((dataURLs) =>
+      setPreviewImages([...previewImages, ...dataURLs])
+    );
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: "image/*",
+    multiple: true,
+  });
+  const formatDate = () => {
+    const today = new Date();
+    const options = {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+    let dateString = today.toLocaleDateString("en-US", options);
+    dateString = dateString.replace(/(\d+), (\d+)/, "$1 $2");
+
+    return dateString;
+  };
+
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [user, userLoading] = useAuthState(auth);
-  const [groupFlag, setGroupFlag] = useState(false);
-
-  // Map state and handlers
-  const [address, setAddress] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [latitude, setLatitude] = useState("");
   const [showMap, setShowMap] = useState(false);
   const handleCoordinates = (lng, lat, address) => {
-    setLongitude(lng);
-    setLatitude(lat);
-    setAddress(address);
+    setForm({ ...form, latitude: lat, longitude: lng, Address: address });
   };
 
   let images = [];
   let imagesURL = [];
-
-  // Redirect to main page if user is not authenticated
   const goToMainPage = () => router.push("/");
 
   useEffect(() => {
     if (!userLoading && !user) goToMainPage();
   }, [userLoading, user]);
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const className = e.target.className.value;
-      const classType = e.target.classType.value;
-      const groupType = e.target.groupType.value;
-      const classStudents = e.target?.classStudents?.value || 0;
-      const add = address;
-      const lat = latitude;
-      const lng = longitude;
-      const price = e.target.price.value;
-      const description = e.target.description.value;
-      const pricing = e.target.pricing.value;
-      const funfact = e.target.funfact.value;
-      const experience = e.target.experience.value;
-      const about = e.target.about.value;
-      const category = e.target.category.value;
-
-      if (groupType === "group" && classStudents == 0) {
-        toast.error("Class must have at least one student");
-        return;
-      }
-
-      for (let i = 0; i < e.target.images.files.length; i++) {
-        images.push({
-          file: e.target.images.files[i],
-          type: e.target.images.files[i].type,
-        });
-      }
-
-      setLoading(true);
-
-      const addingClass = await addDoc(collection(db, "classes"), {
-        Address: add,
-        Category: category,
-        Description: description,
-        Pricing: pricing,
-        FunFact: funfact,
-        Experience: experience,
-        About: about,
-        Name: className,
-        Price: price,
-        Type: classType,
-        groupType: groupType,
-        classStudents: classStudents,
-        remainingSeats: classStudents,
-        latitude: lat,
-        longitude: lng,
-        Location: new GeoPoint(lat, lng),
-        Images: imagesURL,
-        classCreator: user?.uid,
-        status: "active",
-      });
-
-      images.map(({ file: img, type }) => {
-        const fileRef = ref(
-          storage,
-          `images/${
-            Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
-            "-" +
-            img.name
-          }`
-        );
-        uploadBytes(fileRef, img).then(async (res) => {
-          getDownloadURL(ref(storage, res.metadata.fullPath)).then(
-            async (url) => {
-              await updateDoc(doc(db, "classes", addingClass.id), {
-                Images: arrayUnion({ url: url, type: type }),
-              });
-              toast.success("Class Added", {
-                toastId: "success66",
-              });
-              setTimeout(() => {
-                setLoading(false);
-                router.push({
-                  pathname: "/classes",
-                  query: {
-                    id: addingClass.id,
-                  },
-                });
-              }, 4000);
-            }
-          );
-        });
-      });
-
-      handleCoordinates(null, null, "");
-    } catch (error) {
-      console.warn(error);
-      setLoading(false);
-      toast.error("Something went wrong", {
-        toastId: "error66",
-      });
-    }
-  };
 
   return userLoading || !user ? (
     <section className="flex justify-center items-center min-h-[100vh]">
@@ -167,133 +238,240 @@ export default function CreateClass() {
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      {/* Header */}
       <Header />
-      {/* Form Section */}
-      <div className="max-w-7xl mx-auto px-8 py-8 min-h-[80vh] sm:px-16">
-        <h1 className="text-3xl font-extrabold text-center py-5">
+      <div className="max-w-7xl mx-auto px-6 py-6  min-h-[80vh]  md:px-16">
+        <h1 className="text-5xl font-extrabold text-center py-5 pb-3">
           Create Class
         </h1>
+        <div>
+          <p className="text-center text-gray-500 pb-5 text-lg">
+            {" "}
+            {formatDate()}{" "}
+          </p>
+        </div>
 
         <div className="formContainer mt-10">
-          <form
-            onSubmit={(e) => {
-              handleFormSubmit(e);
-            }}
-          >
-            <div className="grid gap-2 grid-cols-2">
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Class Name</label>
+          <form className="flex gap-6 flex-col justify-center items-center">
+            <div className="text-xl w-full max-w-[750px] font-bold">
+              About Class
+            </div>
+            <div className="w-full flex flex-row gap-4 max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Class Name</label>
                 <input
                   required
                   name="className"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: Professional Music Lessons by Tony"
+                  placeholder="Your class name"
                   type={"text"}
+                  value={form.Name}
+                  onChange={(e) => setForm({ ...form, Name: e.target.value })}
                 />
               </div>
-              {/* <div className="grid-cols-6">
-								<label className="text-lg font-medium">Category</label>
-								<input
-									required
-									name="category"
-									className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-									placeholder="Example: Music"
-									type={"text"}
-								/>
-							</div> */}
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Category</label>
+            </div>
+            <div className="flex flex-row gap-4 flex-wrap w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Category</label>
                 <select
                   required
                   name="category"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  value={form.Category}
+                  onChange={(e) =>
+                    setForm({ ...form, Category: e.target.value })
+                  }
                 >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.name} value={category.name}>
-                      {category.name}
-                    </option>
-                  ))}
+                  <option value="">Select Category</option>
+                  {categories &&
+                    categories.length > 0 &&
+                    categories.map((category, id) => (
+                      <option key={id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
                 </select>
               </div>
-
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Address</label>
-                <input
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Sub Category</label>
+                <select
                   required
-                  name="address"
+                  name="subCategory"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: 121 Richmond St W, Toronto"
+                  value={form.SubCategory}
+                  onChange={(e) =>
+                    setForm({ ...form, SubCategory: e.target.value })
+                  }
+                >
+                  <option value="">Select Sub Category</option>
+                  {categories &&
+                    categories.length > 0 &&
+                    categories
+                      .find((category) => category.name === form.Category)
+                      ?.subCategories.map((subCategory, id) => (
+                        <option key={id} value={subCategory.name}>
+                          {subCategory.name}
+                        </option>
+                      ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Description</label>
+                <textarea
+                  required
+                  name="description"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="About your class"
                   type={"text"}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  value={form.Description}
+                  onChange={(e) =>
+                    setForm({ ...form, Description: e.target.value })
+                  }
                 />
               </div>
-              <div className="grid-cols-6">
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Price Per Hour</label>
+                <input
+                  required
+                  name="price"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="Example: $20"
+                  type={"number"}
+                  value={form.Price}
+                  onChange={(e) => setForm({ ...form, Price: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Pricing</label>
+                <textarea
+                  required
+                  name="pricing"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="Example: Expert: $20"
+                  value={form.Pricing}
+                  onChange={(e) =>
+                    setForm({ ...form, Pricing: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="w-full max-w-[750px]">
+              <div className="text-lg font-bold w-full pb-1">Images</div>
+              <div className="text-base text-gray-500  w-full pb-6">
+                Choose a photo that will help learners get to know you.
+              </div>
+              <div
+                {...getRootProps()}
+                className="border-2 border-dashed border-gray-400 rounded-xl p-5 w-full flex flex-col items-center justify-center cursor-pointer hover:border-logo-red"
+              >
+                <input {...getInputProps()} />
+                <div className="flex flex-col py-6 items-center">
+                  <img src="/assets/imageUpload.svg" alt="Upload Image" />
+                  <p className="text-gray-500 text-base mt-2">
+                    {isDragActive
+                      ? "Drop the files here"
+                      : "Click to upload files or Drag & Drop"}
+                  </p>
+                  <p className="text-gray-500 text-base">
+                    JPG or PNG(10MB max)
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="w-full max-w-[750px] grid grid-cols-2 gap-4 mt-4">
+              {previewImages.map((preview, idx) => (
+                <div key={idx} className="flex justify-center relative">
+                  <button
+                    className="text-logo-red absolute top-2 right-2"
+                    onClick={(e) => RemoveImg(e, preview.name)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="25"
+                      height="25"
+                      viewBox="0 0 30 30"
+                    >
+                      <path
+                        fill="#e73f2b"
+                        d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <img
+                    src={preview.src}
+                    alt={`Preview ${idx}`}
+                    className="w-full h-48 object-cover rounded-lg border"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="text-xl w-full max-w-[750px] font-bold">
+              About Instructor
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Experience</label>
+                <textarea
+                  required
+                  name="experience"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="Example: 5 years"
+                  value={form.Experience}
+                  onChange={(e) =>
+                    setForm({ ...form, Experience: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">About</label>
+                <textarea
+                  required
+                  name="about"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="About yourself"
+                  value={form.About}
+                  onChange={(e) => setForm({ ...form, About: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Fun Fact</label>
+                <textarea
+                  required
+                  name="funfact"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="Example: I love to play guitar"
+                  value={form.FunFact}
+                  onChange={(e) =>
+                    setForm({ ...form, FunFact: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="text-xl w-full max-w-[750px] font-bold">
+              <div className="flex flex-wrap gap-2 flex-row justify-between align-center">
+                <div>Instructor Address</div>
                 <button
                   type="button"
-                  className="w-full border-2 border-gray-200 rounded-xl px-3 py-3 mt-8 bg-transparent bg-gray-100"
+                  className="border-2 border-gray-200 rounded-xl px-4 py-2 text-base bg-transparent bg-gray-100"
                   onClick={() => setShowMap(true)}
                 >
                   Get Coordinates
                 </button>
               </div>
-
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Class Type</label>
-                <input
-                  required
-                  name="classType"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: Piano"
-                  type={"text"}
-                />
-              </div>
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Class Group Type</label>
-                <select
-                  required
-                  name="groupType"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  defaultValue="single"
-                  onChange={(e) =>
-                    e.target.value === "group"
-                      ? setGroupFlag(true)
-                      : setGroupFlag(false)
-                  }
-                >
-                  <option value="single">Single</option>
-                  <option value="group">Group</option>
-                </select>
-              </div>
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">
-                  {groupFlag ? "Price Per Student" : "Price"}
-                </label>
-                <input
-                  required
-                  name="price"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: 100"
-                  type={"number"}
-                />
-              </div>
-              {groupFlag && (
-                <div className="grid-cols-6">
-                  <label className="text-lg font-medium">Class Students</label>
-                  <input
-                    required
-                    name="classStudents"
-                    className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                    placeholder="Example: 100"
-                    type={"number"}
-                  />
-                </div>
-              )}
             </div>
 
-            {/* Map */}
             {showMap && (
               <div className="py-4 mx-auto aspect-square w-full md:w-2/3">
                 <MapCoordinates
@@ -302,143 +480,212 @@ export default function CreateClass() {
                 />
               </div>
             )}
-
-            {/* Coordinates */}
-            <div className="grid grid-cols-2 gap-3 mt-2">
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Latitude</label>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Address</label>
+                <input
+                  required
+                  name="address"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="Your address"
+                  type={"text"}
+                  value={form.Address}
+                  onChange={(e) =>
+                    setForm({ ...form, Address: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Latitude</label>
                 <input
                   required
                   name="latitude"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: 43.84914"
-                  step="any"
-                  type={"number"}
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="Your location latitude"
+                  type={"text"}
+                  value={form.latitude}
+                  onChange={(e) =>
+                    setForm({ ...form, latitude: e.target.value })
+                  }
                 />
               </div>
-              <div className="grid-cols-6">
-                <label className="text-lg font-medium">Longitude</label>
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Longitude</label>
                 <input
                   required
                   name="longitude"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Example: -79.32399"
-                  step="any"
-                  type={"number"}
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="Your location longitude"
+                  type={"text"}
+                  value={form.longitude}
+                  onChange={(e) =>
+                    setForm({ ...form, longitude: e.target.value })
+                  }
                 />
               </div>
             </div>
-
-            {/* Additional Information */}
-            <div className="grid grid-cols-1 gap-3 mt-2">
-              <div className="col-span-12">
-                <label className="text-lg font-medium">
-                  Media (png, jpg, mp4)
-                </label>
-                <input
-                  required
-                  name="images"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  multiple
-                  accept="image/png, image/jpeg, image/jpg, video/mp4"
-                  type={"file"}
-                />
+            <div className="w-full max-w-[750px] mt-4 flex flex-wrap gap-2 justify-between items-center">
+              <div>
+                <div className="text-xl font-bold">Create Package</div>
+                <div className="text-sm text-gray-400 mt-1 font-medium">
+                  Optional
+                </div>
               </div>
-              <div className="col-span-12">
-                <label className="text-lg font-medium">About</label>
-                <textarea
-                  required
-                  name="about"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Tell your students a little bit about yourself!"
-                  type={"text"}
-                />
-              </div>
-              <div className="col-span-12">
-                <label className="text-lg font-medium">Experience</label>
-                <textarea
-                  required
-                  name="experience"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Impress students with your experience!"
-                  type={"text"}
-                />
-              </div>
-              <div className="col-span-12">
-                <label className="text-lg font-medium">Description</label>
-                <textarea
-                  required
-                  name="description"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Enter a description"
-                  type={"text"}
-                />
-              </div>
-              <div className="col-span-12">
-                <label className="text-lg font-medium">Pricing</label>
-                <textarea
-                  required
-                  name="pricing"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Explain your pricing packages!"
-                  type={"text"}
-                />
-              </div>
-              <div className="col-span-12">
-                <label className="text-lg font-medium">Fun Fact</label>
-                <textarea
-                  required
-                  name="funfact"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Tell your students a fun fact about yourself!"
-                  type={"text"}
-                />
-              </div>
-
-              <div className="col-span-12">
-                {!loading ? (
-                  <button
-                    type="submit"
-                    className="active:scale-[.98] w-full active:duration-75 transition-all hover:scale-[1.01] ease-in-out transform py-4 bg-logo-red rounded-xl text-white font-bold text-lg"
-                  >
-                    Create
-                  </button>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-logo-red"
-                      disabled=""
-                    >
-                      <svg
-                        className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+              <button
+                onClick={addNewPackage}
+                className="bg-logo-red text-white px-4 py-2 rounded-full flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5 mr-1"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+                Add Package
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 w-full max-w-[750px]">
+              {packages.map((pkg, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-6 rounded-3xl border-gray-200 p-10 px-12 border-[1px] "
+                >
+                  <div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setPackages((prev) =>
+                            prev.filter((_, i) => i !== idx)
+                          );
+                        }}
+                        className="text-sm text-red-500 font-bold"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Uploading...
-                    </button>
+                        Remove
+                      </button>
+                    </div>
+                    <div>
+                      <label className="text-lg font-bold">Name</label>
+                      <input
+                        required
+                        name={`Name-${idx}`}
+                        className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                        placeholder="Package Name"
+                        type={"text"}
+                        value={pkg.Name}
+                        onChange={(e) =>
+                          setPackages((prev) =>
+                            prev.map((p, i) =>
+                              i === idx ? { ...p, Name: e.target.value } : p
+                            )
+                          )
+                        }
+                      />
+                    </div>
                   </div>
+                  <div>
+                    <label className="text-lg font-bold">
+                      Number of Sessions
+                    </label>
+                    <input
+                      required
+                      name={`sessions-${idx}`}
+                      className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                      placeholder="Number of Sessions in package"
+                      type={"text"}
+                      value={pkg.num_sessions}
+                      onChange={(e) =>
+                        setPackages((prev) =>
+                          prev.map((p, i) =>
+                            i === idx
+                              ? { ...p, num_sessions: e.target.value }
+                              : p
+                          )
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="bg-gray-400 h-[1px]"></div>
+                  <div className="flex flex-col gap-4">
+                    <label className="text-lg font-bold">Total Price</label>
+                    <div className="flex flex-wrap flex-row justify-between items-center">
+                      <label className="text-base font-bold">
+                        Price of complete package
+                      </label>
+                      <input
+                        required
+                        name={`price-${idx}`}
+                        className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                        placeholder="Price"
+                        type={"number"}
+                        value={pkg.Price}
+                        onChange={(e) =>
+                          setPackages((prev) =>
+                            prev.map((p, i) =>
+                              i === idx ? { ...p, Price: e.target.value } : p
+                            )
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row flex-wrap justify-between items-center">
+                      <label className="text-base font-bold">
+                        Discount Percentage
+                      </label>
+                      <input
+                        required
+                        name={`discount-${idx}`}
+                        className="border-2 md:w-auto w-full text-center border-gray-100 text-base rounded-xl p-1 px-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                        placeholder="Discount"
+                        type={"number"}
+                        value={pkg.Discount}
+                        onChange={(e) =>
+                          setPackages((prev) =>
+                            prev.map((p, i) =>
+                              i === idx ? { ...p, Discount: e.target.value } : p
+                            )
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-row justify-between items-center">
+                      <label className="text-lg font-bold">Package Price</label>
+                      <label className="text-lg font-bold">
+                        $ {pkg.Price - (pkg.Price * pkg.Discount) / 100}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-row gap-4 w-full mb-4 max-w-[750px]">
+              <button
+                onClick={addClass}
+                disabled={loading}
+                type="submit"
+                className="bg-logo-red text-white px-8 py-2 rounded-full flex items-center"
+              >
+                {loading ? (
+                  <Image
+                    src="/Rolling-1s-200px.svg"
+                    width={"20px"}
+                    height={"20px"}
+                    alt="Loading"
+                  />
+                ) : (
+                  "Create Class"
                 )}
-              </div>
+              </button>
             </div>
           </form>
         </div>
