@@ -24,7 +24,7 @@ function FitnessProfileSection({ classData, instructorData }) {
         )}
       </div>
       <FitnessLayout />
-      <EducationSection instructorData={instructorData} />
+      <EducationSection classData={classData} instructorData={instructorData} />
     </div>
   );
 }

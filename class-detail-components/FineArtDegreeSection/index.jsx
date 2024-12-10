@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
-function ExperienceSection({ instructorData }) {
+function ExperienceSection({ classData }) {
   const [isReadMore, setIsReadMore] = useState(true);
 
   const toggleReadMore = () => {
@@ -9,7 +11,7 @@ function ExperienceSection({ instructorData }) {
 
   return (
     <div className="w-[100.00%] box-border">
-      {!instructorData ? (
+      {!classData ? (
         <div className="flex justify-start items-start flex-row animate-pulse">
           <div className="h-14 w-14 bg-gray-200 rounded-lg flex-shrink-0"></div>
           <div className="grow-0 shrink-0 basis-auto ml-[15px] w-full lg:w-[calc(100%-4rem)]">
@@ -19,16 +21,11 @@ function ExperienceSection({ instructorData }) {
         </div>
       ) : (
         <div className="flex justify-start items-start flex-col md:flex-row gap-[15px]">
-          {/* <img
-            src="/assets/image_95ed60a9.png"
-            alt=""
-            className="h-14 max-w-[initial] w-14 block box-border flex-shrink-0"
-          /> */}
           <div className="grow-0 shrink-0 basis-auto w-full lg:w-[calc(100%-4rem)]">
             <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-[black] mt-2 m-0 p-0">
-              {isReadMore ? instructorData?.experience?.slice(0, 150) : instructorData?.experience}
+              {isReadMore ? classData?.Experience?.slice(0, 150) : classData?.Experience}
             </p>
-            {instructorData?.experience?.length > 150 && (
+            {classData?.Experience?.length > 150 && (
               <p
                 onClick={toggleReadMore}
                 className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] mt-4 m-0 p-0 cursor-pointer hover:text-blue-600"
