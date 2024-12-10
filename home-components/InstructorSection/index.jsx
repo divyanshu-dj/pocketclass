@@ -39,6 +39,7 @@ function InstructorSection({ classId, instructor, loading }) {
         <SuperInstructorCard
           instructorImg={instructor?.profileImage}
           superInstructor={instructor?.TopRated}
+          classId={classId}
         />
         <MusicianProfileCard1 instructor={instructor} />
       </div>
