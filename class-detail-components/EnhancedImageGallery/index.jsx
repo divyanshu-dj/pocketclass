@@ -16,17 +16,17 @@ function EnhancedImageGallery({ images = [] }) {
           className="mySwiper rounded-xl overflow-hidden h-full"
         >
           {images?.map((imageUrl, index) => (
-            <SwiperSlide key={`${imageUrl}-${index}`}>
+            <SwiperSlide key={`${imageUrl.url}-${index}`}>
               <div className="relative h-full w-full rounded-xl overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full w-full -z-10 overflow-hidden bg-cover bg-center bg-no-repeat blur-sm brightness-70"
                   style={{
-                    backgroundImage: `url(${imageUrl})`
+                    backgroundImage: `url(${imageUrl.url})`
                   }}
                 />
                 <img
                   className="object-contain h-full w-full"
-                  src={imageUrl}
+                  src={imageUrl.url}
                   alt={`Class image ${index + 1}`}
                 />
               </div>

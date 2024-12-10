@@ -74,6 +74,7 @@ export default function Schedule() {
     }
   };
 
+
   useEffect(() => {
     if (user) {
       const loadSc = onSnapshot(
@@ -112,7 +113,6 @@ export default function Schedule() {
       localizer.format(date, "ha").replace(":00", ""),
     timeGutterFormat: (date, culture, localizer) =>
       localizer.format(date, "ha").replace("am", "AM").replace("pm", "PM"),
-
   };
 
   useEffect(() => {
@@ -294,19 +294,33 @@ export default function Schedule() {
     setEvents(newEvents);
   };
 
-  const timeOptions = Array.from(
-    { length: 48 },
-    (_, i) =>
-      `${String(Math.floor(i / 2)).padStart(2, "0")}:${
-        i % 2 === 0 ? "00" : "30"
-      }`
-  );
+  // time slots from 30 minutes to 3 hours slotOptions
+
+  const slotOptions = [
+    { value: 30, label: "30 minutes" },
+    { value: 60, label: "1 hour" },
+    { value: 90, label: "1 hour 30 minutes" },
+    { value: 120, label: "2 hours" },
+    { value: 150, label: "2 hours 30 minutes" },
+    { value: 180, label: "3 hours" },
+    { value: 210, label: "3 hours 30 minutes" },
+    { value: 240, label: "4 hours" },
+  ];
+
+  const timeOptions = Array.from({ length: 48 }, (_, i) => {
+    const hour = Math.floor(i / 2)
+      .toString()
+      .padStart(2, "0");
+    const minute = i % 2 === 0 ? "00" : "30";
+    const time = `${hour}:${minute}`;
+    return { value: time, label: time };
+  });
 
   return (
     <div className="flex flex-col lg:h-screen">
       <Header />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
-        <div className="w-full lg:w-1/3 overflow-auto p-4 border-r bg-white shadow-md">
+        <div className="overflow-auto p-4 border-r bg-white shadow-md">
           <h2 className="text-2xl font-bold text-gray-700 mb-3">Schedule</h2>
 
           <div className="mb-6">
@@ -316,14 +330,14 @@ export default function Schedule() {
             >
               Appointment Duration (in minutes)
             </label>
-            <input
-              type="number"
-              id="appointment-duration"
-              value={appointmentDuration}
-              min={5}
-              step={5}
-              onChange={(e) => setAppointmentDuration(Number(e.target.value))}
-              className="w-full border rounded p-2 bg-gray-100 text-sm"
+
+            <Select
+              value={slotOptions.find(
+                (option) => option.value === appointmentDuration
+              )}
+              onChange={(selected) => setAppointmentDuration(selected.value)}
+              options={slotOptions}
+              className="w-full"
             />
           </div>
 
@@ -346,10 +360,9 @@ export default function Schedule() {
                         className="flex items-center space-x-2 mb-2"
                       >
                         <Select
-                          value={{
-                            value: slot.startTime,
-                            label: slot.startTime || "Start Time",
-                          }}
+                          value={timeOptions.find(
+                            (option) => option.value === slot.startTime
+                          )}
                           onChange={(selected) =>
                             handleGeneralInputChange(
                               dayIndex,
@@ -358,25 +371,14 @@ export default function Schedule() {
                               selected.value
                             )
                           }
-                          options={timeOptions.map((time) => ({
-                            value: time,
-                            label: time,
-                          }))}
-                          className="w-full bg-gray-100"
-                          styles={{
-                            menu: (provided) => ({
-                              ...provided,
-                              maxHeight: "300px",
-                            }),
-                          }}
+                          options={timeOptions}
+                          className="w-full"
                         />
-
                         <span>-</span>
                         <Select
-                          value={{
-                            value: slot.endTime,
-                            label: slot.endTime || "End Time",
-                          }}
+                          value={timeOptions.find(
+                            (option) => option.value === slot.endTime
+                          )}
                           onChange={(selected) =>
                             handleGeneralInputChange(
                               dayIndex,
@@ -385,17 +387,8 @@ export default function Schedule() {
                               selected.value
                             )
                           }
-                          options={timeOptions.map((time) => ({
-                            value: time,
-                            label: time,
-                          }))}
-                          className="w-full bg-gray-100"
-                          styles={{
-                            menu: (provided) => ({
-                              ...provided,
-                              maxHeight: "300px",
-                            }),
-                          }}
+                          options={timeOptions}
+                          className="w-full"
                         />
                         <button
                           onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
@@ -442,10 +435,9 @@ export default function Schedule() {
                       className="flex items-center space-x-2 mb-2"
                     >
                       <Select
-                        value={{
-                          value: slot.startTime,
-                          label: slot.startTime || "Start Time",
-                        }}
+                        value={timeOptions.find(
+                          (option) => option.value === slot.startTime
+                        )}
                         onChange={(selected) =>
                           handleGeneralInputChange(
                             dayIndex,
@@ -454,10 +446,7 @@ export default function Schedule() {
                             selected.value
                           )
                         }
-                        options={timeOptions.map((time) => ({
-                          value: time,
-                          label: time,
-                        }))}
+                        options={timeOptions}
                         className="w-full bg-gray-100"
                         styles={{
                           menu: (provided) => ({
@@ -469,10 +458,9 @@ export default function Schedule() {
 
                       <span>-</span>
                       <Select
-                        value={{
-                          value: slot.endTime,
-                          label: slot.endTime || "End Time",
-                        }}
+                        value={timeOptions.find(
+                          (option) => option.value === slot.endTime
+                        )}
                         onChange={(selected) =>
                           handleGeneralInputChange(
                             dayIndex,
@@ -481,10 +469,7 @@ export default function Schedule() {
                             selected.value
                           )
                         }
-                        options={timeOptions.map((time) => ({
-                          value: time,
-                          label: time,
-                        }))}
+                        options={timeOptions}
                         className="w-full bg-gray-100"
                         styles={{
                           menu: (provided) => ({
@@ -556,10 +541,9 @@ export default function Schedule() {
                         className="flex items-center space-x-2 mb-2"
                       >
                         <Select
-                          value={{
-                            value: slot.startTime,
-                            label: slot.startTime || "Start Time",
-                          }}
+                          value={timeOptions.find(
+                            (option) => option.value === slot.startTime
+                          )}
                           onChange={(selected) =>
                             handleAdjustedInputChange(
                               item.date,
@@ -568,10 +552,7 @@ export default function Schedule() {
                               selected.value
                             )
                           }
-                          options={timeOptions.map((time) => ({
-                            value: time,
-                            label: time,
-                          }))}
+                          options={timeOptions}
                           className="w-full bg-gray-100"
                           styles={{
                             menu: (provided) => ({
@@ -583,10 +564,9 @@ export default function Schedule() {
 
                         <span>-</span>
                         <Select
-                          value={{
-                            value: slot.endTime,
-                            label: slot.endTime || "End Time",
-                          }}
+                          value={timeOptions.find(
+                            (option) => option.value === slot.endTime
+                          )}
                           onChange={(selected) =>
                             handleAdjustedInputChange(
                               item.date,
@@ -595,10 +575,7 @@ export default function Schedule() {
                               selected.value
                             )
                           }
-                          options={timeOptions.map((time) => ({
-                            value: time,
-                            label: time,
-                          }))}
+                          options={timeOptions}
                           className="w-full bg-gray-100"
                           styles={{
                             menu: (provided) => ({
@@ -652,10 +629,9 @@ export default function Schedule() {
                       className="flex items-center space-x-2 mb-2"
                     >
                       <Select
-                        value={{
-                          value: slot.startTime,
-                          label: slot.startTime || "Start Time",
-                        }}
+                        value={timeOptions.find(
+                          (option) => option.value === slot.startTime
+                        )}
                         onChange={(selected) =>
                           handleAdjustedInputChange(
                             item.date,
@@ -664,10 +640,7 @@ export default function Schedule() {
                             selected.value
                           )
                         }
-                        options={timeOptions.map((time) => ({
-                          value: time,
-                          label: time,
-                        }))}
+                        options={timeOptions}
                         className="w-full"
                         styles={{
                           menu: (provided) => ({
@@ -679,10 +652,9 @@ export default function Schedule() {
 
                       <span>-</span>
                       <Select
-                        value={{
-                          value: slot.endTime,
-                          label: slot.endTime || "End Time",
-                        }}
+                        value={timeOptions.find(
+                          (option) => option.value === slot.endTime
+                        )}
                         onChange={(selected) =>
                           handleAdjustedInputChange(
                             item.date,
@@ -691,10 +663,7 @@ export default function Schedule() {
                             selected.value
                           )
                         }
-                        options={timeOptions.map((time) => ({
-                          value: time,
-                          label: time,
-                        }))}
+                        options={timeOptions}
                         className="w-full"
                         styles={{
                           menu: (provided) => ({
@@ -729,7 +698,7 @@ export default function Schedule() {
             {scheduleLoading ? "Saving..." : "Save Schedule"}
           </button>
         </div>
-        <div className="w-full lg:w-2/3 p-4">
+        <div className="flex-grow p-4">
           <BigCalendar
             timeslots={2}
             timeStep={30}
