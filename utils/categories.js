@@ -80,6 +80,10 @@ export const categories = [
       {
         name: "Clarinet",
         imagePath: "/assets/Music/clarinet_icon.png",
+      },
+      {
+        name: "DJ",
+        imagePath: "/assets/Music/dj_icon.png",
       }
     ],
   },
