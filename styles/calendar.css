@@ -39,7 +39,11 @@
     display: none!important;
 }
 .rbc-event{
-    border: rgb(255, 116, 116) 1px solid!important;
+    border: rgb(75, 255, 59) 1px solid!important;
+    color:black!important
+}
+.rbc-agenda-table{
+    color: black!important;
 }
 .rbc-events-container{
     margin-right: 6px!important;

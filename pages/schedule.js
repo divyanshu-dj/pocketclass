@@ -27,6 +27,9 @@ const localizer = momentLocalizer(moment);
 export default function Schedule() {
   const [user, userLoading] = useAuthState(auth);
   const router = useRouter();
+  const [vacationStartDate, setVacationStartDate] = useState(null);
+  const [vacationEndDate, setVacationEndDate] = useState(null);
+  const [showVacationPicker, setShowVacationPicker] = useState(false);
 
   const [events, setEvents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -49,6 +52,32 @@ export default function Schedule() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("week");
   const [scheduleLoading, setScheduleLoading] = useState(false);
+
+  const addVacation = () => {
+    if (!vacationStartDate || !vacationEndDate) {
+      toast.error("Please select a valid vacation range.");
+      return;
+    }
+
+    const vacationDates = [];
+    let currentDate = moment(vacationStartDate);
+
+    while (currentDate.isSameOrBefore(vacationEndDate)) {
+      const dateStr = currentDate.format("YYYY-MM-DD");
+      vacationDates.push({ date: dateStr, slots: [] });
+      currentDate = currentDate.add(1, "day");
+    }
+
+    const updatedAdjustedAvailability = adjustedAvailability.filter(
+      (item) =>
+        !vacationDates.some((vacationDate) => vacationDate.date === item.date)
+    );
+
+    setAdjustedAvailability([...updatedAdjustedAvailability, ...vacationDates]);
+    setVacationStartDate(null);
+    setVacationEndDate(null);
+    setShowVacationPicker(false);
+  };
 
   const saveSchedule = async (
     db,
@@ -73,7 +102,6 @@ export default function Schedule() {
       setScheduleLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (user) {
@@ -225,7 +253,7 @@ export default function Schedule() {
             for (let i = 0; i < 52; i++) {
               const start = moment()
                 .startOf("week")
-                .add(index, "days")
+                .add(index + 1 > 6 ? 0 : index + 1, "days")
                 .add(i, "weeks")
                 .set({
                   hour: current.hours(),
@@ -233,7 +261,7 @@ export default function Schedule() {
                 });
               const end = moment()
                 .startOf("week")
-                .add(index, "days")
+                .add(index + 1 > 6 ? 0 : index + 1, "days")
                 .add(i, "weeks")
                 .set({
                   hour: next.hours(),
@@ -321,7 +349,9 @@ export default function Schedule() {
       <Header />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
-          <h2 className="text-2xl font-bold text-gray-700 mb-3">Appointment Duration</h2>
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">
+            Appointment Duration
+          </h2>
 
           <div className="mb-6">
             <label
@@ -345,20 +375,20 @@ export default function Schedule() {
             General Availability
           </h2>
           <label
-              htmlFor="general-availability"
-              className="block font-semibold text-gray-600 mb-4"
-            >
+            htmlFor="general-availability"
+            className="block font-semibold text-gray-600 mb-4"
+          >
             Set when you're regularly available for appointments
-            </label>
+          </label>
           {generalAvailability.map((day, dayIndex) => (
             <div key={dayIndex} className="mb-6">
-              <div className="grid grid-cols-5 items-start gap-4">
-                <h3 className="font-semibold col-span-4 lg:col-span-1 text-gray-600">
+              <div className="flex justify-between flex-row items-start">
+                <h3 className="font-semibold mt-[7px] mr-4 w-[95px] lg:col-span-1 text-gray-600">
                   {day.day}
                 </h3>
-                <div className="col-span-3 hidden lg:block">
+                <div className="hidden lg:block mr-2">
                   {day.slots.length === 0 ? (
-                    <p className="text-gray-500">Unavailable</p>
+                    <p className="text-gray-500 mt-[7px]">Unavailable</p>
                   ) : (
                     day.slots.map((slot, slotIndex) => (
                       <div
@@ -409,7 +439,7 @@ export default function Schedule() {
                     ))
                   )}
                 </div>
-                <div className="flex space-x-2 justify-end">
+                <div className="flex mt-[7px] space-x-2 justify-end">
                   <button
                     onClick={() => addGeneralSlot(dayIndex)}
                     className="text-blue-500 hover:text-blue-600"
@@ -431,7 +461,7 @@ export default function Schedule() {
                 </div>
               </div>
 
-              <div className="col-span-3 block lg:hidden">
+              <div className="col-span-3 block mt-2 lg:hidden">
                 {day.slots.length === 0 ? (
                   <p className="text-gray-500">Unavailable</p>
                 ) : (
@@ -503,18 +533,63 @@ export default function Schedule() {
             Adjusted Availability
           </h2>
           <label
-              htmlFor="general-availability"
-              className="block font-semibold text-gray-600 mb-4"
-            >
+            htmlFor="general-availability"
+            className="block font-semibold text-gray-600 mb-4"
+          >
             Indivate times you are available for specific dates
-            </label>
+          </label>
           <div className="mb-6">
             <button
               className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-600 mb-4"
-              onClick={() => setShowDatePicker(true)}
+              onClick={() => {
+                setShowDatePicker(true);
+                setShowVacationPicker(false);
+              }}
             >
               Change a Date's Availability
             </button>
+            <button
+              className="px-4 ml-2 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-600 mb-4"
+              onClick={() => {
+                setShowVacationPicker(true);
+                setShowDatePicker(false);
+              }}
+            >
+              Add Vacation
+            </button>
+
+            {showVacationPicker && (
+              <div className="bg-white p-4 w-max rounded-md shadow-lg">
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Select Vacation Dates
+                </h3>
+                <DayPicker
+                  mode="range"
+                  selected={{ from: vacationStartDate, to: vacationEndDate }}
+                  onSelect={(range) => {
+                    if (range) {
+                      setVacationStartDate(range.from);
+                      setVacationEndDate(range.to);
+                    }
+                  }}
+                  className="border rounded p-2 bg-gray-100 text-sm"
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 mr-2"
+                    onClick={addVacation}
+                  >
+                    Add Vacation
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    onClick={() => setShowVacationPicker(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
 
             {showDatePicker && (
               <div className=" bg-white p-4 w-max rounded-md shadow-lg">
@@ -539,11 +614,11 @@ export default function Schedule() {
           </div>
           {adjustedAvailability.map((item) => (
             <div key={item.date} className="mb-6">
-              <div className="grid grid-cols-7 items-start gap-4">
-                <h3 className="font-semibold col-span-6 lg:col-span-2 text-gray-600">
+              <div className="flex flex-row justify-between items-start">
+                <h3 className="font-semibold mt-[7px]  w-[95px] text-gray-600">
                   {item.date}
                 </h3>
-                <div className="col-span-4 hidden lg:block">
+                <div className="hidden lg:block">
                   {item.slots.length === 0 ? (
                     <p className="text-gray-500">Unavailable</p>
                   ) : (
@@ -611,7 +686,7 @@ export default function Schedule() {
                     ))
                   )}
                 </div>
-                <div className="flex space-x-2 justify-end">
+                <div className="flex mt-[7px] space-x-2 justify-end">
                   <button
                     onClick={() => addAdjustedSlot(item.date)}
                     className="text-blue-500 hover:text-blue-600"

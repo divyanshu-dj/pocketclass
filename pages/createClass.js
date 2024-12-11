@@ -96,7 +96,7 @@ export default function CreateClass() {
       uploadBytes(fileRef, img).then(async (res) => {
         getDownloadURL(ref(storage, res.metadata.fullPath)).then(async (url) => {
           await updateDoc(doc(db, "classes", addingClass.id), {
-            Images: arrayUnion({ url: url, type: img.type }),
+            Images: arrayUnion(url),
           });
         });
       });
