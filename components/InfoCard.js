@@ -24,10 +24,7 @@ function InfoCard({
   
   const handleSmallCardClick = () => {
     router.push({
-      pathname: "/classes",
-      query: {
-        id: id,
-      },
+      pathname: "/classes/id=" + id,
     });
   };
 

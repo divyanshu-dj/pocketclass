@@ -7,7 +7,7 @@ import {
   UserCircleIcon,
   UsersIcon,
 } from "@heroicons/react/solid";
-import "react-date-range/dist/styles.css"; 
+import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { DateRangePicker } from "react-date-range";
 import { useRouter } from "next/router";
@@ -247,11 +247,18 @@ function Header({ placeholder }) {
                         </li>
                       )}
                       {category !== "" && user && category === "instructor" && (
+                        <>
                         <li>
                           <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <a href="/withdraw">My Wallet</a>
+                            <a href="/schedule">Manage Schedule</a>
                           </p>
                         </li>
+                          <li>
+                            <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                              <a href="/withdraw">My Wallet</a>
+                            </p>
+                          </li>
+                        </>
                       )}
                       {category !== "" && user && userData?.isAdmin && (
                         <li>
