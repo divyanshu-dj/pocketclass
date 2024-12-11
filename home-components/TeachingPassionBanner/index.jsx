@@ -1,4 +1,5 @@
 import { Button } from "@mui/base";
+import Link from "next/link";
 
 function TeachingPassionBanner() {
   return (
@@ -10,10 +11,12 @@ function TeachingPassionBanner() {
                 Passionate About Teaching? Join PocketClass!
             </p>
             {/* Button Component starts here. We've generated code using MUI Base. See other options in "Component library" dropdown in Settings */}
-            <Button
-                className="bg-[#261f22] [font-family:Inter,sans-serif] text-sm font-semibold text-[white] min-w-[220px] h-[45px] w-[220px] cursor-pointer block box-border grow-0 shrink-0 basis-auto mt-6 rounded-[100px] border-[none]">
-                Become an Instructor
-            </Button>
+            <Link href="/Register">
+              <Button
+                  className="bg-[#261f22] [font-family:Inter,sans-serif] text-sm font-semibold text-[white] min-w-[220px] h-[45px] w-[220px] cursor-pointer block box-border grow-0 shrink-0 basis-auto mt-6 rounded-[100px] border-[none]">
+                  Become an Instructor
+              </Button>
+            </Link>
         </div>
     </div>
   );
