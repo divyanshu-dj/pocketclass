@@ -21,7 +21,7 @@ function FitnessReviewSectionWidget({
         style={{ margin: "auto", marginTop: "20px" }}
       >
         <DynamicButtonSection
-          classId={classId}
+          classId={classId} 
           classData={classData}
           instructorId={classCreatorData?.userUid}
           below={true}
