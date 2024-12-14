@@ -34,7 +34,7 @@ export default function ClassLocationMap({ longitude, latitude, address }) {
   console.log('mapref: ', map.current)
   return (
     <div className="w-full">
-      <div ref={mapContainer} className="w-full h-[300px] rounded-xl mb-4" />
+      <div ref={mapContainer} className="w-full h-[200px] rounded-xl mb-4" />
       <button 
         onClick={handleAddressClick}
         className="text-left text-gray-600 hover:text-logo-red transition-colors duration-200"

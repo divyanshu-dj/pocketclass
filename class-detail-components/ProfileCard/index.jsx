@@ -60,7 +60,7 @@ function ProfileCard({ classId }) {
     <>
       <div className="w-[100.00%] box-border">
         <div
-          className="grid grid-cols-1 md:grid-cols-2 justify-start items-start gap-8 md:gap-14 w-[100.00%] box-border"
+          className="grid grid-cols-1 md:grid-cols-2 justify-start items-start gap-8 md:gap-[10rem] w-[100.00%] box-border"
         >
           {reviewsToShow.map((review) => (
             <div
