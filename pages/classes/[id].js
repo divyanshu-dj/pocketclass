@@ -5,17 +5,16 @@ import FitnessClassOverviewWidget from "../../class-detail-components/FitnessCla
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebaseConfig";
 
-
-const ClassDetails = () => {
+const ClassDetails = ({ classData }) => {
   const router = useRouter();
   const [user] = useAuthState(auth);
-  const classId = router.query.id?.replace('id=', '');
-
+  const classId = router.query.id?.replace("id=", "");
 
   return (
     <div data-ignore="used only for top most containter width">
-      <FitnessClassOverviewWidget 
-        {...mockData} 
+      <FitnessClassOverviewWidget
+        {...mockData}
+        classData={mockData}
         classId={classId}
         userId={user?.uid}
       />
