@@ -6,6 +6,8 @@ import Header from "../components/Header";
 import dynamic from "next/dynamic";
 import { categories } from "../utils/categories";
 import { useDropzone } from "react-dropzone";
+import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 const MapCoordinates = dynamic(() => import("../components/MapCoordinates"), {
   ssr: false,
@@ -27,6 +29,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import { set } from "date-fns";
+import LocationMap from "../components/LocationMap";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -92,16 +95,17 @@ export default function CreateClass() {
           img.name
         }`
       );
-    
+
       uploadBytes(fileRef, img).then(async (res) => {
-        getDownloadURL(ref(storage, res.metadata.fullPath)).then(async (url) => {
-          await updateDoc(doc(db, "classes", addingClass.id), {
-            Images: arrayUnion(url),
-          });
-        });
+        getDownloadURL(ref(storage, res.metadata.fullPath)).then(
+          async (url) => {
+            await updateDoc(doc(db, "classes", addingClass.id), {
+              Images: arrayUnion(url),
+            });
+          }
+        );
       });
     });
-    
 
     setForm({
       Name: "",
@@ -364,8 +368,12 @@ export default function CreateClass() {
             <div className="w-full max-w-[750px]">
               <div className="text-lg font-bold w-full pb-1">Images</div>
               <div className="text-base text-gray-500  w-full pb-6">
-              Upload high-quality images of your class setup or teaching environment. Studies show that engaging visuals can significantly enhance student interest and enrollment. <br></br><br></br>
-              <b>Pro Tip:</b> Use bright, clear photos that highlight the unique aspects of your class to attract more students.
+                Upload high-quality images of your class setup or teaching
+                environment. Studies show that engaging visuals can
+                significantly enhance student interest and enrollment. <br></br>
+                <br></br>
+                <b>Pro Tip:</b> Use bright, clear photos that highlight the
+                unique aspects of your class to attract more students.
               </div>
               <div
                 {...getRootProps()}
@@ -460,70 +468,24 @@ export default function CreateClass() {
                 />
               </div>
             </div>
-            <div className="text-xl w-full max-w-[750px] font-bold">
-              <div className="flex flex-wrap gap-2 flex-row justify-between align-center">
-                <div>Location of Lesson</div>
-                <button
-                  type="button"
-                  className="border-2 border-gray-200 rounded-xl px-4 py-2 text-base bg-transparent bg-gray-100"
-                  onClick={() => setShowMap(true)}
-                >
-                  Get Coordinates
-                </button>
-              </div>
-            </div>
-
-            {showMap && (
-              <div className="py-4 mx-auto aspect-square w-full md:w-2/3">
-                <MapCoordinates
-                  setCoordinates={handleCoordinates}
-                  setShowMap={setShowMap}
-                />
-              </div>
-            )}
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-m font-bold">Address</label>
+            <div className="w-full max-w-[750px]">
+              <div className="text-xl font-bold mb-4">Location of Lesson</div>
+              <LocationMap
+                onLocationSelect={({ address, latitude, longitude }) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    Address: address,
+                    latitude: latitude,
+                    longitude: longitude,
+                  }));
+                }}
+              />
+              <div className="mt-4">
+                <label className="text-m font-bold">Selected Address</label>
                 <input
-                  required
-                  name="address"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Your address"
-                  type={"text"}
+                  readOnly
                   value={form.Address}
-                  onChange={(e) =>
-                    setForm({ ...form, Address: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-m font-bold">Latitude</label>
-                <input
-                  required
-                  name="latitude"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Your location latitude"
-                  type={"text"}
-                  value={form.latitude}
-                  onChange={(e) =>
-                    setForm({ ...form, latitude: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex-grow">
-                <label className="text-m font-bold">Longitude</label>
-                <input
-                  required
-                  name="longitude"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Your location longitude"
-                  type={"text"}
-                  value={form.longitude}
-                  onChange={(e) =>
-                    setForm({ ...form, longitude: e.target.value })
-                  }
                 />
               </div>
             </div>
@@ -531,7 +493,8 @@ export default function CreateClass() {
               <div>
                 <div className="text-xl font-bold">Create a Package</div>
                 <div className="text-sm text-gray-400 mt-1 font-medium">
-                <b>Optional:</b> Packages encourage students to commit and enable lasting relationships.
+                  <b>Optional:</b> Packages encourage students to commit and
+                  enable lasting relationships.
                 </div>
               </div>
               <button

@@ -1,11 +1,19 @@
 import { Button } from "@mui/base";
-import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db, auth } from "../../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import ClassLocationMap from "../../components/ClassLocationMap";
 
-function DynamicButtonSection({ classId, instructorId }) {
+function DynamicButtonSection({ classId, classData, instructorId }) {
   const [user] = useAuthState(auth);
   const router = useRouter();
 
@@ -67,7 +75,10 @@ function DynamicButtonSection({ classId, instructorId }) {
 
   return (
     <div className="flex justify-center items-stretch flex-col grow-0 shrink-0 basis-auto">
-      <Button onClick={() => router.push(`/booking?id=${classId}`)} className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105">
+      <Button
+        onClick={() => router.push(`/booking?id=${classId}`)}
+        className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105"
+      >
         <span className="[font-family:Inter,sans-serif] text-base font-semibold">
           Booking schedule
         </span>
@@ -78,6 +89,17 @@ function DynamicButtonSection({ classId, instructorId }) {
       >
         Send message
       </Button>
+
+      {classData && (
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4">Location</h3>
+          <ClassLocationMap
+            longitude={classData.longitude}
+            latitude={classData.latitude}
+            address={classData.Address}
+          />
+        </div>
+      )}
     </div>
   );
 }
