@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
 import Select from "react-select";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-day-picker/dist/style.css";
+import moment from "moment-timezone";
 import { DayPicker } from "react-day-picker";
 import { auth } from "../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -20,6 +20,9 @@ import {
   getDoc,
   onSnapshot,
   collection,
+  query,
+  getDocs,
+  where,
 } from "firebase/firestore";
 
 const localizer = momentLocalizer(moment);
@@ -52,7 +55,38 @@ export default function Schedule() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("week");
   const [scheduleLoading, setScheduleLoading] = useState(false);
+  const userTimezone = moment.tz.guess();
+  const [bookedSlots, setBookedSlots] = useState([]);
 
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      const bookingsQuery = query(
+        collection(db, "Bookings"),
+        where("instructor_id", "==", user.uid)
+      );
+
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+      
+
+      const validBookings = [];
+      bookingsSnapshot.forEach((docSnapshot) => {
+        const booking = docSnapshot.data();
+        const bookingStartTime = moment.utc(booking.startTime);
+
+        validBookings.push({
+          startTime: new Date(moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")),
+          endTime: new Date(moment.utc(booking.endTime).format("YYYY-MM-DD hh:mm A")),
+          date: bookingStartTime.format("YYYY-MM-DD"),
+          student_id: booking.student_id,
+          student_name: booking.student_name,
+        });
+      });
+
+      setBookedSlots(validBookings);
+    };
+
+    if (user) fetchBookedSlots();
+  }, [user]);
   const addVacation = () => {
     if (!vacationStartDate || !vacationEndDate) {
       toast.error("Please select a valid vacation range.");
@@ -90,6 +124,7 @@ export default function Schedule() {
       const data = {
         generalAvailability,
         adjustedAvailability,
+        appointmentDuration,
       };
 
       await setDoc(doc(db, "Schedule", user.uid), data, { merge: true });
@@ -113,6 +148,9 @@ export default function Schedule() {
             if (data) {
               setGeneralAvailability(data.generalAvailability);
               setAdjustedAvailability(data.adjustedAvailability);
+              setAppointmentDuration(
+                data?.appointmentDuration ? data.appointmentDuration : 30
+              );
             }
           }
         },
@@ -145,7 +183,12 @@ export default function Schedule() {
 
   useEffect(() => {
     generateEvents(generalAvailability, adjustedAvailability);
-  }, [appointmentDuration, generalAvailability, adjustedAvailability]);
+  }, [
+    appointmentDuration,
+    generalAvailability,
+    adjustedAvailability,
+    bookedSlots,
+  ]);
 
   const handleGeneralInputChange = (dayIndex, slotIndex, key, value) => {
     const updatedAvailability = [...generalAvailability];
@@ -267,8 +310,23 @@ export default function Schedule() {
                   hour: next.hours(),
                   minute: next.minutes(),
                 });
+
+              const isBooked = bookedSlots.some(
+                (bookedSlot) =>
+                  moment(bookedSlot.startTime).isSame(start) ||
+                  moment(bookedSlot.endTime).isSame(end) ||
+                  (moment(bookedSlot.startTime).isBefore(start) &&
+                    moment(bookedSlot.endTime).isAfter(start)) ||
+                  (moment(bookedSlot.startTime).isBefore(end) &&
+                    moment(bookedSlot.endTime).isAfter(end))
+              );
+
+              if (isBooked) {
+                continue;
+              }
+
               newEvents.push({
-                title: "Available",
+                title: "",
                 start: start.toDate(),
                 end: end.toDate(),
                 color: "#d8f5b6",
@@ -305,9 +363,21 @@ export default function Schedule() {
               hour: next.hours(),
               minute: next.minutes(),
             });
+            const isBooked = bookedSlots.some(
+              (bookedSlot) =>
+                moment(bookedSlot.startTime).isSame(start) ||
+                moment(bookedSlot.endTime).isSame(end) ||
+                (moment(bookedSlot.startTime).isBefore(start) &&
+                  moment(bookedSlot.endTime).isAfter(start)) ||
+                (moment(bookedSlot.startTime).isBefore(end) &&
+                  moment(bookedSlot.endTime).isAfter(end))
+            );
 
+            if (isBooked) {
+              continue;
+            }
             newEvents.push({
-              title: "Available",
+              title: "",
               start: start.toDate(),
               end: end.toDate(),
               color: "#d8f5b6",
@@ -316,6 +386,19 @@ export default function Schedule() {
             current = next;
           }
         }
+      });
+    });
+
+    bookedSlots.forEach((booked) => {
+
+      
+
+      newEvents.push({
+        title: booked.student_name,
+        start: booked.startTime,
+        end: booked.endTime,
+        color: "#87CEEB", // Blue for booked slots
+        tooltip: `Booked by ${booked.student_name}`,
       });
     });
 
@@ -802,6 +885,8 @@ export default function Schedule() {
               },
             })}
             scrollToTime={new Date(1970, 1, 1, 8, 0, 0)}
+            // Tooltip
+            tooltipAccessor="tooltip"
           />
         </div>
       </div>

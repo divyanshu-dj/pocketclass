@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { categories } from "../../utils/categories";
+import BookingComponent from "../BookingComponent";
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -301,6 +302,7 @@ function FitnessClassDetailsSection({
             instructorData={classCreatorData}
             classData={classData}
           />
+          <BookingComponent classId={classId} instructorId={classCreatorData?.userUid}/>
           <FitnessScheduleMindfulnessDisplay
             classData={classData}
             timeSlotOptions={timeSlotOptions}
@@ -319,7 +321,10 @@ function FitnessClassDetailsSection({
             classCreatorData={classCreatorData}
           />
         </div>
-        <div className="hidden xl:block shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-full lg:max-w-[300px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]" style={{zIndex: 1}}>
+        <div
+          className="hidden xl:block shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col w-full lg:max-w-[300px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]"
+          style={{ zIndex: 1 }}
+        >
           <DynamicButtonSection
             classId={classId}
             classData={classData}

@@ -2,7 +2,12 @@ import React from "react";
 import Image from "next/image";
 import { HeartIcon } from "@heroicons/react/outline";
 import { StarIcon } from "@heroicons/react/solid";
+import { TrashIcon } from "@heroicons/react/outline";
+import { PencilIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
+import { deleteDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
+import { db } from "../firebaseConfig";
 
 function InfoCard({
   type,
@@ -21,7 +26,15 @@ function InfoCard({
 }) {
   const router = useRouter();
 
-  
+  const deleteClass = async () => {
+    const classRef = doc(db, "classes", id);
+    await deleteDoc(classRef);
+    toast.success("Class deleted successfully");
+    
+    const card = document.getElementById("infoCard" + id);
+    card?.remove();
+  };
+
   const handleSmallCardClick = () => {
     router.push({
       pathname: "/classes/id=" + id,
@@ -30,22 +43,20 @@ function InfoCard({
 
   const formatTime = (timeString) => {
     const date = new Date(timeString);
-    return date.toLocaleString('en-US', { 
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
   };
 
-
   let currentClassReview = Array.isArray(reviews)
-  ? reviews.filter((rev) => {
-      return rev.classID === id;
-    })
-  : [];
-
+    ? reviews.filter((rev) => {
+        return rev.classID === id;
+      })
+    : [];
 
   let averageReview = 0;
 
@@ -55,16 +66,23 @@ function InfoCard({
     });
     averageReview = averageReview / (currentClassReview.length * 3);
   }
-  
+
   return (
     <div
       className="flex py-7 px-2 border-b cursor-pointer hover:opacity-80 hover:shadow-lg pr-4 transition duration-200 ease-out first:border-t min-w-[100%]"
       onClick={() => handleSmallCardClick()}
+      id={"infoCard" + id}
     >
       <div className="relative h-24 w-40 md:h-52 md:w-80 flex-shrink-0">
         <Image
           priority={true}
-          src={images?.length ? typeof images[0] === "string" ? images[0] : images[0]?.url : images}
+          src={
+            images?.length
+              ? typeof images[0] === "string"
+                ? images[0]
+                : images[0]?.url
+              : images
+          }
           layout="fill"
           unoptimized
           objectFit="contain"
@@ -75,7 +93,29 @@ function InfoCard({
       <div className="flex flex-col flex-grow pl-5">
         <div className="flex justify-between">
           <h4 className="text-xl">{name}</h4>
-          <HeartIcon className="h-7 cursor-pointer" />
+          <div className="flex flex-col gap-2 items-center"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}>
+            <HeartIcon className="h-5 cursor-pointer" />
+
+            <button
+              onClick={(e) => {
+                deleteClass();
+              }}
+            >
+              <TrashIcon  className="h-5 cursor-pointer"/>
+            </button>
+
+            <button
+              onClick={(e) => {
+                router.push("/updateClass/" + id);
+              }}
+            >
+              <PencilIcon className="h-5 cursor-pointer"/>
+            </button>
+          </div>
         </div>
 
         <div className="flex-row">
@@ -142,9 +182,15 @@ function InfoCard({
               fill="#4B5563"
               aria-hidden="true"
             >
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clipRule="evenodd"
+              />
             </svg>
-            <span>{formatTime(start)} - {formatTime(end)}</span>
+            <span>
+              {formatTime(start)} - {formatTime(end)}
+            </span>
           </div>
         )}
 

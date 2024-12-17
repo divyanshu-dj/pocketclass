@@ -82,7 +82,7 @@ function DynamicButtonSection({
     <div className="flex justify-center items-stretch flex-col grow-0 shrink-0 basis-auto">
       <Button
         style={below ? { margin: "auto", width: "60%" } : {}}
-        onClick={() => router.push(`/booking?id=${classId}`)}
+        onClick={() => router.push(`/booking?classId=${classId}&instructorId=${instructorId}`)}
         className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105"
       >
         <span className="[font-family:Inter,sans-serif] text-base font-semibold">

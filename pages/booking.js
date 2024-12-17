@@ -1,527 +1,520 @@
-// Booking.js
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
-import Image from "next/image";
-import Head from "next/head";
-// library
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import {
-  BriefcaseIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-} from "@heroicons/react/solid";
 import { toast } from "react-toastify";
-// firebase
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebaseConfig";
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  onSnapshot,
-  orderBy,
+  addDoc,
+  collection,
+  updateDoc,
   query,
   where,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
-// components
+import moment from "moment";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+  AddressElement,
+} from "@stripe/react-stripe-js";
 import Header from "../components/Header";
-import AddBooking from "../components/AddBooking";
-import Details from "../components/BookingDetails";
-// utils
-import {
-  getDateOnly,
-  isAfter30Days,
-  isBeforeNow,
-  isBeforeToday,
-} from "../utils/date";
-import AddAvailability from "../components/AddAvailability";
-import {
-  alreadyHasAvailability,
-  getDateList,
-  getFlatList,
-} from "../utils/slots";
-const localizer = momentLocalizer(moment);
+import { useAuthState } from "react-firebase-hooks/auth";
+import { use } from "react";
+import { set } from "date-fns";
 
-/* COLORS */
-const red = "rgb(245, 0, 0, 0.05)";
-const darkGreen = "rgb(0, 190, 0, 0.8)";
-const green = "rgb(0, 190, 0, 0.5)";
-const darkGray = "rgb(210, 210, 210)";
-const gray = "rgb(230, 230, 230, 0.4)";
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
-export default function Booking({ component = false }) {
+export default function Booking() {
   const router = useRouter();
-  // user & class
-  const { id: classId } = router.query;
-  const [user] = useAuthState(auth);
-  const [userData, setUserData] = useState(null);
-  const [classData, setClassData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const uid = user?.uid;
-  const uName = `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`;
+  const { instructorId, classId } = router.query;
+  const [timer, setTimer] = useState(null);
 
-  // if user is instructor
-  const isInstructor = user?.uid === classData?.classCreator;
-  const [showAvailability, setShowAvailability] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [schedule, setSchedule] = useState({
+    generalAvailability: [],
+    adjustedAvailability: [],
+  });
+  const [appointmentDuration, setAppointmentDuration] = useState(30);
+  const [groupedSlots, setGroupedSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [stripeOptions, setStripeOptions] = useState(null);
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [user, userLoading] = useAuthState(auth);
+  const studentId = user?.uid;
+  const studentName = user?.displayName;
+  const [classData, setClassData] = useState({});
 
-  // if user is not instructor
-  const [showList, setShowList] = useState(true);
-
-  // appointment
-  const [availability, setAvailability] = useState([]);
-  const [appointments, setAppointments] = useState([]);
-
-  // dialogs
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [slotDate, setSlotDate] = useState(null);
-  const [initialStart, setInitialStart] = useState(null);
-  const [initialEnd, setInitialEnd] = useState(null);
-  const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
-  const [appointmentDetails, setAppointmentDetails] = useState(null);
-
-  /**
-   * UTILITY FUNCTIONS
-   */
-
-  // redirect to main page
-  const goToMainPage = () => router.push("/");
-
-  // get data from db
-  const getData = async (xid, xcol) => {
-    const docRef = doc?.(db, xcol, xid);
-    const data = await getDoc?.(docRef);
-    return data?.data?.();
-  };
-
-  // check id
+  // Get Class Data
   useEffect(() => {
-    if ((router.isReady && !classId) || (router.isReady && !user))
-      goToMainPage();
-  }, [classId, router.isReady, user]);
+    const fetchData = async () => {
+      if (!classId) return;
 
-  // close modals
-  const handleCloseModal = () => {
-    setInitialStart(null);
-    setInitialEnd(null);
-    setShowAppointmentDetails(false);
-    setShowAddForm(false);
-  };
-
-  // appointment styles
-  const eventStyleGetter = (event) => {
-    return {
-      style: {
-        backgroundColor: isBeforeNow(event.end) ? darkGray : darkGreen,
-        color: isBeforeNow(event.end) ? "black" : "white",
-        display: isInstructor || event.owner === uid ? "block" : "none",
-        textAlign: "center",
-        padding: window.innerWidth > 768 ? "4px" : "1px 4px",
-        cursor: !!event?.availability ? "default" : "pointer",
-        borderRadius: "1000px",
-        fontSize: "13px",
-      },
-    };
-  };
-
-  const dayPropGetter = (date) => {
-    return {
-      style: {
-        backgroundColor: isBeforeToday(date)
-          ? gray
-          : !isInstructor &&
-            getFlatList(availability)?.some(
-              (a) => moment(a.start).isSame(date, "day") && a.availability
-            ) &&
-            green,
-      },
-    };
-  };
-
-  /**
-   * DATA FUNCTIONS
-   */
-
-  // get appointments
-  const getAppointments = async () => {
-    try {
-      const querySnapshot = await getDocs(
-        query(collection(db, "appointments"), where("class", "==", classId))
-      );
-
-      const apps = querySnapshot?.docs?.map?.((app) => app?.data?.());
-      setAppointments(apps || []);
-    } catch (error) {
-      toast.error("Appointments loading error !", {
-        toastId: "appError3",
-      });
-      console.warn(error);
-    }
-  };
-
-  // get availability
-  const getAvailability = async () => {
-    try {
-      const querySnapshot = await getDocs(
-        query(collection(db, "schedule"), where("class", "==", classId))
-      );
-
-      const apps = querySnapshot?.docs?.map?.((app) => app?.data?.());
-      setAvailability(apps || []);
-    } catch (error) {
-      toast.error("Availability loading error !", {
-        toastId: "avlError3",
-      });
-      console.warn(error);
-    }
-  };
-
-  // get availability data on change
-  useEffect(() => {
-    const observeAvailability = async () => {
-      try {
-        onSnapshot(query(collection(db, "schedule")), async (querySnapshot) => {
-          const ch = querySnapshot
-            .docChanges()
-            .find((change) => change?.doc?.data()?.class === classId);
-
-          if (ch) {
-            await getAvailability();
-          }
-        });
-      } catch (error) {
-        toast.error("Appointments observing error !", {
-          toastId: "appError3",
-        });
-        console.warn(error);
+      const classDocRef = doc(db, "classes", classId);
+      const snapshot = await getDoc(classDocRef);
+      if (snapshot.exists()) {
+        setClassData(snapshot.data());
       }
     };
 
-    if (isInstructor && !!classId) observeAvailability();
-  }, [isInstructor, classId]);
-
-  // get appointments data on change
-  useEffect(() => {
-    const observeAppointments = async () => {
-      try {
-        onSnapshot(
-          query(collection(db, "appointments")),
-          async (querySnapshot) => {
-            const ch = querySnapshot
-              .docChanges()
-              .find((change) => change?.doc?.data()?.class === classId);
-
-            if (ch) {
-              await getAppointments();
-            }
-          }
-        );
-      } catch (error) {
-        toast.error("Appointment observing error !", {
-          toastId: "appError4",
-        });
-        console.warn(error);
-      }
-    };
-
-    if (!!classId) observeAppointments();
+    fetchData();
   }, [classId]);
 
-  // get all data
   useEffect(() => {
-    const getAllData = async () => {
-      try {
-        setIsLoading(true);
-        const cData = await getData(classId, "classes");
-        const uData = await getData(uid, "Users");
-        setClassData(await cData);
-        setUserData(await uData);
+    if (!user && !userLoading) router.push("/Login");
+  }, [user, userLoading]);
 
-        await getAppointments();
-        await getAvailability();
-
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Class Data loading error !", {
-          toastId: "classError3",
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!instructorId || !classId) return;
+      const docRef = doc(db, "Schedule", instructorId);
+      const snapshot = await getDoc(docRef);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setSchedule({
+          generalAvailability: data.generalAvailability || [],
+          adjustedAvailability: data.adjustedAvailability || [],
         });
-        console.warn(error);
+        setAppointmentDuration(data.appointmentDuration || 30);
       }
+
+      const now = moment.utc();
+      const bookingsQuery = query(
+        collection(db, "Bookings"),
+        where("instructor_id", "==", instructorId)
+      );
+      const bookingsSnapshot = await getDocs(bookingsQuery);
+
+      const validBookings = [];
+      bookingsSnapshot.forEach(async (docSnapshot) => {
+        const booking = docSnapshot.data();
+        const bookingRef = docSnapshot.ref;
+
+        const bookingStartTime = moment.utc(booking.startTime); // Convert to UTC
+        const bookingExpiry = booking.expiry
+          ? moment.utc(booking.expiry)
+          : null;
+
+        if (
+          booking.status === "Pending" &&
+          bookingExpiry &&
+          bookingExpiry.isBefore(now)
+        ) {
+          await deleteDoc(bookingRef);
+        } else {
+          validBookings.push({
+            startTime: bookingStartTime.format("HH:mm"),
+            endTime: moment.utc(booking.endTime).format("HH:mm"),
+            date: bookingStartTime.format("YYYY-MM-DD"),
+          });
+        }
+      });
+
+      setBookedSlots(validBookings);
     };
 
-    if (!!classId && !!user) getAllData();
-  }, [classId, user]);
+    fetchData();
+  }, [instructorId, classId]);
 
-  /**
-   * APPOINTMENTS FUNCTIONS
-   */
+  // Generate slots
+  useEffect(() => {
+    const generateSlots = () => {
+      const { generalAvailability, adjustedAvailability } = schedule;
+      const slotsByDate = {};
+      let totalSlotCount = 0;
+      const startDate = moment.utc(selectedDate).startOf("day"); // Normalize to UTC
 
-  // slot click
-  const handleSlotClick = (slot, isDirect = false) => {
-    const slotDate = getDateOnly(slot.start);
+      for (let i = 0; totalSlotCount < 30; i++) {
+        const currentDate = startDate.clone().add(i, "days");
+        const dayName = currentDate.format("dddd");
+        const dateStr = currentDate.format("YYYY-MM-DD");
+        let slots = [];
+
+        // Adjusted availability priority
+        const adjustedDay = adjustedAvailability.find(
+          (day) => day.date === dateStr
+        );
+        if (adjustedDay) {
+          adjustedDay.slots.forEach((slot) =>
+            slots.push(...splitSlots(slot.startTime, slot.endTime, dateStr))
+          );
+        } else {
+          const generalDay = generalAvailability.find(
+            (day) => day.day === dayName
+          );
+          if (generalDay) {
+            generalDay.slots.forEach((slot) =>
+              slots.push(...splitSlots(slot.startTime, slot.endTime, dateStr))
+            );
+          }
+        }
+
+        if (slots.length > 0) {
+          slotsByDate[dateStr] = slots;
+        }
+        totalSlotCount += slots.length;
+        if (totalSlotCount >= 30) break;
+      }
+
+      const grouped = [];
+      Object.entries(slotsByDate).forEach(([date, slots]) =>
+        grouped.push({ date, slots })
+      );
+      setGroupedSlots(grouped);
+    };
+
+    const splitSlots = (start, end, dateStr) => {
+      const slotStart = moment.utc(start, "HH:mm"); // Normalize start to UTC
+      const slotEnd = moment.utc(end, "HH:mm"); // Normalize end to UTC
+      const slots = [];
+
+      while (slotStart.isBefore(slotEnd)) {
+        const nextSlot = slotStart.clone().add(appointmentDuration, "minutes");
+        if (nextSlot.isAfter(slotEnd)) break;
+
+        // Compare booked slots using UTC times
+        const isBooked = bookedSlots.some(
+          (booked) =>
+            booked.date === dateStr &&
+            moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
+        );
+
+        if (!isBooked) {
+          slots.push({
+            startTime: slotStart.format("HH:mm"),
+            endTime: nextSlot.format("HH:mm"),
+          });
+        }
+        slotStart.add(appointmentDuration, "minutes");
+      }
+      return slots;
+    };
+
     if (
-      isBeforeNow(slotDate) ||
-      (isInstructor && !showAvailability) ||
-      (isInstructor &&
-        showAvailability &&
-        alreadyHasAvailability(availability, slotDate))
+      schedule.generalAvailability.length ||
+      schedule.adjustedAvailability.length
     )
+      generateSlots();
+  }, [selectedDate, schedule, appointmentDuration, bookedSlots]);
+
+  const handleSlotClick = (date, slot) => {
+    setSelectedSlot({ date, ...slot });
+  };
+
+  const initializeStripe = async () => {
+    const now = moment.utc();
+    const expiry = now.clone().add(10, "minutes").toISOString();
+    setTimer(600);
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev > 0) return prev - 1;
+        else {
+          clearInterval(interval);
+          setStripeOptions(null);
+          toast.error("Booking session expired. Please try again.");
+        }
+        return 0;
+      });
+    }, 1000);
+    const bookingData = {
+      student_id: studentId,
+      instructor_id: instructorId,
+      class_id: classId,
+      student_name: studentName,
+      startTime: moment
+        .utc(
+          `${selectedSlot.date} ${selectedSlot.startTime}`,
+          "YYYY-MM-DD HH:mm"
+        )
+        .toISOString(),
+      endTime: moment
+        .utc(`${selectedSlot.date} ${selectedSlot.endTime}`, "YYYY-MM-DD HH:mm")
+        .toISOString(),
+      status: "Pending",
+      expiry,
+    };
+
+    const bookingsRef = collection(db, "Bookings");
+    const slotQuery = query(
+      bookingsRef,
+      where("instructor_id", "==", instructorId),
+      where(
+        "startTime",
+        "==",
+        moment
+          .utc(
+            `${selectedSlot.date} ${selectedSlot.startTime}`,
+            "YYYY-MM-DD HH:mm"
+          )
+          .toISOString()
+      )
+    );
+
+    const querySnapshot = await getDocs(slotQuery);
+
+    if (!querySnapshot.empty) {
+      toast.error(
+        "This slot is already booked. Please select a different time."
+      );
       return;
-    if (!!isDirect) {
-      setInitialStart(slot.start);
-      setInitialEnd(slot.end);
     }
 
-    setSlotDate(slotDate);
-    setShowAddForm(true);
+    const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
+
+    const response = await fetch("/api/create-stripe-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ price: classData.Price }),
+    });
+    const data = await response.json();
+    if (data?.clientSecret)
+      setStripeOptions({
+        clientSecret: data.clientSecret,
+        bookingRef: bookingRef.id,
+      });
   };
 
-  // appointment details
-  const handleAppointmentClick = (appointment) => {
-    if (
-      (!isInstructor && appointment.owner !== uid) ||
-      !!appointment?.availability
-    )
-      return;
-    setAppointmentDetails(appointment);
-    setShowAppointmentDetails(true);
+  const handleBookSlot = () => {
+    initializeStripe();
   };
 
-  return isLoading || !classData || !userData || !classId || !user ? (
-    <section className="flex justify-center items-center min-h-[100vh]">
-      <Image src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
-    </section>
-  ) : component &&
-    getFlatList(availability).filter((a) => !isBeforeNow(getDateOnly(a.start)))
-      .length === 0 ? (
-    <>
-      <p className="text-center text-xl text-gray-700 my-20">
-        No upcomming availability
-      </p>
-    </>
-  ) : (
-    <div className={`flex flex-col mx-auto ${!component && "min-h-screen"}`}>
-      {!component && (
-        <>
-          {/* head */}
-          <Head>
-            <title>Booking</title>
-            <meta name="description" content="Generated by create next app" />
-            <link rel="icon" href="/pc_favicon.ico" />
-          </Head>
-
-          {/* header */}
-          <Header />
-        </>
-      )}
-      {/* booking container */}
-      <div
-        className={`bg-white flex-1 flex flex-col ${
-          !component
-            ? " p-2 md:p-12"
-            : " max-h-screen overflow-y-auto smallScrollbar"
-        }`}
-      >
-        {!component && (
-          <>
-            <h1 className="capitalize text-logo-red text-2xl md:text-4xl font-medium pb-1">
-              {classData?.Name}
-            </h1>
-
-            <div className="icons my-3 flex flex-row flex-wrap mb-10">
-              <div className="mt-2 mr-4 flex items-center text-sm text-gray-500">
-                <BriefcaseIcon className="h-5 w-5 mr-1" fill="#AF816C" />
-                {classData?.Category} / {classData?.Type}
-              </div>
-
-              <div className="mt-2 mr-4 flex items-center text-sm text-gray-500">
-                <CurrencyDollarIcon className="h-5 w-5 mr-1" fill="#58C18E" />
-                {classData?.Price}
-              </div>
-              <div className="mt-2 w-full md:w-fit flex items-center text-sm text-gray-500">
-                <CalendarIcon className="h-5 w-5 mr-1" fill="#E73F2B" />
-                Available
-              </div>
-            </div>
-          </>
-        )}
-        <div
-          className={`p-4 pt-4 md:p-10 md:pt-8 w-full min-h-fit flex-1 flex flex-col ${
-            !component &&
-            " bg-white shadow-lg border rounded-3xl overflow-hidden"
-          }`}
-        >
-          {/* availability */}
-          {!component && !!user && !!isInstructor && (
-            <div className="flex mb-10 rounded-full border border-logo-red w-fit shadow-md">
-              <button
-                className={`w-[140px] md:w-[200px] py-1 rounded-l-full font-medium duration-300 ease-in-out ${
-                  !showAvailability
-                    ? " bg-logo-red text-white"
-                    : " bg-slate-100 text-gray-700"
-                }`}
-                onClick={() => setShowAvailability(false)}
-              >
-                Bookings
-              </button>
-
-              <button
-                className={`w-[140px] md:w-[200px] py-1 rounded-r-full font-medium duration-300 ease-in-out ${
-                  showAvailability
-                    ? " bg-logo-red text-white"
-                    : " bg-slate-100 text-gray-700"
-                }`}
-                onClick={() => setShowAvailability(true)}
-              >
-                Your Availability
-              </button>
-            </div>
-          )}
-
-          {/* availability display */}
-          {!component && !!user && !isInstructor && (
-            <div className="flex mb-10 rounded-full border border-logo-red w-fit shadow-md">
-              <button
-                className={`w-[140px] md:w-[200px] py-1 rounded-l-full font-medium duration-300 ease-in-out ${
-                  showList
-                    ? " bg-logo-red text-white"
-                    : " bg-slate-100 text-gray-700"
-                }`}
-                onClick={() => setShowList(true)}
-              >
-                List
-              </button>
-
-              <button
-                className={`w-[140px] md:w-[200px] py-1 rounded-r-full font-medium duration-300 ease-in-out ${
-                  !showList
-                    ? " bg-logo-red text-white"
-                    : " bg-slate-100 text-gray-700"
-                }`}
-                onClick={() => setShowList(false)}
-              >
-                Calendar
-              </button>
-            </div>
-          )}
-
-          {(!!user && !isInstructor && !!showList) || component ? (
-            getFlatList(availability)
-              ?.sort((a, b) => new Date(a.start) - new Date(b.start))
-              ?.filter((a) => a.availability)
-              ?.map?.((a, i) => {
-                const slotDate = getDateOnly(a.start);
-                const isDisabled = isBeforeNow(slotDate);
-
-                return (
-                  !isDisabled && (
-                    <div
-                      key={`${a.start} ${i}`}
-                      className={`flex flex-col md:flex-row md:items-center p-3 border-b ${
-                        i === 0 && "border-t"
-                      }`}
-                    >
-                      <div>
-                        <p className="text-logo-red text-xs font-medium">
-                          Available
-                        </p>
-                        <p className="font-medium">
-                          {new Date(a.start).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center md:ml-40">
-                        <p className="text-sm font-medium text-gray-600">
-                          {new Date(a.start).toLocaleTimeString()}
-                        </p>
-                        <p className="mx-1">-</p>
-                        <p className="text-sm font-medium text-gray-600">
-                          {new Date(a.end).toLocaleTimeString()}
-                        </p>
-                      </div>
-
-                      <button
-                        className="ml-auto py-1 px-4 bg-transparent border border-logo-red text-logo-red rounded-full font-medium text-sm hover:opacity-30 ease-in-out duration-300 disabled:opacity-30 disabled:grayscale-[90%] mt-4 sm:mt-0"
-                        onClick={() => {
-                          !!user
-                            ? handleSlotClick(a, true)
-                            : toast.warning("Login to use this feature !", {
-                                toastId: "loginError1",
-                              });
-                        }}
-                      >
-                        Open
-                      </button>
-                    </div>
-                  )
-                );
-              })
-          ) : (
-            <Calendar
-              className="min-h-[750px] md:min-h-[600px] flex-1 w-full"
-              localizer={localizer}
-              events={
-                !isInstructor
-                  ? getDateList(appointments)?.filter?.((a) => a?.owner === uid)
-                  : showAvailability
-                  ? getFlatList(availability)?.filter((a) => a.availability)
-                  : getDateList(appointments)
-              }
-              startAccessor="start"
-              endAccessor="end"
-              selectable={true}
-              onSelectSlot={handleSlotClick}
-              onSelectEvent={handleAppointmentClick}
-              eventPropGetter={eventStyleGetter}
-              dayPropGetter={dayPropGetter}
-              longPressThreshold={100}
-            />
-          )}
+  return (
+    <div className="relative h-screen flex flex-col">
+      <Header />
+      <div className="flex flex-grow flex-col lg:flex-row lg:overflow-hidden">
+        {/* Calendar Section */}
+        <div className="p-4 border-r bg-gray-50 flex-shrink-0 max-h-full overflow-y-auto">
+          <h2 className="text-2xl font-bold text-[#E73F2B] mb-4">
+            Select a Date
+          </h2>
+          <DayPicker
+            className="bg-white p-2 rounded-lg flex items-center justify-center"
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => setSelectedDate(date + 1)}
+          />
         </div>
 
-        {showAddForm &&
-          (isInstructor ? (
-            <AddAvailability
-              slotDate={slotDate}
-              closeModal={handleCloseModal}
-              classId={classId}
-              uEmail={userData?.email}
-            />
-          ) : (
-            <>
-              <AddBooking
-                slotDate={slotDate}
-                availability={availability}
-                appointments={appointments}
-                closeModal={handleCloseModal}
-                uName={uName}
-                uEmail={userData?.email}
-                uid={uid}
-                classId={classId}
-                className={classData?.Name}
-                insId={classData?.classCreator}
-                price={classData?.Price}
-                initialStart={initialStart}
-                initialEnd={initialEnd}
-                groupType={classData?.groupType}
-                classStudents={classData?.classStudents}
-                remainingSeats={classData?.remainingSeats}
-                bookingslotInfo={classData?.bookings}
-              />
-            </>
+        {/* Time Slots Section */}
+        <div className="flex-grow p-4 bg-white overflow-y-auto">
+          <h2 className="text-2xl font-bold text-[#E73F2B] mb-6 mt-2">
+            Select a Time Slot
+          </h2>
+          {groupedSlots.map((group, index) => (
+            <div key={index} className="mb-6">
+              <h3 className="font-bold text-lg mb-2">
+                {moment(group.date).format("dddd, Do MMMM YYYY")}
+              </h3>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {group.slots.map((slot, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSlotClick(group.date, slot)}
+                    className={`p-3 border rounded cursor-pointer ${
+                      selectedSlot?.startTime === slot.startTime &&
+                      selectedSlot?.date === group.date
+                        ? "bg-[#E73F2B] text-white"
+                        : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
+                    }`}
+                  >
+                    {slot.startTime} - {slot.endTime}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
 
-        {showAppointmentDetails && (
-          <Details
-            appointmentDetails={appointmentDetails}
-            closeModal={handleCloseModal}
-            isInstructor={isInstructor}
-          />
-        )}
+          {/* Sticky Booking Div */}
+          {selectedSlot && (
+            <div className="sticky bottom-0 bg-gray-50 p-4 shadow-md flex justify-between items-center">
+              <p>
+                Selected:{" "}
+                {moment(selectedSlot.date).format("dddd, Do MMMM YYYY")}{" "}
+                {selectedSlot.startTime} - {selectedSlot.endTime}
+              </p>
+              <button
+                onClick={handleBookSlot}
+                className="bg-[#E73F2B] text-white p-2 rounded"
+              >
+                Book Slot
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Centered Stripe Checkout */}
+      {stripeOptions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <Elements stripe={stripePromise} options={stripeOptions}>
+            <CheckoutForm
+              bookingRef={stripeOptions.bookingRef}
+              timer={timer}
+              price={classData.Price}
+              setStripeOptions={setStripeOptions}
+              date={selectedSlot.date}
+              startTime={selectedSlot.startTime}
+              endTime={selectedSlot.endTime}
+            />
+          </Elements>
+        </div>
+      )}
     </div>
   );
 }
+
+const CheckoutForm = ({ bookingRef, timer, setStripeOptions, date, startTime, endTime }) => {
+  const stripe = useStripe();
+  const [user, userLoading] = useAuthState(auth);
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+
+  
+  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent) => {
+    try {
+      const res = await fetch("/api/sendEmail", {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: targetSubject,
+          html: targetHtmlContent,
+          to: targetEmails,
+        }),
+      });
+
+      if (res.status === 200) {
+        console.log("Email sent successfully");
+      } else {
+        toast.error("Failed to send email. Please try again.");
+      }
+    } catch (error) {
+      console.warn("Error sending email: ", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        payment_method_data: {
+          billing_details: {
+            name: user?.displayName,
+            email: user?.email,
+          },
+        },
+      },
+      redirect: "if_required",
+    });
+
+    if (!error && paymentIntent?.status === "succeeded") {
+      const bookingDocRef = doc(db, "Bookings", bookingRef);
+      await updateDoc(bookingDocRef, { status: "Confirmed", expiry: null });
+
+      const bookingSnapshot = await getDoc(bookingDocRef);
+      const bookingData = bookingSnapshot.data();
+      const classRef = doc(db, "classes", bookingData.class_id);
+      const classSnapshot = await getDoc(classRef);
+      const classData = classSnapshot.data();
+
+      const instructorRef = doc(db, "Users", bookingData.instructor_id);
+      const instructorSnapshot = await getDoc(instructorRef);
+      const instructorData = instructorSnapshot.data();
+
+      // Combine both emails
+      const recipientEmails = `${user?.email}, ${instructorData.email}`;
+
+      // HTML content for the email
+      const htmlContent = `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #007bff;">New Booking Confirmation</h2>
+        <p>Hello,</p>
+        <p>We are excited to confirm a new booking for the class <strong>${
+          classData.Name
+        }</strong>!</p>
+        <h3>Booking Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;" border="1">
+          <tr>
+            <td style="padding: 8px;"><strong>User Email:</strong></td>
+            <td style="padding: 8px;">${user?.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Class Name:</strong></td>
+            <td style="padding: 8px;">${classData.Name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Start Time:</strong></td>
+            <td style="padding: 8px;">${date + "/" + startTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>End Time:</strong></td>
+            <td style="padding: 8px;">${date + "/" + endTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Price:</strong></td>
+            <td style="padding: 8px;">${classData.Price}</td>
+          </tr>
+        </table>
+        <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
+        <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
+      </div>
+    `;
+
+      await sendEmail(
+        recipientEmails,
+        `New Booking for ${classData.Name} with Pocketclass!`,
+        htmlContent
+      );
+
+      setStripeOptions(null);
+      setLoading(false);
+      toast.success("Booking confirmed!");
+    } else {
+      toast.error(error?.message || "Payment failed!");
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto"
+    >
+      <div className="flex flex-row items-center justify-between mb-4">
+        <h1 className="text-lg font-bold">Complete Payment</h1>
+
+        <div className="flex items-center">
+          <p className="text-sm text-gray-500 mr-2">Expires in:</p>
+          <p className="text-sm text-[#E73F2B] font-bold">
+            {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
+            {timer % 60}
+          </p>
+        </div>
+      </div>
+      <AddressElement options={{ mode: "billing" }} />
+      <PaymentElement />
+      <button
+        className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Pay"}
+      </button>
+    </form>
+  );
+};
