@@ -10,7 +10,7 @@ function FitnessReviewSectionWidget({
   classCreatorData,
 }) {
   return (
-    <div className="w-full lg:w-[88.00%] box-border mt-12">
+    <div className="w-full box-border mt-12">
       <FitnessReviewSectionContainer
         classId={classId}
         reviewCountsArray1={reviewCountsArray1}
