@@ -129,8 +129,8 @@ export default function UpdateClass() {
       Images: form.Images.filter((file) => file.name !== name),
     });
 
-    console.log("Updated form.Images:", form.Images);
-    console.log("Updated previewImages:", previewImages);
+    // console.log("Updated form.Images:", form.Images);
+    // console.log("Updated previewImages:", previewImages);
   };
   const handleInputChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

@@ -65,7 +65,7 @@ function Balance({   }) {
 
     let validCurrencies = await account.json();
     setPaymentDetails({ ...paymentDetails, accountNumber:accountNumber });
-    console.log(accountNumber);
+    // console.log(accountNumber);
     //remove duplicates
     validCurrencies = [...new Set(validCurrencies)];
     setCurrency(validCurrencies);
@@ -83,7 +83,7 @@ function Balance({   }) {
   const updatePayoutsAndBalance = async (
     accountNumber = paymentDetails.accountNumber
   ) => {
-    console.log(paymentDetails.accountNumber);
+    // console.log(paymentDetails.accountNumber);
     if(!accountNumber)return;
     toast.loading("Loading Balance and Details...");
     let payouts = fetch("/api/getPayouts", {
@@ -113,7 +113,7 @@ function Balance({   }) {
 
         setWithdrawn(withdrawn);
         setPayouts(payoutsReceived);
-        console.log(payoutsReceived);
+        // console.log(payoutsReceived);
       });
     });
     let getBalanceObject = fetch("/api/getBalanceObj", {

@@ -56,20 +56,20 @@ export default async function (req, res) {
         // currentDateMinusSevenDays.setDate(currentDateMinusSevenDays.getDate() +1);
         currentDateMinusSevenDays.setDate(currentDateMinusSevenDays.getDate() - 7);
         const totalTransfers = appointmentData.length;
-        console.log("Current date: " + new Date());
-        console.log("Current date minus 7 days: " + currentDateMinusSevenDays);
-        console.log("Running transfers for " + totalTransfers + " appointments...")
+        // console.log("Current date: " + new Date());
+        // console.log("Current date minus 7 days: " + currentDateMinusSevenDays);
+        // console.log("Running transfers for " + totalTransfers + " appointments...")
         appointmentData.forEach(async (appointment,index) => {
             if(appointment.paid !== false) return;
-            console.log(appointment.end);
+            // console.log(appointment.end);
             const appointmentEnd =appointment.end.toDate();
             console.log("Appointment " + index+1 + " ended on: " + appointmentEnd);
             // Check if the appointment ended 7 or more days ago
             if(appointmentEnd <= currentDateMinusSevenDays) {
-                console.log("Creating transfer for appointment " + index+1 + "...");
+                // console.log("Creating transfer for appointment " + index+1 + "...");
                 const instructorId = appointment.instructor;
                 // Get the instructor's stripe account from the database
-                console.log(appointment)
+                // console.log(appointment)
                 const instructor = await getDoc(doc(db, 'Users', instructorId));
                 const instructorData = instructor.data();
                 const instructorStripeAccountId = instructorData.stripeAccountId;
@@ -85,7 +85,7 @@ export default async function (req, res) {
                     currency: "cad",
                     destination: instructorStripeAccountId,
                 });
-                console.log('Transfer created:', transfer);
+                // console.log('Transfer created:', transfer);
                 // Update the appointment to mark it as paid
                 await updateDoc(doc(db, 'appointments', appointment.id), {
                     paid: true,

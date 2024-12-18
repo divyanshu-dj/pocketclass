@@ -5,7 +5,7 @@ import SvgIcon3 from "./icons/SvgIcon3";
 import { categories } from "../../utils/categories";
 
 function MusicianProfileCard1({ instructor }) {
-  console.log(instructor);
+  // console.log(instructor);
   // Default values if data is missing
   const fullName = `${instructor?.name?.split(" ").slice(0, 4).join(" ") || "N/A"}`.trim();
   const rating = instructor?.averageRating; // Static as not in DB

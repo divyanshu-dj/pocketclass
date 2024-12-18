@@ -99,7 +99,7 @@ function DynamicButtonSection({
 
       {classData && (
         <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4">Location</h3>
+          {/* <h3 className="text-lg font-bold mb-4">Location</h3> */}
           <ClassLocationMap
             longitude={classData.longitude}
             latitude={classData.latitude}

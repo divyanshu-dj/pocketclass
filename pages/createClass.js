@@ -167,8 +167,8 @@ export default function CreateClass() {
       Images: form.Images.filter((file) => file.name !== name),
     });
 
-    console.log("Updated form.Images:", form.Images);
-    console.log("Updated previewImages:", previewImages);
+    // console.log("Updated form.Images:", form.Images);
+    // console.log("Updated previewImages:", previewImages);
   };
 
   const onDrop = (acceptedFiles) => {
@@ -337,7 +337,7 @@ export default function CreateClass() {
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Price Per Hour</label>
+                <label className="text-lg font-bold">Price Per Session</label>
                 <input
                   required
                   name="price"
@@ -352,7 +352,7 @@ export default function CreateClass() {
 
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Pricing</label>
+                <label className="text-lg font-bold">Pricing Description</label>
                 <textarea
                   required
                   name="pricing"

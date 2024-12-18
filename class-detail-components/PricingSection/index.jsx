@@ -1,7 +1,8 @@
-function PricingSection({ instructorData }) {
+function PricingSection({classData}) {
+  // console.log("Insructor Data" + {instructorData});
   return (
     <div className="w-[100.00%] box-border mt-[15.5px]">
-      {!instructorData ? (
+      {!classData ? (
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-24 mb-4"></div>
           <div className="space-y-2">
@@ -11,13 +12,14 @@ function PricingSection({ instructorData }) {
         </div>
       ) : (
         <div className="w-[100.00%] box-border">
-          <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-[#261f22] m-0 p-0">
-            Pricing
+          <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0">
+            Pricing Description
           </p>
           <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[black] mt-2 m-0 p-0">
-            Prices range from ${instructorData?.price_min}/hr-${instructorData?.price_max}/hr, depending on class type and group size
+            {classData?.Pricing}
+            {/* Prices range from ${instructorData?.price_min}/hr-${instructorData?.price_max}/hr, depending on class type and group size */}
             <br />
-            (Contact for more information).
+            (Please contact for more information).
           </p>
         </div>
       )}
