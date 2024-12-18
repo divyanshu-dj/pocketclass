@@ -245,7 +245,7 @@ function FitnessClassDetailsSection({
         </div>
       </div>
       <div className="flex justify-start items-start flex-col-reverse lg:flex-row gap-7 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
-        <div className="grow-0 shrink basis-auto">
+        <div className="grow-0 shrink basis-auto xl:max-w-[calc(100vw-500px)]">
           <EnhancedImageGallery images={classData?.Images || []} />
           <div className="flex justify-start items-start gap-2 flex-col md:flex-row w-[100.00%] box-border mt-8">
             {!classCreatorData?.profileImage ? (
@@ -302,7 +302,10 @@ function FitnessClassDetailsSection({
             instructorData={classCreatorData}
             classData={classData}
           />
-          <BookingComponent classId={classId} instructorId={classCreatorData?.userUid}/>
+          <BookingComponent
+            classId={classId}
+            instructorId={classCreatorData?.userUid}
+          />
           <FitnessScheduleMindfulnessDisplay
             classData={classData}
             timeSlotOptions={timeSlotOptions}

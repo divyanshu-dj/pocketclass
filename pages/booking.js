@@ -37,6 +37,7 @@ const stripePromise = loadStripe(
 
 export default function Booking() {
   const router = useRouter();
+
   const { instructorId, classId } = router.query;
   const [timer, setTimer] = useState(null);
 
@@ -54,8 +55,60 @@ export default function Booking() {
   const studentId = user?.uid;
   const studentName = user?.displayName;
   const [classData, setClassData] = useState({});
+  const today = new Date();
+  const [daysWithNoSlots, setDaysWithNoSlots] = useState([]);
+  const [minDays, setMinDays] = useState(0);
+  const [maxDays, setMaxDays] = useState(30);
 
-  // Get Class Data
+  const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
+    const dateStr = moment(date).format("YYYY-MM-DD");
+    const { generalAvailability, adjustedAvailability } = schedule;
+
+    const adjustedDay = adjustedAvailability.find(
+      (day) => day.date === dateStr
+    );
+    if (adjustedDay && adjustedDay.slots.length > 0) return true;
+    else if (adjustedDay && adjustedDay.slots.length === 0) return false;
+
+    const dayName = moment(date).format("dddd");
+    const generalDay = generalAvailability.find((day) => day.day === dayName);
+    if (generalDay && generalDay.slots.length > 0) {
+      return generalDay.slots.some((slot) => {
+        const slotStart = moment(slot.startTime, "HH:mm");
+        const slotEnd = moment(slot.endTime, "HH:mm");
+        while (slotStart.isBefore(slotEnd)) {
+          const nextSlot = slotStart
+            .clone()
+            .add(appointmentDuration, "minutes");
+          if (
+            !bookedSlots.some(
+              (booked) =>
+                booked.date === dateStr &&
+                moment(booked.startTime, "HH:mm").isSame(slotStart)
+            )
+          ) {
+            return true; // Found an available slot
+          }
+          slotStart.add(appointmentDuration, "minutes");
+        }
+      });
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    const daysToCheck = [];
+    for (let i = minDays; i < maxDays; i++) {
+      const date = moment(today).add(i, "days").toDate();
+      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration)) {
+        daysToCheck.push(date);
+      }
+    }
+    console.log("Days with no slots: ", daysToCheck);
+    setDaysWithNoSlots(daysToCheck);
+  }, [schedule, bookedSlots, appointmentDuration]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!classId) return;
@@ -71,10 +124,6 @@ export default function Booking() {
   }, [classId]);
 
   useEffect(() => {
-    if (!user && !userLoading) router.push("/Login");
-  }, [user, userLoading]);
-
-  useEffect(() => {
     const fetchData = async () => {
       if (!instructorId || !classId) return;
       const docRef = doc(db, "Schedule", instructorId);
@@ -85,7 +134,11 @@ export default function Booking() {
           generalAvailability: data.generalAvailability || [],
           adjustedAvailability: data.adjustedAvailability || [],
         });
+        setMinDays(data.minDays || 0);
+        setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
+        const date = moment(today).add(data.minDays, "days");
+        setSelectedDate(new Date(date));
       }
 
       const now = moment.utc();
@@ -132,7 +185,16 @@ export default function Booking() {
       const { generalAvailability, adjustedAvailability } = schedule;
       const slotsByDate = {};
       let totalSlotCount = 0;
-      const startDate = moment.utc(selectedDate).startOf("day"); // Normalize to UTC
+      const startDate = moment(selectedDate).startOf("day");
+      const minDate = moment().add(minDays, "days").startOf("day");
+      const maxDate = moment().add(maxDays, "days").endOf("day");
+
+      if (
+        moment(startDate).isBefore(minDate) ||
+        moment(startDate).isAfter(maxDate)
+      ) {
+        return;
+      }
 
       for (let i = 0; totalSlotCount < 30; i++) {
         const currentDate = startDate.clone().add(i, "days");
@@ -186,7 +248,7 @@ export default function Booking() {
         const isBooked = bookedSlots.some(
           (booked) =>
             booked.date === dateStr &&
-            moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
+            moment(booked.startTime, "HH:mm").isSame(slotStart)
         );
 
         if (!isBooked) {
@@ -213,6 +275,10 @@ export default function Booking() {
 
   const initializeStripe = async () => {
     const now = moment.utc();
+    if (!user && !userLoading) {
+      toast.error("Please login to book a slot.");
+      return;
+    }
     const expiry = now.clone().add(10, "minutes").toISOString();
     setTimer(600);
     const interval = setInterval(() => {
@@ -301,7 +367,21 @@ export default function Booking() {
             className="bg-white p-2 rounded-lg flex items-center justify-center"
             mode="single"
             selected={selectedDate}
-            onSelect={(date) => setSelectedDate(date + 1)}
+            onSelect={(date) => setSelectedDate(new Date(date))}
+            disabled={{
+              before: moment(today).add(minDays, "days").toDate(),
+              after: moment(today).add(maxDays, "days").toDate(),
+            }}
+            modifiers={{
+              noSlots: daysWithNoSlots.map((date) => new Date(date)),
+            }}
+            classNames={{
+              day: "react-day-picker-day",
+              noSlots: "bg-red-100 text-red-700 cross-icon",
+            }}
+            modifiersClassNames={{
+              noSlots: "bg-red-100 cross-icon rounded-full",
+            }}
           />
         </div>
 
@@ -373,13 +453,19 @@ export default function Booking() {
   );
 }
 
-const CheckoutForm = ({ bookingRef, timer, setStripeOptions, date, startTime, endTime }) => {
+const CheckoutForm = ({
+  bookingRef,
+  timer,
+  setStripeOptions,
+  date,
+  startTime,
+  endTime,
+}) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
   const [loading, setLoading] = useState(false);
 
-  
   const sendEmail = async (targetEmails, targetSubject, targetHtmlContent) => {
     try {
       const res = await fetch("/api/sendEmail", {
