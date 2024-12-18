@@ -380,7 +380,7 @@ export default function Booking() {
               noSlots: "bg-red-100 text-red-700 cross-icon",
             }}
             modifiersClassNames={{
-              noSlots: "bg-red-100 cross-icon rounded-full",
+              noSlots: "bg-red-50 cross-icon rounded-full",
             }}
           />
         </div>

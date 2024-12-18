@@ -85,17 +85,6 @@
 
 .cross-icon {
     position: relative;
-  }
-  
-  .cross-icon::after {
-    content: "X";
-    fill: red;
-    position: absolute;
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    color: #e73f2b;
   }
   

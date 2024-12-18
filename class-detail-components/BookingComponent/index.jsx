@@ -55,9 +55,8 @@ export default function index({ instructorId, classId }) {
   const [classData, setClassData] = useState({});
   const today = new Date();
   const [daysWithNoSlots, setDaysWithNoSlots] = useState([]);
-  const [minDays, setMinDays] = useState(0);  
+  const [minDays, setMinDays] = useState(0);
   const [maxDays, setMaxDays] = useState(30);
-
 
   const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
     const dateStr = moment(date).format("YYYY-MM-DD");
@@ -188,7 +187,7 @@ export default function index({ instructorId, classId }) {
       if (
         moment(selectedDate).isBefore(minDate) ||
         moment(selectedDate).isAfter(maxDate)
-      ){
+      ) {
         setGroupedSlots([]);
         return;
       }
@@ -196,7 +195,7 @@ export default function index({ instructorId, classId }) {
 
       // Adjusted availability priority
       const adjustedDay = adjustedAvailability.find(
-        (day) => (day.date === dateStr)
+        (day) => day.date === dateStr
       );
       if (adjustedDay) {
         adjustedDay.slots.forEach((slot) =>
@@ -376,7 +375,7 @@ export default function index({ instructorId, classId }) {
               noSlots: "bg-red-100 text-red-700 cross-icon",
             }}
             modifiersClassNames={{
-              noSlots: "bg-red-100 cross-icon rounded-full",
+              noSlots: "bg-red-50 cross-icon rounded-full",
             }}
           />
         </div>
@@ -422,6 +421,11 @@ export default function index({ instructorId, classId }) {
                 </button>
               ))}
             </div>
+            {groupedSlots.length == 0 && (
+              <div className="text-gray-600 mt-2 mr-2 text-lg">
+                No Time Slots available for this day
+              </div>
+            )}
 
             {/* {groupedSlots.map((group, index) => (
               <div key={index} className="mb-6">
