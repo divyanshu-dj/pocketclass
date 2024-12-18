@@ -29,7 +29,7 @@ function FitnessBioSection({classAbout}) {
           {classAbout?.length > 150 && (
             <p 
               onClick={toggleReadMore} 
-              className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] mt-4 m-0 p-0 cursor-pointer hover:text-blue-600"
+              className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] mt-4 m-0 p-0 cursor-pointer hover:text-red-600"
             >
               {isReadMore ? "Read more" : "Read less"}
             </p>

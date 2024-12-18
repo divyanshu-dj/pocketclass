@@ -58,7 +58,7 @@ const AddStripe = () => {
   }
   const createStripeAccount = async () => {
     if(!email)return
-    console.log(email)
+    // console.log(email)
     let link=await fetch("/api/createExternalAccount", {
       method: "POST",
       headers: {

@@ -16,9 +16,9 @@ export default async function handler(req, res) {
 
     let voucher;
     snapshot.forEach(doc => voucher = { id: doc.id, ...doc.data() });
-    console.log(Date.now() > voucher.expiryDate.toDate());
-    console.log(new Date(voucher.expiryDate.toDate()).getTime());
-    console.log(new Date().getTime());
+    // console.log(Date.now() > voucher.expiryDate.toDate());
+    // console.log(new Date(voucher.expiryDate.toDate()).getTime());
+    // console.log(new Date().getTime());
     if (voucher.remainingUses <= 0 || new Date()> new Date(voucher.expiryDate.toDate())) {
       return res.status(400).json({ message: 'Voucher is not valid' });
     }

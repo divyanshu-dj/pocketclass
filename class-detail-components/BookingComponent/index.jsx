@@ -103,7 +103,7 @@ export default function index({ instructorId, classId }) {
         daysToCheck.push(date);
       }
     }
-    console.log("Days with no slots: ", daysToCheck);
+    // console.log("Days with no slots: ", daysToCheck);
     setDaysWithNoSlots(daysToCheck);
   }, [schedule, bookedSlots, appointmentDuration]);
 
@@ -351,11 +351,11 @@ export default function index({ instructorId, classId }) {
 
   return (
     <div className="relative flex flex-col my-6 mb-10">
-      <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1>
+      {/* <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1> */}
       <div className="flex flex-grow flex-col lg:flex-row">
         {/* Calendar Section */}
-        <div className="p-4 pb-8 max-h-min border-r bg-gray-50 flex-shrink-0 overflow-y-auto">
-          <h2 className="text-2xl font-bold text-[#E73F2B] mb-4">
+        <div className="p-4 pb-8 max-h-min border-gray-100 rounded-md bg-gray-50 flex-shrink-0 overflow-y-auto">
+          <h2 className="text-xl font-bold text-[#E73F2B] mb-4">
             Select a Date
           </h2>
           <DayPicker
@@ -375,34 +375,34 @@ export default function index({ instructorId, classId }) {
               noSlots: "bg-red-100 text-red-700 cross-icon",
             }}
             modifiersClassNames={{
-              noSlots: "bg-red-50 cross-icon rounded-full",
+              noSlots: "line-through cross-icon rounded-full",
             }}
           />
         </div>
 
         {/* Time Slots Section */}
         <div className="flex-grow p-4 flex flex-col bg-white overflow-y-auto">
-          <h2 className="text-2xl font-bold text-[#E73F2B] mb-6 mt-2">
+          <h2 className="text-xl font-bold text-[#E73F2B] mb-6">
             Select a Time Slot
           </h2>
           <div className="flex-grow">
             {/* Display Time slots ONLY of Selected Date without using Grouped slot, just selected Dtae*/}
-            <div className="flex flex-row mb-3 items-center">
+            <div className="flex flex-row mb-3 items-center justify-center">
               <button
                 onClick={() => handlePrev()}
-                className="p-1 font-bold text-xl text-center text-[#E73F2B]  rounded"
+                className="p-1 font-bold text-3xl text-center text-[#E73F2B] rounded"
               >
-                <ChevronLeftIcon className="h-6 w-6" />
-              </button>
-              <button
-                onClick={() => handleNext()}
-                className="p-1 font-bold text-xl mr-2 text-center text-[#E73F2B]  rounded"
-              >
-                <ChevronRightIcon className="h-6 w-6" />
+                <ChevronLeftIcon className="h-8 w-8" />
               </button>
               <h3 className="font-bold text-lg">
-                {moment(selectedDate).format("dddd, Do MMMM YYYY")}
+                {moment(selectedDate).format("dddd, MMM Do YYYY")}
               </h3>
+              <button
+                onClick={() => handleNext()}
+                className="p-1 font-bold text-2xl mr-2 text-center text-[#E73F2B] rounded"
+              >
+                <ChevronRightIcon className="h-8 w-8" />
+              </button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {groupedSlots.map((slot, i) => (
@@ -422,7 +422,7 @@ export default function index({ instructorId, classId }) {
               ))}
             </div>
             {groupedSlots.length == 0 && (
-              <div className="text-gray-600 mt-2 mr-2 text-lg">
+              <div className="text-gray-600 m-2 text-lg">
                 No Time Slots available for this day
               </div>
             )}
@@ -469,17 +469,17 @@ export default function index({ instructorId, classId }) {
 
           {/* Sticky Booking Div */}
           {selectedSlot && (
-            <div className=" bg-gray-50 p-4 shadow-md flex justify-between items-center">
+            <div className=" bg-gray-50 border-2 border-red-300 rounded p-4 flex justify-between items-center">
               <p>
-                Selected:{" "}
-                {moment(selectedSlot.date).format("dddd, Do MMMM YYYY")}{" "}
+                <strong>Selected:{" "}</strong>
+                {moment(selectedSlot.date).format("dddd, MMMM Do YYYY")}{" "}
                 {selectedSlot.startTime} - {selectedSlot.endTime}
               </p>
               <button
                 onClick={handleBookSlot}
                 className="bg-[#E73F2B] text-white p-2 rounded"
               >
-                Book Slot
+                Book Now
               </button>
             </div>
           )}
@@ -580,7 +580,7 @@ const CheckoutForm = ({
       // HTML content for the email
       const htmlContent = `
       <div style="font-family: Arial, sans-serif; color: #333;">
-        <h2 style="color: #007bff;">New Booking Confirmation</h2>
+        <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
         <p>We are excited to confirm a new booking for the class <strong>${
           classData.Name

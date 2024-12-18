@@ -57,7 +57,7 @@ export default async function (req, res) {
 
             const appointmentStart = appointment.start.toDate();
             if (appointmentStart.toDateString() === tomorrow.toDateString()) {
-                console.log("Sending reminder email for appointment:", appointment);
+                // console.log("Sending reminder email for appointment:", appointment);
                 const ownerId = appointment.owner;
                 const owner = await getDoc(doc(db, 'Users', ownerId));
                 const ownerData = owner.data();
@@ -65,7 +65,7 @@ export default async function (req, res) {
 
                 const reminderText = `Reminder: You have an appointment titled "${appointment.title}" starting tomorrow at ${moment(appointmentStart).format("hh:mm A")}.`;
                 await sendEmail(targetEmail, 'Appointment Reminder', reminderText, new Date());
-                console.log("Reminder email sent for appointment:", appointment);
+                // console.log("Reminder email sent for appointment:", appointment);
             }
         }
 

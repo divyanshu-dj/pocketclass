@@ -6,7 +6,7 @@ import stripe from "../../utils/stripe";
 export default async function makePayoutToClient(req, res) {
   // Retrieve the balance from the request body
   const { balance,account,currency } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   // Perform any necessary validation or checks on the balance
 
@@ -38,7 +38,7 @@ async function  makePayout(balance,account,currency) {
       if(balanceObj.available[0].amount/100<balance){
             return 'insufficient balance';
       }
-      console.log(balanceObj)
+      // console.log(balanceObj)
    const payout= await stripe.payouts.create({
     amount: balance*100, // Amount in cents
     currency: currency,
