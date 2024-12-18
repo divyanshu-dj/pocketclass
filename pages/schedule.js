@@ -57,7 +57,9 @@ export default function Schedule() {
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const userTimezone = moment.tz.guess();
   const [bookedSlots, setBookedSlots] = useState([]);
-
+  // Minimum and Maximum Days before which a booking can be made
+  const [minDays, setMinDays] = useState(1);
+  const [maxDays, setMaxDays] = useState(30);
   useEffect(() => {
     const fetchBookedSlots = async () => {
       const bookingsQuery = query(
@@ -125,6 +127,8 @@ export default function Schedule() {
         generalAvailability,
         adjustedAvailability,
         appointmentDuration,
+        minDays,
+        maxDays,
       };
 
       await setDoc(doc(db, "Schedule", user.uid), data, { merge: true });
@@ -151,6 +155,8 @@ export default function Schedule() {
               setAppointmentDuration(
                 data?.appointmentDuration ? data.appointmentDuration : 30
               );
+              setMinDays(data?.minDays ? data.minDays : 1);
+              setMaxDays(data?.maxDays ? data.maxDays : 30);
             }
           }
         },
@@ -857,6 +863,38 @@ export default function Schedule() {
               </div>
             </div>
           ))}
+
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">
+            Booking Restrictions
+          </h2>
+          <div className="mb-6">
+            <label
+              htmlFor="min-days"
+              className="block font-semibold text-gray-600 mb-2"
+            >
+              Minimum Days Before Booking
+            </label>
+            <input
+              type="number"
+              value={minDays}
+              onChange={(e) => setMinDays(e.target.value)}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              htmlFor="max-days"
+              className="block font-semibold text-gray-600 mb-2"
+            >
+              Maximum Days Before Booking
+            </label>
+            <input
+              type="number"
+              value={maxDays}
+              onChange={(e) => setMaxDays(e.target.value)}
+              className="w-full border rounded p-2"
+            />
+          </div>
 
           <button
             onClick={() =>

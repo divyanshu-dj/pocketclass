@@ -28,6 +28,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { use } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
+import { set } from "date-fns";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -51,8 +53,60 @@ export default function index({ instructorId, classId }) {
   const studentId = user?.uid;
   const studentName = user?.displayName;
   const [classData, setClassData] = useState({});
+  const today = new Date();
+  const [daysWithNoSlots, setDaysWithNoSlots] = useState([]);
+  const [minDays, setMinDays] = useState(0);
+  const [maxDays, setMaxDays] = useState(30);
 
-  // Get Class Data
+  const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
+    const dateStr = moment(date).format("YYYY-MM-DD");
+    const { generalAvailability, adjustedAvailability } = schedule;
+
+    const adjustedDay = adjustedAvailability.find(
+      (day) => day.date === dateStr
+    );
+    if (adjustedDay && adjustedDay.slots.length > 0) return true;
+    else if (adjustedDay && adjustedDay.slots.length === 0) return false;
+
+    const dayName = moment(date).format("dddd");
+    const generalDay = generalAvailability.find((day) => day.day === dayName);
+    if (generalDay && generalDay.slots.length > 0) {
+      return generalDay.slots.some((slot) => {
+        const slotStart = moment(slot.startTime, "HH:mm");
+        const slotEnd = moment(slot.endTime, "HH:mm");
+        while (slotStart.isBefore(slotEnd)) {
+          const nextSlot = slotStart
+            .clone()
+            .add(appointmentDuration, "minutes");
+          if (
+            !bookedSlots.some(
+              (booked) =>
+                booked.date === dateStr &&
+                moment(booked.startTime, "HH:mm").isSame(slotStart)
+            )
+          ) {
+            return true; // Found an available slot
+          }
+          slotStart.add(appointmentDuration, "minutes");
+        }
+      });
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    const daysToCheck = [];
+    for (let i = minDays; i < maxDays; i++) {
+      const date = moment(today).add(i, "days").toDate();
+      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration)) {
+        daysToCheck.push(date);
+      }
+    }
+    console.log("Days with no slots: ", daysToCheck);
+    setDaysWithNoSlots(daysToCheck);
+  }, [schedule, bookedSlots, appointmentDuration]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!classId) return;
@@ -78,7 +132,11 @@ export default function index({ instructorId, classId }) {
           generalAvailability: data.generalAvailability || [],
           adjustedAvailability: data.adjustedAvailability || [],
         });
+        setMinDays(data.minDays || 0);
+        setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
+        const date = moment(today).add(data.minDays, "days");
+        setSelectedDate(new Date(date));
       }
 
       const now = moment.utc();
@@ -123,9 +181,16 @@ export default function index({ instructorId, classId }) {
   useEffect(() => {
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
-      const slotsByDate = {};
-      const dateStr = moment.utc(selectedDate).format("YYYY-MM-DD"); // Normalize to UTC
-
+      const minDate = moment().add(minDays, "days").startOf("day");
+      const maxDate = moment().add(maxDays, "days").endOf("day");
+      const dateStr = moment(selectedDate).format("YYYY-MM-DD");
+      if (
+        moment(selectedDate).isBefore(minDate) ||
+        moment(selectedDate).isAfter(maxDate)
+      ) {
+        setGroupedSlots([]);
+        return;
+      }
       let slots = [];
 
       // Adjusted availability priority
@@ -134,33 +199,24 @@ export default function index({ instructorId, classId }) {
       );
       if (adjustedDay) {
         adjustedDay.slots.forEach((slot) =>
-          slots.push(...splitSlots(slot.startTime, slot.endTime, dateStr))
+          slots.push(...splitSlots(slot.startTime, slot.endTime))
         );
       } else {
-        const dayName = moment.utc(selectedDate).format("dddd"); // Get day name
+        const dayName = moment(selectedDate).format("dddd"); // Get day name
         const generalDay = generalAvailability.find(
           (day) => day.day === dayName
         );
         if (generalDay) {
           generalDay.slots.forEach((slot) =>
-            slots.push(...splitSlots(slot.startTime, slot.endTime, dateStr))
+            slots.push(...splitSlots(slot.startTime, slot.endTime))
           );
         }
       }
 
-      if (slots.length > 0) {
-        slotsByDate[dateStr] = slots;
-      }
-
-      const grouped = Object.entries(slotsByDate).map(([date, slots]) => ({
-        date,
-        slots,
-      }));
-
-      setGroupedSlots(grouped);
+      setGroupedSlots(slots); // Directly set slots for the selected date
     };
 
-    const splitSlots = (start, end, dateStr) => {
+    const splitSlots = (start, end) => {
       const slotStart = moment.utc(start, "HH:mm"); // Normalize start to UTC
       const slotEnd = moment.utc(end, "HH:mm"); // Normalize end to UTC
       const slots = [];
@@ -169,10 +225,9 @@ export default function index({ instructorId, classId }) {
         const nextSlot = slotStart.clone().add(appointmentDuration, "minutes");
         if (nextSlot.isAfter(slotEnd)) break;
 
-        // Compare booked slots using UTC times
         const isBooked = bookedSlots.some(
           (booked) =>
-            booked.date === dateStr &&
+            booked.date === moment(selectedDate).format("YYYY-MM-DD") &&
             moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
         );
 
@@ -278,6 +333,21 @@ export default function index({ instructorId, classId }) {
   const handleBookSlot = () => {
     initializeStripe();
   };
+  const handlePrev = () => {
+    setSelectedDate((prevDate) => {
+      const date = new Date(prevDate); // Ensure prevDate is a Date object
+      date.setDate(date.getDate() - 1);
+      return date;
+    });
+  };
+
+  const handleNext = () => {
+    setSelectedDate((prevDate) => {
+      const date = new Date(prevDate); // Ensure prevDate is a Date object
+      date.setDate(date.getDate() + 1);
+      return date;
+    });
+  };
 
   return (
     <div className="relative flex flex-col my-6 mb-10">
@@ -292,7 +362,21 @@ export default function index({ instructorId, classId }) {
             className="bg-white p-2 rounded-lg flex items-center justify-center"
             mode="single"
             selected={selectedDate}
-            onSelect={(date) => setSelectedDate(date + 1)}
+            onSelect={(date) => setSelectedDate(new Date(date))}
+            disabled={{
+              before: moment(today).add(minDays, "days").toDate(),
+              after: moment(today).add(maxDays, "days").toDate(),
+            }}
+            modifiers={{
+              noSlots: daysWithNoSlots.map((date) => new Date(date)),
+            }}
+            classNames={{
+              day: "react-day-picker-day",
+              noSlots: "bg-red-100 text-red-700 cross-icon",
+            }}
+            modifiersClassNames={{
+              noSlots: "bg-red-50 cross-icon rounded-full",
+            }}
           />
         </div>
 
@@ -302,11 +386,67 @@ export default function index({ instructorId, classId }) {
             Select a Time Slot
           </h2>
           <div className="flex-grow">
-            {groupedSlots.map((group, index) => (
+            {/* Display Time slots ONLY of Selected Date without using Grouped slot, just selected Dtae*/}
+            <div className="flex flex-row mb-3 items-center">
+              <button
+                onClick={() => handlePrev()}
+                className="p-1 font-bold text-xl text-center text-[#E73F2B]  rounded"
+              >
+                <ChevronLeftIcon className="h-6 w-6" />
+              </button>
+              <button
+                onClick={() => handleNext()}
+                className="p-1 font-bold text-xl mr-2 text-center text-[#E73F2B]  rounded"
+              >
+                <ChevronRightIcon className="h-6 w-6" />
+              </button>
+              <h3 className="font-bold text-lg">
+                {moment(selectedDate).format("dddd, Do MMMM YYYY")}
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {groupedSlots.map((slot, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSlotClick(selectedDate, slot)}
+                  className={`p-3 border rounded cursor-pointer ${
+                    selectedSlot?.startTime === slot.startTime &&
+                    selectedSlot?.date ===
+                      moment.utc(selectedDate).format("YYYY-MM-DD")
+                      ? "bg-[#E73F2B] text-white"
+                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
+                  }`}
+                >
+                  {slot.startTime} - {slot.endTime}
+                </button>
+              ))}
+            </div>
+            {groupedSlots.length == 0 && (
+              <div className="text-gray-600 mt-2 mr-2 text-lg">
+                No Time Slots available for this day
+              </div>
+            )}
+
+            {/* {groupedSlots.map((group, index) => (
               <div key={index} className="mb-6">
-                <h3 className="font-bold text-lg mb-2">
-                  {moment(group.date).format("dddd, Do MMMM YYYY")}
-                </h3>
+                <div className="flex flex-row items-center">
+                  {/* Add Prev and Next Buttons to navigate date */}
+            {/* <button
+                    onClick={() => handlePrev()}
+                    className="p-2 bg-[#E73F2B] text-white rounded mr-2"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => handleNext()}
+                    className="p-2 bg-[#E73F2B] text-white rounded"
+                  >
+                    Next
+                  </button>
+                  <h3 className="font-bold text-lg mb-2">
+                    {moment(group.date).format("dddd, Do MMMM YYYY")}
+                  </h3>
+                </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {group.slots.map((slot, i) => (
                     <button
@@ -323,8 +463,8 @@ export default function index({ instructorId, classId }) {
                     </button>
                   ))}
                 </div>
-              </div>
-            ))}
+              </div> */}
+            {/* ))}  */}
           </div>
 
           {/* Sticky Booking Div */}
@@ -366,7 +506,14 @@ export default function index({ instructorId, classId }) {
   );
 }
 
-const CheckoutForm = ({ bookingRef, timer, setStripeOptions, startTime, endTime, date }) => {
+const CheckoutForm = ({
+  bookingRef,
+  timer,
+  setStripeOptions,
+  startTime,
+  endTime,
+  date,
+}) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
