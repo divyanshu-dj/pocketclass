@@ -469,7 +469,7 @@ export default function index({ instructorId, classId }) {
 
           {/* Sticky Booking Div */}
           {selectedSlot && (
-            <div className=" bg-gray-50 border-2 border-red-300 rounded m-4 p-4 flex justify-between items-center">
+            <div className=" bg-gray-50 border-2 border-red-300 rounded p-4 flex justify-between items-center">
               <p>
                 <strong>Selected:{" "}</strong>
                 {moment(selectedSlot.date).format("dddd, MMMM Do YYYY")}{" "}
