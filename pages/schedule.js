@@ -126,7 +126,15 @@ export default function Schedule() {
         const booking = docSnapshot.data();
         const bookingStartTime = moment.utc(booking.startTime);
 
-        validBookings.push({
+        //  If booking expiry time is less than current time, remove the booking
+        if (
+          booking.status === "Pending" &&
+          bookingExpiry &&
+          bookingExpiry.isBefore(now)
+        ) {
+        }
+        else{
+          validBookings.push({
           startTime: new Date(
             moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")
           ),
@@ -137,6 +145,7 @@ export default function Schedule() {
           student_id: booking.student_id,
           student_name: booking.student_name,
         });
+        }
       });
 
       setBookedSlots(validBookings);
