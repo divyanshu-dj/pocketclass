@@ -4,6 +4,7 @@ import { mockData } from "../../class-detail-components/mockData";
 import FitnessClassOverviewWidget from "../../class-detail-components/FitnessClassOverviewWidget";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebaseConfig";
+import Head from "next/head";
 
 const ClassDetails = ({ classData }) => {
   const router = useRouter();
@@ -12,6 +13,11 @@ const ClassDetails = ({ classData }) => {
 
   return (
     <div data-ignore="used only for top most containter width">
+    <Head>
+      <title>Explore Class</title>
+      <meta name="description" content="Explore this class" />
+      <link rel="icon" href="/pc_favicon.ico" />
+    </Head>
       <FitnessClassOverviewWidget
         {...mockData}
         classData={mockData}

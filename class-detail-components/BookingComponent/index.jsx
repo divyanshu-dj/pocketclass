@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { DayPicker } from "react-day-picker";
+import { Chevron, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
@@ -35,7 +35,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
-export default function index({ instructorId, classId }) {
+export default function index({ instructorId, classId, classData }) {
   const router = useRouter();
   const [timer, setTimer] = useState(null);
 
@@ -44,6 +44,7 @@ export default function index({ instructorId, classId }) {
     generalAvailability: [],
     adjustedAvailability: [],
   });
+  const [mode, setMode] = useState("Individual");
   const [appointmentDuration, setAppointmentDuration] = useState(30);
   const [groupedSlots, setGroupedSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -52,24 +53,77 @@ export default function index({ instructorId, classId }) {
   const [user, userLoading] = useAuthState(auth);
   const studentId = user?.uid;
   const studentName = user?.displayName;
-  const [classData, setClassData] = useState({});
   const today = new Date();
   const [daysWithNoSlots, setDaysWithNoSlots] = useState([]);
   const [minDays, setMinDays] = useState(0);
   const [maxDays, setMaxDays] = useState(30);
 
-  const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
+  const hasSlots = (date, schedule, bookedSlots, appointmentDuration, mode) => {
     const dateStr = moment(date).format("YYYY-MM-DD");
-    const { generalAvailability, adjustedAvailability } = schedule;
+    var { generalAvailability, adjustedAvailability } = schedule;
+    const dayName = moment(date).format("dddd");
+
+    if (mode === "Individual") {
+      generalAvailability = generalAvailability.map((day) => ({
+        ...day,
+        slots: day.slots.filter((slot) => !slot.classId),
+      }));
+
+      adjustedAvailability = adjustedAvailability.map((day) => ({
+        ...day,
+        slots: day.slots.filter((slot) => !slot.classId),
+      }));
+    } else if (mode === "Group") {
+      generalAvailability = generalAvailability.map((day) => ({
+        ...day,
+        slots: day.slots.filter((slot) => slot.classId === classId),
+      }));
+
+      adjustedAvailability = adjustedAvailability.map((day) => ({
+        ...day,
+        slots: day.slots.filter((slot) => slot.classId === classId),
+      }));
+    }
 
     const adjustedDay = adjustedAvailability.find(
       (day) => day.date === dateStr
     );
-    if (adjustedDay && adjustedDay.slots.length > 0) return true;
-    else if (adjustedDay && adjustedDay.slots.length === 0) return false;
-
-    const dayName = moment(date).format("dddd");
+    if (adjustedDay && adjustedDay.slots.length == 0) return false;
+    else if (adjustedDay && adjustedDay.slots.length > 0) {
+      return adjustedDay.slots.some((slot) => {
+        const slotStart = moment(slot.startTime, "HH:mm");
+        const slotEnd = moment(slot.endTime, "HH:mm");
+        while (slotStart.isBefore(slotEnd)) {
+          const nextSlot = slotStart
+            .clone()
+            .add(appointmentDuration, "minutes");
+          if (
+            !bookedSlots.some(
+              (booked) =>
+                booked.date === dateStr &&
+                moment(booked.startTime, "HH:mm").isSame(slotStart)
+            )
+          ) {
+            return true;
+          } else if (
+            bookedSlots.some(
+              (booked) =>
+                booked.date === dateStr &&
+                moment(booked.startTime, "HH:mm").isSame(slotStart) &&
+                booked.classId === classId
+            ).length < classData?.groupSize &&
+            mode === "Group"
+          ) {
+            return true;
+          }
+          slotStart.add(appointmentDuration, "minutes");
+        }
+        return false;
+      });
+    }
     const generalDay = generalAvailability.find((day) => day.day === dayName);
+    if (generalDay && generalDay.slots.length == 0) return false;
+    if (!generalDay) return false;
     if (generalDay && generalDay.slots.length > 0) {
       return generalDay.slots.some((slot) => {
         const slotStart = moment(slot.startTime, "HH:mm");
@@ -85,10 +139,21 @@ export default function index({ instructorId, classId }) {
                 moment(booked.startTime, "HH:mm").isSame(slotStart)
             )
           ) {
-            return true; // Found an available slot
+            return true;
+          } else if (
+            bookedSlots.some(
+              (booked) =>
+                booked.date === dateStr &&
+                moment(booked.startTime, "HH:mm").isSame(slotStart) &&
+                booked.classId === classId
+            ).length < classData?.groupSize &&
+            mode === "Group"
+          ) {
+            return true;
           }
           slotStart.add(appointmentDuration, "minutes");
         }
+        return false;
       });
     }
 
@@ -99,27 +164,12 @@ export default function index({ instructorId, classId }) {
     const daysToCheck = [];
     for (let i = minDays; i < maxDays; i++) {
       const date = moment(today).add(i, "days").toDate();
-      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration)) {
+      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration, mode)) {
         daysToCheck.push(date);
       }
     }
-    // console.log("Days with no slots: ", daysToCheck);
     setDaysWithNoSlots(daysToCheck);
-  }, [schedule, bookedSlots, appointmentDuration]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!classId) return;
-
-      const classDocRef = doc(db, "classes", classId);
-      const snapshot = await getDoc(classDocRef);
-      if (snapshot.exists()) {
-        setClassData(snapshot.data());
-      }
-    };
-
-    fetchData();
-  }, [classId]);
+  }, [schedule, bookedSlots, appointmentDuration, mode, classData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +249,9 @@ export default function index({ instructorId, classId }) {
       );
       if (adjustedDay) {
         adjustedDay.slots.forEach((slot) =>
-          slots.push(...splitSlots(slot.startTime, slot.endTime))
+          slots.push(
+            ...splitSlots(slot.startTime, slot.endTime, dateStr, slot.classId)
+          )
         );
       } else {
         const dayName = moment(selectedDate).format("dddd"); // Get day name
@@ -208,15 +260,22 @@ export default function index({ instructorId, classId }) {
         );
         if (generalDay) {
           generalDay.slots.forEach((slot) =>
-            slots.push(...splitSlots(slot.startTime, slot.endTime))
+            slots.push(
+              ...splitSlots(slot.startTime, slot.endTime, dateStr, slot.classId)
+            )
           );
         }
+      }
+      if (mode === "Individual") {
+        slots = slots.filter((slot) => !slot.classId);
+      } else if (mode === "Group") {
+        slots = slots.filter((slot) => slot.classId === classId);
       }
 
       setGroupedSlots(slots); // Directly set slots for the selected date
     };
 
-    const splitSlots = (start, end) => {
+    const splitSlots = (start, end, dateStr, classId) => {
       const slotStart = moment.utc(start, "HH:mm"); // Normalize start to UTC
       const slotEnd = moment.utc(end, "HH:mm"); // Normalize end to UTC
       const slots = [];
@@ -225,20 +284,29 @@ export default function index({ instructorId, classId }) {
         const nextSlot = slotStart.clone().add(appointmentDuration, "minutes");
         if (nextSlot.isAfter(slotEnd)) break;
 
-        const isBooked = bookedSlots.some(
+        const bookingsForSlot = bookedSlots.filter(
           (booked) =>
             booked.date === moment(selectedDate).format("YYYY-MM-DD") &&
             moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
         );
 
-        if (!isBooked) {
+        const isBooked = bookingsForSlot.length > 0;
+
+        if (
+          !isBooked ||
+          (mode === "Group" && bookingsForSlot.length < classData.groupSize)
+        ) {
           slots.push({
             startTime: slotStart.format("HH:mm"),
             endTime: nextSlot.format("HH:mm"),
+            date: dateStr,
+            classId: classId,
           });
         }
+
         slotStart.add(appointmentDuration, "minutes");
       }
+
       return slots;
     };
 
@@ -247,7 +315,7 @@ export default function index({ instructorId, classId }) {
       schedule.adjustedAvailability.length
     )
       generateSlots();
-  }, [selectedDate, schedule, appointmentDuration, bookedSlots]);
+  }, [selectedDate, schedule, appointmentDuration, bookedSlots, mode]);
 
   const handleSlotClick = (date, slot) => {
     setSelectedSlot({ date, ...slot });
@@ -259,8 +327,10 @@ export default function index({ instructorId, classId }) {
       toast.error("Please login to book a slot.");
       return;
     }
-    const expiry = now.clone().add(10, "minutes").toISOString();
-    setTimer(600);
+
+    const expiry = now.clone().add(5, "minutes").toISOString();
+    setTimer(300);
+
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev > 0) return prev - 1;
@@ -272,6 +342,7 @@ export default function index({ instructorId, classId }) {
         return 0;
       });
     }, 1000);
+
     const bookingData = {
       student_id: studentId,
       instructor_id: instructorId,
@@ -308,26 +379,52 @@ export default function index({ instructorId, classId }) {
 
     const querySnapshot = await getDocs(slotQuery);
 
-    if (!querySnapshot.empty) {
-      toast.error(
-        "This slot is already booked. Please select a different time."
+    if (mode === "Group") {
+      const existingGroupBookings = querySnapshot.docs.filter(
+        (doc) => doc.data().class_id === classId
+      ).length;
+
+      if (existingGroupBookings >= classData?.groupSize) {
+        toast.error(
+          "This slot is fully booked for the group class. Please select a different time."
+        );
+        return;
+      }
+    } else {
+      const isSlotBooked = querySnapshot.docs.some((doc) =>
+        moment
+          .utc(doc.data().startTime)
+          .isSame(
+            moment.utc(
+              `${selectedSlot.date} ${selectedSlot.startTime}`,
+              "YYYY-MM-DD HH:mm"
+            )
+          )
       );
-      return;
+
+      if (isSlotBooked) {
+        toast.error(
+          "This slot is already booked. Please select a different time."
+        );
+        return;
+      }
     }
 
     const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
-
     const response = await fetch("/api/create-stripe-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ price: classData.Price }),
+      body: JSON.stringify({ price: mode === "Group" ? classData.groupPrice : classData.Price }),
     });
+
     const data = await response.json();
-    if (data?.clientSecret)
+
+    if (data?.clientSecret) {
       setStripeOptions({
         clientSecret: data.clientSecret,
         bookingRef: bookingRef.id,
       });
+    }
   };
 
   const handleBookSlot = () => {
@@ -352,6 +449,21 @@ export default function index({ instructorId, classId }) {
   return (
     <div className="relative flex flex-col my-6 mb-10">
       {/* <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1> */}
+
+      <div className="flex flex-row items-center justify-between mb-4">
+        <div className="text-2xl font-bold text-[#E73F2B]">
+          Booking Schedule
+        </div>
+
+        <div>
+          <button onClick={() => setMode("Individual")} className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Individual" ? "bg-[#E73F2B] text-white" : ""}`}>
+            Indivisual
+          </button>
+          <button onClick={() => setMode("Group")} className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Group" ? "bg-[#E73F2B] text-white" : ""}`}>
+            Group
+          </button>
+        </div>
+      </div>
       <div className="flex flex-grow flex-col lg:flex-row">
         {/* Calendar Section */}
         <div className="p-4 pb-8 max-h-min border-gray-100 rounded-md bg-gray-50 flex-shrink-0 overflow-y-auto">
@@ -408,11 +520,10 @@ export default function index({ instructorId, classId }) {
               {groupedSlots.map((slot, i) => (
                 <button
                   key={i}
-                  onClick={() => handleSlotClick(selectedDate, slot)}
+                  onClick={() => handleSlotClick(slot.date, slot)}
                   className={`p-3 border rounded cursor-pointer ${
                     selectedSlot?.startTime === slot.startTime &&
-                    selectedSlot?.date ===
-                      moment.utc(selectedDate).format("YYYY-MM-DD")
+                    selectedSlot?.date === slot.date
                       ? "bg-[#E73F2B] text-white"
                       : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
                   }`}
@@ -471,7 +582,7 @@ export default function index({ instructorId, classId }) {
           {selectedSlot && (
             <div className=" bg-gray-50 border-2 border-red-300 rounded p-4 flex justify-between items-center">
               <p>
-                <strong>Selected:{" "}</strong>
+                <strong>Selected: </strong>
                 {moment(selectedSlot.date).format("dddd, MMMM Do YYYY")}{" "}
                 {selectedSlot.startTime} - {selectedSlot.endTime}
               </p>
@@ -494,10 +605,12 @@ export default function index({ instructorId, classId }) {
               bookingRef={stripeOptions.bookingRef}
               setStripeOptions={setStripeOptions}
               timer={timer}
-              price={classData.Price}
+              price={mode === "Group" ? classData.groupPrice : classData.Price}
               startTime={selectedSlot.startTime}
               endTime={selectedSlot.endTime}
               date={selectedSlot.date}
+              setTimer={setTimer}
+              mode={mode}
             />
           </Elements>
         </div>
@@ -513,6 +626,8 @@ const CheckoutForm = ({
   startTime,
   endTime,
   date,
+  setTimer,
+  mode,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -605,7 +720,7 @@ const CheckoutForm = ({
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${classData.Price}</td>
+            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price}</td>
           </tr>
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
@@ -634,6 +749,18 @@ const CheckoutForm = ({
       onSubmit={handleSubmit}
       className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto"
     >
+      <div className="flex flex-row justify-end text-[#E73F2B] mb-2">
+        <button
+          className="top-4 right- flex flex-row items-center gap-1 text-center"
+          onClick={() => {
+            setStripeOptions(null);
+            setTimer(null);
+          }}
+        >
+          <ChevronLeftIcon className="h-4 w-4 mt-1" />
+          Go Back
+        </button>
+      </div>
       <div className="flex flex-row items-center justify-between mb-4">
         <h1 className="text-lg font-bold">Complete Payment</h1>
 

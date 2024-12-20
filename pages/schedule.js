@@ -24,6 +24,7 @@ import {
   getDocs,
   where,
 } from "firebase/firestore";
+import Head from "next/head";
 
 const localizer = momentLocalizer(moment);
 
@@ -33,6 +34,7 @@ export default function Schedule() {
   const [vacationStartDate, setVacationStartDate] = useState(null);
   const [vacationEndDate, setVacationEndDate] = useState(null);
   const [showVacationPicker, setShowVacationPicker] = useState(false);
+  const [showClassDropdown, setShowClassDropdown] = useState(null);
 
   const [events, setEvents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -57,9 +59,59 @@ export default function Schedule() {
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const userTimezone = moment.tz.guess();
   const [bookedSlots, setBookedSlots] = useState([]);
+  const [classes, setClasses] = useState([]);
   // Minimum and Maximum Days before which a booking can be made
   const [minDays, setMinDays] = useState(1);
   const [maxDays, setMaxDays] = useState(30);
+
+  const assignClass = (dayIndex, slotIndex) => {
+    setShowClassDropdown({ dayIndex, slotIndex });
+  };
+
+  const closeClassDropdown = () => {
+    setShowClassDropdown(null);
+  };
+
+  const handleClassAssign = (dayIndex, slotIndex, classId) => {
+    console.log(classes);
+    const updatedGeneralAvailability = [...generalAvailability];
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].classId = classId;
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSize =
+      classes.find((c) => c.uid === classId).groupSize;
+
+    setGeneralAvailability(updatedGeneralAvailability);
+    console.log(generalAvailability);
+  };
+
+  const removeClass = (dayIndex, slotIndex) => {
+    const updatedGeneralAvailability = [...generalAvailability];
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].classId = null;
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSize = null;
+    setGeneralAvailability(updatedGeneralAvailability);
+  };
+  useEffect(() => {
+    const fetchClasses = async () => {
+      const classesQuery = query(
+        collection(db, "classes"),
+        where("classCreator", "==", user.uid)
+      );
+
+      const classesSnapshot = await getDocs(classesQuery);
+
+      const validClasses = [];
+
+      classesSnapshot.forEach((docSnapshot) => {
+        const classData = docSnapshot.data();
+        if (classData.groupSize > 1 && classData.groupPrice > 0) {
+          validClasses.push({ ...classData, uid: docSnapshot.id });
+        }
+      });
+
+      setClasses(validClasses);
+    };
+
+    if (user) fetchClasses();
+  }, [user, userLoading]);
   useEffect(() => {
     const fetchBookedSlots = async () => {
       const bookingsQuery = query(
@@ -68,20 +120,35 @@ export default function Schedule() {
       );
 
       const bookingsSnapshot = await getDocs(bookingsQuery);
-      
 
       const validBookings = [];
       bookingsSnapshot.forEach((docSnapshot) => {
         const booking = docSnapshot.data();
         const bookingStartTime = moment.utc(booking.startTime);
 
-        validBookings.push({
-          startTime: new Date(moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")),
-          endTime: new Date(moment.utc(booking.endTime).format("YYYY-MM-DD hh:mm A")),
-          date: bookingStartTime.format("YYYY-MM-DD"),
-          student_id: booking.student_id,
-          student_name: booking.student_name,
-        });
+        //  If booking expiry time is less than current time, remove the booking
+        const now = moment.utc();
+        const bookingExpiry = booking.expiry
+          ? moment.utc(booking.expiry)
+          : null;
+        if (
+          booking.status === "Pending" &&
+          bookingExpiry &&
+          bookingExpiry.isBefore(now)
+        ) {
+        } else {
+          validBookings.push({
+            startTime: new Date(
+              moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")
+            ),
+            endTime: new Date(
+              moment.utc(booking.endTime).format("YYYY-MM-DD hh:mm A")
+            ),
+            date: bookingStartTime.format("YYYY-MM-DD"),
+            student_id: booking.student_id,
+            student_name: booking.student_name,
+          });
+        }
       });
 
       setBookedSlots(validBookings);
@@ -330,12 +397,13 @@ export default function Schedule() {
               if (isBooked) {
                 continue;
               }
-
               newEvents.push({
-                title: "",
+                title: slot.classId
+                  ? classes.find((c) => c.uid === slot.classId)?.Name
+                  : "",
                 start: start.toDate(),
                 end: end.toDate(),
-                color: "#d8f5b6",
+                color: slot.classId ? "#a1d564" : "#d8f5b6",
               });
             }
             current = next;
@@ -383,10 +451,12 @@ export default function Schedule() {
               continue;
             }
             newEvents.push({
-              title: "",
+              title: slot.classId
+                ? classes.find((c) => c.uid === slot.classId)?.Name
+                : "",
               start: start.toDate(),
               end: end.toDate(),
-              color: "#d8f5b6",
+              color: slot.classId ? "#a1d564" : "#d8f5b6",
             });
 
             current = next;
@@ -395,16 +465,35 @@ export default function Schedule() {
       });
     });
 
+    const groupedSlots = {};
+
     bookedSlots.forEach((booked) => {
+      const key = `${moment(booked.startTime).format()}/${moment(
+        booked.endTime
+      ).format()}`;
 
-      
+      if (!groupedSlots[key]) {
+        groupedSlots[key] = [];
+      }
 
+      groupedSlots[key].push(booked.student_name);
+    });
+
+    Object.entries(groupedSlots).forEach(([key, students]) => {
+      const [start, end] = key.split("/");
+      console.log(key, students);
       newEvents.push({
-        title: booked.student_name,
-        start: booked.startTime,
-        end: booked.endTime,
-        color: "#87CEEB", // Blue for booked slots
-        tooltip: `Booked by ${booked.student_name}`,
+        title:
+          students.length === 1
+            ? students[0]
+            : `${students.length} students booked`,
+        start: new Date(start),
+        end: new Date(end),
+        color: students.length === 1 ? "#87CEEB" : "#369bc5", // Light blue for single bookings, yellow for group bookings
+        tooltip:
+          students.length === 1
+            ? `Booked by ${students[0]}`
+            : `${students.length} students have booked`,
       });
     });
 
@@ -433,8 +522,40 @@ export default function Schedule() {
     return { value: time, label: time };
   });
 
+  // assignAdjustedClass, removeAdjustedClass, handleClassAdjustedAssign
+
+  const assignAdjustedClass = (date, slotIndex) => {
+    setShowClassDropdown({ date, slotIndex });
+  };
+  const removeAdjustedClass = (date, slotIndex) => {
+    const updatedAvailability = [...adjustedAvailability];
+    updatedAvailability.find((item) => item.date === date).slots[
+      slotIndex
+    ].classId = null;
+    updatedAvailability.find((item) => item.date === date).slots[
+      slotIndex
+    ].groupSize = null;
+    setAdjustedAvailability(updatedAvailability);
+  };
+
+  const handleClassAdjustedAssign = (date, slotIdex, classId) => {
+    const updatedAvailability = [...adjustedAvailability];
+    updatedAvailability.find((item) => item.date === date).slots[
+      slotIdex
+    ].classId = classId;
+    updatedAvailability.find((item) => item.date === date).slots[
+      slotIdex
+    ].groupSize = classes.find((c) => c.uid === classId).groupSize;
+    setAdjustedAvailability(updatedAvailability);
+  };
+
   return (
     <div className="flex flex-col lg:h-screen">
+      <Head>
+        <title>Schedule</title>
+        <meta name="description" content="Manage your Schedule" />
+        <link rel="icon" href="/pc_favicon.ico" />
+      </Head>
       <Header />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
@@ -480,50 +601,108 @@ export default function Schedule() {
                     <p className="text-gray-500 mt-[7px]">Unavailable</p>
                   ) : (
                     day.slots.map((slot, slotIndex) => (
-                      <div
-                        key={slotIndex}
-                        className="flex items-center space-x-2 mb-2"
-                      >
-                        <Select
-                          value={timeOptions.find(
-                            (option) => option.value === slot.startTime
-                          )}
-                          onChange={(selected) =>
-                            handleGeneralInputChange(
-                              dayIndex,
-                              slotIndex,
-                              "startTime",
-                              selected.value
-                            )
-                          }
-                          options={timeOptions}
-                          className="w-full"
-                        />
-                        <span>-</span>
-                        <Select
-                          value={timeOptions.find(
-                            (option) => option.value === slot.endTime
-                          )}
-                          onChange={(selected) =>
-                            handleGeneralInputChange(
-                              dayIndex,
-                              slotIndex,
-                              "endTime",
-                              selected.value
-                            )
-                          }
-                          options={timeOptions}
-                          className="w-full"
-                        />
-                        <button
-                          onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
-                          className="text-red-500 flex justify-center items-center hover:text-red-600"
-                          title="Unavailable All Day"
+                      <div>
+                        <div
+                          key={slotIndex}
+                          className="flex items-center space-x-2 mb-2"
                         >
-                          <span className="material-symbols-outlined text-xs">
-                            block
-                          </span>
-                        </button>
+                          <Select
+                            value={timeOptions.find(
+                              (option) => option.value === slot.startTime
+                            )}
+                            onChange={(selected) =>
+                              handleGeneralInputChange(
+                                dayIndex,
+                                slotIndex,
+                                "startTime",
+                                selected.value
+                              )
+                            }
+                            options={timeOptions}
+                            className="w-full"
+                          />
+                          <span>-</span>
+                          <Select
+                            value={timeOptions.find(
+                              (option) => option.value === slot.endTime
+                            )}
+                            onChange={(selected) =>
+                              handleGeneralInputChange(
+                                dayIndex,
+                                slotIndex,
+                                "endTime",
+                                selected.value
+                              )
+                            }
+                            options={timeOptions}
+                            className="w-full"
+                          />
+                          <button
+                            onClick={() =>
+                              removeGeneralSlot(dayIndex, slotIndex)
+                            }
+                            className="text-red-500 flex justify-center items-center hover:text-red-600"
+                            title="Unavailable for this time slot"
+                          >
+                            <span className="material-symbols-outlined text-xs">
+                              block
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => assignClass(dayIndex, slotIndex)}
+                            className={`text-blue-400 ${
+                              slot.classId ? "hidden" : ""
+                            } flex justify-center items-center hover:text-blue-600`}
+                            title="Assign Class"
+                          >
+                            <span className="material-symbols-outlined text-xs">
+                              assignment
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => removeClass(dayIndex, slotIndex)}
+                            className={`text-red-500 flex justify-center items-center hover:text-red-600 ${
+                              slot.classId ? "" : "hidden"
+                            }`}
+                            title="Remove Class"
+                          >
+                            <span className="material-symbols-outlined text-xs">
+                              group_remove
+                            </span>
+                          </button>
+                        </div>
+
+                        {showClassDropdown &&
+                          showClassDropdown.dayIndex === dayIndex &&
+                          showClassDropdown.slotIndex === slotIndex && (
+                            <div className="bg-white border rounded-md shadow-md mt-2 mb-3 z-10">
+                              <ul>
+                                {classes.map((classItem) => (
+                                  <li
+                                    key={classItem.uid}
+                                    onClick={() => {
+                                      handleClassAssign(
+                                        dayIndex,
+                                        slotIndex,
+                                        classItem.uid
+                                      );
+                                      closeClassDropdown();
+                                    }}
+                                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                  >
+                                    {classItem.Name}
+                                  </li>
+                                ))}
+                              </ul>
+                              <button
+                                onClick={closeClassDropdown}
+                                className="block w-full mb-2 text-center text-red-500 hover:text-red-600"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          )}
                       </div>
                     ))
                   )}
@@ -555,63 +734,119 @@ export default function Schedule() {
                   <p className="text-gray-500">Unavailable</p>
                 ) : (
                   day.slots.map((slot, slotIndex) => (
-                    <div
-                      key={slotIndex}
-                      className="flex items-center space-x-2 mb-2"
-                    >
-                      <Select
-                        value={timeOptions.find(
-                          (option) => option.value === slot.startTime
-                        )}
-                        onChange={(selected) =>
-                          handleGeneralInputChange(
-                            dayIndex,
-                            slotIndex,
-                            "startTime",
-                            selected.value
-                          )
-                        }
-                        options={timeOptions}
-                        className="w-full bg-gray-100"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            maxHeight: "300px",
-                          }),
-                        }}
-                      />
-
-                      <span>-</span>
-                      <Select
-                        value={timeOptions.find(
-                          (option) => option.value === slot.endTime
-                        )}
-                        onChange={(selected) =>
-                          handleGeneralInputChange(
-                            dayIndex,
-                            slotIndex,
-                            "endTime",
-                            selected.value
-                          )
-                        }
-                        options={timeOptions}
-                        className="w-full bg-gray-100"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            maxHeight: "300px",
-                          }),
-                        }}
-                      />
-                      <button
-                        onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
-                        className="text-red-500 flex justify-center items-center hover:text-red-600"
-                        title="Unavailable All Day"
+                    <div>
+                      <div
+                        key={slotIndex}
+                        className="flex items-center space-x-2 mb-2"
                       >
-                        <span className="material-symbols-outlined text-xs">
-                          block
-                        </span>
-                      </button>
+                        <Select
+                          value={timeOptions.find(
+                            (option) => option.value === slot.startTime
+                          )}
+                          onChange={(selected) =>
+                            handleGeneralInputChange(
+                              dayIndex,
+                              slotIndex,
+                              "startTime",
+                              selected.value
+                            )
+                          }
+                          options={timeOptions}
+                          className="w-full bg-gray-100"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              maxHeight: "300px",
+                            }),
+                          }}
+                        />
+
+                        <span>-</span>
+                        <Select
+                          value={timeOptions.find(
+                            (option) => option.value === slot.endTime
+                          )}
+                          onChange={(selected) =>
+                            handleGeneralInputChange(
+                              dayIndex,
+                              slotIndex,
+                              "endTime",
+                              selected.value
+                            )
+                          }
+                          options={timeOptions}
+                          className="w-full bg-gray-100"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              maxHeight: "300px",
+                            }),
+                          }}
+                        />
+                        <button
+                          onClick={() => assignClass(dayIndex, slotIndex)}
+                          className={`text-blue-400 ${
+                            slot.classId ? "hidden" : ""
+                          } flex justify-center items-center hover:text-blue-600`}
+                          title="Assign Class"
+                        >
+                          <span className="material-symbols-outlined text-xs">
+                            assignment
+                          </span>
+                        </button>
+
+                        <button
+                          onClick={() => removeClass(dayIndex, slotIndex)}
+                          className={`text-red-500 flex justify-center items-center hover:text-red-600 ${
+                            slot.classId ? "" : "hidden"
+                          }`}
+                          title="Remove Class"
+                        >
+                          <span className="material-symbols-outlined text-xs">
+                            group_remove
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => removeGeneralSlot(dayIndex, slotIndex)}
+                          className="text-red-500 flex justify-center items-center hover:text-red-600"
+                          title="Unavailable for this time slot"
+                        >
+                          <span className="material-symbols-outlined text-xs">
+                            block
+                          </span>
+                        </button>
+                      </div>
+
+                      {showClassDropdown &&
+                        showClassDropdown.dayIndex === dayIndex &&
+                        showClassDropdown.slotIndex === slotIndex && (
+                          <div className="bg-white border rounded-md shadow-md mt-2 mb-3 z-10">
+                            <ul>
+                              {classes.map((classItem) => (
+                                <li
+                                  key={classItem.uid}
+                                  onClick={() => {
+                                    handleClassAssign(
+                                      dayIndex,
+                                      slotIndex,
+                                      classItem.uid
+                                    );
+                                    closeClassDropdown();
+                                  }}
+                                  className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                >
+                                  {classItem.Name}
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              onClick={closeClassDropdown}
+                              className="block w-full text-center text-red-500 mb-2 hover:text-red-600"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        )}
                     </div>
                   ))
                 )}
@@ -712,65 +947,123 @@ export default function Schedule() {
                     <p className="text-gray-500">Unavailable</p>
                   ) : (
                     item.slots.map((slot, slotIndex) => (
-                      <div
-                        key={slotIndex}
-                        className="flex items-center space-x-2 mb-2"
-                      >
-                        <Select
-                          value={timeOptions.find(
-                            (option) => option.value === slot.startTime
-                          )}
-                          onChange={(selected) =>
-                            handleAdjustedInputChange(
-                              item.date,
-                              slotIndex,
-                              "startTime",
-                              selected.value
-                            )
-                          }
-                          options={timeOptions}
-                          className="w-full bg-gray-100"
-                          styles={{
-                            menu: (provided) => ({
-                              ...provided,
-                              maxHeight: "300px",
-                            }),
-                          }}
-                        />
-
-                        <span>-</span>
-                        <Select
-                          value={timeOptions.find(
-                            (option) => option.value === slot.endTime
-                          )}
-                          onChange={(selected) =>
-                            handleAdjustedInputChange(
-                              item.date,
-                              slotIndex,
-                              "endTime",
-                              selected.value
-                            )
-                          }
-                          options={timeOptions}
-                          className="w-full bg-gray-100"
-                          styles={{
-                            menu: (provided) => ({
-                              ...provided,
-                              maxHeight: "300px",
-                            }),
-                          }}
-                        />
-                        <button
-                          onClick={() =>
-                            removeAdjustedSlot(item.date, slotIndex)
-                          }
-                          className="text-red-500 flex items-center justify-center hover:text-red-600"
-                          title="Unavailable All Day"
+                      <div>
+                        <div
+                          key={slotIndex}
+                          className="flex items-center space-x-2 mb-2"
                         >
-                          <span className="text-xs material-symbols-outlined  ">
-                            block
-                          </span>
-                        </button>
+                          <Select
+                            value={timeOptions.find(
+                              (option) => option.value === slot.startTime
+                            )}
+                            onChange={(selected) =>
+                              handleAdjustedInputChange(
+                                item.date,
+                                slotIndex,
+                                "startTime",
+                                selected.value
+                              )
+                            }
+                            options={timeOptions}
+                            className="w-full bg-gray-100"
+                            styles={{
+                              menu: (provided) => ({
+                                ...provided,
+                                maxHeight: "300px",
+                              }),
+                            }}
+                          />
+
+                          <span>-</span>
+                          <Select
+                            value={timeOptions.find(
+                              (option) => option.value === slot.endTime
+                            )}
+                            onChange={(selected) =>
+                              handleAdjustedInputChange(
+                                item.date,
+                                slotIndex,
+                                "endTime",
+                                selected.value
+                              )
+                            }
+                            options={timeOptions}
+                            className="w-full bg-gray-100"
+                            styles={{
+                              menu: (provided) => ({
+                                ...provided,
+                                maxHeight: "300px",
+                              }),
+                            }}
+                          />
+                          <button
+                            onClick={() =>
+                              removeAdjustedSlot(item.date, slotIndex)
+                            }
+                            className="text-red-500 flex items-center justify-center hover:text-red-600"
+                            title="Unavailable for this time slot"
+                          >
+                            <span className="text-xs material-symbols-outlined  ">
+                              block
+                            </span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              assignAdjustedClass(item.date, slotIndex)
+                            }
+                            className={`text-blue-400 ${
+                              slot.classId ? "hidden" : ""
+                            } flex justify-center items-center hover:text-blue-600`}
+                            title="Assign Class"
+                          >
+                            <span className="material-symbols-outlined text-xs">
+                              assignment
+                            </span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              removeAdjustedClass(item.date, slotIndex)
+                            }
+                            className={`text-red-500 ${
+                              slot.classId ? "" : "hidden"
+                            } flex justify-center items-center hover:text-red-600`}
+                            title="Remove Class"
+                          >
+                            <span className="material-symbols-outlined text-xs">
+                              group_remove
+                            </span>
+                          </button>
+                        </div>
+                        {showClassDropdown &&
+                          showClassDropdown.date === item.date &&
+                          showClassDropdown.slotIndex === slotIndex && (
+                            <div className="bg-white border rounded-md shadow-md mt-2 z-10">
+                              <ul>
+                                {classes.map((classItem) => (
+                                  <li
+                                    key={classItem.uid}
+                                    onClick={() => {
+                                      handleClassAdjustedAssign(
+                                        item.date,
+                                        slotIndex,
+                                        classItem.uid
+                                      );
+                                      closeClassDropdown();
+                                    }}
+                                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                  >
+                                    {classItem.Name}
+                                  </li>
+                                ))}
+                              </ul>
+                              <button
+                                onClick={closeClassDropdown}
+                                className="block w-full text-center text-red-500 hover:text-red-600"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          )}
                       </div>
                     ))
                   )}
@@ -800,63 +1093,113 @@ export default function Schedule() {
                   <p className="text-gray-500">Unavailable</p>
                 ) : (
                   item.slots.map((slot, slotIndex) => (
-                    <div
-                      key={slotIndex}
-                      className="flex items-center space-x-2 mb-2"
-                    >
-                      <Select
-                        value={timeOptions.find(
-                          (option) => option.value === slot.startTime
-                        )}
-                        onChange={(selected) =>
-                          handleAdjustedInputChange(
-                            item.date,
-                            slotIndex,
-                            "startTime",
-                            selected.value
-                          )
-                        }
-                        options={timeOptions}
-                        className="w-full"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            maxHeight: "300px",
-                          }),
-                        }}
-                      />
-
-                      <span>-</span>
-                      <Select
-                        value={timeOptions.find(
-                          (option) => option.value === slot.endTime
-                        )}
-                        onChange={(selected) =>
-                          handleAdjustedInputChange(
-                            item.date,
-                            slotIndex,
-                            "endTime",
-                            selected.value
-                          )
-                        }
-                        options={timeOptions}
-                        className="w-full"
-                        styles={{
-                          menu: (provided) => ({
-                            ...provided,
-                            maxHeight: "300px",
-                          }),
-                        }}
-                      />
-                      <button
-                        onClick={() => removeAdjustedSlot(item.date, slotIndex)}
-                        className="text-red-500 flex items-center justify-center hover:text-red-600"
-                        title="Unavailable All Day"
+                    <div>
+                      <div
+                        key={slotIndex}
+                        className="flex items-center space-x-2 mb-2"
                       >
-                        <span className="text-xs material-symbols-outlined  ">
-                          block
-                        </span>
-                      </button>
+                        <Select
+                          value={timeOptions.find(
+                            (option) => option.value === slot.startTime
+                          )}
+                          onChange={(selected) =>
+                            handleAdjustedInputChange(
+                              item.date,
+                              slotIndex,
+                              "startTime",
+                              selected.value
+                            )
+                          }
+                          options={timeOptions}
+                          className="w-full"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              maxHeight: "300px",
+                            }),
+                          }}
+                        />
+
+                        <span>-</span>
+                        <Select
+                          value={timeOptions.find(
+                            (option) => option.value === slot.endTime
+                          )}
+                          onChange={(selected) =>
+                            handleAdjustedInputChange(
+                              item.date,
+                              slotIndex,
+                              "endTime",
+                              selected.value
+                            )
+                          }
+                          options={timeOptions}
+                          className="w-full"
+                          styles={{
+                            menu: (provided) => ({
+                              ...provided,
+                              maxHeight: "300px",
+                            }),
+                          }}
+                        />
+
+                        <button
+                          onClick={() =>
+                            assignAdjustedClass(item.date, slotIndex)
+                          }
+                          className={`text-blue-400 ${
+                            slot.classId ? "hidden" : ""
+                          } flex justify-center items-center hover:text-blue-600`}
+                          title="Assign Class"
+                        >
+                          <span className="material-symbols-outlined text-xs">
+                            assignment
+                          </span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            removeAdjustedClass(item.date, slotIndex)
+                          }
+                          className={`text-red-500 ${
+                            slot.classId ? "" : "hidden"
+                          } flex justify-center items-center hover:text-red-600`}
+                          title="Remove Class"
+                        >
+                          <span className="material-symbols-outlined text-xs">
+                            group_remove
+                          </span>
+                        </button>
+                      </div>
+                      {showClassDropdown &&
+                        showClassDropdown.date === item.date &&
+                        showClassDropdown.slotIndex === slotIndex && (
+                          <div className="bg-white border rounded-md shadow-md mt-2 z-10">
+                            <ul>
+                              {classes.map((classItem) => (
+                                <li
+                                  key={classItem.uid}
+                                  onClick={() => {
+                                    handleClassAdjustedAssign(
+                                      item.date,
+                                      slotIndex,
+                                      classItem.uid
+                                    );
+                                    closeClassDropdown();
+                                  }}
+                                  className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                >
+                                  {classItem.Name}
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              onClick={closeClassDropdown}
+                              className="block w-full text-center text-red-500 hover:text-red-600"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        )}
                     </div>
                   ))
                 )}
