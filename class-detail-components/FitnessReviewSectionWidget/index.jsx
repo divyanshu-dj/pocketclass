@@ -11,22 +11,21 @@ function FitnessReviewSectionWidget({
 }) {
   return (
     <div className="w-full box-border mt-12">
+      <div
+        className="xl:hidden flex mb-12 shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border justify-start items-stretch flex-col w-full lg:max-w-[300px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]"
+        style={{ zIndex: 1 }}
+      >
+        <DynamicButtonSection
+          classId={classId}
+          classData={classData}
+          instructorId={classCreatorData?.userUid}
+        />
+      </div>
       <FitnessReviewSectionContainer
         classId={classId}
         reviewCountsArray1={reviewCountsArray1}
         classTitle={classTitle}
       />
-      <div
-        className="w-[90%] xl:hidden shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border flex justify-start items-stretch flex-col  lg:max-w-[90%] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x"
-        style={{ margin: "auto", marginTop: "20px" }}
-      >
-        <DynamicButtonSection
-          classId={classId} 
-          classData={classData}
-          instructorId={classCreatorData?.userUid}
-          below={true}
-        />
-      </div>
       <ReviewSectionWidget classId={classId} />
     </div>
   );

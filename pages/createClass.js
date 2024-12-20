@@ -42,6 +42,8 @@ export default function CreateClass() {
     Address: "",
     Price: "",
     Pricing: "",
+    groupSize: "",
+    groupPrice: "",
     // Location: { Extra in actual response getting sent..
     //   _lat: "",
     //   _long: "",
@@ -71,7 +73,9 @@ export default function CreateClass() {
       !form.About ||
       !form.Experience ||
       !form.Description ||
-      !form.FunFact
+      !form.FunFact ||
+      !form.groupSize ||
+      !form.groupPrice
     ) {
       toast.error("Please fill all fields");
       return;
@@ -121,6 +125,8 @@ export default function CreateClass() {
       FunFact: "",
       TopRated: false,
       classCreator: "",
+      groupPrice: "",
+      groupSize: "",
       status: "pending",
     });
     setPackages([
@@ -361,6 +367,37 @@ export default function CreateClass() {
                   value={form.Pricing}
                   onChange={(e) =>
                     setForm({ ...form, Pricing: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Max Group Size</label>
+                <input
+                  required
+                  name="groupSize"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="e.g., 2-4"
+                  type={"number"}
+                  value={form.groupSize}
+                  onChange={(e) =>
+                    setForm({ ...form, groupSize: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Group Price Per Person</label>
+                <input
+                  required
+                  name="groupPrice"
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  placeholder="e.g., $30"
+                  type={"number"}
+                  value={form.groupPrice}
+                  onChange={(e) =>
+                    setForm({ ...form, groupPrice: e.target.value })
                   }
                 />
               </div>
