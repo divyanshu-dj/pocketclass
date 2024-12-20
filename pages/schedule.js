@@ -127,24 +127,27 @@ export default function Schedule() {
         const bookingStartTime = moment.utc(booking.startTime);
 
         //  If booking expiry time is less than current time, remove the booking
+        const now = moment.utc();
+        const bookingExpiry = booking.expiry
+          ? moment.utc(booking.expiry)
+          : null;
         if (
           booking.status === "Pending" &&
           bookingExpiry &&
           bookingExpiry.isBefore(now)
         ) {
-        }
-        else{
+        } else {
           validBookings.push({
-          startTime: new Date(
-            moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")
-          ),
-          endTime: new Date(
-            moment.utc(booking.endTime).format("YYYY-MM-DD hh:mm A")
-          ),
-          date: bookingStartTime.format("YYYY-MM-DD"),
-          student_id: booking.student_id,
-          student_name: booking.student_name,
-        });
+            startTime: new Date(
+              moment(bookingStartTime).format("YYYY-MM-DD hh:mm A")
+            ),
+            endTime: new Date(
+              moment.utc(booking.endTime).format("YYYY-MM-DD hh:mm A")
+            ),
+            date: bookingStartTime.format("YYYY-MM-DD"),
+            student_id: booking.student_id,
+            student_name: booking.student_name,
+          });
         }
       });
 
@@ -400,7 +403,7 @@ export default function Schedule() {
                   : "",
                 start: start.toDate(),
                 end: end.toDate(),
-                color: slot.classId?'#a1d564':'#d8f5b6',
+                color: slot.classId ? "#a1d564" : "#d8f5b6",
               });
             }
             current = next;
@@ -453,7 +456,7 @@ export default function Schedule() {
                 : "",
               start: start.toDate(),
               end: end.toDate(),
-              color: slot.classId?'#a1d564':'#d8f5b6',
+              color: slot.classId ? "#a1d564" : "#d8f5b6",
             });
 
             current = next;
