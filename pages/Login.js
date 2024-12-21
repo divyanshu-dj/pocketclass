@@ -108,7 +108,9 @@ function Login() {
     if (docSnap.exists()) {
       const data = docSnap.data();
       if (!data.stripeAccountId && data.category === "instructor") {
-        router.push("/addStripe");
+        toast.error(
+          "Please connect your Stripe account to continue as an Instructor"
+        );
       }
     }
   };
