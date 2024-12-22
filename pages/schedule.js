@@ -25,6 +25,7 @@ import {
   where,
 } from "firebase/firestore";
 import Head from "next/head";
+import NewHeader from "../components/NewHeader";
 
 const localizer = momentLocalizer(moment);
 
@@ -556,7 +557,7 @@ export default function Schedule() {
         <meta name="description" content="Manage your Schedule" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <Header />
+      <NewHeader />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
           <h2 className="text-2xl font-bold text-gray-700 mb-3">

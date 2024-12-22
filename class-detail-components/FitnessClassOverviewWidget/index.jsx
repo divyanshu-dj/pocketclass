@@ -57,7 +57,7 @@ function FitnessClassOverviewWidget({
     fetchClassData();
   }, [classId]);
   return (
-    <div className="bg-[white] box-border flex justify-start items-stretch flex-col md:pt-6 pb-4">
+    <div className="bg-[white] box-border flex justify-start items-stretch flex-col pb-4">
       <NewHeader isHome={false} />
       <FitnessClassDetailsSection
         timeSlotOptions={timeSlotOptions}

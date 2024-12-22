@@ -13,7 +13,14 @@ import { DateRangePicker } from "react-date-range";
 import { useRouter } from "next/router";
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
 import { auth } from "/firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Link from "next/link";
 import Notifications from "./Notifications";
@@ -34,19 +41,88 @@ function Header({ placeholder }) {
   const [user, loading, error] = useAuthState(auth);
   const [signOut, signOutLoading, signOutError] = useSignOut(auth);
   const [userData, setUserData] = useState(null);
+  const [schedule, setSchedule] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [profileCompleted, setProfileCompleted] = useState(true);
+  const [stripeIntegration, setStripeIntegration] = useState(true);
+  const [classCreated, setClassCreated] = useState(true);
+  const [scheduleCreated, setScheduleCreated] = useState(true);
+
+  useEffect(() => {
+    if (
+      userData &&
+      userData.firstName &&
+      userData.lastName &&
+      userData.email &&
+      userData.gender &&
+      userData.dob &&
+      userData.phoneNumber &&
+      userData.profileImage &&
+      userData.profileDescription
+    ) {
+      setProfileCompleted(true);
+    }
+
+    if (userData && userData.stripeAccountId) {
+      setStripeIntegration(true);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (classes && classes.length > 0) {
+      setClassCreated(true);
+    }
+  }, [classes]);
+
+  useEffect(() => {
+    if (schedule) {
+      setScheduleCreated(true);
+    }
+  }, [schedule]);
 
   useEffect(() => {
     const getData = async () => {
       const docRef = doc?.(db, "Users", user?.uid);
       const data = await getDoc?.(docRef);
       setUserData(data?.data?.());
-      if (window.location.pathname === "/" && data?.data()?.category === "instructor" && !data?.data()?.stripeAccountId) {
+      if (
+        window.location.pathname === "/" &&
+        data?.data()?.category === "instructor" &&
+        !data?.data()?.stripeAccountId
+      ) {
         toast.error("Please setup stripe to start earning");
       }
     };
 
     user && getData();
   }, [user]);
+
+  useEffect(() => {
+    const getData = async () => {
+      const userId = user?.uid;
+      const docRef = doc(db, "Schedule", userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSchedule(data);
+      }
+      const classesQuery = query(
+        collection(db, "classes"),
+        where("classCreator", "==", user.uid)
+      );
+
+      const docSnap2 = await getDocs(classesQuery);
+
+      if (docSnap2.docs.length > 0) {
+        const data = docSnap2.docs.map((doc) => doc.data());
+        setClasses(data);
+      }
+    };
+
+    if (userData && userData.category === "instructor") {
+      getData();
+    }
+  }, [userData]);
 
   const selectionRange = {
     startDate: startDate,
@@ -101,13 +177,105 @@ function Header({ placeholder }) {
 
   return (
     <>
-    {user && userData && userData.category === "instructor" && !userData.stripeAccountId && (
-      <div onClick={() => router.push("/addStripe")} className="flex items-center justify-center py-2 cursor-pointer bg-logo-red text-white">
-        <p className="font-semibold text-sm">
-          Please setup stripe to start earning, Your classes will not be visible without it
-        </p>
-      </div>
-    )}
+      {user &&
+        userData &&
+        userData.category === "instructor" &&
+        (!stripeIntegration ||
+          !classCreated ||
+          !scheduleCreated ||
+          !profileCompleted) && (
+          <div className=" bg-gray-50">
+            <div className="flex items-center text-logo-red px-2 justify-center text-base text-center lg:text-xl mt-3 mb-4 font-semibold">
+            Please complete these steps to publish your class!
+            </div>
+            <div className="flex flex-col lg:flex-row px-4 bg-gray-50 gap-3 mt-2 mb-6 z-40">
+              <div
+                onClick={() => {
+                  router.push("/profile/" + user.uid);
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  profileCompleted ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 1
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Complete your Profile
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/createClass");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  classCreated ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 2
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Create a class
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/schedule");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  scheduleCreated ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 3
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Create Schedule
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/addStripe");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  stripeIntegration ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 4
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Connect Stripe
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       <header className="sticky top-0 z-50 grid grid-cols-12 bg-white shadow-sm p-5 md:px-10">
         {/* left */}
         <div

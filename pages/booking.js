@@ -31,6 +31,7 @@ import { use } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import { set } from "date-fns";
 import Header from "../components/Header";
+import NewHeader from "../components/NewHeader";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -504,9 +505,9 @@ export default function index() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-screen max-h-screen overflow-hidden">
+    <div className="relative flex flex-col min-h-screen max-h-screen lg:overflow-hidden">
       {/* <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1> */}
-      <Header />
+      <NewHeader />
       <div className="flex flex-wrap-reverse gap-2 flex-row items-center justify-between mb-4 px-4 mt-6">
         <div className="text-2xl text-[#E73F2B] font-bold mb-1">
           Booking Schedule
@@ -531,7 +532,7 @@ export default function index() {
           </button>
         </div>
       </div>
-      <div className="flex  flex-grow flex-col overflow-hidden lg:flex-row">
+      <div className="flex  flex-grow flex-col lg:overflow-hidden lg:flex-row">
         {/* Calendar Section */}
         <div className="p-4 pb-8 border-gray-100 rounded-md bg-gray-50 flex-shrink-0 overflow-y-auto">
           <h2 className="text-xl font-bold text-[#E73F2B] mb-4">

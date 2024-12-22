@@ -3,7 +3,14 @@ import { Button } from "@mui/base";
 import Link from "next/link";
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { MenuIcon, UserCircleIcon } from "@heroicons/react/solid";
 import Image from "next/image";
 import Notifications from "./Notifications";
@@ -17,6 +24,83 @@ const NewHeader = ({ isHome = true }) => {
   const [showDropDown, setDropDown] = useState(false);
   const [category, setCategory] = useState("");
   const router = useRouter();
+  const [schedule, setSchedule] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [profileCompleted, setProfileCompleted] = useState(true);
+  const [stripeIntegration, setStripeIntegration] = useState(true);
+  const [classCreated, setClassCreated] = useState(true);
+  const [scheduleCreated, setScheduleCreated] = useState(true);
+
+  useEffect(() => {
+    if (
+      userData &&
+      userData.firstName &&
+      userData.lastName &&
+      userData.email &&
+      userData.gender &&
+      userData.dob &&
+      userData.phoneNumber &&
+      userData.profileImage &&
+      userData.profileDescription
+    ) {
+      setProfileCompleted(true);
+    }
+    else{
+      setProfileCompleted(false);
+    }
+
+    if (userData && userData.stripeAccountId) {
+      setStripeIntegration(true);
+    }
+    else{
+      setStripeIntegration(false);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (classes && classes.length > 0) {
+      setClassCreated(true);
+    }
+    else{
+      setClassCreated(false);
+    }
+  }, [classes]);
+
+  useEffect(() => {
+    if (schedule) {
+      setScheduleCreated(true);
+    }
+    else{
+      setScheduleCreated(false);
+    }
+  }, [schedule]);
+
+  useEffect(() => {
+    const getData = async () => {
+      const userId = user?.uid;
+      const docRef = doc(db, "Schedule", userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSchedule(data);
+      }
+      const classesQuery = query(
+        collection(db, "classes"),
+        where("classCreator", "==", user.uid)
+      );
+
+      const docSnap2 = await getDocs(classesQuery);
+
+      if (docSnap2.docs.length > 0) {
+        const data = docSnap2.docs.map((doc) => doc.data());
+        setClasses(data);
+      }
+    };
+
+    if (userData && userData.category === "instructor") {
+      getData();
+    }
+  }, [userData]);
 
   const toggleDropDown = () => {
     setDropDown(!showDropDown);
@@ -28,7 +112,11 @@ const NewHeader = ({ isHome = true }) => {
       const data = await getDoc(docRef);
       setUserData(data?.data());
       setCategory(data?.data()?.category);
-      if (window.location.pathname === "/" && data?.data()?.category === "instructor" && !data?.data()?.stripeAccountId) {
+      if (
+        window.location.pathname === "/" &&
+        data?.data()?.category === "instructor" &&
+        !data?.data()?.stripeAccountId
+      ) {
         toast.error("Please setup stripe to start earning");
       }
     };
@@ -37,18 +125,107 @@ const NewHeader = ({ isHome = true }) => {
   }, [user]);
   return (
     <>
-    {user && userData && userData.category === "instructor" && !userData.stripeAccountId && (
-      <div onClick={() => router.push("/addStripe")} className="flex items-center cursor-pointer justify-center py-3 bg-logo-red text-white">
-        <p className="font-semibold text-sm">
-          Please setup stripe to start earning, Your classes will not be visible without it
-        </p>
-      </div>
-    )}
+      {user &&
+        userData &&
+        userData.category === "instructor" &&
+        (!stripeIntegration ||
+          !classCreated ||
+          !scheduleCreated ||
+          !profileCompleted) && (
+          <div className=" bg-gray-50 py-[2px]">
+            <div className="flex items-center text-logo-red px-2 justify-center text-base text-center lg:text-xl mt-3 mb-4 font-semibold">
+              Please complete these steps to publish your class!
+            </div>
+            <div className="flex flex-col lg:flex-row px-4 bg-gray-50 gap-3 mt-2 mb-2 z-40">
+              <div
+                onClick={() => {
+                  router.push("/profile/" + user.uid);
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  profileCompleted ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 1
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Complete your Profile
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/createClass");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  classCreated ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 2
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Create a class
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/schedule");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  scheduleCreated ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 3
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Create Schedule
+                </div>
+              </div>
+              <div
+                onClick={() => {
+                  router.push("/addStripe");
+                }}
+                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                  stripeIntegration ? "border-logo-red" : "border-gray-500"
+                }`}
+              >
+                <div
+                  style={{ fontWeight: "400" }}
+                  className="text-logo-red text-sm"
+                >
+                  Step 4
+                </div>
+                <div
+                  style={{ fontWeight: "500" }}
+                  className="text-black text-base"
+                >
+                  Connect Stripe
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       <div>
-        <div
-          className="bg-white sticky top-0 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] h-20 section-spacing"
-          style={{ position: `${isHome ? "relative" : "fixed"}` }}
-        >
+        <div className="bg-white top-0 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] h-20 section-spacing">
           <Link className="cursor-pointer" href="/">
             <img
               src="/assets/image_5c0480a2.png"
@@ -178,7 +355,7 @@ const NewHeader = ({ isHome = true }) => {
                     </p>
                   </Link>
                   <Link className="cursor-pointer" href="/Register">
-                    <Button className="bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] min-w-[91px] h-[43px] w-[91px] md:ml-4 lg:ml-[31px] rounded-[100px] border-2 border-solid border-[#261f22]">
+                    <Button className="bg-transparent [font-family:Inter,sans-serif]text-base font-semibold text-[#261f22] min-w-[91px] h-[43px] w-[91px] md:ml-4 lg:ml-[31px] rounded-[100px] border-2 border-solid border-[#261f22]">
                       Sign up
                     </Button>
                   </Link>
