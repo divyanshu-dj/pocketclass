@@ -31,49 +31,7 @@ const NewHeader = ({ isHome = true }) => {
   const [classCreated, setClassCreated] = useState(true);
   const [scheduleCreated, setScheduleCreated] = useState(true);
 
-  useEffect(() => {
-    if (
-      userData &&
-      userData.firstName &&
-      userData.lastName &&
-      userData.email &&
-      userData.gender &&
-      userData.dob &&
-      userData.phoneNumber &&
-      userData.profileImage &&
-      userData.profileDescription
-    ) {
-      setProfileCompleted(true);
-    }
-    else{
-      setProfileCompleted(false);
-    }
-
-    if (userData && userData.stripeAccountId) {
-      setStripeIntegration(true);
-    }
-    else{
-      setStripeIntegration(false);
-    }
-  }, [userData]);
-
-  useEffect(() => {
-    if (classes && classes.length > 0) {
-      setClassCreated(true);
-    }
-    else{
-      setClassCreated(false);
-    }
-  }, [classes]);
-
-  useEffect(() => {
-    if (schedule) {
-      setScheduleCreated(true);
-    }
-    else{
-      setScheduleCreated(false);
-    }
-  }, [schedule]);
+ 
 
   useEffect(() => {
     const getData = async () => {
@@ -83,6 +41,13 @@ const NewHeader = ({ isHome = true }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setSchedule(data);
+
+        if (data){
+          setScheduleCreated(true);
+        }
+        else{
+          setScheduleCreated(false);
+        }
       }
       const classesQuery = query(
         collection(db, "classes"),
@@ -94,6 +59,16 @@ const NewHeader = ({ isHome = true }) => {
       if (docSnap2.docs.length > 0) {
         const data = docSnap2.docs.map((doc) => doc.data());
         setClasses(data);
+
+        if (data && data.length > 0) {
+          setClassCreated(true);
+        }
+        else{
+          setClassCreated(false);
+        }
+      }
+      else{
+        setClassCreated(false);
       }
     };
 
@@ -113,11 +88,31 @@ const NewHeader = ({ isHome = true }) => {
       setUserData(data?.data());
       setCategory(data?.data()?.category);
       if (
+        data?.data() &&
+        data?.data().firstName &&
+        data?.data().lastName &&
+        data?.data().email &&
+        data?.data().gender &&
+        data?.data().dob &&
+        data?.data().phoneNumber &&
+        data?.data().profileImage &&
+        data?.data().profileDescription
+      ) {
+        setProfileCompleted(true);
+      }
+      else{
+        setProfileCompleted(false);
+      }
+      if (
         window.location.pathname === "/" &&
         data?.data()?.category === "instructor" &&
         !data?.data()?.stripeAccountId
       ) {
         toast.error("Please setup stripe to start earning");
+        setStripeIntegration(false);
+      }
+      else{
+        setStripeIntegration(true);
       }
     };
 
