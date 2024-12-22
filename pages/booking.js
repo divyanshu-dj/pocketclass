@@ -31,6 +31,7 @@ import { use } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import { set } from "date-fns";
 import Header from "../components/Header";
+import NewHeader from "../components/NewHeader";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -71,6 +72,7 @@ export default function index() {
     }
   }, [classId]);
   const hasSlots = (date, schedule, bookedSlots, appointmentDuration, mode) => {
+    console.log(user);
     const dateStr = moment(date).format("YYYY-MM-DD");
     var { generalAvailability, adjustedAvailability } = schedule;
     const dayName = moment(date).format("dddd");
@@ -174,7 +176,8 @@ export default function index() {
 
   useEffect(() => {
     const daysToCheck = [];
-    for (let i = minDays; i < maxDays; i++) {
+    const minHourtoDay = 0;
+    for (let i = minHourtoDay; i < maxDays; i++) {
       const date = moment(today).add(i, "days").toDate();
       if (!hasSlots(date, schedule, bookedSlots, appointmentDuration, mode)) {
         daysToCheck.push(date);
@@ -197,7 +200,7 @@ export default function index() {
         setMinDays(data.minDays || 0);
         setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
-        const date = moment(today).add(data.minDays, "days");
+        const date = moment(today);
         setSelectedDate(new Date(date));
       }
 
@@ -243,7 +246,8 @@ export default function index() {
   useEffect(() => {
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
-      const minDate = moment().add(minDays, "days").startOf("day");
+      const minDate = moment().add(minDays, "hours").startOf("day");
+      const minTime = moment().add(minDays, "hours").format("HH:mm");
       const maxDate = moment().add(maxDays, "days").endOf("day");
       const startDate = moment(selectedDate).startOf("day");
       var endDate = startDate.clone().add(2, "days").endOf("day");
@@ -268,10 +272,16 @@ export default function index() {
         if (adjustedDay) {
           adjustedDay.slots.forEach((slot) =>
             slots.push(
-              ...splitSlots(slot.startTime, slot.endTime, dateStr, slot.classId)
+              ...splitSlots(
+                slot.startTime,
+                slot.endTime,
+                dateStr,
+                slot.classId
+              ).filter(
+                (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
+              )
             )
           );
-
         } else {
           const dayName = currentDate.format("dddd");
           const generalDay = generalAvailability.find(
@@ -285,6 +295,8 @@ export default function index() {
                   slot.endTime,
                   dateStr,
                   slot.classId
+                ).filter(
+                  (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
                 )
               )
             );
@@ -346,6 +358,23 @@ export default function index() {
 
   const handleSlotClick = (date, slot) => {
     setSelectedSlot({ date, ...slot });
+  };
+  const JumpToNextAvail = () => {
+    const nextDate = moment(selectedDate).add(1, "day");
+    const maxDate = moment().add(maxDays, "days").endOf("day");
+
+    while (
+      !hasSlots(nextDate, schedule, bookedSlots, appointmentDuration, mode) &&
+      nextDate.isBefore(maxDate)
+    ) {
+      nextDate.add(1, "day");
+    }
+
+    if (!hasSlots(nextDate, schedule, bookedSlots, appointmentDuration, mode)) {
+      toast.error("No slots available after this date.");
+      return;
+    }
+    setSelectedDate(nextDate);
   };
 
   const initializeStripe = async () => {
@@ -441,7 +470,9 @@ export default function index() {
     const response = await fetch("/api/create-stripe-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ price: mode === "Group" ? classData.groupPrice : classData.Price }),
+      body: JSON.stringify({
+        price: mode === "Group" ? classData.groupPrice : classData.Price,
+      }),
     });
 
     const data = await response.json();
@@ -474,10 +505,10 @@ export default function index() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-screen max-h-screen overflow-hidden">
+    <div className="relative flex flex-col min-h-screen max-h-screen lg:overflow-hidden">
       {/* <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1> */}
-      <Header />
-      <div className="flex flex-row items-center justify-between mb-4 px-4 mt-6">
+      <NewHeader />
+      <div className="flex flex-wrap-reverse gap-2 flex-row items-center justify-between mb-4 px-4 mt-6">
         <div className="text-2xl text-[#E73F2B] font-bold mb-1">
           Booking Schedule
         </div>
@@ -489,7 +520,7 @@ export default function index() {
               mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
             }`}
           >
-            Indivisual
+            Individual
           </button>
           <button
             onClick={() => setMode("Group")}
@@ -501,7 +532,7 @@ export default function index() {
           </button>
         </div>
       </div>
-      <div className="flex  flex-grow flex-col overflow-hidden lg:flex-row">
+      <div className="flex  flex-grow flex-col lg:overflow-hidden lg:flex-row">
         {/* Calendar Section */}
         <div className="p-4 pb-8 border-gray-100 rounded-md bg-gray-50 flex-shrink-0 overflow-y-auto">
           <h2 className="text-xl font-bold text-[#E73F2B] mb-4">
@@ -513,7 +544,7 @@ export default function index() {
             selected={selectedDate}
             onSelect={(date) => setSelectedDate(new Date(date))}
             disabled={{
-              before: moment(today).add(minDays, "days").toDate(),
+              before: moment(today).add(minDays, "hours").toDate(),
               after: moment(today).add(maxDays, "days").toDate(),
             }}
             modifiers={{
@@ -534,7 +565,7 @@ export default function index() {
           <h2 className="text-xl font-bold text-[#E73F2B] mb-6">
             Select a Time Slot
           </h2>
-          <div className="flex-grow">
+          <div className="flex-grow mb-3">
             <div className="space-y-6">
               {Object.entries(
                 groupedSlots.reduce((acc, slot) => {
@@ -546,7 +577,7 @@ export default function index() {
                 <div key={date}>
                   {/* Date Header */}
                   <div className="text-lg font-bold mb-3">
-                  {moment(date).format("dddd, MMM Do YYYY")}
+                    {moment(date).format("dddd, MMM Do YYYY")}
                   </div>
                   {/* Slots for the Date */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -570,11 +601,18 @@ export default function index() {
             </div>
 
             {groupedSlots.length == 0 && (
-              <div className="text-gray-600 m-2 text-lg">
-                No Time Slots available for this day
+              <div className="flex flex-col items-center">
+                <div className="text-gray-600 m-2 mb-0 text-lg">
+                  No Time Slots available for this day
+                </div>
+                <button
+                  onClick={() => JumpToNextAvail()}
+                  className="p-2 text-blue-600 rounded"
+                >
+                  Jump to next available day
+                </button>
               </div>
             )}
-
           </div>
 
           {/* Sticky Booking Div */}
@@ -626,7 +664,7 @@ const CheckoutForm = ({
   endTime,
   date,
   setTimer,
-  mode
+  mode,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -719,7 +757,9 @@ const CheckoutForm = ({
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price}</td>
+            <td style="padding: 8px;">${
+              mode === "Group" ? classData.groupPrice : classData.Price
+            }</td>
           </tr>
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>

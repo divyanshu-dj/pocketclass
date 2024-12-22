@@ -162,7 +162,8 @@ export default function index({ instructorId, classId, classData }) {
 
   useEffect(() => {
     const daysToCheck = [];
-    for (let i = minDays; i < maxDays; i++) {
+    const minHourtoDay = 0;
+    for (let i = minHourtoDay; i < maxDays; i++) {
       const date = moment(today).add(i, "days").toDate();
       if (!hasSlots(date, schedule, bookedSlots, appointmentDuration, mode)) {
         daysToCheck.push(date);
@@ -185,7 +186,7 @@ export default function index({ instructorId, classId, classData }) {
         setMinDays(data.minDays || 0);
         setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
-        const date = moment(today).add(data.minDays, "days");
+        const date = moment(today);
         setSelectedDate(new Date(date));
       }
 
@@ -231,13 +232,12 @@ export default function index({ instructorId, classId, classData }) {
   useEffect(() => {
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
-      const minDate = moment().add(minDays, "days").startOf("day");
+      const minDate = moment().add(minDays, "hours").startOf("day");
+      const minTime = moment().add(minDays, "hours").format("HH:mm");
       const maxDate = moment().add(maxDays, "days").endOf("day");
       const dateStr = moment(selectedDate).format("YYYY-MM-DD");
-      if (
-        moment(selectedDate).isBefore(minDate) ||
-        moment(selectedDate).isAfter(maxDate)
-      ) {
+      if (moment(selectedDate).isAfter(maxDate) || 
+        moment(selectedDate).isBefore(minDate)) {
         setGroupedSlots([]);
         return;
       }
@@ -248,20 +248,36 @@ export default function index({ instructorId, classId, classData }) {
         (day) => day.date === dateStr
       );
       if (adjustedDay) {
-        adjustedDay.slots.forEach((slot) =>
-          slots.push(
-            ...splitSlots(slot.startTime, slot.endTime, dateStr, slot.classId)
-          )
+        adjustedDay.slots.forEach(
+          (slot) =>
+            slots.push(
+              ...splitSlots(
+                slot.startTime,
+                slot.endTime,
+                dateStr,
+                slot.classId
+              ).filter(
+                (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
+              )
+            )
         );
       } else {
         const dayName = moment(selectedDate).format("dddd"); // Get day name
+        const dateStr = moment(selectedDate).format("YYYY-MM-DD");
         const generalDay = generalAvailability.find(
           (day) => day.day === dayName
         );
         if (generalDay) {
           generalDay.slots.forEach((slot) =>
             slots.push(
-              ...splitSlots(slot.startTime, slot.endTime, dateStr, slot.classId)
+              ...splitSlots(
+                slot.startTime,
+                slot.endTime,
+                dateStr,
+                slot.classId
+              ).filter(
+                (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
+              )
             )
           );
         }
@@ -319,6 +335,24 @@ export default function index({ instructorId, classId, classData }) {
 
   const handleSlotClick = (date, slot) => {
     setSelectedSlot({ date, ...slot });
+  };
+
+  const JumpToNextAvail = () => {
+    const nextDate = moment(selectedDate).add(1, "day");
+    const maxDate = moment().add(maxDays, "days").endOf("day");
+    while (
+      !hasSlots(nextDate, schedule, bookedSlots, appointmentDuration, mode) &&
+      nextDate.isBefore(maxDate)
+    ) {
+      nextDate.add(1, "day");
+    }
+
+    if (!hasSlots(nextDate, schedule, bookedSlots, appointmentDuration, mode)) {
+      toast.error("No slots available after this date.");
+
+      return;
+    }
+    setSelectedDate(nextDate);
   };
 
   const initializeStripe = async () => {
@@ -414,7 +448,9 @@ export default function index({ instructorId, classId, classData }) {
     const response = await fetch("/api/create-stripe-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ price: mode === "Group" ? classData.groupPrice : classData.Price }),
+      body: JSON.stringify({
+        price: mode === "Group" ? classData.groupPrice : classData.Price,
+      }),
     });
 
     const data = await response.json();
@@ -450,16 +486,26 @@ export default function index({ instructorId, classId, classData }) {
     <div className="relative flex flex-col my-6 mb-10">
       {/* <h1 className="text-3xl font-bold text-[#E73F2B] mb-4">Book a Slot</h1> */}
 
-      <div className="flex flex-row items-center justify-between mb-4">
+      <div className="flex flex-wrap-reverse gap-2 flex-row items-center justify-between mb-4">
         <div className="text-2xl font-bold text-[#E73F2B]">
           Booking Schedule
         </div>
 
         <div>
-          <button onClick={() => setMode("Individual")} className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Individual" ? "bg-[#E73F2B] text-white" : ""}`}>
-            Indivisual
+          <button
+            onClick={() => setMode("Individual")}
+            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
+              mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
+            }`}
+          >
+            Individual
           </button>
-          <button onClick={() => setMode("Group")} className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Group" ? "bg-[#E73F2B] text-white" : ""}`}>
+          <button
+            onClick={() => setMode("Group")}
+            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
+              mode === "Group" ? "bg-[#E73F2B] text-white" : ""
+            }`}
+          >
             Group
           </button>
         </div>
@@ -476,7 +522,7 @@ export default function index({ instructorId, classId, classData }) {
             selected={selectedDate}
             onSelect={(date) => setSelectedDate(new Date(date))}
             disabled={{
-              before: moment(today).add(minDays, "days").toDate(),
+              before: moment(today).add(minDays, "hours").toDate(),
               after: moment(today).add(maxDays, "days").toDate(),
             }}
             modifiers={{
@@ -497,7 +543,7 @@ export default function index({ instructorId, classId, classData }) {
           <h2 className="text-xl font-bold text-[#E73F2B] mb-6">
             Select a Time Slot
           </h2>
-          <div className="flex-grow">
+          <div className="flex-grow mb-3">
             {/* Display Time slots ONLY of Selected Date without using Grouped slot, just selected Dtae*/}
             <div className="flex flex-row mb-3 items-center justify-center">
               <button
@@ -533,8 +579,16 @@ export default function index({ instructorId, classId, classData }) {
               ))}
             </div>
             {groupedSlots.length == 0 && (
-              <div className="text-gray-600 m-2 text-lg">
-                No Time Slots available for this day
+              <div className="flex flex-col items-center">
+                <div className="text-gray-600 m-2 mb-0 text-lg">
+                  No Time Slots available for this day
+                </div>
+                <button
+                  onClick={() => JumpToNextAvail()}
+                  className="mt-1 text-blue-600 rounded"
+                >
+                  Jump to next available day
+                </button>
               </div>
             )}
 
@@ -720,7 +774,9 @@ const CheckoutForm = ({
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price}</td>
+            <td style="padding: 8px;">${
+              mode === "Group" ? classData.groupPrice : classData.Price
+            }</td>
           </tr>
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>

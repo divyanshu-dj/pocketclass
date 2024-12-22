@@ -25,6 +25,7 @@ import {
   where,
 } from "firebase/firestore";
 import Head from "next/head";
+import NewHeader from "../components/NewHeader";
 
 const localizer = momentLocalizer(moment);
 
@@ -556,7 +557,7 @@ export default function Schedule() {
         <meta name="description" content="Manage your Schedule" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <Header />
+      <NewHeader />
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
           <h2 className="text-2xl font-bold text-gray-700 mb-3">
@@ -695,6 +696,11 @@ export default function Schedule() {
                                   </li>
                                 ))}
                               </ul>
+                              {classes.length === 0 && (
+                                <p className="px-4 py-2 text-gray-500">
+                                  No group classes available
+                                </p>
+                              )}
                               <button
                                 onClick={closeClassDropdown}
                                 className="block w-full mb-2 text-center text-red-500 hover:text-red-600"
@@ -839,6 +845,11 @@ export default function Schedule() {
                                 </li>
                               ))}
                             </ul>
+                              {classes.length === 0 && (
+                                <p className="px-4 py-2 text-gray-500">
+                                  No group classes available
+                                </p>
+                              )}
                             <button
                               onClick={closeClassDropdown}
                               className="block w-full text-center text-red-500 mb-2 hover:text-red-600"
@@ -1037,7 +1048,7 @@ export default function Schedule() {
                         {showClassDropdown &&
                           showClassDropdown.date === item.date &&
                           showClassDropdown.slotIndex === slotIndex && (
-                            <div className="bg-white border rounded-md shadow-md mt-2 z-10">
+                            <div className="bg-white border rounded-md shadow-md mb-3 mt-2 z-10">
                               <ul>
                                 {classes.map((classItem) => (
                                   <li
@@ -1056,6 +1067,11 @@ export default function Schedule() {
                                   </li>
                                 ))}
                               </ul>
+                              {classes.length === 0 && (
+                                <p className="px-4 py-2 text-gray-500">
+                                  No group classes available
+                                </p>
+                              )}
                               <button
                                 onClick={closeClassDropdown}
                                 className="block w-full text-center text-red-500 hover:text-red-600"
@@ -1173,7 +1189,7 @@ export default function Schedule() {
                       {showClassDropdown &&
                         showClassDropdown.date === item.date &&
                         showClassDropdown.slotIndex === slotIndex && (
-                          <div className="bg-white border rounded-md shadow-md mt-2 z-10">
+                          <div className="bg-white border rounded-md shadow-md mt-2 mb-3 z-10">
                             <ul>
                               {classes.map((classItem) => (
                                 <li
@@ -1192,6 +1208,11 @@ export default function Schedule() {
                                 </li>
                               ))}
                             </ul>
+                              {classes.length === 0 && (
+                                <p className="px-4 py-2 text-gray-500">
+                                  No group classes available
+                                </p>
+                              )}
                             <button
                               onClick={closeClassDropdown}
                               className="block w-full text-center text-red-500 hover:text-red-600"
@@ -1215,7 +1236,7 @@ export default function Schedule() {
               htmlFor="min-days"
               className="block font-semibold text-gray-600 mb-2"
             >
-              Minimum Days Before Booking
+              Minimum Hours Before Booking
             </label>
             <input
               type="number"

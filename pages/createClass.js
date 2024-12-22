@@ -30,6 +30,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import { set } from "date-fns";
 import LocationMap from "../components/LocationMap";
+import NewHeader from "../components/NewHeader";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -248,7 +249,7 @@ export default function CreateClass() {
         <meta name="Create Class" content="Create A Class To Teach Students" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <Header />
+      <NewHeader />
       <div className="max-w-7xl mx-auto px-6 py-6  min-h-[80vh]  md:px-16">
         <h1 className="text-4xl font-extrabold text-center py-5 pb-3">
           Create Your Class
