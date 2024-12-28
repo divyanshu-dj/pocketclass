@@ -10,7 +10,6 @@ export default function ClassLocationMap({ longitude, latitude, address }) {
   const marker = useRef(null);
 
 
-
   useEffect(() => {
 
     map.current = new mapboxgl.Map({
@@ -31,7 +30,6 @@ export default function ClassLocationMap({ longitude, latitude, address }) {
     window.open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, '_blank');
   };
 
-  // console.log('mapref: ', map.current)
   return (
     <div className="w-full">
       <div ref={mapContainer} className="w-full h-[200px] rounded-xl mb-4" />

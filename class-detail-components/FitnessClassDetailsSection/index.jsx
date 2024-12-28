@@ -218,30 +218,32 @@ function FitnessClassDetailsSection({
         )}
 
         <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
-          {!isFavoriteLoading ? (
-            <div
-              onClick={toggleFavorite}
-              className="cursor-pointer flex items-center"
-            >
-              {isFavorite ? (
-                <AiFillHeart
-                  className={`w-6 h-6 flex grow-0 shrink-0 basis-auto text-red-500`}
-                />
-              ) : (
-                <AiOutlineHeart
-                  className={`w-6 h-6 flex grow-0 shrink-0 basis-auto`}
-                />
-              )}
-              <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
-                {isFavorite ? "Remove Favorite" : "Add to Favorite"}
-              </p>
-            </div>
-          ) : (
-            <div className="flex items-center animate-pulse">
-              <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-              <div className="h-4 w-24 bg-gray-200 rounded ml-[7px]"></div>
-            </div>
-          )}
+          {userId ? (
+            isFavoriteLoading ? (
+              <div className="flex items-center animate-pulse">
+                <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded ml-[7px]"></div>
+              </div>
+            ) : (
+              <div
+                onClick={toggleFavorite}
+                className="cursor-pointer flex items-center"
+              >
+                {isFavorite ? (
+                  <AiFillHeart
+                    className={`w-6 h-6 flex grow-0 shrink-0 basis-auto text-red-500`}
+                  />
+                ) : (
+                  <AiOutlineHeart
+                    className={`w-6 h-6 flex grow-0 shrink-0 basis-auto`}
+                  />
+                )}
+                <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
+                  {isFavorite ? "Remove Favorite" : "Add to Favorite"}
+                </p>
+              </div>
+            )
+          ) : null}
         </div>
       </div>
       <div className="flex justify-start items-start flex-col-reverse lg:flex-row gap-7 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">

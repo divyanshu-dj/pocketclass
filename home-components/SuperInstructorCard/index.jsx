@@ -56,7 +56,6 @@ function SuperInstructorCard({
       console.error("Error toggling favorite:", error);
     }
   };
-
   return (
     <div
       className="box-border flex justify-start items-stretch flex-row grow-0 shrink-0 basis-auto pt-4 pb-[172px] px-4 rounded-2xl bg-cover bg-center"
@@ -81,7 +80,7 @@ function SuperInstructorCard({
             height={40} 
             className="bg-gray-300"
           />
-        ) : (
+        ) : user && (
           <div
             onClick={toggleFavorite}
             className="border backdrop-blur-[5.75px] bg-[rgba(81,76,78,0.50)] box-border flex justify-center items-center flex-col w-10 h-10 rounded-[20px] border-solid border-[white]"
@@ -99,5 +98,4 @@ function SuperInstructorCard({
     </div>
   );
 }
-
 export default SuperInstructorCard;
