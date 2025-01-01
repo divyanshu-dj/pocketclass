@@ -7,284 +7,261 @@ import { toast, ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import Header from "../../components/Header";
+import NewHeader from "../../components/NewHeader";
+import { useDropzone } from "react-dropzone";
 
 function UpdateProfile() {
-	const [userData, setUserData] = useState();
-	const [loading, setLoading] = useState(false);
-	let images = [];
-	let imagesURL = [];
-	const router = useRouter();
-	const { id } = router.query;
+  const [userData, setUserData] = useState();
+  const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [droppedFile, setDroppedFile] = useState(null);
 
-	const getUserInfo = async (id) => {
-		const docRef = doc(db, "Users", id);
-		const data = await getDoc(docRef);
-		setUserData(data.data());
-	};
+  const router = useRouter();
+  const { id } = router.query;
 
-	useEffect(() => {
-		if (id) {
-			getUserInfo(id);
-		}
-	}, [id]);
+  const getUserInfo = async (id) => {
+    const docRef = doc(db, "Users", id);
+    const data = await getDoc(docRef);
+    setUserData(data.data());
+  };
 
-	if (!id || !userData) {
-		return (
-			<section className="flex justify-center items-center min-h-[100vh]">
-				<Image priority={true} src="/Rolling-1s-200px.svg" width={"60px"} height={"60px"} />
-			</section>
-		);
-	}
+  useEffect(() => {
+    if (id) {
+      getUserInfo(id);
+    }
+  }, [id]);
 
-	const onUpdateHandle = async (e) => {
-		e.preventDefault();
-		const firstName = e.target.firstName.value;
-		const lastName = e.target.lastName.value;
-		const gender = e.target.gender.value;
-		const phoneNumber = e.target.phoneNumber.value;
-		const dob = e.target.dob.value;
-		const profileDescription = e.target.profileDescription.value;
+  const validateFields = (data) => {
+    const errors = {};
+    if (!data.firstName) errors.firstName = "First Name is required";
+    if (!data.lastName) errors.lastName = "Last Name is required";
+    if (!data.gender) errors.gender = "Gender is required";
+    if (!data.phoneNumber) errors.phoneNumber = "Phone Number is required";
+    if (!data.dob) errors.dob = "Date of Birth is required";
+    if (!data.profileDescription) errors.profileDescription = "Description is required";
+	if (!droppedFile?.name && (!userData?.images || userData.images.length === 0) ) errors.droppedFile = "Image is required";
+    return errors;
+  };
 
-		for (let i = 0; i < e.target.images.files.length; i++) {
-			images.push(e.target.images.files[i]);
-		}
+  const onDrop = (acceptedFiles) => {
+    const imageFile = acceptedFiles.find((file) => file.type.startsWith("image/"));
+    if (imageFile) {
+      setDroppedFile(imageFile);
+    }
+  };
 
-		setLoading(true);
+  const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: "image/*" });
 
-		const data = {
-			firstName,
-			lastName,
-			gender,
-			phoneNumber,
-			dob,
-			images: e.target.images.files.length ? imagesURL : userData?.images,
-			profileDescription,
-		};
+  const onUpdateHandle = async (e) => {
+    e.preventDefault();
+    const data = {
+      firstName: e.target.firstName.value,
+      lastName: e.target.lastName.value,
+      gender: e.target.gender.value,
+      phoneNumber: e.target.phoneNumber.value,
+      dob: e.target.dob.value,
+      profileDescription: e.target.profileDescription.value,
+    };
 
-		await updateDoc(doc(db, "Users", id), data);
+    const errors = validateFields(data);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
 
-		images.length !== 0 &&
-			images.map((img) => {
-				const fileRef = ref(
-					storage,
-					`images/userImages/${
-						Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
-						"-" +
-						img.name
-					}`
-				);
+    setFormErrors({});
+    setLoading(true);
 
-				uploadBytes(fileRef, img)
-					.then(async (res) => {
-						getDownloadURL(ref(storage, res.metadata.fullPath)).then(
-							async (url) => {
-								await updateDoc(doc(db, "Users", id), {
-									images: arrayUnion(url),
-								});
+    let imageURLArray = userData?.images || [];
+    if (droppedFile) {
+      const fileRef = ref(storage, `images/userImages/${Date.now()}-${droppedFile.name}`);
+      const uploadResult = await uploadBytes(fileRef, droppedFile);
+      const imageURL = await getDownloadURL(uploadResult.ref);
+      imageURLArray = [imageURL]; // Ensure only one image in the array
+    }
 
-								toast.success("Updated", {
-									toastId: "success6996",
-								});
-							}
-						);
-					})
-					.finally(() => {
-						setTimeout(() => {
-							setLoading(false);
-							router.push(`/profile/${id}`);
-						}, 4000);
-					});
-			});
+    await updateDoc(doc(db, "Users", id), {
+      ...data,
+      images: imageURLArray,
+    });
 
-		toast.success("Updated", {
-			toastId: "success9853",
-		});
+    toast.success("Profile updated successfully", {
+      toastId: "success-toast",
+    });
 
-		setTimeout(() => {
-			setLoading(false);
-			router.push(`/profile/${id}`);
-		}, 4000);
+    setLoading(false);
+    router.push(`/profile/${id}`);
+  };
+  if (!id || !userData) {
+    return (
+      <section className="flex justify-center items-center min-h-[100vh]">
+        <Image
+          priority={true}
+          src="/Rolling-1s-200px.svg"
+          width={60}
+          height={60}
+          alt="Loading"
+        />
+      </section>
+    );
+  }
 
-		setLoading(false);
-	};
+  return (
+    <>
+      <Head>
+        <title>Update Profile</title>
+        <meta name="description" content="Update your profile" />
+        <link rel="icon" href="/pc_favicon.ico" />
+      </Head>
 
-	return (
-		<>
-			<Head>
-				<title>Edit Class</title>
-				<meta
-					name="pocketclass"
-					content="Register for an account at pocketclass!"
-				/>
-				<link rel="icon" href="/pc_favicon.ico" />
-			</Head>
+      <NewHeader />
 
-			<Header />
+      <div className="px-10 rounded-3xl flex flex-col justify-center items-center h-[100vh]">
+        <div className="registrationContainer lg:w-[50%] sm:w-[100%]">
+          <h1 className="text-5xl font-semibold text-center">Update Profile</h1>
 
-			<div className="px-10 rounded-3xl flex flex-col justify-center items-center h-[100vh]">
-				<div className="registrationContainer lg:w-[50%] sm:w-[100%] ">
-					<h1 className="text-5xl font-semibold text-center">Update Profile</h1>
+          <div className="mt-8">
+            <form onSubmit={onUpdateHandle}>
+              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
+                <div>
+                  <label className="text-medium font-medium">First Name</label>
+                  <input
+                    defaultValue={userData?.firstName}
+                    name="firstName"
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                      formErrors.firstName ? "border-red-500" : "border-gray-100"
+                    }`}
+                    placeholder="Enter your First name"
+                  />
+                </div>
+                <div>
+                  <label className="text-medium font-medium">Last Name</label>
+                  <input
+                    defaultValue={userData?.lastName}
+                    name="lastName"
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                      formErrors.lastName ? "border-red-500" : "border-gray-100"
+                    }`}
+                    placeholder="Enter your Last Name"
+                  />
+                </div>
+              </div>
 
-					<div className="mt-8">
-						<form onSubmit={(e) => onUpdateHandle(e)}>
-							<div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
-								<div className="firstName">
-									<label className="text-medium font-medium">First Name</label>
-									<input
-										defaultValue={userData?.firstName}
-										name="firstName"
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										placeholder="Enter your First name"
-									/>
-								</div>
-								<div className="lastName">
-									<label className="text-medium font-medium">Last Name</label>
-									<input
-										defaultValue={userData?.lastName}
-										name="lastName"
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										placeholder="Enter your Last Name"
-									/>
-								</div>
-							</div>
+              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
+                <div>
+                  <label className="text-medium font-medium">Phone Number</label>
+                  <input
+                    defaultValue={userData?.phoneNumber}
+                    name="phoneNumber"
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                      formErrors.phoneNumber ? "border-red-500" : "border-gray-100"
+                    }`}
+                    placeholder="Enter your Phone Number"
+                  />
+                </div>
+                <div>
+                  <label className="text-medium font-medium">Date of Birth</label>
+                  <input
+                    defaultValue={userData?.dob}
+                    name="dob"
+                    type="date"
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                      formErrors.dob ? "border-red-500" : "border-gray-100"
+                    }`}
+                    placeholder="Enter your Date of Birth"
+                  />
+                </div>
+              </div>
 
-							<div className="grid lg:grid-cols-2 lg:gap-x-2 sm:grid-cols-1">
-								<div className="phoneNumber">
-									<label className="text-medium font-medium">
-										Phone Number
-									</label>
-									<input
-										defaultValue={userData?.phoneNumber}
-										name="phoneNumber"
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										placeholder="Enter your Phone Number"
-									/>
-								</div>
-								<div className="dob">
-									<label className="text-medium font-medium">
-										Date of Birth
-									</label>
-									<input
-										defaultValue={userData?.dob}
-										name="dob"
-										type={"date"}
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										placeholder="Enter your Date of birth"
-									/>
-								</div>
-							</div>
+              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
+                <div>
+                  <label className="text-medium font-medium">Gender</label>
+                  <select
+                    name="gender"
+                    className={`w-full border-2 text-sm rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                      formErrors.gender ? "border-red-500" : "border-gray-100"
+                    }`}
+					defaultValue={userData?.gender}
+                  >
+                    <option value="" hidden>
+                      {userData?.gender || "Select Gender"}
+                    </option>
+                    <option value="woman">Woman</option>
+                    <option value="man">Man</option>
+                    <option value="non-binary">Non-binary</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-medium font-medium">Image</label>
+                  <div
+                    {...getRootProps({
+                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                        formErrors.images ? "border-red-500" : "border-gray-100"
+                      }`,
+                    })}
+					style={{border: 'solid', borderStyle: 'dashed', borderColor: formErrors.images ? 'red' : `#d4d2d3`, borderRadius: '10px'}}
+                    className="border-dashed flex justify-center items-center py-2 border-3 border-gray-200 px-3 cursor-pointer"
+                  >
+                    <input {...getInputProps()} />
+                    {droppedFile ? (
+                      <p className="text-center">{droppedFile.name}</p>
+                    ) : (
+                      <p>Drag & drop or select an Image</p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-							<div className="grid lg:grid-cols-2 lg:gap-x-2 sm:grid-cols-1">
-								<div className="gender">
-									<label className="text-medium font-medium">Gender</label>
-									<select
-										name="gender"
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-									>
-										<option
-											value={userData?.gender ? userData?.gender : ""}
-											hidden
-										>
-											{userData?.gender ? userData?.gender : "Gender"}
-										</option>
-										<option value="woman">Women</option>
-										<option value="man">Men</option>
-										<option value="non-binary/genderquee">
-											Non-binary / genderqueer
-										</option>
-										<option value="i-prefer-to-self-identify">
-											I prefer to self-identify
-										</option>
-										<option value="i'd-rather-not-say">
-											I'd rather not say
-										</option>
-									</select>
-								</div>
-								<div className="img">
-									<label className="text-medium font-medium">
-										Images (png, jpg)
-									</label>
-									<input
-										name="images"
-										className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										multiple
-										accept="image/png, image/jpeg, image/jpg"
-										type={"file"}
-									/>
-								</div>
-							</div>
+              <div>
+                <label className="text-medium font-medium">Description</label>
+                <textarea
+                  defaultValue={userData?.profileDescription}
+                  name="profileDescription"
+                  className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
+                    formErrors.profileDescription ? "border-red-500" : "border-gray-100"
+                  }`}
+                  placeholder="Enter a profile description"
+                />
+              </div>
 
-							<div className="grid lg:grid-cols-1 lg:gap-x-2 sm:grid-cols-1">
-								<div className="gender">
-									<label className="text-medium font-medium">Description</label>
-									<input
-										defaultValue={userData?.profileDescription}
-										name="profileDescription"
-										className="w-full border-2 text-sm border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-										placeholder="Enter a profile description"
-									/>
-								</div>
-							</div>
+              <div className="col-span-12 mt-10">
+                {!loading ? (
+                  <button
+                    type="submit"
+                    className="w-full py-4 bg-logo-red rounded-xl text-white font-bold text-lg"
+                  >
+                    Update
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full py-4 bg-logo-red rounded-xl text-white font-bold text-lg opacity-50"
+                  >
+                    Updating...
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
 
-							<div className="col-span-12 mt-10">
-								{!loading ? (
-									<button
-										type="submit"
-										className="active:scale-[.98] w-full active:duration-75 transition-all hover:scale-[1.01]  ease-in-out transform py-4 bg-logo-red rounded-xl text-white font-bold text-lg"
-									>
-										Update
-									</button>
-								) : (
-									<div class="flex items-center justify-center">
-										<button
-											type="button"
-											class="inline-flex items-center justify-center py-4 text-sm font-semibold leading-6 text-white transition duration-150 w-full ease-in-out bg-logo-red rounded-xl shadow cursor-not-allowed hover:bg-logo-red"
-											disabled=""
-										>
-											<svg
-												class="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
-												xmlns="http://www.w3.org/2000/svg"
-												fill="none"
-												viewBox="0 0 24 24"
-											>
-												<circle
-													class="opacity-25"
-													cx="12"
-													cy="12"
-													r="10"
-													stroke="currentColor"
-													stroke-width="4"
-												></circle>
-												<path
-													class="opacity-75"
-													fill="currentColor"
-													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-												></path>
-											</svg>
-											Updating...
-										</button>
-									</div>
-								)}
-							</div>
-						</form>
-					</div>
-				</div>
-				<ToastContainer
-					position="top-center"
-					autoClose={2000}
-					hideProgressBar={false}
-					newestOnTop
-					closeOnClick
-					rtl={false}
-					pauseOnFocusLoss
-					draggable
-					pauseOnHover
-					theme="light"
-				/>
-			</div>
-		</>
-	);
+        <ToastContainer
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </div>
+    </>
+  );
 }
 
 export default UpdateProfile;

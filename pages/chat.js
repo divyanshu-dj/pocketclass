@@ -3,7 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 // components
-import Header from "../components/Header";
 // firebase
 import { auth, db } from "../firebaseConfig";
 import {
@@ -28,6 +27,7 @@ import AddMedia from "../components/AddMedia";
 import MediaDisplay from "../components/MediaDisplay";
 import { v4 } from "uuid";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import NewHeader from "../components/NewHeader";
 
 const Chat = () => {
 	const router = useRouter();
@@ -380,7 +380,7 @@ const Chat = () => {
 			</Head>
 
 			{/* header */}
-			<Header />
+			<NewHeader />
 
 			{/* chat container */}
 			<div className="flex-1 flex flex-col md:flex-row w-full overflow-hidden">

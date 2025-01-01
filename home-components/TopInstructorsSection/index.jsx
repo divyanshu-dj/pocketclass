@@ -24,7 +24,7 @@ function TopClassesSection({
 
   useEffect(() => {
     const filteredClasses = activeFilter
-      ? classes.filter((classItem) => classItem.Type === activeFilter)
+      ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
       : classes;
     onClassesLoad?.(filteredClasses.length);
   }, [classes, activeFilter, onClassesLoad]);
@@ -110,11 +110,11 @@ function TopClassesSection({
   const displayedClasses = showAll
     ? activeFilter
       ? classes
-          .filter((classItem) => classItem.Type === activeFilter)
+          .filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
           .slice(0, 12)
       : classes.slice(0, 12)
     : activeFilter
-    ? classes.filter((classItem) => classItem.Type === activeFilter).slice(0, 4)
+    ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter))).slice(0, 4)
     : classes.slice(0, 4);
 
   return (

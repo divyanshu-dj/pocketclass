@@ -2,10 +2,10 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import ClassHeading from "../components/ClassHeading";
+import NewHeader from "../components/NewHeader";
 
 export default function Class() {
   const [data, setData] = useState([]);
@@ -41,7 +41,7 @@ export default function Class() {
       </Head>
 
       {/* header */}
-      <Header />
+      <NewHeader />
 
       {/* body */}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">

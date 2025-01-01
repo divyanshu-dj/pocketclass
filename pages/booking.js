@@ -30,7 +30,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { use } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import { set } from "date-fns";
-import Header from "../components/Header";
 import NewHeader from "../components/NewHeader";
 
 const stripePromise = loadStripe(

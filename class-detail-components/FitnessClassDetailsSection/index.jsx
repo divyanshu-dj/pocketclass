@@ -202,7 +202,7 @@ function FitnessClassDetailsSection({
                       className="h-1 max-w-[initial] w-1 block box-border"
                     />
                     <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[3px] m-0 p-0">
-                      {classData?.SubCategory || "N/A"}
+                      {classData?.SubCategory || classData?.Type || "N/A"}
                     </p>
                   </div>
                 </div>

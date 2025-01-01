@@ -11,11 +11,11 @@ import {
   import Image from "next/image";
   import { useRouter } from "next/router";
   import React, { useEffect, useState } from "react";
-  import Header from "../../components/Header";
   import { auth, db } from "../../firebaseConfig";
   import InfoCard from "../../components/InfoCard";
   import { useAuthState } from "react-firebase-hooks/auth";
   import { Tabs } from "antd";
+import NewHeader from "../../components/NewHeader";
   
   const MyClass = () => {
 	const router = useRouter();
@@ -137,7 +137,7 @@ import {
 		  <link rel="icon" href="/pc_favicon.ico" />
 		</Head>
   
-		<Header />
+		<NewHeader />
   
 		<h1 className="text-center text-4xl font-bold py-[50px]">My Classes</h1>
   

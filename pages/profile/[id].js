@@ -1,7 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
 import Footer from "../../components/Footer";
-import Header from "../../components/Header";
 
 import { Router, useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -15,6 +14,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import NewHeader from "../../components/NewHeader";
 
 export default function Profile() {
 
@@ -52,7 +52,7 @@ export default function Profile() {
           <link rel="icon" href="/pc_favicon.ico" />
         </Head>
         {/* header */}
-        <Header />
+        <NewHeader />
         {/* banner */}
 
         <div className="max-w-5xl mx-auto px-8 py-8 sm:px-16 h-[auto]">

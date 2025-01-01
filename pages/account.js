@@ -1,12 +1,12 @@
 "use client"
 import React from "react";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import Login from "./Login";
 import Register from "./Register";
 import { auth } from "/firebaseConfig"
 import { onAuthStateChanged } from "firebase/auth";
 import Home from "../components/home";
+import NewHeader from "../components/NewHeader";
 
 export default function Account() {
   const [user, setUser] = React.useState(null);
@@ -27,8 +27,7 @@ export default function Account() {
     return unSubscribeAuth;
   }, [user])
 
-  // if(authState === null) return <div><Header /><Footer /></div>
-  if (authState === 'login') return <div><Header /><Login setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
-  if (authState === 'register') return <div><Header /><Register setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
+  if (authState === 'login') return <div><  NewHeader /><Login setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
+  if (authState === 'register') return <div><NewHeader /><Register setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
   if (user) return <Home user={user} setAuthState={setAuthState} setUser={setUser} />
 }

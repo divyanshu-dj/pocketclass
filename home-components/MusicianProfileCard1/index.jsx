@@ -11,7 +11,7 @@ function MusicianProfileCard1({ instructor }) {
   const rating = instructor?.averageRating; // Static as not in DB
   const reviews = instructor?.reviewCount; // Static as not in DB
   const price = instructor?.Price; // Static as not in DB
-  const specialization = instructor?.Type; // Static as not in DB
+  const specialization = instructor?.SubCategory?(instructor?.SubCategory):(instructor?.Type); // Static as not in DB
 
   const getCategoryIcon = (category, type) => {
     const categoryData = categories.find((cat) => cat.name === category);

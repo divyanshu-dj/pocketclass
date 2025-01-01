@@ -10,7 +10,6 @@ import { DayPicker } from "react-day-picker";
 import { auth } from "../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
-import Header from "../components/Header";
 import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
 import {

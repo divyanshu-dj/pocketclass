@@ -1,10 +1,10 @@
 import React from "react";
 import Footer from "/components/Footer";
-import Header from "/components/Header";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import LargeCard from "/components/LargeCard";
+import NewHeader from "../../components/NewHeader";
 
 export default function InstructorGuide() {
   return (
@@ -17,7 +17,7 @@ export default function InstructorGuide() {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
       {/* header */}
-      <Header />
+      <NewHeader />
 
       {/*body*/}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
