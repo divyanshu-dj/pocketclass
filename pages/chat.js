@@ -84,7 +84,7 @@ const Chat = () => {
 
 		scrollToBottom();
 	}, [messages, groupMessages]);
-	
+
 
 	/**
 	 * DATA FUNCTIONS
@@ -99,60 +99,60 @@ const Chat = () => {
 				setRoomData(chatRoomTemp);
 
 				setStudentData(await getData(chatRoomTemp?.student, "Users"));
-				
+
 				setInstructorData(await getData(chatRoomTemp?.instructor, "Users"));
 				const classTempData = await getData(chatRoomTemp?.class, "classes");
 				setClassData(classTempData);
 
-					if (classTempData?.groupType === "group") {
-						
-							const chatroomsQuery = query(
-								collection(db, "chatrooms"),
-								where("class", "==", cid)
-							);
-							
-							const chatroomsSnapshot = await getDocs(chatroomsQuery);
-							const chatRoomTempData = chatroomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-					
-						// Merging messages from all chatrooms
-						const mergedMessages = chatRoomTempData.reduce((acc, chatRoom) => {
-							return acc.concat(chatRoom.messages);
-						}, []);
+				if (classTempData?.groupType === "group") {
 
-						
-						// Sorting messages by createdAt timestamp
-						mergedMessages.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds || a.createdAt.nanoseconds - b.createdAt.nanoseconds);
-					
-						setGroupMessages(mergedMessages);
+					const chatroomsQuery = query(
+						collection(db, "chatrooms"),
+						where("class", "==", cid)
+					);
 
-						const appointmentsSnapshot = await getDocs(
-							query(
-								collection(db, "appointments"),
-								where("class", "==", cid)
-							)
-						);
-						const appointments = appointmentsSnapshot.docs.map(doc => doc.data());
-						setGroupAppointments(appointments);
+					const chatroomsSnapshot = await getDocs(chatroomsQuery);
+					const chatRoomTempData = chatroomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-						const uniqueStudentIds = [
-							...new Set(
-								appointments
-									.map(appt => appt.owner)
-							),
-						];
+					// Merging messages from all chatrooms
+					const mergedMessages = chatRoomTempData.reduce((acc, chatRoom) => {
+						return acc.concat(chatRoom.messages);
+					}, []);
 
-						const studentsDataPromises = uniqueStudentIds.map(uid =>
-							getData(uid, "Users")
-						);
 
-						const students = await Promise.all(studentsDataPromises);
+					// Sorting messages by createdAt timestamp
+					mergedMessages.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds || a.createdAt.nanoseconds - b.createdAt.nanoseconds);
 
-						const uniqueStudents = [
-							...new Map(students.map(student => [student.userUid, student])).values()
-						];
-						setGroupStudents(uniqueStudents);
-					}
-				
+					setGroupMessages(mergedMessages);
+
+					const appointmentsSnapshot = await getDocs(
+						query(
+							collection(db, "appointments"),
+							where("class", "==", cid)
+						)
+					);
+					const appointments = appointmentsSnapshot.docs.map(doc => doc.data());
+					setGroupAppointments(appointments);
+
+					const uniqueStudentIds = [
+						...new Set(
+							appointments
+								.map(appt => appt.owner)
+						),
+					];
+
+					const studentsDataPromises = uniqueStudentIds.map(uid =>
+						getData(uid, "Users")
+					);
+
+					const students = await Promise.all(studentsDataPromises);
+
+					const uniqueStudents = [
+						...new Map(students.map(student => [student.userUid, student])).values()
+					];
+					setGroupStudents(uniqueStudents);
+				}
+
 
 				setIsLoading(false);
 			} catch (error) {
@@ -299,8 +299,35 @@ const Chat = () => {
 			const targetName = isInstructor
 				? `${instructorData?.firstName} ${instructorData?.lastName}`
 				: `${studentData?.firstName} ${studentData?.lastName}`;
+			const senderName = (!isInstructor)
+				? `${instructorData?.firstName} ${instructorData?.lastName}`
+				: `${studentData?.firstName} ${studentData?.lastName}`;
+
+			const chatLink = `https://pocketclass.ca/chat?cid=${cid}&chid=${chid}`;
 
 			const targetText = `You have new messages in class '${classData?.Name}' by '${targetName}'.`;
+
+			const emailContent = `
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.5;">
+                <p>Hello ${targetName},</p>
+
+                <p>You’ve received a new message on PocketClass from <strong>${senderName}</strong>:</p>
+
+                <blockquote style="border-left: 3px solid #ddd; padding-left: 10px; color: #555;">
+                    ${targetText}
+                </blockquote>
+
+                <p>To view or respond to this message, please log in to PocketClass or click the link below:</p>
+
+                <p><a href="${chatLink}" style="color: #007bff; text-decoration: none;">View Conversation</a></p>
+
+                <p>If you have any questions, feel free to reach out to <a href="mailto:contact@pocketclass.ca">contact@pocketclass.ca</a> or visit your PocketClass account for more details.</p>
+
+                <p>Best regards,<br>The PocketClass Team</p>
+            </body>
+            </html>
+        `
 
 			let data = {
 				isRead: false,
@@ -327,11 +354,11 @@ const Chat = () => {
 				}
 
 				if (notifDate?.isBefore(tenMinutesAgo)) {
-					await sendEmail(targetEmail, targetText, now);
+					await sendEmail(targetEmail, emailContent, now);
 				}
 			} else {
 				await addDoc(collection(db, "notifications"), data);
-				await sendEmail(targetEmail, targetText, now);
+				await sendEmail(targetEmail, emailContent, now);
 			}
 		} catch (error) {
 			console.warn(error);
@@ -339,8 +366,9 @@ const Chat = () => {
 	};
 
 	// send email
-	const sendEmail = async (targetEmail, targetText, now) => {
+	const sendEmail = async (targetEmail, html, now) => {
 		try {
+			console.log("Email sent successfully");
 			const res = await fetch("/api/sendEmail", {
 				method: "POST",
 				headers: {
@@ -349,9 +377,7 @@ const Chat = () => {
 				},
 				body: JSON.stringify({
 					subject: `Message Alert`,
-					text: `${targetText} \n\nTime:${moment(now?.toDate())?.format?.(
-						"DD-MM-YY / hh:mm A"
-					)}`,
+					html: html,
 					to: targetEmail,
 				}),
 			});
@@ -434,7 +460,7 @@ const Chat = () => {
 							</h1>
 						</div>
 					</div>
-					
+
 
 					{/* group members */}
 					{classData?.groupType === "group" && groupStudents.filter(item => item?.userUid !== studentData?.userUid)?.map(student => (

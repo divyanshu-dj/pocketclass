@@ -730,7 +730,7 @@ const CheckoutForm = ({
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
   const [loading, setLoading] = useState(false);
-  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent) => {
+  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent, attachments = []) => {
     try {
       const res = await fetch("/api/sendEmail", {
         method: "POST",
@@ -742,6 +742,7 @@ const CheckoutForm = ({
           subject: targetSubject,
           html: targetHtmlContent,
           to: targetEmails,
+          attachments
         }),
       });
 
@@ -789,6 +790,24 @@ const CheckoutForm = ({
       // Combine both emails
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
 
+      const startDateTime = new Date(`${date}T${startTime}`).toISOString();
+      const endDateTime = new Date(`${date}T${endTime}`).toISOString();
+      const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocketclass//NONSGML v1.0//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+SUMMARY:${classData.Name}
+DESCRIPTION:Booking confirmed for the class ${classData.Name}
+DTSTART:${startDateTime.replace(/-|:|\.\d+/g, '')}
+DTEND:${endDateTime.replace(/-|:|\.\d+/g, '')}
+LOCATION:Online
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
+    `.trim();
+
       // HTML content for the email
       const htmlContent = `
       <div style="font-family: Arial, sans-serif; color: #333;">
@@ -828,7 +847,14 @@ const CheckoutForm = ({
       await sendEmail(
         recipientEmails,
         `New Booking for ${classData.Name} with Pocketclass!`,
-        htmlContent
+        htmlContent,
+        [
+          {
+            filename: "booking-invite.ics",
+            content: icsContent,
+            type: "text/calendar",
+          },
+        ]
       );
 
       setStripeOptions(null);
