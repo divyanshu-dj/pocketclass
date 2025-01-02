@@ -312,10 +312,10 @@ const Chat = () => {
             <body style="font-family: Arial, sans-serif; line-height: 1.5;">
                 <p>Hello ${targetName},</p>
 
-                <p>You’ve received a new message on PocketClass from <strong>${senderName}</strong>:</p>
+                <p>You’ve received a new message on PocketClass from <strong>${senderName}</strong> in ${classData?.Name}:</p>
 
                 <blockquote style="border-left: 3px solid #ddd; padding-left: 10px; color: #555;">
-                    ${targetText}
+                    ${newMessage}
                 </blockquote>
 
                 <p>To view or respond to this message, please log in to PocketClass or click the link below:</p>
@@ -368,7 +368,6 @@ const Chat = () => {
 	// send email
 	const sendEmail = async (targetEmail, html, now) => {
 		try {
-			console.log("Email sent successfully");
 			const res = await fetch("/api/sendEmail", {
 				method: "POST",
 				headers: {
