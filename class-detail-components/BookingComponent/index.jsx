@@ -791,6 +791,8 @@ const CheckoutForm = ({
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
 
       const startDateTime = new Date(`${date}T${startTime}`).toISOString();
+      const organizer = instructorData.email;
+      const location = classData.Address || "Online";
       const endDateTime = new Date(`${date}T${endTime}`).toISOString();
       const icsContent = `
 BEGIN:VCALENDAR
@@ -802,7 +804,8 @@ SUMMARY:${classData.Name}
 DESCRIPTION:Booking confirmed for the class ${classData.Name}
 DTSTART:${startDateTime.replace(/-|:|\.\d+/g, '')}
 DTEND:${endDateTime.replace(/-|:|\.\d+/g, '')}
-LOCATION:Online
+LOCATION:${location}
+ORGANIZER;CN=${instructorData.firstName} ${instructorData.lastName}:MAILTO:${organizer}
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR
