@@ -30,7 +30,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { use } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import { set } from "date-fns";
-import Header from "../components/Header";
 import NewHeader from "../components/NewHeader";
 
 const stripePromise = loadStripe(
@@ -516,17 +515,15 @@ export default function index() {
         <div>
           <button
             onClick={() => setMode("Individual")}
-            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
-              mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
-            }`}
+            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
+              }`}
           >
             Individual
           </button>
           <button
             onClick={() => setMode("Group")}
-            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
-              mode === "Group" ? "bg-[#E73F2B] text-white" : ""
-            }`}
+            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Group" ? "bg-[#E73F2B] text-white" : ""
+              }`}
           >
             Group
           </button>
@@ -585,12 +582,11 @@ export default function index() {
                       <button
                         key={i}
                         onClick={() => handleSlotClick(slot.date, slot)}
-                        className={`p-3 border rounded cursor-pointer ${
-                          selectedSlot?.startTime === slot.startTime &&
-                          selectedSlot?.date === slot.date
+                        className={`p-3 border rounded cursor-pointer ${selectedSlot?.startTime === slot.startTime &&
+                            selectedSlot?.date === slot.date
                             ? "bg-[#E73F2B] text-white"
                             : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
-                        }`}
+                          }`}
                       >
                         {slot.startTime} - {slot.endTime}
                       </button>
@@ -670,7 +666,7 @@ const CheckoutForm = ({
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
   const [loading, setLoading] = useState(false);
-  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent) => {
+  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent, attachments = []) => {
     try {
       const res = await fetch("/api/sendEmail", {
         method: "POST",
@@ -682,6 +678,7 @@ const CheckoutForm = ({
           subject: targetSubject,
           html: targetHtmlContent,
           to: targetEmails,
+          attachments
         }),
       });
 
@@ -734,8 +731,7 @@ const CheckoutForm = ({
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
-        <p>We are excited to confirm a new booking for the class <strong>${
-          classData.Name
+        <p>We are excited to confirm a new booking for the class <strong>${classData.Name
         }</strong>!</p>
         <h3>Booking Details:</h3>
         <table style="width: 100%; border-collapse: collapse;" border="1">
@@ -757,9 +753,8 @@ const CheckoutForm = ({
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${
-              mode === "Group" ? classData.groupPrice : classData.Price
-            }</td>
+            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price
+        }</td>
           </tr>
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
@@ -767,10 +762,36 @@ const CheckoutForm = ({
       </div>
     `;
 
+
+      const startDateTime = new Date(`${date}T${startTime}`).toISOString();
+      const endDateTime = new Date(`${date}T${endTime}`).toISOString();
+      const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocketclass//NONSGML v1.0//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:${bookingRef}@pocketclass.com
+SUMMARY:${classData.Name}
+DESCRIPTION:Booking confirmed for the class ${classData.Name}
+DTSTART:${startDateTime.replace(/-|:|\.\d+/g, '')}
+DTEND:${endDateTime.replace(/-|:|\.\d+/g, '')}
+LOCATION:Online
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
+  `.trim();
       await sendEmail(
         recipientEmails,
         `New Booking for ${classData.Name} with Pocketclass!`,
-        htmlContent
+        htmlContent,
+        [
+          {
+            filename: "booking-invite.ics",
+            content: icsContent,
+            type: "text/calendar",
+          },
+        ]
       );
 
       setStripeOptions(null);

@@ -2,7 +2,6 @@
 
 import Head from "next/head";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import dynamic from "next/dynamic";
 import { categories } from "../utils/categories";
 import { useDropzone } from "react-dropzone";

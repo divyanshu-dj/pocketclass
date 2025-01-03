@@ -3,12 +3,12 @@ import { db, auth } from '../firebaseConfig';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
-import Header from '../components/Header';
 import Head from 'next/head';
 import Footer from '../components/Footer';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDeleteLeft, faRandom, faTrash, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import NewHeader from '../components/NewHeader';
 
 const VoucherManager = () => {
     const [user, loading, error] = useAuthState(auth);
@@ -128,7 +128,7 @@ useEffect(() => {
                 <link rel="icon" href="/pc_favicon.ico" />
             </Head>
             {/* header */}
-            <Header />
+            <NewHeader />
             {/* banner */}
             <div className="max-w-7xl mx-auto px-8 py-8 min-h-[80vh] sm:px-16">
             <h1 className="text-3xl font-extrabold text-center py-5">Voucher Management</h1>

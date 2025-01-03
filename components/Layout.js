@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import Header from "./Header";
-// import Header from "./Header";
+import NewHeader from "./NewHeader";
 // import PageHead from "./PageHead";
 // import PageTitle from "./PageTitle";
 // import Sidebar from "./sidebar";
@@ -25,7 +24,7 @@ const Layout = ({
         <>
             {/* <PageHead headTitle={"Panoply"} /> */}
             <div id="main-wrapper" className={"pageClass"}>
-                {<Header />}
+                {<NewHeader />}
                 {/*  */}
 
                 <div className="content-body" style={{ minHeight: height - 122 }}>

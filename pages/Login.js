@@ -103,7 +103,7 @@ function Login() {
     }
   }, [user, error]);
   const shouldRedirectToStripe = async (user) => {
-    const docRef = doc(db, "Users", user.user.uid);
+    const docRef = doc(db, "Users", user?.user?.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const data = docSnap.data();

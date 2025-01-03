@@ -18,9 +18,9 @@ import {
 	where,
 } from "firebase/firestore";
 // components
-import Header from "../components/Header";
 import Dropdown from "../components/Dropdown";
 import moment from "moment";
+import NewHeader from "../components/NewHeader";
 
 export default function Support() {
 	// user & class
@@ -266,7 +266,7 @@ export default function Support() {
 			</Head>
 
 			{/* header */}
-			<Header />
+			<NewHeader />
 
 			{/* application container */}
 			<div className="bg-white flex-1 flex flex-col p-2 md:p-12">

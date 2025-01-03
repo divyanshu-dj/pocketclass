@@ -2,7 +2,6 @@
 
 import Head from "next/head";
 import Footer from "../../components/Footer";
-import Header from "../../components/Header";
 import dynamic from "next/dynamic";
 import { categories } from "../../utils/categories";
 import { useDropzone } from "react-dropzone";
@@ -21,6 +20,7 @@ import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
+import NewHeader from "../../components/NewHeader";
 
 export default function UpdateClass() {
   const [form, setForm] = useState({
@@ -179,7 +179,7 @@ export default function UpdateClass() {
         <meta name="Update Class" content="Update A Class To Teach Students" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <Header />
+      <NewHeader />
       <div className="max-w-7xl mx-auto px-6 py-6  min-h-[80vh]  md:px-16">
         <h1 className="text-4xl font-extrabold text-center py-5 pb-3">
           Edit this Class

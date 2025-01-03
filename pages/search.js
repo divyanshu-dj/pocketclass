@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import { format } from "date-fns";
 import InfoCard from "../components/InfoCard";
 import Mapper from "../components/Mapper";
@@ -15,6 +14,7 @@ import {
 	where,
 } from "firebase/firestore";
 import { useEffect } from "react";
+import NewHeader from "../components/NewHeader";
 
 function Search({ searchResults }) {
 	const router = useRouter();
@@ -35,7 +35,7 @@ function Search({ searchResults }) {
 
 	return (
 		<div>
-			<Header
+			<NewHeader
 				placeholder={`${searchInput} | ${range} | ${noOfGuests} guests`}
 			/>
 
