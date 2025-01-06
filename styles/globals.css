@@ -237,3 +237,24 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.ant-tabs-tab {
+  font-size: 16px !important;
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #ff0000 !important; 
+}
+.ant-tabs-nav-wrap{
+  justify-content: center !important;
+}
+
+.ant-tabs-ink-bar {
+  height: 4px !important;
+  background-color: #ff0000 !important; 
+}
+.ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: #ff0000 !important; /* Change to your desired hover color */
+}
+
+
