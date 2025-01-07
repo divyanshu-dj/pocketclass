@@ -547,125 +547,133 @@ const Chat = () => {
       {/* chat container */}
       <div className="flex-1 flex flex-col md:flex-row w-full overflow-hidden">
         {/* chat left pane */}
-        <div className="w-full md:w-[25%] min-w-[200px] overflow-y-auto md:border-r-2 flex flex-col shadow-md md:shadow-none border-b md:border-b-0">
+        <div className="w-full flex flex-col  md:w-[25%] min-w-[200px] overflow-y-auto md:border-r-2 gap-6 shadow-md md:shadow-none border-b md:border-b-0">
           <div>
-            {/* Check if chatroom has any Direct message chat room or not using filter */}
+            <div>
+              {/* Check if chatroom has any Direct message chat room or not using filter */}
 
-            {chatRooms?.filter(
-              (chatroom) =>
+              {chatRooms?.filter(
+                (chatroom) =>
+                  !chatroom?.startTime &&
+                  (chatroom?.messages?.length > 0 || chatroom?.id === chid)
+              ).length > 0 && (
+                <h1 className="text-base  mt-4 text-gray-400 font-semibold mx-4 my-2">
+                  Direct Messages
+                </h1>
+              )}
+            </div>
+            {chatRooms?.map((chatroom, index) => {
+              if (
                 !chatroom?.startTime &&
                 (chatroom?.messages?.length > 0 || chatroom?.id === chid)
-            ).length > 0 && (
-              <h1 className="text-lg text-black font-semibold mx-4 my-2">
-                Direct Messages
-              </h1>
-            )}
-          </div>
-          {chatRooms?.map((chatroom, index) => {
-            if (
-              !chatroom?.startTime &&
-              (chatroom?.messages?.length > 0 || chatroom?.id === chid)
-            ) {
-              const classData = classes.find((c) => c?.id === chatroom.class);
-              const booking = bookings.find(
-                (booking) => booking?.student_id === chatroom.student
-              );
-              return classData?.Name ? (
-                <div
-                  key={index}
-                  onClick={() => {
-                    setchid(chatroom.id);
-                  }}
-                  className={` py-4 border-gray-300 hover:bg-gray-100 ${
-                    chid === chatroom.id ? " bg-gray-100 " : " bg-white"
-                  } border-solid border-b cursor-pointer px-2`}
-                >
-                  <h1 className="text-base mx-4 text-black font-semibold overflow-hidden whitespace-nowrap">
-                    {booking?.student_name &&
-                    booking?.instructor_id == user?.uid
-                      ? `${booking?.student_name} - `
-                      : ""}
-                    {classData?.Name}
-                  </h1>
-                  <div className="flex flex-col space-y-2 mx-2">
-                    <div className="flex items-center justify-between px-2 rounded-lg">
-                      <h1 className="text-sm text-gray-700">
-                        {chatroom?.messages?.length > 0
-                          ? chatroom?.messages?.[chatroom?.messages?.length - 1]
-                              ?.text
-                          : "No messages"}
-                      </h1>
-                      <h1 className="text-xs text-gray-500">
-                        {chatroom?.messages?.length > 0
-                          ? moment(
-                              chatroom?.messages?.[
+              ) {
+                const classData = classes.find((c) => c?.id === chatroom.class);
+                const booking = bookings.find(
+                  (booking) => booking?.student_id === chatroom.student
+                );
+                return classData?.Name ? (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setchid(chatroom.id);
+                    }}
+                    className={` py-4 border-gray-300 hover:bg-gray-100 ${
+                      chid === chatroom.id ? " bg-gray-100 " : " bg-white"
+                    } border-solid border-b cursor-pointer px-2`}
+                  >
+                    <h1 className="text-base mx-4 text-black font-semibold overflow-hidden whitespace-nowrap">
+                      {booking?.student_name &&
+                      booking?.instructor_id == user?.uid
+                        ? `${booking?.student_name} - `
+                        : ""}
+                      {classData?.Name}
+                    </h1>
+                    <div className="flex flex-col space-y-2 mx-2">
+                      <div className="flex items-center justify-between px-2 rounded-lg">
+                        <h1 className="text-sm text-gray-700">
+                          {chatroom?.messages?.length > 0
+                            ? chatroom?.messages?.[
                                 chatroom?.messages?.length - 1
-                              ]?.createdAt?.toDate()
-                            ).format("DD-MM-YY / hh:mm")
-                          : ""}
-                      </h1>
+                              ]?.text
+                            : "No messages"}
+                        </h1>
+                        <h1 className="text-xs text-gray-500">
+                          {chatroom?.messages?.length > 0
+                            ? moment(
+                                chatroom?.messages?.[
+                                  chatroom?.messages?.length - 1
+                                ]?.createdAt?.toDate()
+                              ).format("DD-MM-YY / hh:mm")
+                            : ""}
+                        </h1>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : null;
-            }
-            return null; // Ensure a valid return for map()
-          })}
+                ) : null;
+              }
+              return null; // Ensure a valid return for map()
+            })}
+          </div>
           <div>
-            {chatRooms?.filter(
-              (chatroom) =>
+            <div>
+              {chatRooms?.filter(
+                (chatroom) =>
+                  chatroom?.startTime &&
+                  (chatroom?.messages?.length > 0 || chatroom?.id === chid)
+              ).length > 0 && (
+                <h1 className="text-base  mt-4 text-gray-400 font-semibold mx-4 my-2">
+                  Group Messages
+                </h1>
+              )}
+            </div>
+            {chatRooms?.map((chatroom, index) => {
+              if (
                 chatroom?.startTime &&
                 (chatroom?.messages?.length > 0 || chatroom?.id === chid)
-            ).length > 0 && (
-              <h1 className="text-lg text-black font-semibold mx-4 mt-4 my-2">
-                Group Messages
-              </h1>
-            )}
-          </div>
-          {chatRooms?.map((chatroom, index) => {
-            if (
-              chatroom?.startTime &&
-              (chatroom?.messages?.length > 0 || chatroom?.id === chid)
-            ) {
-              const classData = classes.find((c) => c?.id === chatroom.class);
-              return classData?.Name ? (
-                <div
-                  key={index}
-                  onClick={() => {
-                    setchid(chatroom.id);
-                  }}
-                  className={` py-4 border-gray-300 hover:bg-gray-100 ${
-                    chid === chatroom.id ? " bg-gray-100 " : " bg-white"
-                  } border-solid border-b cursor-pointer px-2`}
-                >
-                  <h1 className="text-base mx-4 text-black font-semibold overflow-hidden whitespace-nowrap">
-                    {moment.utc(chatroom?.startTime).format("DD/MM/YY, HH:MM")}{" "}
-                    - {classData?.Name}
-                  </h1>
-                  <div className="flex flex-col space-y-2 mx-2">
-                    <div className="flex items-center justify-between px-2 rounded-lg">
-                      <h1 className="text-sm text-gray-700">
-                        {chatroom?.messages?.length > 0
-                          ? chatroom?.messages?.[chatroom?.messages?.length - 1]
-                              ?.text
-                          : "No messages"}
-                      </h1>
-                      <h1 className="text-xs text-gray-500">
-                        {chatroom?.messages?.length > 0
-                          ? moment(
-                              chatroom?.messages?.[
+              ) {
+                const classData = classes.find((c) => c?.id === chatroom.class);
+                return classData?.Name ? (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setchid(chatroom.id);
+                    }}
+                    className={` py-4 border-gray-300 hover:bg-gray-100 ${
+                      chid === chatroom.id ? " bg-gray-100 " : " bg-white"
+                    } border-solid border-b cursor-pointer px-2`}
+                  >
+                    <h1 className="text-base mx-4 text-black font-semibold overflow-hidden whitespace-nowrap">
+                      {moment
+                        .utc(chatroom?.startTime)
+                        .format("DD/MM/YY, HH:MM")}{" "}
+                      - {classData?.Name}
+                    </h1>
+                    <div className="flex flex-col space-y-2 mx-2">
+                      <div className="flex items-center justify-between px-2 rounded-lg">
+                        <h1 className="text-sm text-gray-700">
+                          {chatroom?.messages?.length > 0
+                            ? chatroom?.messages?.[
                                 chatroom?.messages?.length - 1
-                              ]?.createdAt?.toDate()
-                            ).format("DD-MM-YY / hh:mm")
-                          : ""}
-                      </h1>
+                              ]?.text
+                            : "No messages"}
+                        </h1>
+                        <h1 className="text-xs text-gray-500">
+                          {chatroom?.messages?.length > 0
+                            ? moment(
+                                chatroom?.messages?.[
+                                  chatroom?.messages?.length - 1
+                                ]?.createdAt?.toDate()
+                              ).format("DD-MM-YY / hh:mm")
+                            : ""}
+                        </h1>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : null;
-            }
-            return null;
-          })}
+                ) : null;
+              }
+              return null;
+            })}
+          </div>
         </div>
 
         {/* chat right pane */}
