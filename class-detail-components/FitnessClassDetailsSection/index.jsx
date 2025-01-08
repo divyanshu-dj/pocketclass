@@ -166,7 +166,7 @@ function FitnessClassDetailsSection({
         ) : (
           <div className="grow-0 shrink-0 basis-auto">
             <p className="[font-family:'DM_Sans',sans-serif] text-3xl md:text-4xl lg:text-5xl font-bold lg:leading-[56px] text-[#261f22] m-0 p-0">
-              {classData?.Name || ""}
+              {classData?.Name.length > 37? `${classData?.Name.slice(0, 35)}..` : classData?.Name}
             </p>
             <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-2 md:mt-4">
               <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
