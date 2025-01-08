@@ -132,8 +132,7 @@ function FitnessClassDetailsSection({
   };
   return (
     <div
-      className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing"
-      style={{ marginTop: "5rem" }}
+      className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing"
     >
       <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
@@ -164,9 +163,9 @@ function FitnessClassDetailsSection({
             </div>
           </div>
         ) : (
-          <div className="grow-0 shrink-0 basis-auto">
+          <div className="grow-0 shrink-0 basis-auto  lg:max-w-[70%]">
             <p className="[font-family:'DM_Sans',sans-serif] text-3xl md:text-4xl lg:text-5xl font-bold lg:leading-[56px] text-[#261f22] m-0 p-0">
-              {classData?.Name || ""}
+              {classData?.Name}
             </p>
             <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-2 md:mt-4">
               <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
@@ -293,7 +292,7 @@ function FitnessClassDetailsSection({
                   <div className="h-20 bg-gray-200 rounded w-full"></div>
                 </div>
               ) : (
-                <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[90.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]">
+                <p className="[font-family:'DM_Sans',sans-serif] whitespace-pre-wrap text-base font-medium text-left leading-6 text-[#261f22] w-[90.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]">
                   {classCreatorData?.profileDescription}
                 </p>
               )}
@@ -329,7 +328,7 @@ function FitnessClassDetailsSection({
         </div>
         <div
           className="xl:block hidden shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border justify-start items-stretch flex-col w-full lg:max-w-[300px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]"
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 1, bottom: '12px' }}
         >
           <DynamicButtonSection
             classId={classId}
