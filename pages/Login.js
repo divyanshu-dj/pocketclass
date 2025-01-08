@@ -14,6 +14,7 @@ import { db } from "../firebaseConfig";
 import { useState } from "react";
 import { useCallback } from "react";
 import { useEffect } from "react";
+import { ca } from "date-fns/locale";
 
 function Login() {
   const router = useRouter();
@@ -103,15 +104,19 @@ function Login() {
     }
   }, [user, error]);
   const shouldRedirectToStripe = async (user) => {
-    const docRef = doc(db, "Users", user?.user?.uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (!data.stripeAccountId && data.category === "instructor") {
-        toast.error(
-          "Please connect your Stripe account to continue as an Instructor"
-        );
+    try {
+      const docRef = doc(db, "Users", user?.user?.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (!data.stripeAccountId && data.category === "instructor") {
+          toast.error(
+            "Please connect your Stripe account to continue as an Instructor"
+          );
+        }
       }
+    } catch (e) {
+      console.log(e);
     }
   };
 

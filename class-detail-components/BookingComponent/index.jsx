@@ -775,7 +775,7 @@ const CheckoutForm = ({
 
     if (!error && paymentIntent?.status === "succeeded") {
       const bookingDocRef = doc(db, "Bookings", bookingRef);
-      await updateDoc(bookingDocRef, { status: "Confirmed", expiry: null });
+      await updateDoc(bookingDocRef, { status: "Confirmed", expiry: null, paymentIntentId: paymentIntent.id, paymentStatus: "Paid" });
 
       const bookingSnapshot = await getDoc(bookingDocRef);
       const bookingData = bookingSnapshot.data();
