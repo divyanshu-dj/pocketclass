@@ -293,7 +293,7 @@ function FitnessClassDetailsSection({
                   <div className="h-20 bg-gray-200 rounded w-full"></div>
                 </div>
               ) : (
-                <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-left leading-6 text-[#261f22] w-[90.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]">
+                <p className="[font-family:'DM_Sans',sans-serif] whitespace-pre-wrap text-base font-medium text-left leading-6 text-[#261f22] w-[90.00%] box-border mt-[18px] m-0 p-0 md:ml-[.4rem]">
                   {classCreatorData?.profileDescription}
                 </p>
               )}
@@ -329,7 +329,7 @@ function FitnessClassDetailsSection({
         </div>
         <div
           className="xl:block hidden shadow-[1px_1px_7px_rgba(0,0,0,0.20)] bg-[white] box-border justify-start items-stretch flex-col w-full lg:max-w-[300px] pt-6 px-4 md:px-6 rounded-xl md:rounded-2xl lg:rounded-3x xl:fixed xl:right-[2rem]"
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 1, bottom: '12px' }}
         >
           <DynamicButtonSection
             classId={classId}
