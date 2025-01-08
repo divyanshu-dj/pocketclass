@@ -132,7 +132,7 @@ function FitnessClassDetailsSection({
   };
   return (
     <div
-      className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing"
+      className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing"
     >
       <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
