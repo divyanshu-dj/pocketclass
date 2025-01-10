@@ -5,7 +5,7 @@ import EducationSection from "../EducationSection";
 function FitnessProfileSection({ classData, instructorData }) {
   return (
     <div className="w-full box-border mt-[68px]">
-      <FitnessLayout1 classAbout={classData?.About} />
+      <FitnessLayout1 classAbout={classData?.About} classDesc={classData?.Description} />
       <div className="w-[100.00%] box-border mt-[15.5px]">
         {!classData ? (
           <div className="animate-pulse space-y-4">

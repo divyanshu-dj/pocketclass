@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function FitnessBioSection({classAbout}) {
+function FitnessDescriptionSection({classAbout}) {
   const [isReadMore, setIsReadMore] = useState(true);
 
   const toggleReadMore = () => {
@@ -21,7 +21,7 @@ function FitnessBioSection({classAbout}) {
       ) : (
         <>
           <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0">
-            About Class
+            Class Description:
           </p>
           <p className="[font-family:'DM_Sans',sans-serif] whitespace-pre-wrap text-base font-medium text-left leading-6 text-[#261f22] w-[100.00%] box-border mt-2 m-0 p-0">
             {isReadMore ? classAbout?.slice(0, 150) : classAbout}
@@ -40,4 +40,4 @@ function FitnessBioSection({classAbout}) {
   );
 }
 
-export default FitnessBioSection;
+export default FitnessDescriptionSection;
