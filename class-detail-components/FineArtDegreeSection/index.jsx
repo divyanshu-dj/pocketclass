@@ -22,7 +22,7 @@ function ExperienceSection({ classData }) {
       ) : (
         <div className="flex justify-start items-start flex-col md:flex-row gap-[15px]">
           <div className="grow-0 shrink-0 basis-auto w-full lg:w-[calc(100%-4rem)]">
-            <p className="[font-family:'DM_Sans',sans-serif] text-base font-medium text-[black] mt-2 m-0 p-0">
+            <p className="[font-family:'DM_Sans',sans-serif] whitespace-pre-wrap text-base font-medium text-[black] mt-2 m-0 p-0">
               {isReadMore ? classData?.Experience?.slice(0, 150) : classData?.Experience}
             </p>
             {classData?.Experience?.length > 150 && (

@@ -34,7 +34,6 @@ const Notifications = ({ user }) => {
 	// NOTIFICATIONS STUFF
 	const [notifications, setNotifications] = useState([]);
 
-	// realtime notifications update
 	useEffect(() => {
 		let isMounted = true;
 		const observeNotifications = async () => {
@@ -48,9 +47,12 @@ const Notifications = ({ user }) => {
 									doc?.data?.()?.user === user.uid &&
 									doc?.data?.()?.isRead === false
 							)
-							.map((doc) => doc?.data?.());
+							.map((doc) => ({ ...doc.data(), id: doc.id }));
 
 						if (isMounted) {
+							newNotifications?.sort?.(
+								(a, b) => b?.createdAt?.seconds - a?.createdAt?.seconds
+							);
 							setNotifications(
 								!!newNotifications && newNotifications.length > 0
 									? newNotifications
@@ -99,6 +101,20 @@ const Notifications = ({ user }) => {
 			console.warn(error);
 		}
 	};
+
+	const handleNotif = async (notif) => {
+		const docRef = doc(db, "notifications", notif.id);
+		await updateDoc(docRef, {
+			isRead: true,
+		});
+		if(notif.type === "booking"){
+			window.location.href = `/myClass/${notif.user}`;
+		}
+		if (notif.type == "message"){
+			window.location.href = `/chat?chid=${notif.chatroom}`;
+		}
+		setIsOpen(false);
+	}
 
 	return (
 		<div className="relative" ref={myRef}>
@@ -151,7 +167,7 @@ const Notifications = ({ user }) => {
 			</button>
 
 			{isOpen && (
-				<div className="origin-top-right absolute right-0 -mr-12 md:-mr-0 mt-3 w-[240px] sm:w-[250px] md:w-[370px] rounded-xl shadow-lg bg-white ring-2 ring-black ring-opacity-5 overflow-hidden px-1 py-4">
+				<div className="origin-top-right z-50 absolute right-0 -mr-12 md:-mr-0 mt-3 w-[240px] sm:w-[250px] md:w-[370px] rounded-xl shadow-lg bg-white ring-2 ring-black ring-opacity-5 overflow-hidden px-1 py-4">
 					{/* header */}
 					<div className="px-2 mx-2 mb-4 flex items-center">
 						{/* heading */}
@@ -159,42 +175,6 @@ const Notifications = ({ user }) => {
 							Notifications
 						</h1>
 
-						{/* read all */}
-						<button
-							className={`px-2 ml-auto ${
-								notifications?.length === 0 && " !hidden"
-							}`}
-							title={"Mark all as read"}
-							onClick={() => markAllAsRead()}
-						>
-							<svg
-								width="22px"
-								height="22px"
-								viewBox="0 0 24 24"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-								className="stroke-gray-400 ease-in-out duration-150 hover:stroke-logo-red"
-							>
-								<path
-									d="M1.5 12.5L5.57574 16.5757C5.81005 16.8101 6.18995 16.8101 6.42426 16.5757L9 14"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-									className="stroke-inherit "
-								/>
-								<path
-									d="M16 7L12 11"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-									className="stroke-inherit"
-								/>
-								<path
-									d="M7 12L11.5757 16.5757C11.8101 16.8101 12.1899 16.8101 12.4243 16.5757L22 7"
-									strokeWidth="1.5"
-									strokeLinecap="round"
-									className="stroke-inherit"
-								/>
-							</svg>
-						</button>
 					</div>
 
 					{/* notifications */}
@@ -207,7 +187,8 @@ const Notifications = ({ user }) => {
 							notifications?.map?.((notif, index) => (
 								<div
 									key={`${index}${notif?.createdAt}`}
-									className="w-full min-h-24 mb-2 border bg-gray-100 rounded-lg shadow-sm hover:opacity-80 py-2 px-4 cursor-default"
+									className="w-full cursor-pointer min-h-24 mb-2 border bg-gray-100 rounded-lg shadow-sm hover:opacity-80 py-2 px-4"
+									onClick={() => {handleNotif(notif)}}
 								>
 									<div className="flex mb-1 text-gray-400">
 										<p className="text-xs w-fit">

@@ -288,6 +288,11 @@ const NewHeader = ({ isHome = true }) => {
                               My Classes
                             </Link>
                           </li>
+                          <li className="my-2 hover:text-logo-red">
+                            <Link href={`/chat`}>
+                              My Messages
+                            </Link>
+                          </li>
 
                           {category === "instructor" && (
                             <>

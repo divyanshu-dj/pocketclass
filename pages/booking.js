@@ -16,6 +16,7 @@ import {
   where,
   getDocs,
   deleteDoc,
+  Timestamp,
 } from "firebase/firestore";
 import moment from "moment";
 import { loadStripe } from "@stripe/stripe-js";
@@ -277,7 +278,9 @@ export default function index() {
                 dateStr,
                 slot.classId
               ).filter(
-                (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
+                (slot) =>
+                  slot.date != minDate.format("YYYY-MM-DD") ||
+                  slot.startTime >= minTime
               )
             )
           );
@@ -295,7 +298,9 @@ export default function index() {
                   dateStr,
                   slot.classId
                 ).filter(
-                  (slot) => slot.date != minDate.format("YYYY-MM-DD") || slot.startTime >= minTime
+                  (slot) =>
+                    slot.date != minDate.format("YYYY-MM-DD") ||
+                    slot.startTime >= minTime
                 )
               )
             );
@@ -515,15 +520,17 @@ export default function index() {
         <div>
           <button
             onClick={() => setMode("Individual")}
-            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
-              }`}
+            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
+              mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
+            }`}
           >
             Individual
           </button>
           <button
             onClick={() => setMode("Group")}
-            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${mode === "Group" ? "bg-[#E73F2B] text-white" : ""
-              }`}
+            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
+              mode === "Group" ? "bg-[#E73F2B] text-white" : ""
+            }`}
           >
             Group
           </button>
@@ -582,11 +589,12 @@ export default function index() {
                       <button
                         key={i}
                         onClick={() => handleSlotClick(slot.date, slot)}
-                        className={`p-3 border rounded cursor-pointer ${selectedSlot?.startTime === slot.startTime &&
-                            selectedSlot?.date === slot.date
+                        className={`p-3 border rounded cursor-pointer ${
+                          selectedSlot?.startTime === slot.startTime &&
+                          selectedSlot?.date === slot.date
                             ? "bg-[#E73F2B] text-white"
                             : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
-                          }`}
+                        }`}
                       >
                         {slot.startTime} - {slot.endTime}
                       </button>
@@ -666,7 +674,12 @@ const CheckoutForm = ({
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
   const [loading, setLoading] = useState(false);
-  const sendEmail = async (targetEmails, targetSubject, targetHtmlContent, attachments = []) => {
+  const sendEmail = async (
+    targetEmails,
+    targetSubject,
+    targetHtmlContent,
+    attachments = []
+  ) => {
     try {
       const res = await fetch("/api/sendEmail", {
         method: "POST",
@@ -678,7 +691,7 @@ const CheckoutForm = ({
           subject: targetSubject,
           html: targetHtmlContent,
           to: targetEmails,
-          attachments
+          attachments,
         }),
       });
 
@@ -711,7 +724,12 @@ const CheckoutForm = ({
 
     if (!error && paymentIntent?.status === "succeeded") {
       const bookingDocRef = doc(db, "Bookings", bookingRef);
-      await updateDoc(bookingDocRef, { status: "Confirmed", expiry: null, paymentIntentId: paymentIntent.id, paymentStatus: "Paid" });
+      await updateDoc(bookingDocRef, {
+        status: "Confirmed",
+        expiry: null,
+        paymentIntentId: paymentIntent.id,
+        paymentStatus: "Paid",
+      });
 
       const bookingSnapshot = await getDoc(bookingDocRef);
       const bookingData = bookingSnapshot.data();
@@ -731,7 +749,8 @@ const CheckoutForm = ({
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
-        <p>We are excited to confirm a new booking for the class <strong>${classData.Name
+        <p>We are excited to confirm a new booking for the class <strong>${
+          classData.Name
         }</strong>!</p>
         <h3>Booking Details:</h3>
         <table style="width: 100%; border-collapse: collapse;" border="1">
@@ -753,15 +772,15 @@ const CheckoutForm = ({
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price
-        }</td>
+            <td style="padding: 8px;">${
+              mode === "Group" ? classData.groupPrice : classData.Price
+            }</td>
           </tr>
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
         <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
       </div>
     `;
-
 
       const startDateTime = new Date(`${date}T${startTime}`).toISOString();
       const endDateTime = new Date(`${date}T${endTime}`).toISOString();
@@ -774,13 +793,27 @@ BEGIN:VEVENT
 UID:${bookingRef}@pocketclass.com
 SUMMARY:${classData.Name}
 DESCRIPTION:Booking confirmed for the class ${classData.Name}
-DTSTART:${startDateTime.replace(/-|:|\.\d+/g, '')}
-DTEND:${endDateTime.replace(/-|:|\.\d+/g, '')}
+DTSTART:${startDateTime.replace(/-|:|\.\d+/g, "")}
+DTEND:${endDateTime.replace(/-|:|\.\d+/g, "")}
 LOCATION:Online
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR
   `.trim();
+  
+        const now = Timestamp?.now();
+
+      const notificationRef = collection(db, "notifications");
+      const notificationData = {
+        user: bookingData.instructor_id,
+        type: "booking",
+        title: "New Booking",
+        text: `New booking for ${classData.Name} on ${date} at ${startTime}`,
+        isRead: false,
+        bookingId: bookingRef,
+        createdAt: now,
+      };
+      await addDoc(notificationRef, notificationData);
       await sendEmail(
         recipientEmails,
         `New Booking for ${classData.Name} with Pocketclass!`,

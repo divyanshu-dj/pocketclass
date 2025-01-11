@@ -42,6 +42,7 @@ export default function UpdateClass() {
   });
   const [packages, setPackages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [loadedImgs, setLoadedImgs] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [user, userLoading] = useAuthState(auth);
@@ -61,6 +62,7 @@ export default function UpdateClass() {
           setPreviewImages(
             classData.Images.map((url) => ({ src: url, name: url }))
           );
+          setLoadedImgs(classData.Images);
         } else {
           toast.error("Class not found");
           router.push("/");
@@ -81,7 +83,11 @@ export default function UpdateClass() {
     const docRef = doc(db, "classes", id);
 
     try {
-      await updateDoc(docRef, { ...form, Packages: packages });
+      await updateDoc(docRef, {
+        ...form,
+        Images: loadedImgs,
+        Packages: packages,
+      });
 
       uploadedFiles.forEach((img) => {
         const fileRef = ref(
@@ -126,6 +132,7 @@ export default function UpdateClass() {
     e.preventDefault();
 
     setPreviewImages(previewImages.filter((img) => img.name !== name));
+    setLoadedImgs(loadedImgs.filter((img) => img !== name));
     setForm({
       ...form,
       Images: form.Images.filter((file) => file.name !== name),
@@ -319,7 +326,9 @@ export default function UpdateClass() {
               </div>
 
               <div className="flex-grow">
-                <label className="text-lg font-bold">Group Price Per Person</label>
+                <label className="text-lg font-bold">
+                  Group Price Per Person
+                </label>
                 <input
                   required
                   name="groupPrice"

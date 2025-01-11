@@ -425,9 +425,15 @@ const Chat = () => {
       const now = Timestamp?.now();
       const tenMinutesAgo = moment(now?.toDate()).subtract(10, "minutes");
       const twoMinutesAgo = moment(now?.toDate()).subtract(2, "minutes");
+      const chatroom = chatRooms.find((chatroom) => chatroom?.id === chid);
+      const classData = classes.find((c) => c?.id === chatroom.class);
+
+      const student = chatroom?.student || (!isInstructor)?user.uid:null;
+      const studentData = student?(await getData(student, "Users")):(null);
+      const instructorData = chatroom?.instructor?(await getData(chatroom?.instructor, "Users")):(null);
 
       const targetUid = isInstructor
-        ? roomData?.student || studentData?.userUid
+        ? chatroom?.student || studentData?.userUid
         : roomData?.instructor || instructorData?.userUid;
 
       const targetEmail = isInstructor
@@ -473,7 +479,9 @@ const Chat = () => {
         text: targetText,
         createdAt: now,
         chatroom: chid,
+        type: "message",
       };
+
 
       const querySnapshot = await getDocs(
         query(
@@ -804,7 +812,6 @@ export default Chat;
 const Message = React.forwardRef(
   ({ message, userId, groupStudents, isInstructor, instructorId }, ref) => {
     const isMyMessage = message?.sender === userId;
-    console.log("Instuctor ID: ", instructorId, "  Sender: ", message?.sender);
 
     const messageSender = groupStudents?.find(
       (item) => item?.userUid == message?.sender
