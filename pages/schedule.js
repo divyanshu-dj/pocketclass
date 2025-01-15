@@ -656,7 +656,9 @@ export default function Schedule() {
                             title="Assign Class"
                           >
                             <span className="material-symbols-outlined text-xs">
-                              assignment
+                              <span class="material-symbols-outlined">
+                                groups
+                              </span>
                             </span>
                           </button>
 
@@ -844,11 +846,11 @@ export default function Schedule() {
                                 </li>
                               ))}
                             </ul>
-                              {classes.length === 0 && (
-                                <p className="px-4 py-2 text-gray-500">
-                                  No group classes available
-                                </p>
-                              )}
+                            {classes.length === 0 && (
+                              <p className="px-4 py-2 text-gray-500">
+                                No group classes available
+                              </p>
+                            )}
                             <button
                               onClick={closeClassDropdown}
                               className="block w-full text-center text-red-500 mb-2 hover:text-red-600"
@@ -1207,11 +1209,11 @@ export default function Schedule() {
                                 </li>
                               ))}
                             </ul>
-                              {classes.length === 0 && (
-                                <p className="px-4 py-2 text-gray-500">
-                                  No group classes available
-                                </p>
-                              )}
+                            {classes.length === 0 && (
+                              <p className="px-4 py-2 text-gray-500">
+                                No group classes available
+                              </p>
+                            )}
                             <button
                               onClick={closeClassDropdown}
                               className="block w-full text-center text-red-500 hover:text-red-600"

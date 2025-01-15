@@ -298,16 +298,6 @@ export default function Support() {
 					</div>
 
 					<div className="flex flex-col text-gray-700">
-						<p className="text-logo-red font-medium text-lg mb-3 mt-5">
-							SELECT AN APPOINTMENT {"(optional)"}
-						</p>
-
-						<div className="flex flex-col">
-							<Dropdown options={options} onSelect={setAppointment} />
-						</div>
-					</div>
-
-					<div className="flex flex-col text-gray-700">
 						<p className="uppercase text-logo-red font-medium text-lg mb-3 mt-5">
 							Send Us An Email
 						</p>

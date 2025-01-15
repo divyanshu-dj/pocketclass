@@ -112,7 +112,7 @@ export default async function (req, res) {
       }
     }
 
-    condole.log("Payment transfer process completed");
+    console.log("Payment transfer process completed");
     return res.status(200).json({
       message: "Payment transfer process completed",
       results,
