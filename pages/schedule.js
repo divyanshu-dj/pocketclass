@@ -798,7 +798,7 @@ export default function Schedule() {
                           title="Assign Class"
                         >
                           <span className="material-symbols-outlined text-xs">
-                            assignment
+                            groups
                           </span>
                         </button>
 
@@ -1029,7 +1029,7 @@ export default function Schedule() {
                             title="Assign Class"
                           >
                             <span className="material-symbols-outlined text-xs">
-                              assignment
+                              groups
                             </span>
                           </button>
                           <button
@@ -1170,7 +1170,7 @@ export default function Schedule() {
                           title="Assign Class"
                         >
                           <span className="material-symbols-outlined text-xs">
-                            assignment
+                            groups
                           </span>
                         </button>
                         <button

@@ -9,8 +9,8 @@ const createStripeAccount = async (email) => {
   return account;
 };
 const generateOnboardingLink = async (accountId) => {
-  let url = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeAdded' : 'http://localhost:3000/stripeAdded';
-  let refreshUrl = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeRefresh' : 'http://localhost:3000/stripeRefresh';
+  let url = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeAdded' : 'https://pocketclass.ca/stripeAdded';
+  let refreshUrl = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeRefresh' : 'https://pocketclass.ca/stripeRefresh';
   const loginLink = await stripe.accountLinks.create(
     {account:accountId,
     
