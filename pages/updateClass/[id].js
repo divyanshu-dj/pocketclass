@@ -120,7 +120,7 @@ export default function UpdateClass() {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
-      setUploadedFiles(acceptedFiles);
+      setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
       setPreviewImages((prev) => [
         ...prev,
         ...acceptedFiles.map((file) => ({ src: URL.createObjectURL(file) })),

@@ -178,10 +178,14 @@ function Balance({}) {
     );
 
     const bookings = await getDocs(bookingsQuery);
-    const bookingsData = bookings.docs.map((doc) => ({
+    const filteredBookings = bookings.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    const bookingsData = filteredBookings.filter(
+      (booking) => booking.status != "Pending"
+    );
 
     const paymentIntentIds = bookingsData.map(
       (booking) => booking.paymentIntentId
@@ -196,12 +200,17 @@ function Balance({}) {
       }),
     });
     const pendingPaymentsData = await pendingPayments.json();
+    console.log(pendingPaymentsData);
     let totalPendingAmount = 0;
     let totalFuturePayments = 0;
     bookingsData.forEach((booking) => {
-      const pendingPayment = pendingPaymentsData.paymentIntents.find(
-        (paymentIntent) => paymentIntent.id === booking.paymentIntentId
+      let pendingPayment = pendingPaymentsData?.find(
+        (paymentIntent) => paymentIntent?.paymentIntent.id === booking.paymentIntentId
       );
+
+      pendingPayment = pendingPayment?.paymentIntent;
+
+       
       if (pendingPayment) {
         booking.pendingAmount = pendingPayment.amount;
         if (moment.utc(booking.startTime).format("YY DD MM") === (moment.utc().format("YY DD MM")) && !booking.isTransfered) {
@@ -373,7 +382,7 @@ function Balance({}) {
               <div className="card-body">
                 <div className="my-chart">
                   {/* Show all Transactions that have occured  */}
-                  {transactions.length > 0 && (
+                  {bookingsData?.length > 0 && (
                     <div className="overflow-x-auto">
                       <table className="min-w-full table-auto border-collapse border border-gray-200 shadow-md rounded-lg">
                         <thead className="bg-gray-100">
@@ -419,7 +428,7 @@ function Balance({}) {
                     </div>
                   )}
 
-                  {!transactions.length > 0 && (
+                  {!bookingsData || !bookingsData.length > 0 && (
                     <div className="text-center">No Transactions</div>
                   )}
                 </div>

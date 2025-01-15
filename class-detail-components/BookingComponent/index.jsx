@@ -230,10 +230,23 @@ export default function index({ instructorId, classId, classData }) {
     fetchData();
   }, [instructorId, classId]);
 
+  const calculateRemainingGroupedClassSlots = () => {
+    const selected = moment
+      .utc(`${selectedSlot.date} ${selectedSlot.startTime}`, "YYYY-MM-DD HH:mm")
+      .toISOString();
+    const filteredBookings = bookedSlots.filter(
+      (booking) => (booking.startTime === selectedSlot.startTime && booking.date === selectedSlot.date)
+    );
+    const remainingSlots = classData.groupSize - filteredBookings.length;
+
+    return remainingSlots;
+  };
+
   // Generate slots
   useEffect(() => {
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
+      if (!selectedDate) return;
       const minDate = moment().add(minDays, "hours").startOf("day");
       const minTime = moment().add(minDays, "hours").format("HH:mm");
       const maxDate = moment().add(maxDays, "days").endOf("day");
@@ -533,12 +546,17 @@ export default function index({ instructorId, classId, classData }) {
             className="bg-white p-2 rounded-lg flex items-center justify-center"
             mode="single"
             selected={selectedDate}
-            month={selectedDate}
-            onSelect={(date) => setSelectedDate(new Date(date))}
+            month={selectedDate || today}
+            onSelect={(date) => setSelectedDate(date ? new Date(date) : today)}
             disabled={{
-              before: moment(today).add(minDays, "hours").toDate(),
-              after: moment(today).add(maxDays, "days").toDate(),
+              before: moment(today)
+                .add(minDays || 0, "hours")
+                .toDate(),
+              after: moment(today)
+                .add(maxDays || 30, "days")
+                .toDate(),
             }}
+            onMonthChange={(date) => setSelectedDate(new Date(date || today))}
             modifiers={{
               noSlots: daysWithNoSlots.map((date) => new Date(date)),
             }}
@@ -567,7 +585,8 @@ export default function index({ instructorId, classId, classData }) {
                 <ChevronLeftIcon className="h-8 w-8" />
               </button>
               <h3 className="font-bold text-lg">
-                {moment(selectedDate).format("dddd, MMM Do YYYY")}
+                {selectedDate &&
+                  moment(selectedDate).format("dddd, MMM Do YYYY")}
               </h3>
               <button
                 onClick={() => handleNext()}
@@ -648,18 +667,30 @@ export default function index({ instructorId, classId, classData }) {
 
           {/* Sticky Booking Div */}
           {selectedSlot && (
-            <div className=" bg-gray-50 border-2 border-red-300 rounded p-4 flex justify-between items-center">
-              <p>
-                <strong>Selected: </strong>
-                {moment(selectedSlot.date).format("dddd, MMMM Do YYYY")}{" "}
-                {selectedSlot.startTime} - {selectedSlot.endTime}
-              </p>
-              <button
-                onClick={handleBookSlot}
-                className="bg-[#E73F2B] text-white p-2 rounded"
-              >
-                Book Now
-              </button>
+            <div className="bg-gray-50 border-2 border-red-300 rounded p-4 ">
+              <div className=" flex justify-between items-center">
+                <div>
+                  <p>
+                    <strong>Selected: </strong>
+                    {moment(selectedSlot.date).format(
+                      "dddd, MMMM Do YYYY"
+                    )}{" "}
+                    {selectedSlot.startTime} - {selectedSlot.endTime}
+                  </p>
+                  {mode === "Group" && (
+                    <div>
+                      <strong>Available Seats:</strong>{" "}
+                      {calculateRemainingGroupedClassSlots()}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={handleBookSlot}
+                  className="bg-[#E73F2B] text-white p-2 rounded"
+                >
+                  Book Now
+                </button>
+              </div>
             </div>
           )}
         </div>
