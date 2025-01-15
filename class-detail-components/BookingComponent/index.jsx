@@ -679,7 +679,7 @@ export default function index({ instructorId, classId, classData }) {
                   </p>
                   {mode === "Group" && (
                     <div>
-                      <strong>Slots Left:</strong>{" "}
+                      <strong>Available Seats:</strong>{" "}
                       {calculateRemainingGroupedClassSlots()}
                     </div>
                   )}
