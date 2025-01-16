@@ -509,8 +509,8 @@ export default function Schedule() {
         color: students.length === 1 ? "#87CEEB" : "#369bc5", // Light blue for single bookings, yellow for group bookings
         tooltip:
           students.length === 1
-            ? `Class: ${classDetail.Name}, Booked by ${students[0]}`
-            : `${students} have booked the class ${classDetail.Name}`,
+            ? `Class: ${classDetail?.Name}, Booked by ${students[0]}`
+            : `${students} have booked the class ${classDetail?.Name}`,
       });
     });
 
@@ -744,7 +744,7 @@ export default function Schedule() {
                                     }}
                                     className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
                                   >
-                                    {classItem.Name}
+                                    {classItem?.Name}
                                   </li>
                                 ))}
                               </ul>
@@ -893,7 +893,7 @@ export default function Schedule() {
                                   }}
                                   className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
                                 >
-                                  {classItem.Name}
+                                  {classItem?.Name}
                                 </li>
                               ))}
                             </ul>
@@ -1115,7 +1115,7 @@ export default function Schedule() {
                                     }}
                                     className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
                                   >
-                                    {classItem.Name}
+                                    {classItem?.Name}
                                   </li>
                                 ))}
                               </ul>
@@ -1256,7 +1256,7 @@ export default function Schedule() {
                                   }}
                                   className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
                                 >
-                                  {classItem.Name}
+                                  {classItem?.Name}
                                 </li>
                               ))}
                             </ul>
