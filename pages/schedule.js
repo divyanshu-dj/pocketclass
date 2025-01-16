@@ -10,6 +10,7 @@ import { DayPicker } from "react-day-picker";
 import { auth } from "../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
+import ReactModal from "react-modal";
 import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
 import {
@@ -63,30 +64,36 @@ export default function Schedule() {
   // Minimum and Maximum Days before which a booking can be made
   const [minDays, setMinDays] = useState(1);
   const [maxDays, setMaxDays] = useState(30);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+
+  const handleEventClick = (event) => {
+    setSelectedBooking(event);
+  };
+
+  // Find Booking if booked on event change
+
+  const closeModal = () => {
+    setSelectedBooking(null);
+  };
 
   const assignClass = (dayIndex, slotIndex) => {
-    setShowClassDropdown({ dayIndex, slotIndex });
+    handleClassAssign(dayIndex, slotIndex);
   };
 
   const closeClassDropdown = () => {
     setShowClassDropdown(null);
   };
 
-  const handleClassAssign = (dayIndex, slotIndex, classId) => {
-    console.log(classes);
+  const handleClassAssign = (dayIndex, slotIndex) => {
     const updatedGeneralAvailability = [...generalAvailability];
-    updatedGeneralAvailability[dayIndex].slots[slotIndex].classId = classId;
-    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSize =
-      classes.find((c) => c.uid === classId).groupSize;
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSlot = true;
 
     setGeneralAvailability(updatedGeneralAvailability);
-    console.log(generalAvailability);
   };
 
   const removeClass = (dayIndex, slotIndex) => {
     const updatedGeneralAvailability = [...generalAvailability];
-    updatedGeneralAvailability[dayIndex].slots[slotIndex].classId = null;
-    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSize = null;
+    updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSlot = false;
     setGeneralAvailability(updatedGeneralAvailability);
   };
   useEffect(() => {
@@ -147,6 +154,7 @@ export default function Schedule() {
             date: bookingStartTime.format("YYYY-MM-DD"),
             student_id: booking.student_id,
             student_name: booking.student_name,
+            classId: booking.class_id,
           });
         }
       });
@@ -398,12 +406,12 @@ export default function Schedule() {
                 continue;
               }
               newEvents.push({
-                title: slot.classId
-                  ? classes.find((c) => c.uid === slot.classId)?.Name
+                title: slot.groupSlot
+                  ? "Group Class"
                   : "",
                 start: start.toDate(),
                 end: end.toDate(),
-                color: slot.classId ? "#a1d564" : "#d8f5b6",
+                color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
               });
             }
             current = next;
@@ -451,12 +459,12 @@ export default function Schedule() {
               continue;
             }
             newEvents.push({
-              title: slot.classId
-                ? classes.find((c) => c.uid === slot.classId)?.Name
+              title: slot.groupSlot
+                ? "Group Class"
                 : "",
               start: start.toDate(),
               end: end.toDate(),
-              color: slot.classId ? "#a1d564" : "#d8f5b6",
+              color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
             });
 
             current = next;
@@ -479,9 +487,18 @@ export default function Schedule() {
       groupedSlots[key].push(booked.student_name);
     });
 
+    
+
     Object.entries(groupedSlots).forEach(([key, students]) => {
       const [start, end] = key.split("/");
-      console.log(key, students);
+      // Get classId by find GroupedSlots in BookedSlot
+      const bookingSlot = bookedSlots.find(
+        (bookedSlot) =>
+          moment(bookedSlot.startTime).format() === start &&
+          moment(bookedSlot.endTime).format() === end
+      )
+
+      const classDetail = classes.find((c) => c.uid === bookingSlot.classId);
       newEvents.push({
         title:
           students.length === 1
@@ -492,8 +509,8 @@ export default function Schedule() {
         color: students.length === 1 ? "#87CEEB" : "#369bc5", // Light blue for single bookings, yellow for group bookings
         tooltip:
           students.length === 1
-            ? `Booked by ${students[0]}`
-            : `${students.length} students have booked`,
+            ? `Class: ${classDetail.Name}, Booked by ${students[0]}`
+            : `${students} have booked the class ${classDetail.Name}`,
       });
     });
 
@@ -525,27 +542,24 @@ export default function Schedule() {
   // assignAdjustedClass, removeAdjustedClass, handleClassAdjustedAssign
 
   const assignAdjustedClass = (date, slotIndex) => {
-    setShowClassDropdown({ date, slotIndex });
+    handleClassAdjustedAssign(date, slotIndex);
   };
   const removeAdjustedClass = (date, slotIndex) => {
     const updatedAvailability = [...adjustedAvailability];
     updatedAvailability.find((item) => item.date === date).slots[
       slotIndex
-    ].classId = null;
-    updatedAvailability.find((item) => item.date === date).slots[
-      slotIndex
-    ].groupSize = null;
+    ].groupSlot = false;
     setAdjustedAvailability(updatedAvailability);
   };
 
-  const handleClassAdjustedAssign = (date, slotIdex, classId) => {
+  const handleClassAdjustedAssign = (date, slotIdex) => {
     const updatedAvailability = [...adjustedAvailability];
     updatedAvailability.find((item) => item.date === date).slots[
       slotIdex
-    ].classId = classId;
-    updatedAvailability.find((item) => item.date === date).slots[
+    ].groupSlot = true;
+    const slotFind =updatedAvailability.find((item) => item.date === date).slots[
       slotIdex
-    ].groupSize = classes.find((c) => c.uid === classId).groupSize;
+    ]
     setAdjustedAvailability(updatedAvailability);
   };
 
@@ -581,7 +595,44 @@ export default function Schedule() {
             />
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-700 mb-3">
+          {/* Buttons Information(Kind of like an index) */}
+          <h2 className="text-2xl font-bold text-gray-700 mb-5">
+            Instructions
+          </h2>
+          <div className="flex flex-row justify-between flex-wrap items-start mb-6 gap-3">
+            <div className="flex max-w-[80px] flex-col items-center justify-center font-semibold text-sm">
+              <span className="material-symbols-outlined text-xs text-red-500 flex justify-center items-center">
+                block
+              </span>
+              <div className="text-center">Remove Time Slot</div>
+            </div>
+            <div className="flex max-w-[80px] flex-col items-center justify-center font-semibold text-sm">
+              <span className="material-symbols-outlined text-xs text-blue-500 flex justify-center items-center">
+                add_circle
+              </span>
+              <div className="text-center">Add Time Slot</div>
+            </div>
+            <div className="flex max-w-[80px] flex-col items-center justify-center font-semibold text-sm">
+              <span className="material-symbols-outlined text-xs text-gray-500 flex justify-center items-center">
+                content_copy
+              </span>
+              <div className="text-center">Copy to all</div>
+            </div>
+            <div className="flex max-w-[80px] flex-col items-center justify-center font-semibold text-sm">
+              <span className="material-symbols-outlined text-xs text-blue-500 flex justify-center items-center">
+                groups
+              </span>
+              <div className="text-center">Assign Group Slot</div>
+            </div>
+            <div className="flex max-w-[80px] flex-col items-center justify-center font-semibold text-sm">
+              <span className="material-symbols-outlined text-xs text-red-500 flex justify-center items-center">
+                group_remove
+              </span>
+              <div className="text-center">Remove Group Slot</div>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-700 mb-6">
             General Availability
           </h2>
           <label
@@ -651,7 +702,7 @@ export default function Schedule() {
                           <button
                             onClick={() => assignClass(dayIndex, slotIndex)}
                             className={`text-blue-400 ${
-                              slot.classId ? "hidden" : ""
+                              slot.groupSlot ? "hidden" : ""
                             } flex justify-center items-center hover:text-blue-600`}
                             title="Assign Class"
                           >
@@ -665,7 +716,7 @@ export default function Schedule() {
                           <button
                             onClick={() => removeClass(dayIndex, slotIndex)}
                             className={`text-red-500 flex justify-center items-center hover:text-red-600 ${
-                              slot.classId ? "" : "hidden"
+                              slot.groupSlot ? "" : "hidden"
                             }`}
                             title="Remove Class"
                           >
@@ -793,7 +844,7 @@ export default function Schedule() {
                         <button
                           onClick={() => assignClass(dayIndex, slotIndex)}
                           className={`text-blue-400 ${
-                            slot.classId ? "hidden" : ""
+                            slot.groupSlot ? "hidden" : ""
                           } flex justify-center items-center hover:text-blue-600`}
                           title="Assign Class"
                         >
@@ -805,7 +856,7 @@ export default function Schedule() {
                         <button
                           onClick={() => removeClass(dayIndex, slotIndex)}
                           className={`text-red-500 flex justify-center items-center hover:text-red-600 ${
-                            slot.classId ? "" : "hidden"
+                            slot.groupSlot ? "" : "hidden"
                           }`}
                           title="Remove Class"
                         >
@@ -1024,7 +1075,7 @@ export default function Schedule() {
                               assignAdjustedClass(item.date, slotIndex)
                             }
                             className={`text-blue-400 ${
-                              slot.classId ? "hidden" : ""
+                              slot.groupSlot ? "hidden" : ""
                             } flex justify-center items-center hover:text-blue-600`}
                             title="Assign Class"
                           >
@@ -1037,7 +1088,7 @@ export default function Schedule() {
                               removeAdjustedClass(item.date, slotIndex)
                             }
                             className={`text-red-500 ${
-                              slot.classId ? "" : "hidden"
+                              slot.groupSlot ? "" : "hidden"
                             } flex justify-center items-center hover:text-red-600`}
                             title="Remove Class"
                           >
@@ -1165,7 +1216,7 @@ export default function Schedule() {
                             assignAdjustedClass(item.date, slotIndex)
                           }
                           className={`text-blue-400 ${
-                            slot.classId ? "hidden" : ""
+                            slot.groupSlot ? "hidden" : ""
                           } flex justify-center items-center hover:text-blue-600`}
                           title="Assign Class"
                         >
@@ -1178,7 +1229,7 @@ export default function Schedule() {
                             removeAdjustedClass(item.date, slotIndex)
                           }
                           className={`text-red-500 ${
-                            slot.classId ? "" : "hidden"
+                            slot.groupSlot ? "" : "hidden"
                           } flex justify-center items-center hover:text-red-600`}
                           title="Remove Class"
                         >
@@ -1288,9 +1339,43 @@ export default function Schedule() {
               },
             })}
             scrollToTime={new Date(1970, 1, 1, 8, 0, 0)}
-            // Tooltip
             tooltipAccessor="tooltip"
+            onSelectEvent={handleEventClick} // Event click handler
           />
+          {selectedBooking && (
+            <ReactModal
+              isOpen={!!selectedBooking}
+              onRequestClose={closeModal}
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+              overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+            >
+              <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-md">
+                <h2 className="text-xl font-bold mb-4">Booking Details</h2>
+                <p>
+                  <strong>Title:</strong> {selectedBooking.title?selectedBooking.title:"Not Booked"}
+                </p>
+                <p>
+                  <strong>Start Time:</strong>{" "}
+                  {moment(selectedBooking.start).format("MMMM Do YYYY, h:mm A")}
+                </p>
+                <p>
+                  <strong>End Time:</strong>{" "}
+                  {moment(selectedBooking.end).format("MMMM Do YYYY, h:mm A")}
+                </p>
+                {selectedBooking.tooltip && (
+                  <p>
+                    <strong>Details:</strong> {selectedBooking.tooltip}
+                  </p>
+                )}
+                <button
+                  onClick={closeModal}
+                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Close
+                </button>
+              </div>
+            </ReactModal>
+          )}
         </div>
       </div>
     </div>
