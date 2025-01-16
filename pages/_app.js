@@ -7,6 +7,7 @@ import ProgressBar from "@badrap/bar-of-progress";
 import Router from "next/router";
 import Script from "next/script";
 import { ToastContainer } from "react-toastify";
+import { Insights } from "./insights";
 
 const progress = new ProgressBar({
   size: 4,
@@ -53,6 +54,7 @@ function MyApp({ Component, pageProps }) {
         pauseOnHover
         theme="light"
       />
+      <Insights/>
     </>
   );
 }
