@@ -48,6 +48,7 @@ export default function index({ instructorId, classId, classData }) {
   const [mode, setMode] = useState("Individual");
   const [appointmentDuration, setAppointmentDuration] = useState(30);
   const [groupedSlots, setGroupedSlots] = useState([]);
+  const [individualSlots, setIndividualSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [stripeOptions, setStripeOptions] = useState(null);
   const [stripeLoading, setStripeLoading] = useState(false);
@@ -60,103 +61,78 @@ export default function index({ instructorId, classId, classData }) {
   const [minDays, setMinDays] = useState(0);
   const [maxDays, setMaxDays] = useState(30);
 
-  const hasSlots = (date, schedule, bookedSlots, appointmentDuration, mode) => {
+  const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
     const dateStr = moment(date).format("YYYY-MM-DD");
-    var { generalAvailability, adjustedAvailability } = schedule;
+    const { generalAvailability, adjustedAvailability } = schedule;
     const dayName = moment(date).format("dddd");
 
-    if (mode === "Individual") {
-      generalAvailability = generalAvailability.map((day) => ({
-        ...day,
-        slots: day.slots.filter((slot) => !slot.classId),
-      }));
-
-      adjustedAvailability = adjustedAvailability.map((day) => ({
-        ...day,
-        slots: day.slots.filter((slot) => !slot.classId),
-      }));
-    } else if (mode === "Group") {
-      generalAvailability = generalAvailability.map((day) => ({
-        ...day,
-        slots: day.slots.filter((slot) => slot.classId === classId),
-      }));
-
-      adjustedAvailability = adjustedAvailability.map((day) => ({
-        ...day,
-        slots: day.slots.filter((slot) => slot.classId === classId),
-      }));
-    }
-
+    // Filter adjusted availability for both individual and group slots
     const adjustedDay = adjustedAvailability.find(
       (day) => day.date === dateStr
     );
-    if (adjustedDay && adjustedDay.slots.length == 0) return false;
-    else if (adjustedDay && adjustedDay.slots.length > 0) {
-      return adjustedDay.slots.some((slot) => {
-        const slotStart = moment(slot.startTime, "HH:mm");
-        const slotEnd = moment(slot.endTime, "HH:mm");
-        while (slotStart.isBefore(slotEnd)) {
-          const nextSlot = slotStart
-            .clone()
-            .add(appointmentDuration, "minutes");
-          if (
-            !bookedSlots.some(
-              (booked) =>
-                booked.date === dateStr &&
-                moment(booked.startTime, "HH:mm").isSame(slotStart)
-            )
-          ) {
-            return true;
-          } else if (
-            bookedSlots.some(
-              (booked) =>
-                booked.date === dateStr &&
-                moment(booked.startTime, "HH:mm").isSame(slotStart) &&
-                booked.classId === classId
-            ).length < classData?.groupSize &&
-            mode === "Group"
-          ) {
-            return true;
-          }
-          slotStart.add(appointmentDuration, "minutes");
-        }
-        return false;
-      });
+    if (adjustedDay) {
+      const hasIndividualSlots = adjustedDay.slots.some((slot) =>
+        hasAvailableSlot(slot, dateStr, appointmentDuration, bookedSlots, false)
+      );
+
+      const hasGroupSlots = adjustedDay.slots.some((slot) =>
+        hasAvailableSlot(slot, dateStr, appointmentDuration, bookedSlots, true)
+      );
+      if (hasIndividualSlots || hasGroupSlots) return true;
+      else return false;
     }
+
+    // Filter general availability for both individual and group slots
     const generalDay = generalAvailability.find((day) => day.day === dayName);
-    if (generalDay && generalDay.slots.length == 0) return false;
-    if (!generalDay) return false;
-    if (generalDay && generalDay.slots.length > 0) {
-      return generalDay.slots.some((slot) => {
-        const slotStart = moment(slot.startTime, "HH:mm");
-        const slotEnd = moment(slot.endTime, "HH:mm");
-        while (slotStart.isBefore(slotEnd)) {
-          const nextSlot = slotStart
-            .clone()
-            .add(appointmentDuration, "minutes");
-          if (
-            !bookedSlots.some(
-              (booked) =>
-                booked.date === dateStr &&
-                moment(booked.startTime, "HH:mm").isSame(slotStart)
-            )
-          ) {
-            return true;
-          } else if (
-            bookedSlots.some(
-              (booked) =>
-                booked.date === dateStr &&
-                moment(booked.startTime, "HH:mm").isSame(slotStart) &&
-                booked.classId === classId
-            ).length < classData?.groupSize &&
-            mode === "Group"
-          ) {
-            return true;
-          }
-          slotStart.add(appointmentDuration, "minutes");
-        }
-        return false;
-      });
+    if (!generalDay || generalDay.slots.length === 0) return false;
+
+    const hasIndividualSlots = generalDay.slots.some((slot) =>
+      hasAvailableSlot(slot, dateStr, appointmentDuration, bookedSlots, false)
+    );
+
+    const hasGroupSlots = generalDay.slots.some((slot) =>
+      hasAvailableSlot(slot, dateStr, appointmentDuration, bookedSlots, true)
+    );
+
+    return hasIndividualSlots || hasGroupSlots;
+  };
+
+  // Helper function to check if a slot is available
+  const hasAvailableSlot = (
+    slot,
+    dateStr,
+    appointmentDuration,
+    bookedSlots,
+    isGroup
+  ) => {
+    const slotStart = moment(slot.startTime, "HH:mm");
+    const slotEnd = moment(slot.endTime, "HH:mm");
+
+    while (slotStart.isBefore(slotEnd)) {
+      const nextSlot = slotStart.clone().add(appointmentDuration, "minutes");
+      if (nextSlot.isAfter(slotEnd)) break;
+
+      const isBooked = bookedSlots.some(
+        (booked) =>
+          booked.date === dateStr &&
+          moment(booked.startTime, "HH:mm").isSame(slotStart)
+      );
+
+      if (!isBooked) return true;
+
+      if (
+        isGroup &&
+        bookedSlots.filter(
+          (booked) =>
+            booked.date === dateStr &&
+            moment(booked.startTime, "HH:mm").isSame(slotStart) &&
+            booked.classId === slot.classId
+        ).length < classData?.groupSize
+      ) {
+        return true;
+      }
+
+      slotStart.add(appointmentDuration, "minutes");
     }
 
     return false;
@@ -167,12 +143,12 @@ export default function index({ instructorId, classId, classData }) {
     const minHourtoDay = 0;
     for (let i = minHourtoDay; i < maxDays; i++) {
       const date = moment(today).add(i, "days").toDate();
-      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration, mode)) {
+      if (!hasSlots(date, schedule, bookedSlots, appointmentDuration)) {
         daysToCheck.push(date);
       }
     }
     setDaysWithNoSlots(daysToCheck);
-  }, [schedule, bookedSlots, appointmentDuration, mode, classData]);
+  }, [schedule, bookedSlots, appointmentDuration, classData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,6 +157,22 @@ export default function index({ instructorId, classId, classData }) {
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         const data = snapshot.data();
+        data.generalAvailability.forEach((day) => {
+          day.slots.forEach((slot) => {
+            if (slot.groupSlot) {
+              slot.classId = classId;
+              slot.groupSize = classData.groupSize;
+            }
+          });
+        });
+        data.adjustedAvailability.forEach((day) => {
+          day.slots.forEach((slot) => {
+            if (slot.groupSlot) {
+              slot.classId = classId;
+              slot.groupSize = classData.groupSize;
+            }
+          });
+        });
         setSchedule({
           generalAvailability: data.generalAvailability || [],
           adjustedAvailability: data.adjustedAvailability || [],
@@ -220,6 +212,7 @@ export default function index({ instructorId, classId, classData }) {
             startTime: bookingStartTime.format("HH:mm"),
             endTime: moment.utc(booking.endTime).format("HH:mm"),
             date: bookingStartTime.format("YYYY-MM-DD"),
+            classId: booking.class_id,
           });
         }
       });
@@ -235,7 +228,9 @@ export default function index({ instructorId, classId, classData }) {
       .utc(`${selectedSlot.date} ${selectedSlot.startTime}`, "YYYY-MM-DD HH:mm")
       .toISOString();
     const filteredBookings = bookedSlots.filter(
-      (booking) => (booking.startTime === selectedSlot.startTime && booking.date === selectedSlot.date)
+      (booking) =>
+        booking.startTime === selectedSlot.startTime &&
+        booking.date === selectedSlot.date
     );
     const remainingSlots = classData.groupSize - filteredBookings.length;
 
@@ -247,27 +242,55 @@ export default function index({ instructorId, classId, classData }) {
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
       if (!selectedDate) return;
+
       const minDate = moment().add(minDays, "hours").startOf("day");
       const minTime = moment().add(minDays, "hours").format("HH:mm");
       const maxDate = moment().add(maxDays, "days").endOf("day");
       const dateStr = moment(selectedDate).format("YYYY-MM-DD");
+
       if (
         moment(selectedDate).isAfter(maxDate) ||
         moment(selectedDate).isBefore(minDate)
       ) {
         setGroupedSlots([]);
+        setIndividualSlots([]);
         return;
       }
-      let slots = [];
+
+      let groupSlots = [];
+      let individualSlots = [];
 
       // Adjusted availability priority
       const adjustedDay = adjustedAvailability.find(
         (day) => day.date === dateStr
       );
       if (adjustedDay) {
-        adjustedDay.slots.forEach((slot) =>
-          slots.push(
-            ...splitSlots(
+        adjustedDay.slots.forEach((slot) => {
+          const split = splitSlots(
+            slot.startTime,
+            slot.endTime,
+            dateStr,
+            slot.classId
+          ).filter(
+            (slot) =>
+              slot.date != minDate.format("YYYY-MM-DD") ||
+              slot.startTime >= minTime
+          );
+          if (slot.classId) {
+            groupSlots.push(...split);
+          } else {
+            individualSlots.push(...split);
+          }
+        });
+      } else {
+        const dayName = moment(selectedDate).format("dddd"); // Get day name
+        const generalDay = generalAvailability.find(
+          (day) => day.day === dayName
+        );
+
+        if (generalDay) {
+          generalDay.slots.forEach((slot) => {
+            const split = splitSlots(
               slot.startTime,
               slot.endTime,
               dateStr,
@@ -276,39 +299,18 @@ export default function index({ instructorId, classId, classData }) {
               (slot) =>
                 slot.date != minDate.format("YYYY-MM-DD") ||
                 slot.startTime >= minTime
-            )
-          )
-        );
-      } else {
-        const dayName = moment(selectedDate).format("dddd"); // Get day name
-        const dateStr = moment(selectedDate).format("YYYY-MM-DD");
-        const generalDay = generalAvailability.find(
-          (day) => day.day === dayName
-        );
-        if (generalDay) {
-          generalDay.slots.forEach((slot) =>
-            slots.push(
-              ...splitSlots(
-                slot.startTime,
-                slot.endTime,
-                dateStr,
-                slot.classId
-              ).filter(
-                (slot) =>
-                  slot.date != minDate.format("YYYY-MM-DD") ||
-                  slot.startTime >= minTime
-              )
-            )
-          );
+            );
+            if (slot.classId) {
+              groupSlots.push(...split);
+            } else {
+              individualSlots.push(...split);
+            }
+          });
         }
       }
-      if (mode === "Individual") {
-        slots = slots.filter((slot) => !slot.classId);
-      } else if (mode === "Group") {
-        slots = slots.filter((slot) => slot.classId === classId);
-      }
 
-      setGroupedSlots(slots); // Directly set slots for the selected date
+      setGroupedSlots(groupSlots); // Set group slots for the selected date
+      setIndividualSlots(individualSlots); // Set individual slots for the selected date
     };
 
     const splitSlots = (start, end, dateStr, classId) => {
@@ -322,15 +324,18 @@ export default function index({ instructorId, classId, classData }) {
 
         const bookingsForSlot = bookedSlots.filter(
           (booked) =>
-            booked.date === moment(selectedDate).format("YYYY-MM-DD") &&
+            booked.date === dateStr &&
             moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
         );
 
         const isBooked = bookingsForSlot.length > 0;
 
-        if (
+        if (classId && bookingsForSlot[0]?.classId && !(bookingsForSlot[0]?.classId === classId)) {
+        } else if (
           !isBooked ||
-          (mode === "Group" && bookingsForSlot.length < classData.groupSize)
+          (classId &&
+            bookingsForSlot.filter((b) => b.classId === classId).length <
+              classData.groupSize)
         ) {
           slots.push({
             startTime: slotStart.format("HH:mm"),
@@ -374,7 +379,6 @@ export default function index({ instructorId, classId, classData }) {
     }
     setSelectedDate(nextDate);
   };
-
   const initializeStripe = async () => {
     const now = moment.utc();
     if (!user && !userLoading) {
@@ -434,7 +438,9 @@ export default function index({ instructorId, classId, classData }) {
 
     const querySnapshot = await getDocs(slotQuery);
 
-    if (mode === "Group") {
+    const isGroup = !!selectedSlot.classId;
+
+    if (isGroup) {
       const existingGroupBookings = querySnapshot.docs.filter(
         (doc) => doc.data().class_id === classId
       ).length;
@@ -472,7 +478,7 @@ export default function index({ instructorId, classId, classData }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        price: mode === "Group" ? classData.groupPrice : classData.Price,
+        price: isGroup ? classData.groupPrice : classData.Price,
       }),
     });
 
@@ -516,25 +522,6 @@ export default function index({ instructorId, classId, classData }) {
         <div className="text-2xl font-bold text-[#E73F2B]">
           Booking Schedule
         </div>
-
-        <div>
-          <button
-            onClick={() => setMode("Individual")}
-            className={`border-[#E73F2B] rounded-tl-lg rounded-bl-lg border-2 border-r-0 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
-              mode === "Individual" ? "bg-[#E73F2B] text-white" : ""
-            }`}
-          >
-            Individual
-          </button>
-          <button
-            onClick={() => setMode("Group")}
-            className={`border-[#E73F2B] rounded-tr-lg rounded-br-lg border-2 text-[#E73F2B] px-4 py-1 hover:bg-[#E73F2B] hover:text-white ${
-              mode === "Group" ? "bg-[#E73F2B] text-white" : ""
-            }`}
-          >
-            Group
-          </button>
-        </div>
       </div>
       <div className="flex flex-grow flex-col lg:flex-row">
         {/* Calendar Section */}
@@ -572,9 +559,6 @@ export default function index({ instructorId, classId, classData }) {
 
         {/* Time Slots Section */}
         <div className="flex-grow p-4 flex flex-col bg-white overflow-y-auto">
-          <h2 className="text-xl font-bold text-[#E73F2B] mb-6">
-            Select a Time Slot
-          </h2>
           <div className="flex-grow mb-3">
             {/* Display Time slots ONLY of Selected Date without using Grouped slot, just selected Dtae*/}
             <div className="flex flex-row mb-3 items-center justify-center">
@@ -595,6 +579,32 @@ export default function index({ instructorId, classId, classData }) {
                 <ChevronRightIcon className="h-8 w-8" />
               </button>
             </div>
+            {individualSlots.length > 0 && (
+              <div className="text-gray-700 font-semibold pb-3 rounded">
+                Individual Classes (1-on-1s)
+              </div>
+            )}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+              {individualSlots.map((slot, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSlotClick(slot.date, slot)}
+                  className={`p-3 border rounded cursor-pointer ${
+                    selectedSlot?.startTime === slot.startTime &&
+                    selectedSlot?.date === slot.date
+                      ? "bg-[#E73F2B] text-white"
+                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
+                  }`}
+                >
+                  {slot.startTime} - {slot.endTime}
+                </button>
+              ))}
+            </div>
+            {groupedSlots.length > 0 && (
+              <div className="text-gray-700 font-semibold pb-3 rounded">
+                Grouped Class (Max. Num. of Students: {classData.groupSize})
+              </div>
+            )}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {groupedSlots.map((slot, i) => (
                 <button
@@ -611,7 +621,7 @@ export default function index({ instructorId, classId, classData }) {
                 </button>
               ))}
             </div>
-            {groupedSlots.length == 0 && (
+            {groupedSlots.length == 0 && individualSlots.length == 0 && (
               <div className="flex flex-col items-center">
                 <div className="text-gray-600 m-2 mb-0 text-lg">
                   No Time Slots available for this day
@@ -677,7 +687,7 @@ export default function index({ instructorId, classId, classData }) {
                     )}{" "}
                     {selectedSlot.startTime} - {selectedSlot.endTime}
                   </p>
-                  {mode === "Group" && (
+                  {selectedSlot.classId && (
                     <div>
                       <strong>Available Seats:</strong>{" "}
                       {calculateRemainingGroupedClassSlots()}
@@ -705,12 +715,15 @@ export default function index({ instructorId, classId, classData }) {
               bookingRef={stripeOptions.bookingRef}
               setStripeOptions={setStripeOptions}
               timer={timer}
-              price={mode === "Group" ? classData.groupPrice : classData.Price}
+              price={
+                selectedSlot.classId ? classData.groupPrice : classData.Price
+              }
               startTime={selectedSlot.startTime}
               endTime={selectedSlot.endTime}
               date={selectedSlot.date}
               setTimer={setTimer}
-              mode={mode}
+              mode={selectedSlot.classId ? "Group" : "Individual"}
+              classData={classData}
             />
           </Elements>
         </div>
@@ -763,6 +776,7 @@ const CheckoutForm = ({
   date,
   setTimer,
   mode,
+  classData,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -941,7 +955,10 @@ END:VCALENDAR
       onSubmit={handleSubmit}
       className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto"
     >
-      <div className="flex flex-row justify-end text-[#E73F2B] mb-2">
+      <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
+        <div className="text-base font-semibold text-[#E73F2B]">
+          Paying: ${mode === "Group" ? classData.groupPrice : classData.Price}
+        </div>
         <button
           className="top-4 right- flex flex-row items-center gap-1 text-center"
           onClick={() => {

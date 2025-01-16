@@ -58,6 +58,23 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [newMediaPreview, setNewMediaPreview] = useState(null);
   const [newMedia, setNewMedia] = useState(null);
+  const [selectedClassData, setSelectedClassData] = useState(null);
+  const [selectedChatroom, setSelectedChatroom] = useState(null);
+
+  useEffect(() => {
+    if (chid && chatRooms.length > 0 && classes.length > 0) {
+      const selectedChatroom = chatRooms.find(
+        (chatroom) => chatroom.id === chid
+      );
+      if (selectedChatroom) {
+        const selectedClass = classes.find(
+          (classItem) => classItem.id === selectedChatroom.class
+        );
+        setSelectedClassData(selectedClass || null);
+        setSelectedChatroom(selectedChatroom);
+      }
+    }
+  }, [chid, chatRooms, classes]);
 
   /**
    * UTILITY FUNCTIONS
@@ -94,17 +111,65 @@ const Chat = () => {
   };
 
   const getBookings = async () => {
-    const querySnapshot = await getDocs(
-      query(collection(db, "Bookings"), where("instructor_id", "==", user?.uid))
-    );
-    const query1Snapshot = await getDocs(
-      query(collection(db, "Bookings"), where("student_id", "==", user?.uid))
-    );
+    if (!user) return;
 
-    const appointments = querySnapshot.docs.map((doc) => doc.data());
-    const appointments1 = query1Snapshot.docs.map((doc) => doc.data());
-    appointments.push(...appointments1);
-    setBookings(appointments);
+    try {
+      const instructorQuery = query(
+        collection(db, "Bookings"),
+        where("instructor_id", "==", user?.uid)
+      );
+
+      const studentQuery = query(
+        collection(db, "Bookings"),
+        where("student_id", "==", user?.uid)
+      );
+
+      const instructorBookings = await getDocs(instructorQuery);
+      const studentBookings = await getDocs(studentQuery);
+
+      const allBookings = [
+        ...instructorBookings.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
+        ...studentBookings.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      ];
+
+      // Resolve student names and class details
+      const studentIds = [
+        ...new Set(allBookings.map((booking) => booking.student_id)),
+      ];
+      const classIds = [
+        ...new Set(allBookings.map((booking) => booking.class_id)),
+      ];
+
+      // Fetch students
+      const studentPromises = studentIds.map((id) => getData(id, "Users"));
+      const students = await Promise.all(studentPromises);
+
+      // Fetch classes
+      const classPromises = classIds.map((id) => getData(id, "classes"));
+      const classDetails = await Promise.all(classPromises);
+
+      // Attach names and class details to bookings
+      const enrichedBookings = allBookings.map((booking) => ({
+        ...booking,
+        student_name: `${
+          students.find((s) => s?.userUid === booking.student_id)?.firstName ||
+          "Unknown"
+        } ${
+          students.find((s) => s?.userUid === booking.student_id)?.lastName ||
+          ""
+        }`.trim(),
+        class_name:
+          classDetails.find((c) => c?.id === booking.class_id)?.Name ||
+          "Unknown",
+      }));
+
+      setBookings(enrichedBookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
   };
 
   useEffect(() => {
@@ -239,7 +304,6 @@ const Chat = () => {
               students.map((student) => [student.userUid, student])
             ).values(),
           ];
-          setGroupStudents(uniqueStudents);
         }
 
         setIsLoading(false);
@@ -253,25 +317,35 @@ const Chat = () => {
   }, [chid, cid]);
 
   useEffect(() => {
-    if (chid && chatRooms) {
-      if (chatRooms.find((chatroom) => chatroom.id === chid)) {
-        const chatRoom = chatRooms.find((chatroom) => chatroom.id === chid);
-        const booking = bookings.filter(
+    if (chid && bookings.length > 0) {
+      const selectedChatroom = chatRooms.find(
+        (chatroom) => chatroom.id === chid
+      );
+      if (selectedChatroom) {
+        let relatedBookings = bookings.filter(
           (booking) =>
-            booking.class_id === chatRoom.class &&
-            booking.startTime === chatRoom.startTime
+            booking.class_id === selectedChatroom.class &&
+            booking.student_id == selectedChatroom.student
         );
-        setGroupStudents([]);
-        booking.forEach(async (booking) => {
-          setGroupStudents((prev) => [
-            ...prev,
-            {
-              userUid: booking.student_id,
-              firstName: booking.student_name,
-              lastName: "",
-            },
-          ]);
-        });
+        if (!relatedBookings || !relatedBookings.length) {
+          relatedBookings = bookings.filter(
+            (booking) =>
+              booking.class_id === selectedChatroom.class &&
+              booking.startTime === selectedChatroom.startTime
+          );
+        }
+        console.log(relatedBookings);
+
+        const uniqueStudents = [
+          ...new Map(
+            relatedBookings.map((booking) => [
+              booking.student_id,
+              { userUid: booking.student_id, name: booking.student_name },
+            ])
+          ).values(),
+        ];
+
+        setGroupStudents(uniqueStudents);
       }
     }
   }, [chid, chatRooms, bookings]);
@@ -293,6 +367,27 @@ const Chat = () => {
               return { id: data.id, ...data.data() };
             })
           );
+          const instructors = await Promise.all(
+            classes.map(async (cls) => {
+              try {
+                const docRef = doc(db, "Users", cls.classCreator);
+                const data = await getDoc(docRef);
+                return { id: data.id, ...data.data() };
+              } catch (error) {
+                console.warn(
+                  `Error fetching instructor for class ${cls.id}:`,
+                  error
+                );
+                return null;
+              }
+            })
+          );
+          // Add instructor names to classes firstName+lastName
+          classes.forEach((cls, index) => {
+            if (instructors[index]) {
+              cls.instructorName = instructors[index].firstName + " " +  instructors[index].lastName;
+            }
+          })
           setClasses(classes);
         }
       } catch (error) {
@@ -428,9 +523,11 @@ const Chat = () => {
       const chatroom = chatRooms.find((chatroom) => chatroom?.id === chid);
       const classData = classes.find((c) => c?.id === chatroom.class);
 
-      const student = chatroom?.student || (!isInstructor)?user.uid:null;
-      const studentData = student?(await getData(student, "Users")):(null);
-      const instructorData = chatroom?.instructor?(await getData(chatroom?.instructor, "Users")):(null);
+      const student = chatroom?.student || !isInstructor ? user.uid : null;
+      const studentData = student ? await getData(student, "Users") : null;
+      const instructorData = chatroom?.instructor
+        ? await getData(chatroom?.instructor, "Users")
+        : null;
 
       const targetUid = isInstructor
         ? chatroom?.student || studentData?.userUid
@@ -481,7 +578,6 @@ const Chat = () => {
         chatroom: chid,
         type: "message",
       };
-
 
       const querySnapshot = await getDocs(
         query(
@@ -684,40 +780,61 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* chat right pane */}
         <div className="flex-1 md:flex-auto w-full md:w-[75%] bg-gray-50 flex flex-col overflow-hidden">
           {/* messages */}
-          <div className="flex-1 flex flex-col py-3 px-6 md:py-6 overflow-y-auto scrollbar-hide scroll-smooth">
+          <div className="flex-1 flex flex-col overflow-y-auto scrollbar-hide scroll-smooth">
             {/* start conversation */}
-            <div className="text-sm md:text-base w-fit mx-auto bg-gray-200 text-gray-700 py-0.5 px-4 mb-3 rounded-full cursor-default shadow-md">
-              Start Conversation
+            {selectedClassData && (
+              <div className="sticky top-0 z-10 bg-white shadow-md">
+                <div className="flex w-full flex-col items-center justify-center py-3">
+                  <div className="text-sm w-full md:text-base mx-auto text-gray-700 px-4 rounded-full cursor-default">
+                    <span className="font-semibold">
+                      {selectedClassData?.Name}
+                    </span>{" "}
+                    -{" "}
+                    <span>
+                      {isInstructor
+                        ? groupStudents
+                            .map((student) => student.name)
+                            .join(", ")
+                        : selectedClassData?.instructorName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex-1 flex flex-col py-3 px-6 md:py-6 overflow-y-auto scrollbar-hide scroll-smooth">
+              <div className="text-sm md:text-base w-fit mx-auto bg-gray-200 text-gray-700 py-0.5 px-4 mb-3 rounded-full cursor-default shadow-md">
+                Start Conversation
+              </div>
+
+              {/* messages */}
+              <FlipMove className="flex flex-col" enterAnimation="elevator">
+                {(classData?.groupType == "group"
+                  ? groupMessages
+                  : messages
+                )?.map?.((message, index) => (
+                  <Message
+                    message={message}
+                    userId={user?.uid}
+                    key={index}
+                    groupStudents={groupStudents}
+                    isInstructor={isInstructor}
+                    instructorId={
+                      classes.find(
+                        (classItem) =>
+                          chatRooms.find((chatRoom) => chatRoom.id === chid)
+                            ?.class === classItem.id
+                      )?.classCreator
+                    }
+                  />
+                ))}
+              </FlipMove>
+
+              {/* bottom ref */}
+              <div ref={bottomRef} className="h-5 w-full" />
             </div>
-
-            {/* messages */}
-            <FlipMove className="flex flex-col" enterAnimation="elevator">
-              {(classData?.groupType == "group"
-                ? groupMessages
-                : messages
-              )?.map?.((message, index) => (
-                <Message
-                  message={message}
-                  userId={user?.uid}
-                  key={index}
-                  groupStudents={groupStudents}
-                  isInstructor={isInstructor}
-                  instructorId={
-                    classes.find(
-                      (classItem) =>
-                        chatRooms.find((chatRoom) => chatRoom.id === chid)
-                          ?.class === classItem.id
-                    )?.classCreator
-                  }
-                />
-              ))}
-            </FlipMove>
-
-            {/* bottom ref */}
-            <div ref={bottomRef} className="h-5 w-full" />
           </div>
 
           {/* input message */}
