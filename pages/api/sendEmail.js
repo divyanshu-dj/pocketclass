@@ -9,7 +9,7 @@ export default function (req, res) {
 	];
 
 	var message = {
-		from: "contact.pocketclass@gmail.com",
+		from: '"PocketClass" <contact.pocketclass@gmail.com>',
 		to: toMailList,
 		...req.body,
 	};

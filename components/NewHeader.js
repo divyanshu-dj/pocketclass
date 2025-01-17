@@ -267,9 +267,9 @@ const NewHeader = ({ isHome = true }) => {
                     onClick={toggleDropDown}
                   >
                     <MenuIcon className="h-6 cursor-pointer ml-1" />
-                    {user?.photoURL ? (
+                    {user?.photoURL || userData?.profileImage ? (
                       <img
-                        src={user.photoURL}
+                        src={userData?.profileImage || user?.photoURL}
                         className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12"
                         alt="User"
                       />
