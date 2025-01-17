@@ -72,17 +72,17 @@ function UpdateProfile() {
     setFormErrors({});
     setLoading(true);
 
-    let imageURLArray = userData?.images || [];
+    let imageURI = "";
     if (droppedFile) {
       const fileRef = ref(storage, `images/userImages/${Date.now()}-${droppedFile.name}`);
       const uploadResult = await uploadBytes(fileRef, droppedFile);
       const imageURL = await getDownloadURL(uploadResult.ref);
-      imageURLArray = [imageURL]; // Ensure only one image in the array
+      imageURI = imageURL; // Ensure only one image in the array
     }
 
     await updateDoc(doc(db, "Users", id), {
       ...data,
-      images: imageURLArray,
+      profileImage: imageURI,
     });
 
     toast.success("Profile updated successfully", {
