@@ -12,6 +12,7 @@ function MusicianProfileCard1({ instructor }) {
   const reviews = instructor?.reviewCount; // Static as not in DB
   const price = instructor?.Price; // Static as not in DB
   const specialization = instructor?.SubCategory?(instructor?.SubCategory):(instructor?.Type); // Static as not in DB
+  const groupPrice = instructor?.groupPrice; // Static as not in DB
 
   const getCategoryIcon = (category, type) => {
     const categoryData = categories.find((cat) => cat.name === category);
@@ -68,7 +69,7 @@ function MusicianProfileCard1({ instructor }) {
         </div>
         <div className="flex justify-start items-end flex-col grow-0 shrink-0 basis-auto">
           <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold leading-6 text-[#261f22] grow-0 shrink-0 basis-auto m-0 pl-[21px] p-0">
-            ${price}
+            ${groupPrice}{groupPrice?"-$":""}{price}
           </p>
           <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
             per hour
