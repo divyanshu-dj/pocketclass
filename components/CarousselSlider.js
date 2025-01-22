@@ -13,6 +13,7 @@ const images = [
     "./assets/Partnerships/Speedy_Golf.jpg",
     "./assets/Partnerships/TMU.jpg",
     "./assets/Partnerships/uoft.jpg",
+    "./assets/Partnerships/HockeyPylon.png"
 ];
 
 const CarousselSlider = () => {
