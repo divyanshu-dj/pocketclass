@@ -18,7 +18,7 @@ const images = [
 const CarousselSlider = () => {
   return (
     <div className="">
-      <h1 className="[font-family:'DM_Sans',sans-serif] text-[32px] md:text-[40px] font-bold text-center leading-[40px] md:leading-[48px] text-[#261f22] max-w-[642px] mx-auto box-border m-0 p-0 mb-5">Partnerships</h1>
+      <h1 className="[font-family:'DM_Sans',sans-serif] text-[32px] md:text-[40px] font-bold text-center leading-[40px] md:leading-[48px] text-[#261f22] max-w-[642px] mx-auto box-border m-0 p-0 mb-10">Our Partners</h1>
       <Swiper
         spaceBetween={20} 
         slidesPerView={"auto"} 
