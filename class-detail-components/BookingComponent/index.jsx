@@ -47,6 +47,7 @@ export default function index({ instructorId, classId, classData }) {
   });
   const [mode, setMode] = useState("Individual");
   const [appointmentDuration, setAppointmentDuration] = useState(30);
+  const [timeZone, setTimeZone] = useState("America/Toronto");
   const [groupedSlots, setGroupedSlots] = useState([]);
   const [individualSlots, setIndividualSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -180,6 +181,7 @@ export default function index({ instructorId, classId, classData }) {
         setMinDays(data.minDays || 0);
         setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
+        setTimeZone(data.timezone || "America/Toronto");
         const date = moment(today);
         setSelectedDate(new Date(date));
       }
@@ -526,6 +528,9 @@ export default function index({ instructorId, classId, classData }) {
         <div className="text-2xl font-bold text-[#E73F2B]">
           Booking Schedule
         </div>
+        <div className="text-base text-gray-600 font-bold ">
+          Timezone: {timeZone?(timeZone):"America/Toronto"}
+        </div>
       </div>
       <div className="flex flex-grow flex-col lg:flex-row">
         {/* Calendar Section */}
@@ -728,6 +733,7 @@ export default function index({ instructorId, classId, classData }) {
               setTimer={setTimer}
               mode={selectedSlot.classId ? "Group" : "Individual"}
               classData={classData}
+              timeZone={timeZone}
             />
           </Elements>
         </div>
@@ -781,6 +787,7 @@ const CheckoutForm = ({
   setTimer,
   mode,
   classData,
+  timeZone,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -861,6 +868,7 @@ const CheckoutForm = ({
               endTime: new Date(`${date}T${endTime}`).toISOString(),
               instructorEmail: instructorData?.email,
               studentEmail: user?.email,
+              timeZone: timeZone,
             }),
           })
             .then((response) => {
@@ -880,6 +888,7 @@ const CheckoutForm = ({
         paymentIntentId: paymentIntent.id,
         meetingLink: meetingLink ? meetingLink : "",
         paymentStatus: "Paid",
+        timeZone: timeZone ? timeZone : "America/Toronto",
       });
 
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
@@ -896,8 +905,8 @@ CALSCALE:GREGORIAN
 BEGIN:VEVENT
 SUMMARY:${classData.Name}
 DESCRIPTION:Booking confirmed for the class ${classData.Name}
-DTSTART:${startDateTime.replace(/-|:|\.\d+/g, "")}
-DTEND:${endDateTime.replace(/-|:|\.\d+/g, "")}
+DTSTART;TZID=${timeZone ? timeZone : "America/Toronto"}:${startDateTime.replace(/-|:|\.\d+/g, "")}
+DTEND;TZID=${timeZone ? timeZone : "America/Toronto"}:${endDateTime.replace(/-|:|\.\d+/g, "")}
 LOCATION:${location}
 ORGANIZER;CN=${instructorData.firstName} ${
         instructorData.lastName
@@ -933,6 +942,10 @@ END:VCALENDAR
           <tr>
             <td style="padding: 8px;"><strong>End Time:</strong></td>
             <td style="padding: 8px;">${date + "/" + endTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Time Zone:</strong></td>
+            <td style="padding: 8px;">${timeZone?timeZone:"America/Toronto"}</td>
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>

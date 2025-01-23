@@ -16,7 +16,7 @@ oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { className, startTime, endTime, instructorEmail, studentEmail } = req.body;
+    const { className, startTime, endTime, instructorEmail, studentEmail, timeZone } = req.body;
 
     try {
       const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
@@ -25,12 +25,12 @@ export default async function handler(req, res) {
         summary: className,
         description: 'Join the Google Meet for your class',
         start: {
-          dateTime: startTime, // Format: 'YYYY-MM-DDTHH:mm:ssZ'
-          timeZone: 'America/Toronto',
+          dateTime: startTime, 
+          timeZone: timeZone || 'America/Toronto',
         },
         end: {
           dateTime: endTime,
-          timeZone: 'America/Toronto',
+          timeZone: timeZone || 'America/Toronto',
         },
         conferenceData: {
           createRequest: {
