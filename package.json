@@ -30,6 +30,7 @@
     "date-fns": "^2.29.2",
     "firebase": "^9.10.0",
     "geolib": "^3.3.3",
+    "googleapis": "^144.0.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "jspdf-invoice-template": "^1.4.3",
