@@ -41,6 +41,7 @@ export default function CreateClass() {
     SubCategory: "",
     Address: "",
     Price: "",
+    Mode: "Offline",
     Pricing: "",
     groupSize: "",
     groupPrice: "",
@@ -118,6 +119,7 @@ export default function CreateClass() {
       Address: "",
       Price: "",
       Pricing: "",
+      Mode: "Offline",
       Images: [],
       About: "",
       Experience: "",
@@ -505,6 +507,20 @@ export default function CreateClass() {
                 />
               </div>
             </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Mode of Class</label>
+                <select
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  value={form.Mode}
+                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
+                >
+                  <option value="Online">Online</option>
+                  <option value="Offline">Offline</option>
+                </select>
+              </div>
+            </div>
+
             <div className="w-full max-w-[750px]">
               <div className="text-xl font-bold mb-4">Location of Lesson</div>
               <LocationMap

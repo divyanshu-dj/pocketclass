@@ -36,6 +36,8 @@ export default function Schedule() {
   const [vacationEndDate, setVacationEndDate] = useState(null);
   const [showVacationPicker, setShowVacationPicker] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(null);
+  const [timeZones, setTimeZones] = useState([]);
+  const [selectedTimeZone, setSelectedTimeZone] = useState(null);
 
   const [events, setEvents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -96,6 +98,14 @@ export default function Schedule() {
     updatedGeneralAvailability[dayIndex].slots[slotIndex].groupSlot = false;
     setGeneralAvailability(updatedGeneralAvailability);
   };
+  useEffect(() => {
+    const northAmericanTimeZones = moment.tz
+      .names()
+      .filter((zone) => zone.startsWith("America/"));
+
+    setTimeZones(northAmericanTimeZones.map((zone) => ({ value: zone, label: zone })));
+  }, []);
+
   useEffect(() => {
     const fetchClasses = async () => {
       const classesQuery = query(
@@ -202,6 +212,7 @@ export default function Schedule() {
         generalAvailability,
         adjustedAvailability,
         appointmentDuration,
+        timezone: selectedTimeZone,
         minDays,
         maxDays,
       };
@@ -232,6 +243,7 @@ export default function Schedule() {
               );
               setMinDays(data?.minDays ? data.minDays : 1);
               setMaxDays(data?.maxDays ? data.maxDays : 30);
+              setSelectedTimeZone(data.timezone);
             }
           }
         },
@@ -406,9 +418,7 @@ export default function Schedule() {
                 continue;
               }
               newEvents.push({
-                title: slot.groupSlot
-                  ? "Group Class"
-                  : "",
+                title: slot.groupSlot ? "Group Class" : "",
                 start: start.toDate(),
                 end: end.toDate(),
                 color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
@@ -459,9 +469,7 @@ export default function Schedule() {
               continue;
             }
             newEvents.push({
-              title: slot.groupSlot
-                ? "Group Class"
-                : "",
+              title: slot.groupSlot ? "Group Class" : "",
               start: start.toDate(),
               end: end.toDate(),
               color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
@@ -487,8 +495,6 @@ export default function Schedule() {
       groupedSlots[key].push(booked.student_name);
     });
 
-    
-
     Object.entries(groupedSlots).forEach(([key, students]) => {
       const [start, end] = key.split("/");
       // Get classId by find GroupedSlots in BookedSlot
@@ -496,7 +502,7 @@ export default function Schedule() {
         (bookedSlot) =>
           moment(bookedSlot.startTime).format() === start &&
           moment(bookedSlot.endTime).format() === end
-      )
+      );
 
       const classDetail = classes.find((c) => c.uid === bookingSlot.classId);
       newEvents.push({
@@ -530,6 +536,7 @@ export default function Schedule() {
     { value: 240, label: "4 hours" },
   ];
 
+
   const timeOptions = Array.from({ length: 48 }, (_, i) => {
     const hour = Math.floor(i / 2)
       .toString()
@@ -557,9 +564,8 @@ export default function Schedule() {
     updatedAvailability.find((item) => item.date === date).slots[
       slotIdex
     ].groupSlot = true;
-    const slotFind =updatedAvailability.find((item) => item.date === date).slots[
-      slotIdex
-    ]
+    const slotFind = updatedAvailability.find((item) => item.date === date)
+      .slots[slotIdex];
     setAdjustedAvailability(updatedAvailability);
   };
 
@@ -591,6 +597,28 @@ export default function Schedule() {
               )}
               onChange={(selected) => setAppointmentDuration(selected.value)}
               options={slotOptions}
+              className="w-full"
+            />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">
+            Timezone         
+             </h2>
+
+          <div className="mb-6">
+            <label
+              htmlFor="appointment-duration"
+              className="block font-semibold text-gray-600 mb-2"
+            >
+              Which timezone are you currently in?
+            </label>
+
+            <Select
+              value={timeZones.find(
+                (option) => option.value === selectedTimeZone
+              )}
+              onChange={(selected) => setSelectedTimeZone(selected.value)}
+              options={timeZones}
               className="w-full"
             />
           </div>
@@ -1352,7 +1380,8 @@ export default function Schedule() {
               <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-md">
                 <h2 className="text-xl font-bold mb-4">Booking Details</h2>
                 <p>
-                  <strong>Title:</strong> {selectedBooking.title?selectedBooking.title:"Not Booked"}
+                  <strong>Title:</strong>{" "}
+                  {selectedBooking.title ? selectedBooking.title : "Not Booked"}
                 </p>
                 <p>
                   <strong>Start Time:</strong>{" "}

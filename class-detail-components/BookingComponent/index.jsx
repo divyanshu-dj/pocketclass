@@ -47,6 +47,7 @@ export default function index({ instructorId, classId, classData }) {
   });
   const [mode, setMode] = useState("Individual");
   const [appointmentDuration, setAppointmentDuration] = useState(30);
+  const [timeZone, setTimeZone] = useState("America/Toronto");
   const [groupedSlots, setGroupedSlots] = useState([]);
   const [individualSlots, setIndividualSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -180,6 +181,7 @@ export default function index({ instructorId, classId, classData }) {
         setMinDays(data.minDays || 0);
         setMaxDays(data.maxDays || 30);
         setAppointmentDuration(data.appointmentDuration || 30);
+        setTimeZone(data.timezone || "America/Toronto");
         const date = moment(today);
         setSelectedDate(new Date(date));
       }
@@ -330,7 +332,11 @@ export default function index({ instructorId, classId, classData }) {
 
         const isBooked = bookingsForSlot.length > 0;
 
-        if (classId && bookingsForSlot[0]?.classId && !(bookingsForSlot[0]?.classId === classId)) {
+        if (
+          classId &&
+          bookingsForSlot[0]?.classId &&
+          !(bookingsForSlot[0]?.classId === classId)
+        ) {
         } else if (
           !isBooked ||
           (classId &&
@@ -521,6 +527,9 @@ export default function index({ instructorId, classId, classData }) {
       <div className="flex flex-wrap-reverse gap-2 flex-row items-center justify-between mb-4">
         <div className="text-2xl font-bold text-[#E73F2B]">
           Booking Schedule
+        </div>
+        <div className="text-base text-gray-600 font-bold ">
+          Timezone: {timeZone?(timeZone):"America/Toronto"}
         </div>
       </div>
       <div className="flex flex-grow flex-col lg:flex-row">
@@ -724,6 +733,7 @@ export default function index({ instructorId, classId, classData }) {
               setTimer={setTimer}
               mode={selectedSlot.classId ? "Group" : "Individual"}
               classData={classData}
+              timeZone={timeZone}
             />
           </Elements>
         </div>
@@ -777,6 +787,7 @@ const CheckoutForm = ({
   setTimer,
   mode,
   classData,
+  timeZone,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -831,13 +842,8 @@ const CheckoutForm = ({
     });
 
     if (!error && paymentIntent?.status === "succeeded") {
+      // Get Meeting Link, if Mode is Online
       const bookingDocRef = doc(db, "Bookings", bookingRef);
-      await updateDoc(bookingDocRef, {
-        status: "Confirmed",
-        expiry: null,
-        paymentIntentId: paymentIntent.id,
-        paymentStatus: "Paid",
-      });
 
       const bookingSnapshot = await getDoc(bookingDocRef);
       const bookingData = bookingSnapshot.data();
@@ -848,8 +854,43 @@ const CheckoutForm = ({
       const instructorRef = doc(db, "Users", bookingData.instructor_id);
       const instructorSnapshot = await getDoc(instructorRef);
       const instructorData = instructorSnapshot.data();
+      let meetingLink = null;
+      if (classData.Mode === "Online") {
+        try {
+          meetingLink = await fetch("/api/generateMeetLink", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              className: classData.Name,
+              startTime: new Date(`${date}T${startTime}`).toISOString(),
+              endTime: new Date(`${date}T${endTime}`).toISOString(),
+              instructorEmail: instructorData?.email,
+              studentEmail: user?.email,
+              timeZone: timeZone,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to generate meeting link");
+              }
+              return response.json();
+            })
+            .then((data) => data?.meetLink);
+        } catch (error) {
+          console.error("Error generating meeting link:", error);
+        }
+      }
+      await updateDoc(bookingDocRef, {
+        status: "Confirmed",
+        expiry: null,
+        paymentIntentId: paymentIntent.id,
+        meetingLink: meetingLink ? meetingLink : "",
+        paymentStatus: "Paid",
+        timeZone: timeZone ? timeZone : "America/Toronto",
+      });
 
-      // Combine both emails
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
 
       const startDateTime = new Date(`${date}T${startTime}`).toISOString();
@@ -864,13 +905,14 @@ CALSCALE:GREGORIAN
 BEGIN:VEVENT
 SUMMARY:${classData.Name}
 DESCRIPTION:Booking confirmed for the class ${classData.Name}
-DTSTART:${startDateTime.replace(/-|:|\.\d+/g, "")}
-DTEND:${endDateTime.replace(/-|:|\.\d+/g, "")}
+DTSTART;TZID=${timeZone ? timeZone : "America/Toronto"}:${startDateTime.replace(/-|:|\.\d+/g, "")}
+DTEND;TZID=${timeZone ? timeZone : "America/Toronto"}:${endDateTime.replace(/-|:|\.\d+/g, "")}
 LOCATION:${location}
 ORGANIZER;CN=${instructorData.firstName} ${
         instructorData.lastName
       }:MAILTO:${organizer}
 STATUS:CONFIRMED
+${meetingLink ? `MEETING:${meetingLink}` : ""}
 END:VEVENT
 END:VCALENDAR
     `.trim();
@@ -902,11 +944,23 @@ END:VCALENDAR
             <td style="padding: 8px;">${date + "/" + endTime}</td>
           </tr>
           <tr>
+            <td style="padding: 8px;"><strong>Time Zone:</strong></td>
+            <td style="padding: 8px;">${timeZone?timeZone:"America/Toronto"}</td>
+          </tr>
+          <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
             <td style="padding: 8px;">${
               mode === "Group" ? classData.groupPrice : classData.Price
             }</td>
           </tr>
+          ${
+            meetingLink
+              ? `<tr>
+            <td style="padding: 8px;"><strong>Meeting Link:</strong></td>
+            <td style="padding: 8px;"><a href="${meetingLink}">${meetingLink}</a></td>
+          </tr>`
+              : ""
+          }
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
         <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
