@@ -453,7 +453,7 @@ export default function UpdateClass() {
                   onChange={(e) => setForm({ ...form, Mode: e.target.value })}
                 >
                   <option value="Online">Online</option>
-                  <option value="Offline">Offline</option>
+                  <option value="Offline">In Person</option>
                 </select>
               </div>
             </div>

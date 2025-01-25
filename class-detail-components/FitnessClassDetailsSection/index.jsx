@@ -16,7 +16,8 @@ import {
   onSnapshot,
   collection,
 } from "firebase/firestore";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { AiFillHeart, AiOutlineHeart, AiOutlineMan } from "react-icons/ai";
+import {UserIcon} from '@heroicons/react/solid'
 import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
 
@@ -209,6 +210,15 @@ function FitnessClassDetailsSection({
                   <SvgIcon3 className="w-5 h-5 text-[#7d797a] flex grow-0 shrink-0 basis-auto" />
                   <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
                     ${classData?.groupPrice + "-" + classData?.Price|| "0"} per hour
+                  </p>
+                </div>
+                <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
+                  {/* Boces to show if class in Online or In Person */}
+                  <p className={`[font-family:'DM_Sans',sans-serif] border border-[#7d797a] flex flex-row items-center justify-center ${classData?.Mode === "Online" ? "text-green-500" : "text-[#7d797a]"} px-2 rounded-lg text-sm font-semibold text-[#7d797a] grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0`}>
+                    {/* Man Icon for In_Person and a Dot for Online */}
+                    <span className={`mr-2 ${classData?.Mode === "Online"?"":"hidden"}`}>{classData?.Mode === "Online" ? "🟢" : "🔵"}</span>
+                    <span className={`mr-2 ${classData?.Mode === "Online"?"hidden":""}`}><UserIcon className="w-4 h-4 flex grow-0 shrink-0 basis-auto"/></span>
+                    {classData?.Mode === "Online" ? "Online" : "In-Person"}
                   </p>
                 </div>
               </div>
