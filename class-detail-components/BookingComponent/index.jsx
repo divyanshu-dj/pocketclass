@@ -326,12 +326,12 @@ export default function index({ instructorId, classId, classData }) {
       individualSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
       setGroupedSlots(groupSlots);
-      setIndividualSlots(individualSlots); 
+      setIndividualSlots(individualSlots);
     };
 
     const splitSlots = (start, end, dateStr, classId) => {
       const slotStart = moment.utc(start, "HH:mm");
-      const slotEnd = moment.utc(end, "HH:mm"); 
+      const slotEnd = moment.utc(end, "HH:mm");
       const slots = [];
 
       while (slotStart.isBefore(slotEnd)) {
@@ -869,6 +869,15 @@ const CheckoutForm = ({
       const instructorSnapshot = await getDoc(instructorRef);
       const instructorData = instructorSnapshot.data();
       let meetingLink = null;
+
+      const startDateTime = moment
+        .utc(`${date} ${startTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
+      const organizer = instructorData.email;
+      const location = classData.Address || "Online";
+      const endDateTime = moment
+        .utc(`${date} ${endTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
       if (classData.Mode === "Online") {
         if (mode === "Group") {
           const querySnapshot = await getDocs(
@@ -911,8 +920,8 @@ const CheckoutForm = ({
               },
               body: JSON.stringify({
                 className: classData.Name,
-                startTime: new Date(`${date}T${startTime}`).toISOString(),
-                endTime: new Date(`${date}T${endTime}`).toISOString(),
+                startTime: startDateTime,
+                endTime: endDateTime,
                 instructorEmail: instructorData?.email,
                 studentEmail: user?.email,
                 timeZone: timeZone,
@@ -940,15 +949,6 @@ const CheckoutForm = ({
       });
 
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
-
-      const startDateTime = moment
-        .utc(`${date} ${startTime}`)
-        .format("YYYY-MM-DDTHH:mm:ss");
-      const organizer = instructorData.email;
-      const location = classData.Address || "Online";
-      const endDateTime = moment
-        .utc(`${date} ${endTime}`)
-        .format("YYYY-MM-DDTHH:mm:ss");
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
