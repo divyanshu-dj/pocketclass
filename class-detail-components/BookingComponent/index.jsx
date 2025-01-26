@@ -29,7 +29,11 @@ import {
 } from "@stripe/react-stripe-js";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { use } from "react";
-import { ChevronLeftIcon, ChevronRightIcon, UserIcon } from "@heroicons/react/solid";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  UserIcon,
+} from "@heroicons/react/solid";
 import { set } from "date-fns";
 
 const stripePromise = loadStripe(
@@ -926,11 +930,15 @@ const CheckoutForm = ({
       });
 
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
-    
-      const startDateTime = moment.utc(`${date} ${startTime}`).format("YYYY-MM-DDTHH:mm:ss");
+
+      const startDateTime = moment
+        .utc(`${date} ${startTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
       const organizer = instructorData.email;
       const location = classData.Address || "Online";
-      const endDateTime = moment.utc(`${date} ${endTime}`).format("YYYY-MM-DDTHH:mm:ss");
+      const endDateTime = moment
+        .utc(`${date} ${endTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
@@ -939,25 +947,48 @@ BEGIN:VEVENT
 SUMMARY:${classData.Name}
 DESCRIPTION:Booking confirmed for the class ${classData.Name}
 TZID:${timeZone || "America/Toronto"}
-DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, '')}
+DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, "")}
 X-LIC-LOCATION:${timeZone || "America/Toronto"}
 DTSTART;TZID=${timeZone || "America/Toronto"}:${formatDateTime(startDateTime)}
 DTEND;TZID=${timeZone || "America/Toronto"}:${formatDateTime(endDateTime)}
 LOCATION:${location}
-ORGANIZER;CN=${instructorData.firstName} ${instructorData.lastName}:MAILTO:${organizer}
+ORGANIZER;CN=${instructorData.firstName} ${
+        instructorData.lastName
+      }:MAILTO:${organizer}
 STATUS:CONFIRMED
 ${meetingLink ? `X-GOOGLE-CONFERENCE:${meetingLink}` : ""}
 END:VEVENT
 END:VCALENDAR`.trim();
 
-function formatDateTime(dateTimeString) {
-  const date = moment.utc(dateTimeString);
-  const formattedDate = date.format("YYYYMMDD");
-  const formattedTime = date.format("HHmmss");
-  return `${formattedDate}T${formattedTime}`;
-}
+      function formatDateTime(dateTimeString) {
+        const date = moment.utc(dateTimeString);
+        const formattedDate = date.format("YYYYMMDD");
+        const formattedTime = date.format("HHmmss");
+        return `${formattedDate}T${formattedTime}`;
+      }
       // HTML content for the email
       const htmlContent = `
+      <div>
+
+      ${
+        meetingLink
+          ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+                Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${
+        instructorData.lastName}</strong>.
+              </p>
+              <p style="font-size: 14px; color: #5f5f5f; margin-bottom: 10px;">Meeting Link: <a href="${meetingLink}" style="color: #5f5f5f; text-decoration: none;">${meetingLink}</a></p>
+              <a href="${meetingLink}" style="text-decoration: none; display: inline-block; background-color: #E73F2B; color: white; padding: 10px 20px; border-radius: 5px; font-size: 14px; margin-top: 5px; margin-bottom: 5px;">Join Meeting</a>
+              <p style="font-size: 14px; color: black; font-weight: bold; margin-bottom: 8px; margin-top: 10px;">Guest List:</p>
+              <ul style="list-style-type: disc; margin-left: 20px; padding-left: 0;">
+                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Instructor: ${instructorData.firstName} ${
+        instructorData.lastName
+      } (${instructorData.email})</li>
+                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Student: ${user?.email}</li>
+              </ul>
+            </div>`
+          : ""
+      }
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
@@ -1005,6 +1036,7 @@ function formatDateTime(dateTimeString) {
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
         <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
+      </div>
       </div>
     `;
 
