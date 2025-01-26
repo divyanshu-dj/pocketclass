@@ -18,7 +18,7 @@ import {
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
-import moment from "moment";
+import moment from "moment-timezone";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -249,9 +249,16 @@ export default function index({ instructorId, classId, classData }) {
       const { generalAvailability, adjustedAvailability } = schedule;
       if (!selectedDate) return;
 
-      const minDate = moment().add(minDays, "hours").startOf("day");
-      const minTime = moment().add(minDays, "hours").format("HH:mm");
-      const maxDate = moment().add(maxDays, "days").endOf("day");
+      const minDate = moment()
+        .tz(timeZone)
+        .add(minDays, "hours")
+        .startOf("day");
+      const minTime = moment()
+        .tz(timeZone)
+        .add(minDays, "hours")
+        .format("HH:mm");
+
+      const maxDate = moment().tz(timeZone).add(maxDays, "days").endOf("day");
       const dateStr = moment(selectedDate).format("YYYY-MM-DD");
 
       if (
@@ -315,13 +322,16 @@ export default function index({ instructorId, classId, classData }) {
         }
       }
 
-      setGroupedSlots(groupSlots); // Set group slots for the selected date
-      setIndividualSlots(individualSlots); // Set individual slots for the selected date
+      groupSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+      individualSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+      setGroupedSlots(groupSlots);
+      setIndividualSlots(individualSlots);
     };
 
     const splitSlots = (start, end, dateStr, classId) => {
-      const slotStart = moment.utc(start, "HH:mm"); // Normalize start to UTC
-      const slotEnd = moment.utc(end, "HH:mm"); // Normalize end to UTC
+      const slotStart = moment.utc(start, "HH:mm");
+      const slotEnd = moment.utc(end, "HH:mm");
       const slots = [];
 
       while (slotStart.isBefore(slotEnd)) {
@@ -859,6 +869,15 @@ const CheckoutForm = ({
       const instructorSnapshot = await getDoc(instructorRef);
       const instructorData = instructorSnapshot.data();
       let meetingLink = null;
+
+      const startDateTime = moment
+        .utc(`${date} ${startTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
+      const organizer = instructorData.email;
+      const location = classData.Address || "Online";
+      const endDateTime = moment
+        .utc(`${date} ${endTime}`)
+        .format("YYYY-MM-DDTHH:mm:ss");
       if (classData.Mode === "Online") {
         if (mode === "Group") {
           const querySnapshot = await getDocs(
@@ -901,8 +920,8 @@ const CheckoutForm = ({
               },
               body: JSON.stringify({
                 className: classData.Name,
-                startTime: new Date(`${date}T${startTime}`).toISOString(),
-                endTime: new Date(`${date}T${endTime}`).toISOString(),
+                startTime: startDateTime,
+                endTime: endDateTime,
                 instructorEmail: instructorData?.email,
                 studentEmail: user?.email,
                 timeZone: timeZone,
@@ -930,15 +949,6 @@ const CheckoutForm = ({
       });
 
       const recipientEmails = `${user?.email}, ${instructorData.email}`;
-
-      const startDateTime = moment
-        .utc(`${date} ${startTime}`)
-        .format("YYYY-MM-DDTHH:mm:ss");
-      const organizer = instructorData.email;
-      const location = classData.Address || "Online";
-      const endDateTime = moment
-        .utc(`${date} ${endTime}`)
-        .format("YYYY-MM-DDTHH:mm:ss");
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
@@ -974,16 +984,13 @@ END:VCALENDAR`.trim();
         meetingLink
           ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
               <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
-                Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${
-        instructorData.lastName}</strong>.
+                Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${instructorData.lastName}</strong>.
               </p>
               <p style="font-size: 14px; color: #5f5f5f; margin-bottom: 10px;">Meeting Link: <a href="${meetingLink}" style="color: #5f5f5f; text-decoration: none;">${meetingLink}</a></p>
               <a href="${meetingLink}" style="text-decoration: none; display: inline-block; background-color: #E73F2B; color: white; padding: 10px 20px; border-radius: 5px; font-size: 14px; margin-top: 5px; margin-bottom: 5px;">Join Meeting</a>
               <p style="font-size: 14px; color: black; font-weight: bold; margin-bottom: 8px; margin-top: 10px;">Guest List:</p>
               <ul style="list-style-type: disc; margin-left: 20px; padding-left: 0;">
-                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Instructor: ${instructorData.firstName} ${
-        instructorData.lastName
-      } (${instructorData.email})</li>
+                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Instructor: ${instructorData.firstName} ${instructorData.lastName} (${instructorData.email})</li>
                 <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Student: ${user?.email}</li>
               </ul>
             </div>`
