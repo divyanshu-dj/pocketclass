@@ -178,7 +178,7 @@ function FitnessClassDetailsSection({
                   ({currentClassReview?.length || 0} reviews)
                 </p>
               </div>
-              <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-[20px] md:gap-[35px] grow-0 shrink-0 basis-auto">
+              <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-[20px] md:gap-[35px] grow-0 shrink-0 basis-auto max-w-[100vw]">
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                     <img
@@ -214,7 +214,7 @@ function FitnessClassDetailsSection({
                 </div>
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   {/* Boces to show if class in Online or In Person */}
-                  <p className={`[font-family:'DM_Sans',sans-serif] border border-[#7d797a] flex flex-row items-center justify-center ${classData?.Mode === "Online" ? "text-green-500" : "text-[#7d797a]"} px-2 rounded-lg text-sm font-semibold text-[#7d797a] grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0`}>
+                  <p className={`[font-family:'DM_Sans',sans-serif] border border-[#7d797a] flex flex-row items-center justify-center ${classData?.Mode === "Online" ? "text-green-500" : "text-[#7d797a]"} px-2 rounded-lg text-sm text-[#7d797a] grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0`}>
                     {/* Man Icon for In_Person and a Dot for Online */}
                     <span className={`mr-2 ${classData?.Mode === "Online"?"":"hidden"}`}>{classData?.Mode === "Online" ? "🟢" : "🔵"}</span>
                     <span className={`mr-2 ${classData?.Mode === "Online"?"hidden":""}`}><UserIcon className="w-4 h-4 flex grow-0 shrink-0 basis-auto"/></span>
