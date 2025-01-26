@@ -39,11 +39,13 @@ export default async function handler(req, res) {
           },
         },
         attendees: [
-          { email: studentEmail },
-          { email: instructorEmail },
+          { email: studentEmail, self: true },
+          { email: instructorEmail, self: true, organizer: true },
         ],
         guestsCanInviteOthers: true, 
         guestsCanSeeOtherGuests: true,
+        anyoneCanAddSelf: true,
+        guestsCanModify: true,
       };
 
       const response = await calendar.events.insert({
