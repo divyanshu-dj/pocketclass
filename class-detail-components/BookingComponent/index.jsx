@@ -807,6 +807,7 @@ const CheckoutForm = ({
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const sendEmail = async (
     targetEmails,
     targetSubject,
@@ -1077,6 +1078,7 @@ END:VCALENDAR`.trim();
       setStripeOptions(null);
       setLoading(false);
       toast.success("Booking confirmed!");
+      router.push(`/confirmBooking/${bookingRef}`);
     } else {
       toast.error(error?.message || "Payment failed!");
     }

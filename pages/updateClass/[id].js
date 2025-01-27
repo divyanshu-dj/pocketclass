@@ -266,6 +266,19 @@ export default function UpdateClass() {
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
+                <label className="text-lg font-bold">Mode of Class</label>
+                <select
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  value={form.Mode}
+                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
+                >
+                  <option value="Online">Online</option>
+                  <option value="Offline">In Person</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
                 <label className="text-lg font-bold">Description</label>
                 <textarea
                   required
@@ -442,19 +455,6 @@ export default function UpdateClass() {
                     setForm({ ...form, FunFact: e.target.value })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Mode of Class</label>
-                <select
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  value={form.Mode}
-                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
-                >
-                  <option value="Online">Online</option>
-                  <option value="Offline">In Person</option>
-                </select>
               </div>
             </div>
             <div className="w-full max-w-[750px]">
