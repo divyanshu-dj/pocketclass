@@ -30,6 +30,22 @@ import Image from "next/image";
 import { set } from "date-fns";
 import LocationMap from "../components/LocationMap";
 import NewHeader from "../components/NewHeader";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -81,69 +97,79 @@ export default function CreateClass() {
       toast.error("Please fill all fields");
       return;
     }
+
     setLoading(true);
-    let images = [];
-    let imagesURL = [];
-    const addingClass = await addDoc(collection(db, "classes"), {
-      ...form,
-      Images: imagesURL,
-      classCreator: user?.uid,
-      Packages: packages,
-    });
-    console.log(form.Images);
-    form.Images.forEach((img) => {
-      const fileRef = ref(
-        storage,
-        `images/${
+    try {
+      let imagesURL = [];
+
+      // Add initial class document to Firestore
+      const addingClass = await addDoc(collection(db, "classes"), {
+        ...form,
+        Images: imagesURL,
+        classCreator: user?.uid,
+        Packages: packages,
+      });
+
+      // Upload images and get URLs in order
+      const uploadPromises = form.Images.map((img, index) => {
+        const fileName = `${
           Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
           "-" +
           img.name
-        }`
-      );
-
-      uploadBytes(fileRef, img).then(async (res) => {
-        getDownloadURL(ref(storage, res.metadata.fullPath)).then(
-          async (url) => {
-            await updateDoc(doc(db, "classes", addingClass.id), {
-              Images: arrayUnion(url),
-            });
-          }
+        }`;
+        const fileRef = ref(storage, `images/${fileName}`);
+        return uploadBytes(fileRef, img).then((res) =>
+          getDownloadURL(ref(storage, res.metadata.fullPath))
         );
       });
-    });
 
-    setForm({
-      Name: "",
-      Category: "",
-      SubCategory: "",
-      Address: "",
-      Price: "",
-      Pricing: "",
-      Mode: "Offline",
-      Images: [],
-      About: "",
-      Experience: "",
-      Description: "",
-      FunFact: "",
-      TopRated: false,
-      classCreator: "",
-      groupPrice: "",
-      groupSize: "",
-      status: "pending",
-    });
-    setPackages([
-      {
+      // Wait for all uploads to complete
+      imagesURL = await Promise.all(uploadPromises);
+
+      // Update the class document with ordered URLs
+      await updateDoc(doc(db, "classes", addingClass.id), {
+        Images: imagesURL,
+      });
+
+      // Reset form
+      setForm({
         Name: "",
-        Price: 0,
-        num_sessions: 0,
-        Discount: 0,
-      },
-    ]);
-    setPreviewImages([]);
-    setUploadedFiles([]);
-    toast.success("Class Added");
-    setLoading(false);
+        Category: "",
+        SubCategory: "",
+        Address: "",
+        Price: "",
+        Pricing: "",
+        Mode: "Offline",
+        Images: [],
+        About: "",
+        Experience: "",
+        Description: "",
+        FunFact: "",
+        TopRated: false,
+        classCreator: "",
+        groupPrice: "",
+        groupSize: "",
+        status: "pending",
+      });
+      setPackages([
+        {
+          Name: "",
+          Price: 0,
+          num_sessions: 0,
+          Discount: 0,
+        },
+      ]);
+      setPreviewImages([]);
+      setUploadedFiles([]);
+      toast.success("Class Added");
+    } catch (error) {
+      console.error("Error adding class:", error);
+      toast.error("Failed to add class. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   const [packages, setPackages] = useState([
     {
       Name: "",
@@ -168,19 +194,22 @@ export default function CreateClass() {
 
   const RemoveImg = (e, name) => {
     e.preventDefault();
-
-    setPreviewImages(previewImages.filter((img) => img.name !== name));
-    setForm({
-      ...form,
-      Images: form.Images.filter((file) => file.name !== name),
-    });
-
-    // console.log("Updated form.Images:", form.Images);
-    // console.log("Updated previewImages:", previewImages);
+    e.stopPropagation();
+    
+    // Immediately update all three states
+    const filteredImages = previewImages.filter((img) => img.name !== name);
+    const filteredFiles = uploadedFiles.filter((file) => file.name !== name);
+    
+    setPreviewImages(filteredImages);
+    setUploadedFiles(filteredFiles);
+    setForm(prev => ({
+      ...prev,
+      Images: filteredFiles
+    }));
   };
 
   const onDrop = (acceptedFiles) => {
-    setUploadedFiles(acceptedFiles);
+    setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
 
     const previews = acceptedFiles.map((file) => {
       const reader = new FileReader();
@@ -233,6 +262,86 @@ export default function CreateClass() {
     if (!userLoading && !user) goToMainPage();
   }, [userLoading, user]);
 
+  const SortableImage = ({ image, onRemove }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+      id: image.name
+    });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div 
+        ref={setNodeRef} 
+        style={style}
+        className="flex justify-center relative touch-none"
+        {...attributes} 
+        {...listeners}
+      >
+        <button
+          type="button"
+          className="text-logo-red absolute top-2 right-2 z-10"
+          onClick={(e) => RemoveImg(e, image.name)}
+          onMouseDown={(e) => {
+            e.stopPropagation();  // Prevent drag start when clicking delete
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="#e73f2b"
+            viewBox="0 0 30 30"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5 mr-1"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+            ></path>
+          </svg>
+        </button>
+        <img
+          src={image.src}
+          alt={`Preview ${image.name}`}
+          className="w-full h-48 object-cover rounded-lg border"
+        />
+      </div>
+    );
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      const oldIndex = previewImages.findIndex((img) => img.name === active.id);
+      const newIndex = previewImages.findIndex((img) => img.name === over.id);
+
+      const newPreviewImages = arrayMove(previewImages, oldIndex, newIndex);
+      setPreviewImages(newPreviewImages);
+
+      const newUploadedFiles = newPreviewImages
+        .map((item) => uploadedFiles.find((file) => file.name === item.name))
+        .filter(Boolean);
+      setUploadedFiles(newUploadedFiles);
+
+      setForm((prev) => ({
+        ...prev,
+        Images: newUploadedFiles,
+      }));
+      setPreviewImages(newPreviewImages);
+    }
+  };
+
   return userLoading || !user ? (
     <section className="flex justify-center items-center min-h-[100vh]">
       <Image
@@ -263,7 +372,7 @@ export default function CreateClass() {
         </div>
 
         <div className="formContainer mt-10">
-          <form className="flex gap-6 flex-col justify-center items-center">
+          <form onSubmit={addClass} className="flex gap-6 flex-col justify-center items-center">
             {/* <div className="text-3xl w-full max-w-[750px] font-bold">
               About Class
             </div> */}
@@ -324,6 +433,20 @@ export default function CreateClass() {
                           {subCategory.name}
                         </option>
                       ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Mode of Class</label>
+                <select
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  value={form.Mode}
+                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
+                >
+                  <option value="Online">Online</option>
+                  <option value="Offline">In Person</option>
                 </select>
               </div>
             </div>
@@ -390,7 +513,9 @@ export default function CreateClass() {
               </div>
 
               <div className="flex-grow">
-                <label className="text-lg font-bold">Group Price Per Person</label>
+                <label className="text-lg font-bold">
+                  Group Price Per Person
+                </label>
                 <input
                   required
                   name="groupPrice"
@@ -432,38 +557,26 @@ export default function CreateClass() {
                 </div>
               </div>
             </div>
-            <div className="w-full max-w-[750px] grid grid-cols-2 gap-4 mt-4">
-              {previewImages.map((preview, idx) => (
-                <div key={idx} className="flex justify-center relative">
-                  <button
-                    className="text-logo-red absolute top-2 right-2"
-                    onClick={(e) => RemoveImg(e, preview.name)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      x="0px"
-                      y="0px"
-                      width="25"
-                      height="25"
-                      viewBox="0 0 30 30"
-                    >
-                      <path
-                        fill="#e73f2b"
-                        d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
-                      ></path>
-                    </svg>
-                  </button>
-                  <img
-                    src={preview.src}
-                    alt={`Preview ${idx}`}
-                    className="w-full h-48 object-cover rounded-lg border"
-                  />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={previewImages.map((img) => img.name)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid md:grid-cols-2 grid-cols-1 w-full max-w-[750px] gap-4 mt-4">
+                  {previewImages.map((preview) => (
+                    <SortableImage
+                      key={preview.name}
+                      image={preview}
+                      onRemove={RemoveImg}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
-            {/* <div className="text-xl w-full max-w-[750px] font-bold">
-              About Instructor
-            </div> */}
+              </SortableContext>
+            </DndContext>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
                 <label className="text-lg font-bold">Experience</label>
@@ -505,19 +618,6 @@ export default function CreateClass() {
                     setForm({ ...form, FunFact: e.target.value })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Mode of Class</label>
-                <select
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  value={form.Mode}
-                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
-                >
-                  <option value="Online">Online</option>
-                  <option value="Offline">In Person</option>
-                </select>
               </div>
             </div>
 

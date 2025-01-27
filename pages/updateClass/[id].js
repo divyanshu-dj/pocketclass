@@ -21,6 +21,10 @@ import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import NewHeader from "../../components/NewHeader";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function UpdateClass() {
   const [form, setForm] = useState({
@@ -84,13 +88,15 @@ export default function UpdateClass() {
     const docRef = doc(db, "classes", id);
 
     try {
+      // First update with existing data and loaded images
       await updateDoc(docRef, {
         ...form,
         Images: loadedImgs,
         Packages: packages,
       });
 
-      uploadedFiles.forEach((img) => {
+      // Keep track of upload promises
+      const uploadPromises = uploadedFiles.map(async (img, index) => {
         const fileRef = ref(
           storage,
           `images/${
@@ -100,20 +106,34 @@ export default function UpdateClass() {
           }`
         );
 
-        uploadBytes(fileRef, img).then(async (res) => {
-          getDownloadURL(ref(storage, res.metadata.fullPath)).then(
-            async (url) => {
-              await updateDoc(doc(db, "classes", id), {
-                Images: arrayUnion(url),
-              });
-            }
-          );
-        });
+        const uploadResult = await uploadBytes(fileRef, img);
+        const url = await getDownloadURL(ref(storage, uploadResult.metadata.fullPath));
+        return url;
+      });
+
+      // Wait for all uploads to complete
+      const newImageUrls = await Promise.all(uploadPromises);
+
+      // Get the final image order from previewImages
+      const finalImageOrder = previewImages.map(img => {
+        if (loadedImgs.includes(img.src)) {
+          return img.src; // Return URL for previously loaded images
+        } else {
+          // Find the corresponding new URL for uploaded files
+          const fileIndex = uploadedFiles.findIndex(file => file.name === img.name);
+          return fileIndex !== -1 ? newImageUrls[fileIndex] : null;
+        }
+      }).filter(Boolean);
+
+      // Update with final image order
+      await updateDoc(docRef, {
+        Images: finalImageOrder
       });
 
       toast.success("Class updated successfully");
       router.push("/");
     } catch (err) {
+      console.error(err);
       toast.error("Error updating class");
     }
     setLoading(false);
@@ -121,27 +141,37 @@ export default function UpdateClass() {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
-      setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
-      setPreviewImages((prev) => [
-        ...prev,
-        ...acceptedFiles.map((file) => ({ src: URL.createObjectURL(file) })),
-      ]);
+      const newPreviews = acceptedFiles.map(file => ({
+        src: URL.createObjectURL(file),
+        name: file.name
+      }));
+      
+      setUploadedFiles(prev => [...prev, ...acceptedFiles]);
+      setPreviewImages(prev => [...prev, ...newPreviews]);
     },
+    accept: "image/*",
+    multiple: true
   });
 
-  const RemoveImg = (e, name) => {
+  const RemoveImg = (e, identifier) => {
     e.preventDefault();
+    e.stopPropagation();
+    const isLoadedImage = loadedImgs.includes(identifier);
 
-    setPreviewImages(previewImages.filter((img) => img.name !== name));
-    setLoadedImgs(loadedImgs.filter((img) => img !== name));
-    setForm({
-      ...form,
-      Images: form.Images.filter((file) => file.name !== name),
-    });
-
-    // console.log("Updated form.Images:", form.Images);
-    // console.log("Updated previewImages:", previewImages);
+    if (isLoadedImage) {
+      setLoadedImgs(loadedImgs.filter(img => img !== identifier));
+    } else {
+      setUploadedFiles(uploadedFiles.filter(file => file.name !== identifier));
+    }
+    setPreviewImages(previewImages.filter(img => (img.name || img.src) !== identifier));
+    setForm(prev => ({
+      ...prev,
+      Images: isLoadedImage 
+        ? prev.Images.filter(img => img !== identifier)
+        : prev.Images.filter(file => file.name !== identifier)
+    }));
   };
+
   const handleInputChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -169,6 +199,87 @@ export default function UpdateClass() {
 
   const inputStyle =
     "border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red";
+
+  const SortableImage = ({ image, onRemove }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+      id: image.name || image.src // Use src as fallback for previously uploaded images
+    });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div 
+        ref={setNodeRef} 
+        style={style}
+        className="flex justify-center relative touch-none"
+        {...attributes} 
+        {...listeners}
+      >
+        <button
+          type="button"
+          className="text-logo-red absolute top-2 right-2 z-10"
+          onClick={(e) => onRemove(e, image.name || image.src)}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            x="0px"
+            y="0px"
+            width="25"
+            height="25"
+            viewBox="0 0 30 30"
+          >
+            <path
+              fill="#e73f2b"
+              d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+            ></path>
+          </svg>
+        </button>
+        <img
+          src={image.src}
+          alt={`Preview ${image.name || 'image'}`}
+          className="w-full h-48 object-cover rounded-lg border"
+        />
+      </div>
+    );
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      const oldIndex = previewImages.findIndex((img) => (img.name || img.src) === active.id);
+      const newIndex = previewImages.findIndex((img) => (img.name || img.src) === over.id);
+      
+      const newPreviewImages = arrayMove(previewImages, oldIndex, newIndex);
+      setPreviewImages(newPreviewImages);
+      
+      // Update loadedImgs order
+      const newLoadedImgs = newPreviewImages
+        .filter(img => loadedImgs.includes(img.src))
+        .map(img => img.src);
+      setLoadedImgs(newLoadedImgs);
+      
+      // Update uploadedFiles order
+      const newUploadedFiles = newPreviewImages
+        .filter(img => uploadedFiles.some(file => file.name === img.name))
+        .map(img => uploadedFiles.find(file => file.name === img.name))
+        .filter(Boolean);
+      setUploadedFiles(newUploadedFiles);
+    }
+  };
 
   return userLoading || !user ? (
     <section className="flex justify-center items-center min-h-[100vh]">
@@ -261,6 +372,19 @@ export default function UpdateClass() {
                           {subCategory.name}
                         </option>
                       ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <div className="flex-grow">
+                <label className="text-lg font-bold">Mode of Class</label>
+                <select
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  value={form.Mode}
+                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
+                >
+                  <option value="Online">Online</option>
+                  <option value="Offline">In Person</option>
                 </select>
               </div>
             </div>
@@ -369,35 +493,26 @@ export default function UpdateClass() {
                 </div>
               </div>
             </div>
-            <div className="w-full max-w-[750px] grid grid-cols-2 gap-4 mt-4">
-              {previewImages.map((preview, idx) => (
-                <div key={idx} className="flex justify-center relative">
-                  <button
-                    className="text-logo-red absolute top-2 right-2"
-                    onClick={(e) => RemoveImg(e, preview.name)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      x="0px"
-                      y="0px"
-                      width="25"
-                      height="25"
-                      viewBox="0 0 30 30"
-                    >
-                      <path
-                        fill="#e73f2b"
-                        d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
-                      ></path>
-                    </svg>
-                  </button>
-                  <img
-                    src={preview.src}
-                    alt={`Preview ${idx}`}
-                    className="w-full h-48 object-cover rounded-lg border"
-                  />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext 
+                items={previewImages.map(img => img.name || img.src)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid md:grid-cols-2 grid-cols-1 w-full max-w-[750px] gap-4 mt-4 ">
+                  {previewImages.map((preview) => (
+                    <SortableImage 
+                      key={preview.name || preview.src}
+                      image={preview}
+                      onRemove={RemoveImg}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
             {/* <div className="text-xl w-full max-w-[750px] font-bold">
               About Instructor
             </div> */}
@@ -442,19 +557,6 @@ export default function UpdateClass() {
                     setForm({ ...form, FunFact: e.target.value })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Mode of Class</label>
-                <select
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  value={form.Mode}
-                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
-                >
-                  <option value="Online">Online</option>
-                  <option value="Offline">In Person</option>
-                </select>
               </div>
             </div>
             <div className="w-full max-w-[750px]">
