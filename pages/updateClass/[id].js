@@ -139,18 +139,48 @@ export default function UpdateClass() {
     setLoading(false);
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, fileRejections } = useDropzone({
     onDrop: (acceptedFiles) => {
-      const newPreviews = acceptedFiles.map(file => ({
+      // Validate each file before creating object URL
+      const validFiles = acceptedFiles.filter(file => {
+        // Additional validation if needed
+        const isValid = file.type.startsWith('image/');
+        if (!isValid) {
+          toast.error(`${file.name} is not a valid image file`);
+        }
+        return isValid;
+      });
+
+      const newPreviews = validFiles.map(file => ({
         src: URL.createObjectURL(file),
         name: file.name
       }));
       
-      setUploadedFiles(prev => [...prev, ...acceptedFiles]);
+      setUploadedFiles(prev => [...prev, ...validFiles]);
       setPreviewImages(prev => [...prev, ...newPreviews]);
     },
-    accept: "image/*",
-    multiple: true
+    accept: {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
+    },
+    maxSize: 5 * 1024 * 1024, // 5MB
+    multiple: true,
+    onDropRejected: (fileRejections) => {
+      fileRejections.forEach(({ file, errors }) => {
+        errors.forEach(error => {
+          switch (error.code) {
+            case 'file-too-large':
+              toast.error(`${file.name} is too large. Max size is 5MB`);
+              break;
+            case 'file-invalid-type':
+              toast.error(`${file.name} is not a supported image format`);
+              break;
+            default:
+              toast.error(`Error uploading ${file.name}: ${error.message}`);
+          }
+        });
+      });
+    }
   });
 
   const RemoveImg = (e, identifier) => {
@@ -211,19 +241,27 @@ export default function UpdateClass() {
     };
 
     return (
-      <div 
-        ref={setNodeRef} 
-        style={style}
-        className="flex justify-center relative touch-none"
-        {...attributes} 
-        {...listeners}
-      >
+      <div className="relative">
+        <div 
+          ref={setNodeRef} 
+          style={style}
+          className="flex justify-center touch-none"
+          {...attributes} 
+          {...listeners}
+        >
+          <img
+            src={image.src}
+            alt={`Preview ${image.name || 'image'}`}
+            className="w-full h-48 object-cover rounded-lg border"
+          />
+        </div>
         <button
           type="button"
           className="text-logo-red absolute top-2 right-2 z-10"
-          onClick={(e) => onRemove(e, image.name || image.src)}
-          onMouseDown={(e) => {
+          onClick={(e) => {
             e.stopPropagation();
+            console.log(image);
+            onRemove(e, image.name || image.src)
           }}
         >
           <svg
@@ -240,11 +278,6 @@ export default function UpdateClass() {
             ></path>
           </svg>
         </button>
-        <img
-          src={image.src}
-          alt={`Preview ${image.name || 'image'}`}
-          className="w-full h-48 object-cover rounded-lg border"
-        />
       </div>
     );
   };
