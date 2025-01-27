@@ -276,7 +276,7 @@ export default function CreateClass() {
       <div 
         ref={setNodeRef} 
         style={style}
-        className="flex justify-center relative"
+        className="flex justify-center relative touch-none"
         {...attributes} 
         {...listeners}
       >

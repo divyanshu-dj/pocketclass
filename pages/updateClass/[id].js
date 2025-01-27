@@ -214,7 +214,7 @@ export default function UpdateClass() {
       <div 
         ref={setNodeRef} 
         style={style}
-        className="flex justify-center relative"
+        className="flex justify-center relative touch-none"
         {...attributes} 
         {...listeners}
       >
