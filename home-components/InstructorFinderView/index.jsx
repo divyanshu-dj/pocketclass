@@ -17,6 +17,12 @@ function InstructorFinderView() {
       aboutText: 'Golf Beginner'
     },
     {
+      parentName: 'Kiki',
+      image: '/assets/DJ_Testamonial2.jpg',
+      testimonial: '“I had an absolute blast at the DJ clinic! I’m mixing my own tracks now and feeling more creative than ever. Highly recommend PocketClass to anyone looking to level up in their passion!”',
+      aboutText: 'Aspiring DJ'
+    },
+    {
       parentName: 'Ivan',
       image: '/assets/Yoga_Testamonial.jpg',
       testimonial: '“PocketClass helped me find an amazing yoga session effortlessly! Highly recommend PocketClass for anyone looking to find quality classes!”',
