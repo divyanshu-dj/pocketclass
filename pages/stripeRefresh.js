@@ -1,58 +1,56 @@
-import React, { useEffect } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth ,db} from '../firebaseConfig';
-import { onSnapshot, doc ,getDoc,setDoc} from 'firebase/firestore';
+import React, { useEffect } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "../firebaseConfig";
+import { onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
-import Image from 'next/image';
+import Image from "next/image";
 const StripeRefresh = () => {
   const history = useRouter();
-    const [user]=useAuthState(auth)
+  const [user] = useAuthState(auth);
   useEffect(() => {
     if (user) {
       checkIfStripeAccountExists();
     }
-
   }, [user]);
-const checkIfStripeAccountExists = async () => {
-  const userRef = doc(db, "Users", user.uid);
-  const docSnap = await getDoc(userRef);
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    //set stripeAccountId to the user
-    const onboardingLink = data.stripeOnboardingLink;
-    console.log(onboardingLink);
-    //extract the account id from the onboarding link
-  // Regular expression to match and extract the account ID
-        const regex = /\/acct_(\w+)\//;
-        const match = onboardingLink.match(regex);
 
-        // Check if a match is found
-        if (match && match[1]) {
-        const accountId = 'acct_'+match[1];
-        //get Refreshed onboarding link
-        const response = await fetch('/api/updateOnboardingLinks', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({accountId}),
+  const checkIfStripeAccountExists = async () => {
+    try {
+      const userRef = doc(db, "Users", user.uid);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const accountId = data.stripeAccountId;
+        const email = data.email;
+
+        let link = await fetch("/api/createExternalAccount", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email, accountId: accountId }),
         });
-        const json= await response.json()
-        const onboardingLink = json;
-        const userRef = doc(db, "Users", user.uid);
-        setDoc(userRef, { stripeOnboardingLink: onboardingLink, }, { merge: true }).then(()=>{
-            history.push('/withdraw');
-        }
-        )
+
+        link = await link.json();
+        const onboardingLink = link.onboardingLink;
         window.location.href = onboardingLink;
-        } else {
-        console.error('Account ID not found in the URL');
-        }
-  }}
+      }
+      else{
+        history.push("/");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      alert(error);
+    }
+  };
   return (
     <section className="flex justify-center items-center min-h-[100vh]">
-    <Image priority={true} src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
-</section>
+      <Image
+        priority={true}
+        src="/Rolling-1s-200px.svg"
+        width={"60px"}
+        height={"60px"}
+      />
+    </section>
   );
 };
 

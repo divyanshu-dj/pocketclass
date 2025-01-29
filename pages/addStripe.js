@@ -14,9 +14,12 @@ import {
 } from "firebase/firestore";
 import { useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 const AddStripe = () => {
   const [email, setEmail] = useState("");
   const [user] = useAuthState(auth);
+  const router = useRouter();
+  const [accountId, setAccountId] = useState("");
   useEffect(() => {
     if (user) {
       const getUser = async () => {
@@ -25,61 +28,56 @@ const AddStripe = () => {
         if (userSnap.exists()) {
           const data = userSnap.data();
           setEmail(data.email);
+          setAccountId(data.stripeAccountId);
+        }
+        else{
+          router.push("/");
         }
       };
       getUser();
       setEmail(user.email);
-    }
-    if (user) {
-      const userRef = doc(db, "Users", user.uid);
-      const unsub = onSnapshot(userRef, (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          if (data.stripeAccountId) {
-            console.log("redirecting to stripe onboarding")
-            window.location.href = data.stripeOnboardingLink;
-          }
-          else {
-            console.log("creating stripe account",)
-          }
-        }
-      });
     }
   }, [user]);
   useEffect(() => {
     if (email) {
       createStripeAccount();
     }
-  }
-  , [email]);
+  }, [email]);
   const UpdateStripeLink = async (link) => {
     const userRef = doc(db, "Users", user.uid);
-    return await setDoc(userRef, { stripeOnboardingLink: link }, { merge: true })
-  }
+    return await setDoc(
+      userRef,
+      { stripeAccountId: link },
+      { merge: true }
+    );
+  };
   const createStripeAccount = async () => {
-    if(!email)return
+    if (!email) return;
     // console.log(email)
-    let link=await fetch("/api/createExternalAccount", {
+    let link = await fetch("/api/createExternalAccount", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: email }),
-    })
-    link=await link.json()
-    console.log(link)
-    await UpdateStripeLink(link)
-    window.location.href=link
-    return link
-    
-  }
-
-
+      body: JSON.stringify({ email: email, accountId: accountId }),
+    });
+    link = await link.json();
+    const accountId = link.accountId;
+    const onboardingLink = link.onboardingLink;
+    await UpdateStripeLink(accountId);
+    window.location.href = onboardingLink;
+    return link;
+  };
 
   return (
     <section className="flex justify-center items-center min-h-[100vh]">
-    <Image priority={true} src="/Rolling-1s-200px.svg" width={'60px'} height={"60px"} />
-</section>
+      <Image
+        priority={true}
+        src="/Rolling-1s-200px.svg"
+        width={"60px"}
+        height={"60px"}
+      />
+    </section>
   );
 };
 

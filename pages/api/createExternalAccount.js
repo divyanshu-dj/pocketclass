@@ -1,49 +1,52 @@
-// pages/api/createExternalAccount.js
 import stripe from "../../utils/stripe";
+
 const createStripeAccount = async (email) => {
-  const account = await stripe.accounts.create({
-    type: 'standard',
+  return await stripe.accounts.create({
+    type: "standard",
     country: "CA",
     email: email,
   });
-  return account;
 };
-const generateOnboardingLink = async (accountId) => {
-  let url = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeAdded' : 'https://pocketclass.ca/stripeAdded';
-  let refreshUrl = !(process.env.NODE_ENV === 'DEV') ? 'https://pocketclass.ca/stripeRefresh' : 'https://pocketclass.ca/stripeRefresh';
-  const loginLink = await stripe.accountLinks.create(
-    {account:accountId,
-    
-      return_url: url,
-      type: 'account_onboarding',
-      
-      refresh_url: refreshUrl,
-    }
 
-  );
-  //set payout schedule to manual
-  await stripe.accounts.update(accountId, {
-    settings: {
-      payouts: {
-        schedule: {
-          interval: 'manual',
-        },
-      },
-    },
+const generateOnboardingLink = async (accountId) => {
+  const url = "https://pocketclass.ca/stripeAdded";
+  const refreshUrl = "https://pocketclass.ca/stripeRefresh";
+
+  const loginLink = await stripe.accountLinks.create({
+    account: accountId,
+    return_url: url,
+    type: "account_onboarding",
+    refresh_url: refreshUrl,
   });
 
-  const finalLink=  loginLink.url
-  return finalLink;
-};
-export default async function handler(req, res) {
-  
+  // Set payout schedule to manual
+  await stripe.accounts.update(accountId, {
+    settings: { payouts: { schedule: { interval: "manual" } } },
+  });
 
-  // Create a Stripe account for the user
-  const stripeAccount = await createStripeAccount(req.body.email);
-  //save the stripe account id to the user
-  
-  // Generate onboarding link
-  const onboardingLink = await generateOnboardingLink(stripeAccount.id);
-  // Send the onboarding link to the client
-  res.json(onboardingLink );
+  return loginLink.url;
+};
+
+export default async function handler(req, res) {
+  try {
+    const { email, accountId } = req.body;
+    let stripeAccountId = accountId;
+
+    if (!stripeAccountId) {
+      const stripeAccount = await createStripeAccount(email);
+      stripeAccountId = stripeAccount.id;
+    } else {
+      try {
+        await stripe.accounts.retrieve(stripeAccountId);
+      } catch (error) {
+        const stripeAccount = await createStripeAccount(email);
+        stripeAccountId = stripeAccount.id;
+      }
+    }
+
+    const onboardingLink = await generateOnboardingLink(stripeAccountId);
+    res.json({ accountId: stripeAccountId, onboardingLink });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
