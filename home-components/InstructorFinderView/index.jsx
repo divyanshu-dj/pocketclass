@@ -18,7 +18,7 @@ function InstructorFinderView() {
     },
     {
       parentName: 'Kiki',
-      image: '/assets/DJ_Testamonial2.jpg',
+      image: '/assets/DJ_Testamonial2.JPG',
       testimonial: '“I had an absolute blast at the DJ clinic! I’m mixing my own tracks now and feeling more creative than ever. Highly recommend PocketClass to anyone looking to level up in their passion!”',
       aboutText: 'Aspiring DJ'
     },
