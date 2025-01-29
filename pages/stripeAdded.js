@@ -20,62 +20,42 @@ const StripeAdded = () => {
     try {
       const userRef = doc(db, "Users", user.uid);
       const docSnap = await getDoc(userRef);
-
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const onboardingLink = data.stripeOnboardingLink;
-        const stripeAccountId = data.stripeAccountId;
-
-        if (stripeAccountId) {
+        const accountId = data.stripeAccountId;
+        const payment_enabled = data.payment_enabled;
+        if (payment_enabled) {
           router.push("/withdraw");
           return;
         }
-
-        if (onboardingLink) {
-          const regex = /\/acct_(\w+)\//;
-          const match = onboardingLink.match(regex);
-
-          if (match && match[1]) {
-            const accountId = "acct_" + match[1];
-
-            const response = await fetch("/api/isPayoutsEnabled", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ accountId }),
-            });
-
-            const responseData = await response.json();
-            const payoutsEnabled = responseData.payouts_enabled;
-
-            if (!payoutsEnabled) {
-              console.log("Payouts not enabled, redirecting to onboarding.");
-              window.location.href = onboardingLink;
-              return;
-            }
-
-            await setDoc(
-              userRef,
-              { stripeAccountId: accountId },
-              { merge: true }
-            );
-
-            router.push("/withdraw");
-            return;
-          } else {
-            console.error("Account ID not found in the URL");
-          }
-        } else {
-          console.error("Onboarding link not found");
+        if (!accountId) {
+          router.push("/addStripe");
+          return;
         }
+
+        const response = await fetch("/api/isPayoutsEnabled", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ accountId }),
+        });
+        const responseData = await response.json();
+        const payoutsEnabled = responseData.payouts_enabled;
+        if (!payoutsEnabled) {
+          router.push("/addStripe");
+          return;
+        }
+
+        await setDoc(userRef, { payment_enabled: true }, { merge: true });
+        router.push("/withdraw");
+        return;
       } else {
-        console.error("User document does not exist");
+        router.push("/");
+        return;
       }
     } catch (error) {
-      console.error("Error checking Stripe account:", error);
-    } finally {
-      setLoading(false); // Ensure loading state is updated
+      console.error("Error fetching user data:", error);
     }
   };
 

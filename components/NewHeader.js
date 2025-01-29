@@ -106,7 +106,7 @@ const NewHeader = ({ isHome = true }) => {
       if (
         window.location.pathname === "/" &&
         data?.data()?.category === "instructor" &&
-        !data?.data()?.stripeAccountId
+        !data?.data()?.payment_enabled
       ) {
         toast.error("Please setup stripe to start earning");
         setStripeIntegration(false);
