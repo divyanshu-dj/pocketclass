@@ -33,6 +33,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   UserIcon,
+  MinusIcon,
+  PlusIcon,
 } from "@heroicons/react/solid";
 import { set } from "date-fns";
 
@@ -49,6 +51,11 @@ export default function index({ instructorId, classId, classData }) {
     generalAvailability: [],
     adjustedAvailability: [],
   });
+  const [displayConfirmation, setDisplayConfirmation] = useState(false);
+  const [isSelfBooking, setIsSelfBooking] = useState(false);
+  const [studentEmail, setStudentEmail] = useState("");
+  const [groupEmails, setGroupEmails] = useState([""]);
+  const [numberOfGroupMembers, setNumberOfGroupMembers] = useState(1);
   const [mode, setMode] = useState("Individual");
   const [appointmentDuration, setAppointmentDuration] = useState(30);
   const [timeZone, setTimeZone] = useState("America/Toronto");
@@ -125,15 +132,17 @@ export default function index({ instructorId, classId, classData }) {
 
       if (!isBooked) return true;
 
-      if (
-        isGroup &&
-        bookedSlots.filter(
+      const bookingSizes = bookedSlots
+        .filter(
           (booked) =>
             booked.date === dateStr &&
             moment(booked.startTime, "HH:mm").isSame(slotStart) &&
             booked.classId === slot.classId
-        ).length < classData?.groupSize
-      ) {
+        )
+        .map((booking) => (booking.groupSize ? booking.groupSize : 1));
+      const remainingSlots =
+        classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
+      if (isGroup && remainingSlots > 0) {
         return true;
       }
 
@@ -219,6 +228,7 @@ export default function index({ instructorId, classId, classData }) {
             endTime: moment.utc(booking.endTime).format("HH:mm"),
             date: bookingStartTime.format("YYYY-MM-DD"),
             classId: booking.class_id,
+            groupSize: booking.groupSize,
           });
         }
       });
@@ -238,7 +248,12 @@ export default function index({ instructorId, classId, classData }) {
         booking.startTime === selectedSlot.startTime &&
         booking.date === selectedSlot.date
     );
-    const remainingSlots = classData.groupSize - filteredBookings.length;
+
+    const bookingSizes = filteredBookings.map((booking) =>
+      booking.groupSize ? booking.groupSize : 1
+    );
+    const remainingSlots =
+      classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
 
     return remainingSlots;
   };
@@ -345,7 +360,12 @@ export default function index({ instructorId, classId, classData }) {
         );
 
         const isBooked = bookingsForSlot.length > 0;
-
+        const groupBooked = bookingsForSlot.filter(
+          (b) => b.classId && b.classId === classId
+        );
+        const groupBookedSize = groupBooked
+          .map((b) => (b.groupSize ? b.groupSize : 1))
+          .reduce((a, b) => a + b, 0);
         if (
           classId &&
           bookingsForSlot[0]?.classId &&
@@ -353,9 +373,7 @@ export default function index({ instructorId, classId, classData }) {
         ) {
         } else if (
           !isBooked ||
-          (classId &&
-            bookingsForSlot.filter((b) => b.classId === classId).length <
-              classData.groupSize)
+          (classId && groupBookedSize < classData.groupSize)
         ) {
           slots.push({
             startTime: slotStart.format("HH:mm"),
@@ -400,7 +418,25 @@ export default function index({ instructorId, classId, classData }) {
     setSelectedDate(nextDate);
   };
   const initializeStripe = async () => {
+    setDisplayConfirmation(false);
     const now = moment.utc();
+    if (selectedSlot.classId) {
+      for (let i = 0; i < groupEmails.length; i++) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!groupEmails[i]) {
+          toast.error(
+            "Please enter a valid email address for group member " + (i + 1)
+          );
+          return;
+        }
+        if (!groupEmails[i].match(emailRegex)) {
+          toast.error(
+            "Please enter a valid email address for group member " + (i + 1)
+          );
+          return;
+        }
+      }
+    }
     if (!user && !userLoading) {
       toast.error("Please login to book a slot.");
       return;
@@ -437,6 +473,8 @@ export default function index({ instructorId, classId, classData }) {
         .utc(`${selectedSlot.date} ${selectedSlot.endTime}`, "YYYY-MM-DD HH:mm")
         .toISOString(),
       status: "Pending",
+      groupEmails: groupEmails,
+      groupSize: numberOfGroupMembers,
       expiry,
     };
 
@@ -461,11 +499,18 @@ export default function index({ instructorId, classId, classData }) {
     const isGroup = !!selectedSlot.classId;
 
     if (isGroup) {
-      const existingGroupBookings = querySnapshot.docs.filter(
-        (doc) => doc.data().class_id === classId
-      ).length;
+      const existingGroupBookings = querySnapshot.docs;
 
-      if (existingGroupBookings >= classData?.groupSize) {
+      const numberOfExistingBookings = existingGroupBookings.map((doc) => {
+        const data = doc.data();
+        return data.groupSize ? data.groupSize : 1;
+      });
+
+      const totalBookings =
+        numberOfExistingBookings.reduce((sum, size) => sum + size, 0) +
+        numberOfGroupMembers;
+
+      if (totalBookings > classData?.groupSize) {
         toast.error(
           "This slot is fully booked for the group class. Please select a different time."
         );
@@ -498,7 +543,9 @@ export default function index({ instructorId, classId, classData }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        price: isGroup ? classData.groupPrice : classData.Price,
+        price: isGroup
+          ? classData.groupPrice * numberOfGroupMembers
+          : classData.Price,
       }),
     });
 
@@ -701,7 +748,7 @@ export default function index({ instructorId, classId, classData }) {
           {/* Sticky Booking Div */}
           {selectedSlot && (
             <div className="bg-gray-50 border-2 border-red-300 rounded p-4 ">
-              <div className=" flex justify-between items-center">
+              <div className=" flex justify-between items-center min-[450px]:flex-row flex-col gap-4">
                 <div>
                   <p>
                     <strong>Selected: </strong>
@@ -718,8 +765,21 @@ export default function index({ instructorId, classId, classData }) {
                   )}
                 </div>
                 <button
-                  onClick={handleBookSlot}
-                  className="bg-[#E73F2B] text-white p-2 rounded"
+                  onClick={() => {
+                    if (selectedSlot.classId) {
+                      if (!user) {
+                        setGroupEmails([""]);
+                      }
+                      else{
+                        setGroupEmails([user.email]);
+                      }
+                      setNumberOfGroupMembers(1);
+                      setDisplayConfirmation(true);
+                    } else {
+                      handleBookSlot();
+                    }
+                  }}
+                  className="bg-[#E73F2B] text-white max-[450px]:w-full p-2 rounded"
                 >
                   Book Now
                 </button>
@@ -729,6 +789,135 @@ export default function index({ instructorId, classId, classData }) {
         </div>
       </div>
 
+      {displayConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Confirm Booking</h2>
+            <p>
+              <strong>Selected: </strong>
+              {moment(selectedSlot.date).format("dddd, MMMM Do YYYY")}{" "}
+              {selectedSlot.startTime} - {selectedSlot.endTime}
+            </p>
+            {selectedSlot.classId && (
+              <p>
+                <strong>Available Seats:</strong>{" "}
+                {calculateRemainingGroupedClassSlots()}
+              </p>
+            )}
+            {!selectedSlot.classId && (
+              <div>
+                <div className="flex flex-row gap-3 flex-wrap items-center mt-4">
+                  <div
+                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${
+                      isSelfBooking && "bg-logo-red text-white"
+                    }`}
+                    onClick={() => setIsSelfBooking(true)}
+                  >
+                    Book for Self
+                  </div>
+                  <div
+                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${
+                      !isSelfBooking && "bg-logo-red text-white"
+                    }`}
+                    onClick={() => setIsSelfBooking(false)}
+                  >
+                    Book for someone else
+                  </div>
+                </div>
+                {!isSelfBooking && (
+                  // Ask them to write email of usee
+                  <div className="mt-4">
+                    <label className="block text-gray-700 font-semibold mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={studentEmail}
+                      onChange={(e) => setStudentEmail(e.target.value)}
+                      className="w-full border border-gray-400 rounded px-3 py-2"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {/* If Class Id exists, Ask Number of Students(As Input box from 1 to Remaining Seats), and their emails */}
+            {selectedSlot.classId && (
+              <div>
+                <div className="mt-4 flex items-center w-full">
+                  <div className="flex items-center w-full justify-center space-x-4">
+                    <button
+                      type="button"
+                      className="bg-gray-200 text-gray-700 font-bold px-3 py-2 rounded"
+                      onClick={() => {
+                        if (numberOfGroupMembers > 1) {
+                          setNumberOfGroupMembers((prev) => prev - 1);
+                          setGroupEmails((prev) =>
+                            prev.slice(0, prev.length - 1)
+                          );
+                        }
+                      }}
+                    >
+                      <MinusIcon className="h-4 w-4" />
+                    </button>
+                    <span className="text-gray-700 font-medium">
+                      {numberOfGroupMembers}
+                    </span>
+                    <button
+                      type="button"
+                      className="bg-gray-200 text-gray-700 font-bold px-3 py-2 rounded"
+                      onClick={() => {
+                        if (
+                          numberOfGroupMembers <
+                          calculateRemainingGroupedClassSlots()
+                        ) {
+                          setNumberOfGroupMembers((prev) => prev + 1);
+                          setGroupEmails((prev) => [...prev, ""]);
+                        }
+                      }}
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                    </button>
+                    <span className="ml-4 text-gray-700">No. of Students</span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-gray-700 font-semibold mb-2">
+                    Student Emails
+                  </label>
+                  {groupEmails.map((email, index) => (
+                    <input
+                      key={index}
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        const newEmails = [...groupEmails];
+                        newEmails[index] = e.target.value;
+                        setGroupEmails(newEmails);
+                      }}
+                      className="w-full border border-gray-400 rounded px-3 py-2 mb-2"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex mt-6 justify-between items-center">
+              <button
+                onClick={() => setDisplayConfirmation(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBookSlot}
+                className="bg-[#E73F2B] text-white px-4 py-2 rounded"
+              >
+                Book Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Centered Stripe Checkout */}
       {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
@@ -739,7 +928,9 @@ export default function index({ instructorId, classId, classData }) {
               setStripeOptions={setStripeOptions}
               timer={timer}
               price={
-                selectedSlot.classId ? classData.groupPrice : classData.Price
+                selectedSlot.classId
+                  ? classData.groupPrice * numberOfGroupMembers
+                  : classData.Price
               }
               startTime={selectedSlot.startTime}
               endTime={selectedSlot.endTime}
@@ -748,6 +939,9 @@ export default function index({ instructorId, classId, classData }) {
               mode={selectedSlot.classId ? "Group" : "Individual"}
               classData={classData}
               timeZone={timeZone}
+              groupEmails={groupEmails}
+              numberOfGroupMembers={numberOfGroupMembers}
+              selectedSlot={selectedSlot}
             />
           </Elements>
         </div>
@@ -802,6 +996,10 @@ const CheckoutForm = ({
   mode,
   classData,
   timeZone,
+  groupEmails,
+  numberOfGroupMembers,
+  selectedSlot,
+  price,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -949,7 +1147,9 @@ const CheckoutForm = ({
         timeZone: timeZone ? timeZone : "America/Toronto",
       });
 
-      const recipientEmails = `${user?.email}, ${instructorData.email}`;
+      const recipientEmails = `${user?.email}, ${instructorData.email}, ${
+        mode === "Group" ? groupEmails.join(",") : ""
+      }`;
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
@@ -1093,7 +1293,7 @@ END:VCALENDAR`.trim();
     >
       <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
         <div className="text-base font-semibold text-[#E73F2B]">
-          Paying: ${mode === "Group" ? classData.groupPrice : classData.Price}
+          Paying: ${price}
         </div>
         <button
           className="top-4 right- flex flex-row items-center gap-1 text-center"
