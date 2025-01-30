@@ -768,10 +768,10 @@ export default function index({ instructorId, classId, classData }) {
                   onClick={() => {
                     if (selectedSlot.classId) {
                       if (!user) {
-                        setGroupEmails([user.email]);
+                        setGroupEmails([""]);
                       }
                       else{
-                        setGroupEmails([""]);
+                        setGroupEmails([user.email]);
                       }
                       setNumberOfGroupMembers(1);
                       setDisplayConfirmation(true);
