@@ -767,6 +767,8 @@ export default function index({ instructorId, classId, classData }) {
                 <button
                   onClick={() => {
                     if (selectedSlot.classId) {
+                      setGroupEmails([user.email]);
+                      setNumberOfGroupMembers(1);
                       setDisplayConfirmation(true);
                     } else {
                       handleBookSlot();
