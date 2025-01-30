@@ -37,7 +37,7 @@ export default function Schedule() {
   const [showVacationPicker, setShowVacationPicker] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(null);
   const [timeZones, setTimeZones] = useState([]);
-  const [selectedTimeZone, setSelectedTimeZone] = useState(null);
+  const [selectedTimeZone, setSelectedTimeZone] = useState("America/Toronto");
 
   const [events, setEvents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -165,6 +165,8 @@ export default function Schedule() {
             student_id: booking.student_id,
             student_name: booking.student_name,
             classId: booking.class_id,
+            groupSize: booking.groupSize,
+            groupEmails: booking.groupEmails,
           });
         }
       });
@@ -243,7 +245,7 @@ export default function Schedule() {
               );
               setMinDays(data?.minDays ? data.minDays : 1);
               setMaxDays(data?.maxDays ? data.maxDays : 30);
-              setSelectedTimeZone(data.timezone);
+              setSelectedTimeZone(data.timezone || "America/Toronto");
             }
           }
         },
@@ -492,7 +494,13 @@ export default function Schedule() {
         groupedSlots[key] = [];
       }
 
-      groupedSlots[key].push(booked.student_name);
+      if (booked.groupSize && booked.groupSize > 1) {
+        for (let i = 0; i < booked.groupSize; i++) {
+          groupedSlots[key].push(booked.groupEmails[i]);
+        }
+      } else {
+        groupedSlots[key].push(booked.student_name);
+      }
     });
 
     Object.entries(groupedSlots).forEach(([key, students]) => {
