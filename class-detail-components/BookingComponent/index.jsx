@@ -140,11 +140,9 @@ export default function index({ instructorId, classId, classData }) {
             booked.classId === slot.classId
         )
         .map((booking) => (booking.groupSize ? booking.groupSize : 1));
-      const remainingSlots = classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
-      if (
-        isGroup &&
-        remainingSlots > 0
-      ) {
+      const remainingSlots =
+        classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
+      if (isGroup && remainingSlots > 0) {
         return true;
       }
 
@@ -251,8 +249,11 @@ export default function index({ instructorId, classId, classData }) {
         booking.date === selectedSlot.date
     );
 
-    const bookingSizes = filteredBookings.map((booking) => (booking.groupSize? booking.groupSize : 1));
-    const remainingSlots = classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
+    const bookingSizes = filteredBookings.map((booking) =>
+      booking.groupSize ? booking.groupSize : 1
+    );
+    const remainingSlots =
+      classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
 
     return remainingSlots;
   };
@@ -362,7 +363,9 @@ export default function index({ instructorId, classId, classData }) {
         const groupBooked = bookingsForSlot.filter(
           (b) => b.classId && b.classId === classId
         );
-        const groupBookedSize = groupBooked.map((b) => (b.groupSize)? b.groupSize : 1).reduce((a, b) => a + b, 0);
+        const groupBookedSize = groupBooked
+          .map((b) => (b.groupSize ? b.groupSize : 1))
+          .reduce((a, b) => a + b, 0);
         if (
           classId &&
           bookingsForSlot[0]?.classId &&
@@ -370,9 +373,7 @@ export default function index({ instructorId, classId, classData }) {
         ) {
         } else if (
           !isBooked ||
-          (classId &&
-            groupBookedSize <
-              classData.groupSize)
+          (classId && groupBookedSize < classData.groupSize)
         ) {
           slots.push({
             startTime: slotStart.format("HH:mm"),
@@ -502,13 +503,12 @@ export default function index({ instructorId, classId, classData }) {
 
       const numberOfExistingBookings = existingGroupBookings.map((doc) => {
         const data = doc.data();
-        return data.groupSize ? data.groupSize : 1; 
+        return data.groupSize ? data.groupSize : 1;
       });
 
       const totalBookings =
         numberOfExistingBookings.reduce((sum, size) => sum + size, 0) +
         numberOfGroupMembers;
-
 
       if (totalBookings > classData?.groupSize) {
         toast.error(
@@ -767,7 +767,12 @@ export default function index({ instructorId, classId, classData }) {
                 <button
                   onClick={() => {
                     if (selectedSlot.classId) {
-                      setGroupEmails([user.email]);
+                      if (!user) {
+                        setGroupEmails([user.email]);
+                      }
+                      else{
+                        setGroupEmails([""]);
+                      }
                       setNumberOfGroupMembers(1);
                       setDisplayConfirmation(true);
                     } else {
@@ -1142,7 +1147,9 @@ const CheckoutForm = ({
         timeZone: timeZone ? timeZone : "America/Toronto",
       });
 
-      const recipientEmails = `${user?.email}, ${instructorData.email}, ${mode === "Group" ? groupEmails.join(",") : ""}`;
+      const recipientEmails = `${user?.email}, ${instructorData.email}, ${
+        mode === "Group" ? groupEmails.join(",") : ""
+      }`;
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
