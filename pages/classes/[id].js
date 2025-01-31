@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { mockData } from "../../class-detail-components/mockData";
 import FitnessClassOverviewWidget from "../../class-detail-components/FitnessClassOverviewWidget";
@@ -10,6 +10,16 @@ const ClassDetails = ({ classData }) => {
   const router = useRouter();
   const [user] = useAuthState(auth);
   const classId = router.query.id?.replace("id=", "");
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#review") {
+      const reviewSection = document.getElementById("review");
+      if (reviewSection) {
+        reviewSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, []);
 
   return (
     <div data-ignore="used only for top most containter width">

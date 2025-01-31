@@ -11,6 +11,10 @@
     {
       "path": "/api/transferPayments",
       "schedule": "0 0 * * *"
-    }
+    },
+    {
+      "path": "/api/sendReviewMail",
+      "schedule": "*/30 * * * *"
+    }    
   ]
 }

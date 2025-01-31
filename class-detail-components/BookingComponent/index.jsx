@@ -418,7 +418,6 @@ export default function index({ instructorId, classId, classData }) {
     setSelectedDate(nextDate);
   };
   const initializeStripe = async () => {
-    setDisplayConfirmation(false);
     const now = moment.utc();
     if (selectedSlot.classId) {
       for (let i = 0; i < groupEmails.length; i++) {
@@ -437,6 +436,7 @@ export default function index({ instructorId, classId, classData }) {
         }
       }
     }
+    setDisplayConfirmation(false);
     if (!user && !userLoading) {
       toast.error("Please login to book a slot.");
       return;
