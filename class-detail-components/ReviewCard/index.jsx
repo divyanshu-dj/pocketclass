@@ -5,6 +5,7 @@ import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db, auth } from "../../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "react-toastify";
+import { doc, getDoc } from "firebase/firestore";
 
 function ReviewCard({ classId }) {
   const [user] = useAuthState(auth);
@@ -18,17 +19,24 @@ function ReviewCard({ classId }) {
       !recommendRating ||
       !qualityRating ||
       !safetyRating ||
-      !reviewText ||
-      !user.displayName
+      !reviewText
     ) {
       toast.error("Please fill in all fields before submitting");
       return;
     }
-
+    if (!user) {
+      toast.error("Please login to submit a review");
+      return;
+    }
+    const userData = await getDoc(doc(db, "Users", user.uid));
+    if (!userData.exists()) {
+      toast.error("Please login to submit a review");
+      return;
+    }
     const reviewData = {
       classID: classId,
-      name: user.displayName,
-      photo: user.photoURL,
+      name: userData.data().firstName + " " + userData.data().lastName,
+      photo: userData.data().profileImage,
       recommendRating,
       qualityRating,
       safetyRating,
