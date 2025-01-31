@@ -44,14 +44,14 @@ async function sendReviewEmail(appointment, classData) {
     }
 
     const htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto;">
             <h2>How was your PocketClass session?</h2>
             <p>Hi ${studentData.firstName} ${studentData.lastName},</p>
             <p>Thank you for completing ${classData?.Name}! We truly appreciate your time and trust, and we hope you enjoyed the learning experience.</p>
             <p>Would you mind taking a moment to share your feedback? Your review helps other students make informed decisions.</p>
             <div style="text-align: center; margin: 30px 0;">
                 <a href="https://www.pocketclass.ca/classes/id=${appointment.class_id}#review" 
-                   style="background-color: #4CAF50; color: white; padding: 14px 20px; text-decoration: none; border-radius: 4px;">
+                   style="background-color: #E73F2B; color: white; padding: 14px 20px; text-decoration: none; border-radius: 4px;">
                     Write a Review
                 </a>
             </div>
