@@ -20,6 +20,7 @@ import { AiFillHeart, AiOutlineHeart, AiOutlineMan } from "react-icons/ai";
 import {UserIcon} from '@heroicons/react/solid'
 import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
+import FAQAccordion from "../FAQAccordion";
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -326,6 +327,10 @@ function FitnessClassDetailsSection({
             dynamicReviewCountsArray={dynamicReviewCountsArray}
             dynamicReviewCountsArray1={dynamicReviewCountsArray1}
             reviewCountsArray={reviewCountsArray}
+            classId={classId}
+          />
+          <FAQAccordion
+            instructorId={classCreatorData?.userUid}
             classId={classId}
           />
           <FitnessReviewSectionWidget

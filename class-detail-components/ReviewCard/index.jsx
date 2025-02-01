@@ -28,6 +28,10 @@ function ReviewCard({ classId }) {
       toast.error("Please login to submit a review");
       return;
     }
+    if (!user.firstName || !user.lastName){
+      toast.error("Please update your profile to submit a review");
+      return;
+    }
     const userData = await getDoc(doc(db, "Users", user.uid));
     if (!userData.exists()) {
       toast.error("Please login to submit a review");
