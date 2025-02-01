@@ -329,16 +329,16 @@ function FitnessClassDetailsSection({
             reviewCountsArray={reviewCountsArray}
             classId={classId}
           />
-          <FAQAccordion
-            instructorId={classCreatorData?.userUid}
-            classId={classId}
-          />
           <FitnessReviewSectionWidget
             classTitle={classData?.Name}
             classId={classId}
             reviewCountsArray1={reviewCountsArray1}
             classData={classData}
             classCreatorData={classCreatorData}
+          />
+          <FAQAccordion
+            instructorId={classCreatorData?.userUid}
+            classId={classId}
           />
         </div>
         <div
