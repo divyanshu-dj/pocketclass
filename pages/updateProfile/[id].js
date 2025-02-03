@@ -35,22 +35,36 @@ function UpdateProfile() {
     const errors = {};
     if (!data.firstName) errors.firstName = "First Name is required";
     if (!data.lastName) errors.lastName = "Last Name is required";
-    if (!data.gender) errors.gender = "Gender is required";
-    if (!data.phoneNumber) errors.phoneNumber = "Phone Number is required";
-    if (!data.dob) errors.dob = "Date of Birth is required";
-    if (!data.profileDescription) errors.profileDescription = "Description is required";
-	if (!droppedFile?.name && (!userData?.images || userData.images.length === 0) ) errors.droppedFile = "Image is required";
+    if (!data.gender && userData?.category == "instructor")
+      errors.gender = "Gender is required";
+    if (!data.phoneNumber && userData?.category == "instructor")
+      errors.phoneNumber = "Phone Number is required";
+    if (!data.dob && userData?.category == "instructor")
+      errors.dob = "Date of Birth is required";
+    if (!data.profileDescription && userData?.category == "instructor")
+      errors.profileDescription = "Description is required";
+    if (
+      !droppedFile?.name &&
+      (!userData?.images || userData.images.length === 0) &&
+      userData?.category == "instructor"
+    )
+      errors.droppedFile = "Image is required";
     return errors;
   };
 
   const onDrop = (acceptedFiles) => {
-    const imageFile = acceptedFiles.find((file) => file.type.startsWith("image/"));
+    const imageFile = acceptedFiles.find((file) =>
+      file.type.startsWith("image/")
+    );
     if (imageFile) {
       setDroppedFile(imageFile);
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: "image/*" });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: "image/*",
+  });
 
   const onUpdateHandle = async (e) => {
     e.preventDefault();
@@ -74,7 +88,10 @@ function UpdateProfile() {
 
     let imageURI = "";
     if (droppedFile) {
-      const fileRef = ref(storage, `images/userImages/${Date.now()}-${droppedFile.name}`);
+      const fileRef = ref(
+        storage,
+        `images/userImages/${Date.now()}-${droppedFile.name}`
+      );
       const uploadResult = await uploadBytes(fileRef, droppedFile);
       const imageURL = await getDownloadURL(uploadResult.ref);
       imageURI = imageURL; // Ensure only one image in the array
@@ -129,7 +146,9 @@ function UpdateProfile() {
                     defaultValue={userData?.firstName}
                     name="firstName"
                     className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.firstName ? "border-red-500" : "border-gray-100"
+                      formErrors.firstName
+                        ? "border-red-500"
+                        : "border-gray-100"
                     }`}
                     placeholder="Enter your First name"
                   />
@@ -149,18 +168,24 @@ function UpdateProfile() {
 
               <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
                 <div>
-                  <label className="text-medium font-medium">Phone Number</label>
+                  <label className="text-medium font-medium">
+                    Phone Number
+                  </label>
                   <input
                     defaultValue={userData?.phoneNumber}
                     name="phoneNumber"
                     className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.phoneNumber ? "border-red-500" : "border-gray-100"
+                      formErrors.phoneNumber
+                        ? "border-red-500"
+                        : "border-gray-100"
                     }`}
                     placeholder="Enter your Phone Number"
                   />
                 </div>
                 <div>
-                  <label className="text-medium font-medium">Date of Birth</label>
+                  <label className="text-medium font-medium">
+                    Date of Birth
+                  </label>
                   <input
                     defaultValue={userData?.dob}
                     name="dob"
@@ -181,7 +206,7 @@ function UpdateProfile() {
                     className={`w-full border-2 text-sm rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
                       formErrors.gender ? "border-red-500" : "border-gray-100"
                     }`}
-					defaultValue={userData?.gender}
+                    defaultValue={userData?.gender}
                   >
                     <option value="" hidden>
                       {userData?.gender || "Select Gender"}
@@ -200,7 +225,12 @@ function UpdateProfile() {
                         formErrors.images ? "border-red-500" : "border-gray-100"
                       }`,
                     })}
-					style={{border: 'solid', borderStyle: 'dashed', borderColor: formErrors.images ? 'red' : `#d4d2d3`, borderRadius: '10px'}}
+                    style={{
+                      border: "solid",
+                      borderStyle: "dashed",
+                      borderColor: formErrors.images ? "red" : `#d4d2d3`,
+                      borderRadius: "10px",
+                    }}
                     className="border-dashed flex justify-center items-center py-2 border-3 border-gray-200 px-3 cursor-pointer"
                   >
                     <input {...getInputProps()} />
@@ -219,7 +249,9 @@ function UpdateProfile() {
                   defaultValue={userData?.profileDescription}
                   name="profileDescription"
                   className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                    formErrors.profileDescription ? "border-red-500" : "border-gray-100"
+                    formErrors.profileDescription
+                      ? "border-red-500"
+                      : "border-gray-100"
                   }`}
                   placeholder="Enter a profile description"
                 />

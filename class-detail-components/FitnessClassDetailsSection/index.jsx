@@ -20,6 +20,7 @@ import { AiFillHeart, AiOutlineHeart, AiOutlineMan } from "react-icons/ai";
 import {UserIcon} from '@heroicons/react/solid'
 import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
+import FAQAccordion from "../FAQAccordion";
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -334,6 +335,10 @@ function FitnessClassDetailsSection({
             reviewCountsArray1={reviewCountsArray1}
             classData={classData}
             classCreatorData={classCreatorData}
+          />
+          <FAQAccordion
+            instructorId={classCreatorData?.userUid}
+            classId={classId}
           />
         </div>
         <div
