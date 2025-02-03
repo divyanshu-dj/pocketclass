@@ -30,66 +30,54 @@ function MusicianProfileCard1({ instructor }) {
 
   return (
     <div className="box-border grow-0 shrink-0 basis-auto px-[15px] py-4">
-      <div className="flex justify-between items-start flex-row gap-2 w-[100.00%] box-border">
-        <div className="grow-0 shrink-0 basis-auto">
-          <p className="[font-family:'DM_Sans',sans-serif] text-md font-bold text-[#261f22] m-0 p-0 text-[13px]">
-            {fullName.length > 30 ? `${fullName.slice(0, 25)}..` : fullName}
-          </p>
-          <div className="flex justify-start items-center flex-row">
-            <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
-              {getCategoryIcon(
-                instructor?.Category,
-                instructor?.SubCategory || instructor?.Type
-              ) && (
-                <img
-                  src={getCategoryIcon(
-                    instructor?.Category,
-                    instructor?.SubCategory || instructor?.Type
-                  )}
-                  alt={instructor.Type}
-                  className="w-4 h-4 flex grow-0 shrink-0 basis-auto"
-                />
-              )}
-              <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
-                {instructor.category.split(" ")[0]}
-              </p>
-            </div>
-            <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[3px]">
-              <img
-                src="/assets/image_7a2617f3.png"
-                alt=""
-                className="h-1 max-w-[initial] w-1 block box-border"
-              />
-              <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[3px] m-0 p-0">
-                {specialization}
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-start items-center flex-row mt-2">
-            <SvgIcon2 className="w-5 h-5 text-[#261f22] flex grow-0 shrink-0 basis-auto" />
-            <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto ml-[3px]">
-              <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
-                {rating.toFixed(1)}
-              </p>
-              <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto ml-1.5 m-0 p-0">
-                {`${reviews} ${
-                  reviews === 1 || reviews === 0 ? "(review)" : "(reviews)"
-                }`}
-              </p>{" "}
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-start items-end flex-col grow-0 shrink-0 basis-auto">
-          <p className="[font-family:'DM_Sans',sans-serif] text-xl font-bold leading-6 text-[#261f22] grow-0 shrink-0 basis-auto m-0 pl-[21px] p-0">
-            ${groupPrice}
-            {groupPrice ? "-$" : ""}
-            {price}
-          </p>
-          <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto m-0 p-0">
-            per hour
-          </p>
-        </div>
+      <div className="flex justify-between items-start flex-row gap-2 w-full box-border">
+  <div className="grow-0 shrink basis-auto">
+    <p className="[font-family:'DM_Sans',sans-serif] text-md font-bold text-[#261f22] m-0 p-0 text-[13px]">
+      {fullName.length > 30 ? `${fullName.slice(0, 25)}..` : fullName}
+    </p>
+
+    {/* Category + SubCategory Wrapper */}
+    <div className="flex flex-wrap items-center gap-1 max-w-[180px]">
+      {getCategoryIcon(instructor?.Category, instructor?.SubCategory || instructor?.Type) && (
+        <img
+          src={getCategoryIcon(instructor?.Category, instructor?.SubCategory || instructor?.Type)}
+          alt={instructor.Type}
+          className="w-4 h-4"
+        />
+      )}
+      <p className="text-base font-bold text-[#7d797a] whitespace-normal break-words">
+        {instructor?.category.split(" ")[0]}
+      </p>
+
+      <img src="/assets/image_7a2617f3.png" alt="" className="h-1 w-1 block" />
+
+      <p className="text-base font-bold text-[#7d797a] whitespace-normal break-words">
+        {specialization}
+      </p>
+    </div>
+
+    {/* Rating Section */}
+    <div className="flex items-center mt-2">
+      <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
+      <div className="ml-[3px] flex items-center">
+        <p className="text-base font-bold text-[#261f22]">{rating.toFixed(1)}</p>
+        <p className="text-base font-normal text-[#261f22] ml-1.5">
+          {`${reviews} ${reviews === 1 || reviews === 0 ? "(review)" : "(reviews)"}`}
+        </p>
       </div>
+    </div>
+  </div>
+
+  {/* Price Section */}
+  <div className="flex flex-col items-end shrink-0 min-w-[90px]">
+    <p className="text-xl font-bold leading-6 text-[#261f22]">
+      ${groupPrice}
+      {groupPrice ? "-$" : ""}{price}
+    </p>
+    <p className="text-base font-normal text-[#261f22]">per hour</p>
+  </div>
+</div>
+
       {/* <div className="flex justify-start items-center flex-row mt-4">
         <Button className="bg-[#261f22] [font-family:Inter,sans-serif] text-sm font-semibold text-[white] min-w-[220px] h-[45px] w-[220px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none]">
           Book Session

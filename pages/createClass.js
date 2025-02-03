@@ -98,6 +98,14 @@ export default function CreateClass() {
       return;
     }
 
+    for (let pkg of packages) {
+      if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
+        toast.error("Please fill all package fields");
+        setLoading(false);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       let imagesURL = [];
