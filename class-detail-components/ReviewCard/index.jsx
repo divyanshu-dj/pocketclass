@@ -28,19 +28,20 @@ function ReviewCard({ classId }) {
       toast.error("Please login to submit a review");
       return;
     }
-    if (!user.firstName || !user.lastName){
-      toast.error("Please update your profile to submit a review");
-      return;
-    }
     const userData = await getDoc(doc(db, "Users", user.uid));
     if (!userData.exists()) {
       toast.error("Please login to submit a review");
       return;
     }
+    const userDataa = userData.data();
+    if (!userDataa.firstName || !userDataa.lastName) {
+      toast.error("Please update your profile to submit a review");
+      return;
+    }
     const reviewData = {
       classID: classId,
-      name: userData.data().firstName + " " + userData.data().lastName,
-      photo: userData.data().profileImage,
+      name: userDataa.firstName + " " + userDataa.lastName,
+      photo: userDataa.profileImage || "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png",
       recommendRating,
       qualityRating,
       safetyRating,

@@ -27,7 +27,7 @@ export default function ClassLocationMap({ longitude, latitude, address }) {
   }, [longitude, latitude]);
 
   const handleAddressClick = () => {
-    window.open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, '_blank');
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`, '_blank');
   };
 
   return (
