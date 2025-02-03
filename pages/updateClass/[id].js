@@ -21,10 +21,22 @@ import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import NewHeader from "../../components/NewHeader";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function UpdateClass() {
   const [form, setForm] = useState({
@@ -86,6 +98,13 @@ export default function UpdateClass() {
     e.preventDefault();
     setLoading(true);
     const docRef = doc(db, "classes", id);
+    for (let pkg of packages) {
+      if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
+        toast.error("Please fill all package fields");
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       // First update with existing data and loaded images
@@ -107,7 +126,9 @@ export default function UpdateClass() {
         );
 
         const uploadResult = await uploadBytes(fileRef, img);
-        const url = await getDownloadURL(ref(storage, uploadResult.metadata.fullPath));
+        const url = await getDownloadURL(
+          ref(storage, uploadResult.metadata.fullPath)
+        );
         return url;
       });
 
@@ -115,19 +136,23 @@ export default function UpdateClass() {
       const newImageUrls = await Promise.all(uploadPromises);
 
       // Get the final image order from previewImages
-      const finalImageOrder = previewImages.map(img => {
-        if (loadedImgs.includes(img.src)) {
-          return img.src; // Return URL for previously loaded images
-        } else {
-          // Find the corresponding new URL for uploaded files
-          const fileIndex = uploadedFiles.findIndex(file => file.name === img.name);
-          return fileIndex !== -1 ? newImageUrls[fileIndex] : null;
-        }
-      }).filter(Boolean);
+      const finalImageOrder = previewImages
+        .map((img) => {
+          if (loadedImgs.includes(img.src)) {
+            return img.src; // Return URL for previously loaded images
+          } else {
+            // Find the corresponding new URL for uploaded files
+            const fileIndex = uploadedFiles.findIndex(
+              (file) => file.name === img.name
+            );
+            return fileIndex !== -1 ? newImageUrls[fileIndex] : null;
+          }
+        })
+        .filter(Boolean);
 
       // Update with final image order
       await updateDoc(docRef, {
-        Images: finalImageOrder
+        Images: finalImageOrder,
       });
 
       toast.success("Class updated successfully");
@@ -142,37 +167,37 @@ export default function UpdateClass() {
   const { getRootProps, getInputProps, fileRejections } = useDropzone({
     onDrop: (acceptedFiles) => {
       // Validate each file before creating object URL
-      const validFiles = acceptedFiles.filter(file => {
+      const validFiles = acceptedFiles.filter((file) => {
         // Additional validation if needed
-        const isValid = file.type.startsWith('image/');
+        const isValid = file.type.startsWith("image/");
         if (!isValid) {
           toast.error(`${file.name} is not a valid image file`);
         }
         return isValid;
       });
 
-      const newPreviews = validFiles.map(file => ({
+      const newPreviews = validFiles.map((file) => ({
         src: URL.createObjectURL(file),
-        name: file.name
+        name: file.name,
       }));
-      
-      setUploadedFiles(prev => [...prev, ...validFiles]);
-      setPreviewImages(prev => [...prev, ...newPreviews]);
+
+      setUploadedFiles((prev) => [...prev, ...validFiles]);
+      setPreviewImages((prev) => [...prev, ...newPreviews]);
     },
     accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png']
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
     },
     maxSize: 5 * 1024 * 1024, // 5MB
     multiple: true,
     onDropRejected: (fileRejections) => {
       fileRejections.forEach(({ file, errors }) => {
-        errors.forEach(error => {
+        errors.forEach((error) => {
           switch (error.code) {
-            case 'file-too-large':
+            case "file-too-large":
               toast.error(`${file.name} is too large. Max size is 5MB`);
               break;
-            case 'file-invalid-type':
+            case "file-invalid-type":
               toast.error(`${file.name} is not a supported image format`);
               break;
             default:
@@ -180,7 +205,7 @@ export default function UpdateClass() {
           }
         });
       });
-    }
+    },
   });
 
   const RemoveImg = (e, identifier) => {
@@ -189,16 +214,20 @@ export default function UpdateClass() {
     const isLoadedImage = loadedImgs.includes(identifier);
 
     if (isLoadedImage) {
-      setLoadedImgs(loadedImgs.filter(img => img !== identifier));
+      setLoadedImgs(loadedImgs.filter((img) => img !== identifier));
     } else {
-      setUploadedFiles(uploadedFiles.filter(file => file.name !== identifier));
+      setUploadedFiles(
+        uploadedFiles.filter((file) => file.name !== identifier)
+      );
     }
-    setPreviewImages(previewImages.filter(img => (img.name || img.src) !== identifier));
-    setForm(prev => ({
+    setPreviewImages(
+      previewImages.filter((img) => (img.name || img.src) !== identifier)
+    );
+    setForm((prev) => ({
       ...prev,
-      Images: isLoadedImage 
-        ? prev.Images.filter(img => img !== identifier)
-        : prev.Images.filter(file => file.name !== identifier)
+      Images: isLoadedImage
+        ? prev.Images.filter((img) => img !== identifier)
+        : prev.Images.filter((file) => file.name !== identifier),
     }));
   };
 
@@ -231,9 +260,10 @@ export default function UpdateClass() {
     "border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red";
 
   const SortableImage = ({ image, onRemove }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-      id: image.name || image.src // Use src as fallback for previously uploaded images
-    });
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({
+        id: image.name || image.src, // Use src as fallback for previously uploaded images
+      });
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -242,16 +272,16 @@ export default function UpdateClass() {
 
     return (
       <div className="relative">
-        <div 
-          ref={setNodeRef} 
+        <div
+          ref={setNodeRef}
           style={style}
           className="flex justify-center touch-none"
-          {...attributes} 
+          {...attributes}
           {...listeners}
         >
           <img
             src={image.src}
-            alt={`Preview ${image.name || 'image'}`}
+            alt={`Preview ${image.name || "image"}`}
             className="w-full h-48 object-cover rounded-lg border"
           />
         </div>
@@ -261,7 +291,7 @@ export default function UpdateClass() {
           onClick={(e) => {
             e.stopPropagation();
             console.log(image);
-            onRemove(e, image.name || image.src)
+            onRemove(e, image.name || image.src);
           }}
         >
           <svg
@@ -291,24 +321,28 @@ export default function UpdateClass() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    
+
     if (active.id !== over.id) {
-      const oldIndex = previewImages.findIndex((img) => (img.name || img.src) === active.id);
-      const newIndex = previewImages.findIndex((img) => (img.name || img.src) === over.id);
-      
+      const oldIndex = previewImages.findIndex(
+        (img) => (img.name || img.src) === active.id
+      );
+      const newIndex = previewImages.findIndex(
+        (img) => (img.name || img.src) === over.id
+      );
+
       const newPreviewImages = arrayMove(previewImages, oldIndex, newIndex);
       setPreviewImages(newPreviewImages);
-      
+
       // Update loadedImgs order
       const newLoadedImgs = newPreviewImages
-        .filter(img => loadedImgs.includes(img.src))
-        .map(img => img.src);
+        .filter((img) => loadedImgs.includes(img.src))
+        .map((img) => img.src);
       setLoadedImgs(newLoadedImgs);
-      
+
       // Update uploadedFiles order
       const newUploadedFiles = newPreviewImages
-        .filter(img => uploadedFiles.some(file => file.name === img.name))
-        .map(img => uploadedFiles.find(file => file.name === img.name))
+        .filter((img) => uploadedFiles.some((file) => file.name === img.name))
+        .map((img) => uploadedFiles.find((file) => file.name === img.name))
         .filter(Boolean);
       setUploadedFiles(newUploadedFiles);
     }
@@ -531,13 +565,13 @@ export default function UpdateClass() {
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext 
-                items={previewImages.map(img => img.name || img.src)}
+              <SortableContext
+                items={previewImages.map((img) => img.name || img.src)}
                 strategy={rectSortingStrategy}
               >
                 <div className="grid md:grid-cols-2 grid-cols-1 w-full max-w-[750px] gap-4 mt-4 ">
                   {previewImages.map((preview) => (
-                    <SortableImage 
+                    <SortableImage
                       key={preview.name || preview.src}
                       image={preview}
                       onRemove={RemoveImg}
