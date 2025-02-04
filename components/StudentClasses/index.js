@@ -13,8 +13,8 @@ const StudentClasses = ({ appointments,classDetails,reviews }) => {
             setFilteredAppointments(appointments);
         } else {
             const filtered = appointments.filter((appointment) => {
-                const startDate = moment.utc(appointment.startTime);
-                const today = moment.utc();
+                const startDate = moment.utc(appointment.startTime).format("YYYY-MM-DD HH:mm");
+                const today = moment().tz(appointment.timezone || "America/Toronto").format("YYYY-MM-DD HH:mm");
                 if (selectedStatus === "Upcoming") {
                     return startDate > today;
                 } else {
@@ -28,6 +28,7 @@ const StudentClasses = ({ appointments,classDetails,reviews }) => {
     const handleTabChange = (key) => {
         setSelectedStatus(key);
     };
+
     return (
         <div>
             <Tabs
@@ -66,6 +67,7 @@ const StudentClasses = ({ appointments,classDetails,reviews }) => {
                                 studentId={appointment.student_id}
                                 paymentIntentId={appointment.paymentIntentId}
                                 studentName={appointment.student_name}
+                                timezone={appointment.timezone || "America/Toronto"}
                             />
                         ) : null;
                     })
