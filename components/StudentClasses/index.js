@@ -3,10 +3,15 @@ import { Tabs } from "antd";
 import InfoCard from '../InfoCard';
 import StudentCard from './StudentCard';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 
 const StudentClasses = ({ appointments,classDetails,reviews }) => {
     const [selectedStatus, setSelectedStatus] = React.useState("Upcoming");
     const [filteredAppointments, setFilteredAppointments] = React.useState(appointments);
+
+    const router = useRouter();
+    const { bookingId, mode } = router.query;
+    console.log(bookingId, mode);
 
     useEffect(() => {
         if (selectedStatus === "All") {
@@ -68,6 +73,8 @@ const StudentClasses = ({ appointments,classDetails,reviews }) => {
                                 paymentIntentId={appointment.paymentIntentId}
                                 studentName={appointment.student_name}
                                 timezone={appointment.timezone || "America/Toronto"}
+                                rescheduleBooking={bookingId === appointment.id && mode === "reschedule"}
+                                cancelBooking={bookingId === appointment.id && mode === "cancel"}
                             />
                         ) : null;
                     })

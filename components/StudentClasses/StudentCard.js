@@ -52,14 +52,16 @@ function StudentCard({
   paymentIntentId,
   studentName,
   timezone,
+  rescheduleBooking = false,
+  cancelBooking = false,
 }) {
   const router = useRouter();
   const [refundAmnt, setRefundAmnt] = useState(0);
   const [refundReason, setRefundReason] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(cancelBooking);
   const [refundLoading, setRefundLoading] = useState(false);
 
-  const [rescheduleModal, setRescheduleModal] = React.useState(false);
+  const [rescheduleModal, setRescheduleModal] = useState(rescheduleBooking);
   const deleteClass = async () => {
     const classRef = doc(db, "classes", id);
     await deleteDoc(classRef);
@@ -119,7 +121,9 @@ function StudentCard({
     const bookingStartDate = moment.utc(start, "YYYY-MM-DD HH:mm");
 
     if (bookingStartDate.isBefore(now)) {
-      toast.error("You cannot reschedule an appointment less than 24 hours away.");
+      toast.error(
+        "You cannot reschedule an appointment less than 24 hours away."
+      );
       return;
     }
     setRescheduleModal(true);
@@ -156,6 +160,13 @@ function StudentCard({
   };
 
   const handleRefund = async () => {
+    const now = moment().tz(timezone).add(24, "hours");
+    const bookingStartDate = moment.utc(start, "YYYY-MM-DD HH:mm");
+    const diff = bookingStartDate.diff(now, "hours");
+    if (diff < 24) {
+      toast.error("You cannot refund an appointment less than 24 hours away.");
+      return;
+    }
     setRefundLoading(true);
     const refund = await fetch("/api/refund", {
       method: "POST",
@@ -355,7 +366,10 @@ function StudentCard({
             className="flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {moment.utc(start).format("YYYY-MM-DD HH:mm") < moment.tz(timezone || "America/Toronto").format("YYYY-MM-DD HH:mm") ? (
+            {moment.utc(start).format("YYYY-MM-DD HH:mm") <
+            moment
+              .tz(timezone || "America/Toronto")
+              .format("YYYY-MM-DD HH:mm") ? (
               <button
                 onClick={() => handleBookAgain()}
                 className="px-4 py-1 border-solid border border-logo-red text-logo-red rounded-md hover:bg-logo-red hover:text-white hover:opacity-80 transition duration-200 ease-out"
