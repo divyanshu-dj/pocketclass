@@ -16,6 +16,10 @@ export const categories = [
         imagePath: "/assets/Sport/personal_training_icon.png",
       },
       {
+        name: "Pickleball",
+        imagePath: "/assets/Sport/pickleball_icon.png",
+      },
+      {
         name: "Yoga",
         imagePath: "/assets/Sport/yoga_icon.png",
       },
@@ -42,6 +46,10 @@ export const categories = [
       {
         name: "Badminton",
         imagePath: "/assets/Sport/badminton_icon.png",
+      },
+      {
+        name: "Basketball",
+        imagePath: "/assets/Sport/basketball_icon.png",
       },
     ],
   },
@@ -91,6 +99,10 @@ export const categories = [
     name: "Art",
     imagePath: "/assets/art.png",
     subCategories: [
+      {
+        name: "Dance",
+        imagePath: "/assets/Art/breakdancing_icon.png",
+      },
       {
         name: "Drawing",
         imagePath: "/assets/Art/drawing_icon.png",

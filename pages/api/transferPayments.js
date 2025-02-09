@@ -83,6 +83,10 @@ export default async function (req, res) {
           amount: transferAmount,
           currency: "cad",
           destination: stripeAccountId,
+          metadata:{
+            bookingId: booking.id,
+            paymentIntentId: booking.paymentIntentId, // <-- reference the PaymentIntent
+          },
         });
 
         await updateDoc(doc(db, "Bookings", booking.id), {
