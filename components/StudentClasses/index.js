@@ -71,6 +71,7 @@ const StudentClasses = ({ appointments,classDetails,reviews }) => {
                                 classCreator={classData.classCreator}
                                 studentId={appointment.student_id}
                                 paymentIntentId={appointment.paymentIntentId}
+                                paymentMethod={appointment.paymentMethod}
                                 studentName={appointment.student_name}
                                 timezone={appointment.timezone || "America/Toronto"}
                                 rescheduleBooking={bookingId === appointment.id && mode === "reschedule"}

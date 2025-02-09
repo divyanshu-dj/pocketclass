@@ -51,6 +51,7 @@ export default function index({ instructorId, classId, classData }) {
     generalAvailability: [],
     adjustedAvailability: [],
   });
+  const [bookLoading, setBookLoading] = useState(false);
   const [displayConfirmation, setDisplayConfirmation] = useState(false);
   const [isSelfBooking, setIsSelfBooking] = useState(false);
   const [studentEmail, setStudentEmail] = useState("");
@@ -480,7 +481,6 @@ export default function index({ instructorId, classId, classData }) {
   };
 
   const handleSubmit = async (price, payment_intent_id) => {
-
     const bookingData = {
       student_id: studentId,
       instructor_id: instructorId,
@@ -500,7 +500,7 @@ export default function index({ instructorId, classId, classData }) {
       groupSize: numberOfGroupMembers,
       mode: selectedSlot.classId ? "group" : "individual",
       price: price,
-      paymentIntentId: payment_intent_id
+      paymentIntentId: payment_intent_id,
     };
 
     const bookingsRef = collection(db, "Bookings");
@@ -645,7 +645,7 @@ export default function index({ instructorId, classId, classData }) {
         }
       }
     }
-    
+
     const bookingDocRef = doc(db, "Bookings", bookingRef.id);
     await updateDoc(bookingDocRef, {
       status: "Confirmed",
@@ -737,9 +737,7 @@ END:VCALENDAR`.trim();
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${
-              price
-            }</td>
+            <td style="padding: 8px;">${price}</td>
           </tr>
           ${
             meetingLink
@@ -785,9 +783,10 @@ END:VCALENDAR`.trim();
 
     setStripeOptions(null);
     toast.success("Booking confirmed!");
+    setDisplayConfirmation(false);
     router.push(`/confirmBooking/${bookingRef.id}`);
     setStripeLoading(false);
-
+    setBookLoading(false);
   };
   const initializeStripe = async () => {
     const now = moment.utc();
@@ -808,15 +807,14 @@ END:VCALENDAR`.trim();
         }
       }
     }
-    setDisplayConfirmation(false);
     if (!user && !userLoading) {
       toast.error("Please login to book a slot.");
       return;
     }
-    setStripeLoading(true);
 
     if (packageClasses > 0) {
       // Get the user packages from firebase where class_id is equal to classId and user_id is equal to user.uid
+      setBookLoading(true);
       const packagesRef = collection(db, "Packages");
       const q = query(
         packagesRef,
@@ -828,12 +826,19 @@ END:VCALENDAR`.trim();
       let pricePerSession = querySnapshot.docs[0].data().price_per_session;
       let payment_intent_id = querySnapshot.docs[0].data().payment_intent_id;
       let isPackage = false;
+      let classDeduct = 1;
       if (packageClasses > 0) {
         for (const doc of querySnapshot.docs) {
           const data = doc.data();
           if (data.classes_left > 0) {
+            if (selectedSlot.classId) {
+              classDeduct = groupEmails.length;
+              if (groupEmails.length > data.classes_left) {
+                continue;
+              }
+            }
             await updateDoc(doc.ref, {
-              classes_left: data.classes_left - 1,
+              classes_left: data.classes_left - classDeduct,
             });
             pricePerSession = data.price_per_session;
             payment_intent_id = data.payment_intent_id;
@@ -843,11 +848,13 @@ END:VCALENDAR`.trim();
         }
       }
       if (isPackage) {
-        setPackageClasses((prev) => prev - 1);
+        setPackageClasses((prev) => prev - classDeduct);
         handleSubmit(pricePerSession, payment_intent_id);
         return;
       }
     }
+    setDisplayConfirmation(false);
+    setStripeLoading(true);
     const expiry = now.clone().add(5, "minutes").toISOString();
     setTimer(300);
 
@@ -1187,9 +1194,10 @@ END:VCALENDAR`.trim();
                       handleBookSlot();
                     }
                   }}
+                  disabled={bookLoading}
                   className="bg-[#E73F2B] text-white max-[450px]:w-full p-2 rounded"
                 >
-                  Book Now
+                  {bookLoading ? "Loading..." : "Book Now"}
                 </button>
               </div>
             </div>
@@ -1319,8 +1327,9 @@ END:VCALENDAR`.trim();
               <button
                 onClick={handleBookSlot}
                 className="bg-[#E73F2B] text-white px-4 py-2 rounded"
+                disabled={bookLoading}
               >
-                Book Now
+                {bookLoading ? "Loading..." : "Book Now"}
               </button>
             </div>
           </div>
