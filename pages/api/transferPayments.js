@@ -46,7 +46,10 @@ export default async function (req, res) {
           continue;
         }
 
-        const transferAmount = paymentIntent.amount * 1;
+        let transferAmount = paymentIntent.amount * 1;
+        if (booking.paymentMethod === "Package"){
+          transferAmount = booking.price*100;
+        }
         const instructorId = booking.instructor_id;
         const Instructor = await getDoc(doc(db, "Users", instructorId));
         const instructor = Instructor.data();
