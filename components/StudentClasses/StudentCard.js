@@ -49,6 +49,7 @@ function StudentCard({
   end = null,
   studentId,
   classCreator,
+  paymentMethod,
   paymentIntentId,
   studentName,
   timezone,
@@ -134,6 +135,10 @@ function StudentCard({
     const bookingStartDate = moment.utc(start, "YYYY-MM-DD HH:mm");
     const diff = bookingStartDate.diff(now, "hours");
 
+    if (paymentMethod === "Package") {
+      toast.error("You cannot cancel a package booking, please try to reschedule the booking.");
+      return;
+    }
     if (diff >= 24) {
       fetch("/api/retrieve-stripe", {
         method: "POST",

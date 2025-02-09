@@ -7,6 +7,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
+  updateDoc,
+  where,
+  increment
 } from "firebase/firestore";
 import moment from "moment";
 import { message } from "antd";
@@ -42,6 +46,28 @@ export default async function (req, res) {
           });
       }
 
+      if (bookingData.paymentMethod === "Package") {
+        const packagesRef = collection(db, "Packages");
+        const q = query(packagesRef, where("class_id", "==", bookingData.class_id), where("user_id", "==", bookingData.student_id), where("payment_intent_id", "==", paymentIntentId));
+        const querySnapshot = await getDocs(q);
+        const packageDoc = querySnapshot.docs[0];
+        if (!packageDoc) {
+          continue;
+        }
+        const classDeduct = bookingData.mode === "group" ? bookingData.groupEmails.length : 1;
+        await updateDoc(packageDoc.ref, {
+          classes_left: increment(classDeduct),
+        })
+        await deleteDoc(bookingRef);
+        await addDoc(collection(db, "Refunds"), {
+          bookingId,
+          type: "Package",
+          reason: refundReason,
+          createdAt: new Date(),
+          ...bookingData,
+        });
+        continue;
+      }
       const paymentIntent = await stripe.paymentIntents.retrieve(
         paymentIntentId
       );

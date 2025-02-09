@@ -51,6 +51,7 @@ export default function index({ instructorId, classId, classData }) {
     generalAvailability: [],
     adjustedAvailability: [],
   });
+  const [bookLoading, setBookLoading] = useState(false);
   const [displayConfirmation, setDisplayConfirmation] = useState(false);
   const [isSelfBooking, setIsSelfBooking] = useState(false);
   const [studentEmail, setStudentEmail] = useState("");
@@ -72,6 +73,36 @@ export default function index({ instructorId, classId, classData }) {
   const [daysWithNoSlots, setDaysWithNoSlots] = useState([]);
   const [minDays, setMinDays] = useState(0);
   const [maxDays, setMaxDays] = useState(30);
+  const [packages, setPackages] = useState([]);
+  const [packageClasses, setPackageClasses] = useState();
+
+  useEffect(() => {
+    const getPackages = async () => {
+      if (user) {
+        // From Packages firebase where user_id = user.uid and class_id = classId
+        const packagesref = collection(db, "Packages");
+        const q = query(
+          packagesref,
+          where("user_id", "==", user.uid),
+          where("class_id", "==", classId)
+        );
+        const querySnapshot = await getDocs(q);
+        const packages = querySnapshot.docs.map((doc) => doc.data());
+        setPackages(packages);
+        if (packages.length > 0) {
+          const classesLeft = packages.reduce((total, pkg) => {
+            const classes =
+              pkg.classes_left !== undefined
+                ? Number(pkg.classes_left)
+                : Number(pkg.num_sessions);
+            return total + (classes > 0 ? classes : 0);
+          }, 0);
+          setPackageClasses(classesLeft);
+        }
+      }
+    };
+    getPackages();
+  }, [user, classId]);
 
   const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
     const dateStr = moment(date).format("YYYY-MM-DD");
@@ -417,6 +448,346 @@ export default function index({ instructorId, classId, classData }) {
     }
     setSelectedDate(nextDate);
   };
+
+  const sendEmail = async (
+    targetEmails,
+    targetSubject,
+    targetHtmlContent,
+    attachments = []
+  ) => {
+    try {
+      const res = await fetch("/api/sendEmail", {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: targetSubject,
+          html: targetHtmlContent,
+          to: targetEmails,
+          attachments,
+        }),
+      });
+
+      if (res.status === 200) {
+        console.log("Email sent successfully");
+      } else {
+        toast.error("Failed to send email. Please try again.");
+      }
+    } catch (error) {
+      console.warn("Error sending email: ", error);
+    }
+  };
+
+  const handleSubmit = async (price, payment_intent_id) => {
+    const bookingData = {
+      student_id: studentId,
+      instructor_id: instructorId,
+      class_id: classId,
+      student_name: studentName,
+      startTime: moment
+        .utc(
+          `${selectedSlot.date} ${selectedSlot.startTime}`,
+          "YYYY-MM-DD HH:mm"
+        )
+        .toISOString(),
+      endTime: moment
+        .utc(`${selectedSlot.date} ${selectedSlot.endTime}`, "YYYY-MM-DD HH:mm")
+        .toISOString(),
+      status: "Pending",
+      groupEmails: groupEmails,
+      groupSize: numberOfGroupMembers,
+      mode: selectedSlot.classId ? "group" : "individual",
+      price: price,
+      paymentIntentId: payment_intent_id,
+    };
+
+    const bookingsRef = collection(db, "Bookings");
+    const slotQuery = query(
+      bookingsRef,
+      where("instructor_id", "==", instructorId),
+      where(
+        "startTime",
+        "==",
+        moment
+          .utc(
+            `${selectedSlot.date} ${selectedSlot.startTime}`,
+            "YYYY-MM-DD HH:mm"
+          )
+          .toISOString()
+      )
+    );
+
+    const querySnapshot = await getDocs(slotQuery);
+
+    const isGroup = !!selectedSlot.classId;
+
+    if (isGroup) {
+      const existingGroupBookings = querySnapshot.docs;
+
+      const numberOfExistingBookings = existingGroupBookings.map((doc) => {
+        const data = doc.data();
+        return data.groupSize ? data.groupSize : 1;
+      });
+
+      const totalBookings =
+        numberOfExistingBookings.reduce((sum, size) => sum + size, 0) +
+        numberOfGroupMembers;
+
+      if (totalBookings > classData?.groupSize) {
+        toast.error(
+          "This slot is fully booked for the group class. Please select a different time."
+        );
+        setStripeLoading(false);
+        return;
+      }
+    } else {
+      const isSlotBooked = querySnapshot.docs.some((doc) =>
+        moment
+          .utc(doc.data().startTime)
+          .isSame(
+            moment.utc(
+              `${selectedSlot.date} ${selectedSlot.startTime}`,
+              "YYYY-MM-DD HH:mm"
+            )
+          )
+      );
+
+      if (isSlotBooked) {
+        toast.error(
+          "This slot is already booked. Please select a different time."
+        );
+        setStripeLoading(false);
+        return;
+      }
+    }
+
+    const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
+    const classRef = doc(db, "classes", bookingData.class_id);
+    const classSnapshot = await getDoc(classRef);
+    const classData = classSnapshot.data();
+
+    const instructorRef = doc(db, "Users", bookingData.instructor_id);
+    const instructorSnapshot = await getDoc(instructorRef);
+    const instructorData = instructorSnapshot.data();
+    let meetingLink = null;
+    const date = selectedSlot.date;
+    const startTime = selectedSlot.startTime;
+    const endTime = selectedSlot.endTime;
+
+    const startDateTime = moment
+      .utc(`${date} ${startTime}`)
+      .format("YYYY-MM-DDTHH:mm:ss");
+    const organizer = instructorData.email;
+    const location = classData.Address || "Online";
+    const endDateTime = moment
+      .utc(`${date} ${endTime}`)
+      .format("YYYY-MM-DDTHH:mm:ss");
+    if (classData.Mode === "Online") {
+      if (mode === "Group") {
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, "Bookings"),
+            where("class_id", "==", bookingData.class_id),
+            where(
+              "startTime",
+              "==",
+              moment
+                .utc(
+                  `${selectedSlot.date} ${selectedSlot.startTime}`,
+                  "YYYY-MM-DD HH:mm"
+                )
+                .toISOString()
+            ),
+            where(
+              "endTime",
+              "==",
+              moment
+                .utc(
+                  `${selectedSlot.date} ${selectedSlot.endTime}`,
+                  "YYYY-MM-DD HH:mm"
+                )
+                .toISOString()
+            )
+          )
+        );
+        if (querySnapshot.size > 0) {
+          const otherBookings = querySnapshot.docs.map((doc) => doc.data());
+          meetingLink = otherBookings[0]?.meetingLink;
+        }
+      }
+      if (!meetingLink) {
+        try {
+          meetingLink = await fetch("/api/generateMeetLink", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              className: classData.Name,
+              startTime: startDateTime,
+              endTime: endDateTime,
+              instructorEmail: instructorData?.email,
+              studentEmail: user?.email,
+              timeZone: timeZone,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to generate meeting link");
+              }
+              return response.json();
+            })
+            .then((data) => data?.meetLink);
+        } catch (error) {
+          console.error("Error generating meeting link:", error);
+        }
+      }
+    }
+
+    const bookingDocRef = doc(db, "Bookings", bookingRef.id);
+    await updateDoc(bookingDocRef, {
+      status: "Confirmed",
+      meetingLink: meetingLink ? meetingLink : "",
+      paymentStatus: "Paid",
+      paymentMethod: "Package",
+      timeZone: timeZone ? timeZone : "America/Toronto",
+    });
+
+    const recipientEmails = `${user?.email}, ${instructorData.email}, ${
+      mode === "Group" ? groupEmails.join(",") : ""
+    }`;
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pocketclass//NONSGML v1.0//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+SUMMARY:${classData.Name}
+DESCRIPTION:Booking confirmed for the class ${classData.Name}
+TZID:${timeZone || "America/Toronto"}
+DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, "")}
+X-LIC-LOCATION:${timeZone || "America/Toronto"}
+DTSTART;TZID=${timeZone || "America/Toronto"}:${formatDateTime(startDateTime)}
+DTEND;TZID=${timeZone || "America/Toronto"}:${formatDateTime(endDateTime)}
+LOCATION:${location}
+ORGANIZER;CN=${instructorData.firstName} ${
+      instructorData.lastName
+    }:MAILTO:${organizer}
+STATUS:CONFIRMED
+${meetingLink ? `X-GOOGLE-CONFERENCE:${meetingLink}` : ""}
+END:VEVENT
+END:VCALENDAR`.trim();
+
+    function formatDateTime(dateTimeString) {
+      const date = moment.utc(dateTimeString);
+      const formattedDate = date.format("YYYYMMDD");
+      const formattedTime = date.format("HHmmss");
+      return `${formattedDate}T${formattedTime}`;
+    }
+    // HTML content for the email
+    const htmlContent = `
+      <div>
+
+      ${
+        meetingLink
+          ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+                Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${instructorData.lastName}</strong>.
+              </p>
+              <p style="font-size: 14px; color: #5f5f5f; margin-bottom: 10px;">Meeting Link: <a href="${meetingLink}" style="color: #5f5f5f; text-decoration: none;">${meetingLink}</a></p>
+              <a href="${meetingLink}" style="text-decoration: none; display: inline-block; background-color: #E73F2B; color: white; padding: 10px 20px; border-radius: 5px; font-size: 14px; margin-top: 5px; margin-bottom: 5px;">Join Meeting</a>
+              <p style="font-size: 14px; color: black; font-weight: bold; margin-bottom: 8px; margin-top: 10px;">Guest List:</p>
+              <ul style="list-style-type: disc; margin-left: 20px; padding-left: 0;">
+                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Instructor: ${instructorData.firstName} ${instructorData.lastName} (${instructorData.email})</li>
+                <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Student: ${user?.email}</li>
+              </ul>
+            </div>`
+          : ""
+      }
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
+        <p>Hello,</p>
+        <p>We are excited to confirm a new booking for the class <strong>${
+          classData.Name
+        }</strong>!</p>
+        <h3>Booking Details:</h3>
+        <table style="width: 100%; border-collapse: collapse;" border="1">
+          <tr>
+            <td style="padding: 8px;"><strong>User Email:</strong></td>
+            <td style="padding: 8px;">${user?.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Class Name:</strong></td>
+            <td style="padding: 8px;">${classData.Name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Start Time:</strong></td>
+            <td style="padding: 8px;">${date + "@" + startTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>End Time:</strong></td>
+            <td style="padding: 8px;">${date + "@" + endTime}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Time Zone:</strong></td>
+            <td style="padding: 8px;">${
+              timeZone ? timeZone : "America/Toronto"
+            }</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;"><strong>Price:</strong></td>
+            <td style="padding: 8px;">${price}</td>
+          </tr>
+          ${
+            meetingLink
+              ? `<tr>
+            <td style="padding: 8px;"><strong>Meeting Link:</strong></td>
+            <td style="padding: 8px;"><a href="${meetingLink}">${meetingLink}</a></td>
+          </tr>`
+              : ""
+          }
+        </table>
+        <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
+        <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
+      </div>
+      </div>
+    `;
+
+    const notificationRef = collection(db, "notifications");
+
+    const now = Timestamp?.now();
+    const notificationData = {
+      user: bookingData.instructor_id,
+      type: "booking",
+      title: "New Booking",
+      text: `New booking for ${classData.Name} on ${date} at ${startTime}`,
+      isRead: false,
+      bookingId: bookingRef,
+      createdAt: now,
+    };
+    await addDoc(notificationRef, notificationData);
+
+    await sendEmail(
+      recipientEmails,
+      `New Booking for ${classData.Name} with Pocketclass!`,
+      htmlContent,
+      [
+        {
+          filename: "booking-invite.ics",
+          content: icsContent,
+          type: "text/calendar",
+        },
+      ]
+    );
+
+    setStripeOptions(null);
+    toast.success("Booking confirmed!");
+    setDisplayConfirmation(false);
+    router.push(`/confirmBooking/${bookingRef.id}`);
+    setStripeLoading(false);
+    setBookLoading(false);
+  };
   const initializeStripe = async () => {
     const now = moment.utc();
     if (selectedSlot.classId) {
@@ -436,13 +807,54 @@ export default function index({ instructorId, classId, classData }) {
         }
       }
     }
-    setDisplayConfirmation(false);
     if (!user && !userLoading) {
       toast.error("Please login to book a slot.");
       return;
     }
-    setStripeLoading(true);
 
+    if (packageClasses > 0) {
+      // Get the user packages from firebase where class_id is equal to classId and user_id is equal to user.uid
+      setBookLoading(true);
+      const packagesRef = collection(db, "Packages");
+      const q = query(
+        packagesRef,
+        where("class_id", "==", classId),
+        where("user_id", "==", user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const packageClasses = querySnapshot.docs.length;
+      let pricePerSession = querySnapshot.docs[0].data().price_per_session;
+      let payment_intent_id = querySnapshot.docs[0].data().payment_intent_id;
+      let isPackage = false;
+      let classDeduct = 1;
+      if (packageClasses > 0) {
+        for (const doc of querySnapshot.docs) {
+          const data = doc.data();
+          if (data.classes_left > 0) {
+            if (selectedSlot.classId) {
+              classDeduct = groupEmails.length;
+              if (groupEmails.length > data.classes_left) {
+                continue;
+              }
+            }
+            await updateDoc(doc.ref, {
+              classes_left: data.classes_left - classDeduct,
+            });
+            pricePerSession = data.price_per_session;
+            payment_intent_id = data.payment_intent_id;
+            isPackage = true;
+            break;
+          }
+        }
+      }
+      if (isPackage) {
+        setPackageClasses((prev) => prev - classDeduct);
+        handleSubmit(pricePerSession, payment_intent_id);
+        return;
+      }
+    }
+    setDisplayConfirmation(false);
+    setStripeLoading(true);
     const expiry = now.clone().add(5, "minutes").toISOString();
     setTimer(300);
 
@@ -591,7 +1003,10 @@ export default function index({ instructorId, classId, classData }) {
           Booking Schedule
         </div>
         <div className="text-base text-gray-600 font-bold ">
-          Timezone: {timeZone ? timeZone : "America/Toronto"}
+          <div>Timezone: {timeZone ? timeZone : "America/Toronto"}</div>
+          <div>
+            {packageClasses > 0 && `Package Classes Left: ${packageClasses}`}
+          </div>
         </div>
       </div>
       <div className="flex flex-grow flex-col lg:flex-row">
@@ -770,8 +1185,7 @@ export default function index({ instructorId, classId, classData }) {
                     if (selectedSlot.classId) {
                       if (!user) {
                         setGroupEmails([""]);
-                      }
-                      else{
+                      } else {
                         setGroupEmails([user.email]);
                       }
                       setNumberOfGroupMembers(1);
@@ -780,9 +1194,10 @@ export default function index({ instructorId, classId, classData }) {
                       handleBookSlot();
                     }
                   }}
+                  disabled={bookLoading}
                   className="bg-[#E73F2B] text-white max-[450px]:w-full p-2 rounded"
                 >
-                  Book Now
+                  {bookLoading ? "Loading..." : "Book Now"}
                 </button>
               </div>
             </div>
@@ -912,8 +1327,9 @@ export default function index({ instructorId, classId, classData }) {
               <button
                 onClick={handleBookSlot}
                 className="bg-[#E73F2B] text-white px-4 py-2 rounded"
+                disabled={bookLoading}
               >
-                Book Now
+                {bookLoading ? "Loading..." : "Book Now"}
               </button>
             </div>
           </div>
