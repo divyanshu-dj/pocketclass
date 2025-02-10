@@ -15,6 +15,10 @@
     {
       "path": "/api/sendReviewMail",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/sendReminderMail",
+      "schedule": "*/30 * * * *"
     }    
   ]
 }

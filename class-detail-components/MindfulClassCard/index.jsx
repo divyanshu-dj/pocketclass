@@ -149,7 +149,13 @@ const CheckoutSkeleton = () => {
   );
 };
 
-const CheckoutForm = ({ price, num_sessions, classId, name, setStripeOptions }) => {
+const CheckoutForm = ({
+  price,
+  num_sessions,
+  classId,
+  name,
+  setStripeOptions,
+}) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
   const elements = useElements();
@@ -240,11 +246,12 @@ const CheckoutForm = ({ price, num_sessions, classId, name, setStripeOptions }) 
         "Confirmation of Package Purchase",
         htmlContent
       );
-    }
 
-    toast.success("Package purchased successfully!");
-    setLoading(false);
-    setStripeOptions(null);
+      toast.success("Package purchased successfully!");
+      router.push("/confirmPackage/" + docRef.id);
+      setLoading(false);
+      setStripeOptions(null);
+    }
   };
 
   return (
