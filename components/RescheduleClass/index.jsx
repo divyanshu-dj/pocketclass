@@ -16,6 +16,7 @@ import {
   where,
   getDocs,
   deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import moment from "moment-timezone";
 import { loadStripe } from "@stripe/stripe-js";
@@ -821,6 +822,7 @@ export default function index({
       startTime,
       endTime,
       meetingLink: meetingLink ? meetingLink : "",
+      updatedAt: serverTimestamp(),
     };
     updateDoc(bookingRef, updateData);
     const organizer = instructorData.email;

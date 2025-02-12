@@ -7,12 +7,14 @@ import { Navigation } from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { useRouter } from "next/router";
 
 function SportSelectionWidget({
   category: selectedCategory,
   onSubCategorySelect,
   activeSubCategory,
 }) {
+  const router = useRouter();
   const selectedCategoryData = categories.find(
     (cat) => cat.name.toLowerCase() === selectedCategory
   );
@@ -65,7 +67,7 @@ function SportSelectionWidget({
                 <SwiperSlide key={index}>
                   <div
                     key={index}
-                    onClick={() => onSubCategorySelect(subCategory.name)}
+                    onClick={() => router.push(`/results?category=${selectedCategoryData.name}&subCategory=${subCategory.name}`)}
                     className={`flex justify-start items-stretch flex-col gap-2 grow-0 shrink-0 basis-auto text-center cursor-pointer ${
                       activeSubCategory === subCategory.name
                         ? "opacity-100"

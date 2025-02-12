@@ -8,7 +8,7 @@ import {
 	useSendEmailVerification,
 	useSignInWithGoogle,
 } from "react-firebase-hooks/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { toast, ToastContainer } from "react-toastify";
 
@@ -35,6 +35,7 @@ function Register() {
 				email: user?.user?.email,
 				category: category,
 				profileImage: user?.user?.photoURL,
+				createdAt: serverTimestamp(),
 			};
 
 			if (user) {
@@ -87,6 +88,7 @@ function Register() {
 				dob,
 				email,
 				category,
+				createdAt: serverTimestamp(),
 			};
 
 			if (signedUpUser) {
