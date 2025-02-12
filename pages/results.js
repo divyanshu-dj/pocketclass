@@ -24,7 +24,6 @@ export default function Results() {
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
-  const [selectedDistance, setSelectedDistance] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState(
     subCategory || ""
   );
@@ -58,7 +57,7 @@ export default function Results() {
     if (!map.current || !filteredClasses.length) return;
 
     // Clear existing markers
-    markers.current.forEach((marker) => marker.remove());
+    markers.current.forEach((marker) => marker.marker.remove());
     markers.current = [];
 
     // Determine map bounds
@@ -93,15 +92,9 @@ export default function Results() {
 
         marker.getElement().addEventListener("click", () => {
           setSelectedClassDetails(classItem);
-
-          // Fly to the marker
-          map.current.flyTo({
-            center: [classItem.longitude, classItem.latitude],
-            zoom: 12,
-          });
         });
 
-        markers.current.push(marker);
+        markers.current.push({ marker, classId: classItem.id });
         bounds.extend([classItem.longitude, classItem.latitude]);
       }
     });
@@ -167,15 +160,6 @@ export default function Results() {
     setSubCategoryOptions(options || []);
   }, [selectedCategory]);
 
-  useEffect(() => {
-    if (selectedClassDetails) {
-      map.current.flyTo({
-        center: [selectedClassDetails.longitude, selectedClassDetails.latitude],
-        zoom: 12,
-      });
-    }
-  }, [selectedClassDetails]);
-
   const distanceOptions = [
     { value: "1", label: "1 km" },
     { value: "2", label: "2 km" },
@@ -184,6 +168,10 @@ export default function Results() {
     { value: "15", label: "15 km" },
     { value: "20", label: "20 km" },
   ];
+  const [selectedDistance, setSelectedDistance] = useState(
+    distanceOptions[5].value
+  );
+
   const sortOptions = [
     { value: "rating", label: "Rating" },
     { value: "price", label: "Price" },
@@ -256,6 +244,7 @@ export default function Results() {
 
   useEffect(() => {
     let filtered = [...classes];
+    console.log(classes);
 
     if (selectedCategory) {
       filtered = filtered.filter((data) => data.Category === selectedCategory);
@@ -268,15 +257,21 @@ export default function Results() {
       );
     }
     if (selectedDistance) {
-      filtered = filtered.filter((data) => {
-        const distance = distanceCalculator(
-          location.latitude,
-          location.longitude,
-          data.latitude,
-          data.longitude
-        );
-        return distance <= Number(selectedDistance);
-      });
+      if (location) {
+        filtered = filtered.filter((data) => {
+          const distance = distanceCalculator(
+            location.latitude,
+            location.longitude,
+            data.latitude,
+            data.longitude
+          );
+          return (
+            distance <= Number(selectedDistance) ||
+            data.Mode === "Online" ||
+            data.Address === "Online"
+          );
+        });
+      }
     }
     if (sortBy === "rating") {
       filtered.sort((a, b) => b.averageRating - a.averageRating);
@@ -309,6 +304,7 @@ export default function Results() {
     sortBy,
     classes,
     selectedDistance,
+    location,
   ]);
 
   return (
@@ -320,18 +316,22 @@ export default function Results() {
           <div className="inline-flex bg-gray-200 rounded-full p-1">
             <button
               className={`px-4 py-2 rounded-full transition-all duration-300 
-                ${activeView === "classes" 
-                  ? "bg-logo-red text-white" 
-                  : "text-gray-700"}`}
+                ${
+                  activeView === "classes"
+                    ? "bg-logo-red text-white"
+                    : "text-gray-700"
+                }`}
               onClick={() => setActiveView("classes")}
             >
               Classes
             </button>
             <button
               className={`px-4 py-2 rounded-full transition-all duration-300 
-                ${activeView === "map" 
-                  ? "bg-logo-red text-white" 
-                  : "text-gray-700"}`}
+                ${
+                  activeView === "map"
+                    ? "bg-logo-red text-white"
+                    : "text-gray-700"
+                }`}
               onClick={() => setActiveView("map")}
             >
               Map
@@ -340,10 +340,12 @@ export default function Results() {
         </div>
 
         {/* Classes section - visible on mobile when "classes" view is active, always visible on larger screens */}
-        <div className={`
+        <div
+          className={`
           w-full md:w-1/2 overflow-hidden h-full 
           ${activeView === "classes" || "hidden md:block"}
-        `}>
+        `}
+        >
           <div className="flex flex-wrap gap-4 mb-6 mt-2 px-4">
             <Select
               options={categoryOptions}
@@ -405,15 +407,24 @@ export default function Results() {
                         ? "border-logo-red"
                         : ""
                     }`}
-                    onClick={() => {
-                      router.push(`/classes/id=${classItem.id}`);
-                      setSelectedClassDetails(classItem);
-                      if (classItem.Longitude && classItem.Latitude) {
+                    onMouseEnter={() => {
+                      if (
+                        !(
+                          classItem.Mode === "Online" ||
+                          classItem.Address === "Online"
+                        ) &&
+                        classItem.longitude &&
+                        classItem.latitude
+                      ) {
                         map.current.flyTo({
-                          center: [classItem.Longitude, classItem.Latitude],
+                          center: [classItem.longitude, classItem.latitude],
                           zoom: 12,
                         });
                       }
+                    }}
+                    onClick={() => {
+                      router.push(`/classes/id=${classItem.id}`);
+                      setSelectedClassDetails(classItem);
                     }}
                   >
                     <img
@@ -446,10 +457,12 @@ export default function Results() {
         </div>
 
         {/* Map section - visible on mobile when "map" view is active, always visible on larger screens */}
-        <div className={`
+        <div
+          className={`
           w-full md:w-1/2 p-4 relative h-full 
           ${activeView === "map" || "hidden md:block"}
-        `}>
+        `}
+        >
           <div
             ref={mapContainer}
             className="h-[90%] min-h-[600px] w-full rounded-xl bg-gray-200"
@@ -457,7 +470,9 @@ export default function Results() {
           {selectedClassDetails && (
             <div
               key={selectedClassDetails.id}
-              onClick={() => {router.push(`/classes/id=${selectedClassDetails.id}`)}}
+              onClick={() => {
+                router.push(`/classes/id=${selectedClassDetails.id}`);
+              }}
               className={`flex cursor-pointer items-center z-50 absolute bottom-24 box-border left-4 right-4 bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 border-2 border-gray-100 hover:border-logo-red`}
             >
               <img
