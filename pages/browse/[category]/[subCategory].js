@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { categories } from "../utils/categories";
-import NewHeader from "../components/NewHeader";
+import { categories } from "../../../utils/categories";
+import NewHeader from "../../../components/NewHeader";
 import mapboxgl from "mapbox-gl";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import {
   collection,
   query,
@@ -12,7 +14,7 @@ import {
   doc as firestoreDoc,
   getDoc,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db } from "../../../firebaseConfig";
 import Select from "react-select";
 
 mapboxgl.accessToken = process.env.mapbox_key;
@@ -28,10 +30,14 @@ export default function Results() {
     subCategory || ""
   );
   const [sortBy, setSortBy] = useState("");
-  const categoryOptions = categories.map((category) => ({
-    value: category.name,
-    label: category.name,
-  }));
+  const categoryOptions = [
+    { value: "All", label: "All" },
+    ...categories.map((category) => ({
+      value: category.name,
+      label: category.name,
+    })),
+  ];
+
   const [selectedCategory, setSelectedCategory] = useState(category || "");
   const [subCategoryOptions, setSubCategoryOptions] = useState([]);
   const [selectedClassDetails, setSelectedClassDetails] = useState(null);
@@ -40,6 +46,11 @@ export default function Results() {
   const markers = useRef([]);
   const [activeView, setActiveView] = useState("classes");
 
+  useEffect(() => {
+    setSelectedSubCategory(subCategory || "");
+    setSelectedCategory(category || "");
+  }, [subCategory, category]);
+
   // MapBox Initialization
   useEffect(() => {
     if (map.current) return;
@@ -47,9 +58,15 @@ export default function Results() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [-74.5, 40],
+      center: [location?.longitude || 0, location?.latitude || 0],
       zoom: 9,
     });
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+    });
+
+    map.current.addControl(geocoder);
   }, []);
 
   // Add Markers for Classes
@@ -161,15 +178,14 @@ export default function Results() {
   }, [selectedCategory]);
 
   const distanceOptions = [
-    { value: "1", label: "1 km" },
     { value: "2", label: "2 km" },
     { value: "5", label: "5 km" },
-    { value: "10", label: "10 km" },
     { value: "15", label: "15 km" },
-    { value: "20", label: "20 km" },
+    { value: "30", label: "30 km" },
+    { value: "", label: "All" },
   ];
   const [selectedDistance, setSelectedDistance] = useState(
-    distanceOptions[5].value
+    distanceOptions[3].value
   );
 
   const sortOptions = [
@@ -244,9 +260,8 @@ export default function Results() {
 
   useEffect(() => {
     let filtered = [...classes];
-    console.log(classes);
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== "All") {
       filtered = filtered.filter((data) => data.Category === selectedCategory);
     }
     if (selectedSubCategory) {
@@ -296,7 +311,6 @@ export default function Results() {
         });
       }
     }
-
     setFilteredClasses(filtered);
   }, [
     selectedCategory,
@@ -394,7 +408,7 @@ export default function Results() {
             />
           </div>
 
-          <div className="p-4 overflow-auto h-full max-h-full">
+          <div className="p-4 overflow-auto h-full max-h-[80%]">
             {loading ? (
               <p className="text-center text-gray-500">Loading...</p>
             ) : (
@@ -402,7 +416,7 @@ export default function Results() {
                 {filteredClasses.map((classItem) => (
                   <div
                     key={classItem.id}
-                    className={`flex items-center cursor-pointer bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 border-2 border-gray-100 hover:border-logo-red ${
+                    className={`flex items-center cursor-pointer bg-white rounded-xl shadow-md transform transition-all duration-300 border-2 border-gray-100 hover:border-logo-red ${
                       selectedClassDetails?.id === classItem.id
                         ? "border-logo-red"
                         : ""
@@ -421,14 +435,12 @@ export default function Results() {
                           zoom: 12,
                         });
                         markers.current
-                          .find((marker) => {
-                            const { lng, lat } = marker.marker.getLngLat();
-                            return (
-                              lng === classItem.longitude &&
-                              lat === classItem.latitude
-                            );
-                          })
-                          ?.marker.getElement()
+                            .find((marker) => {
+                              return (
+                                marker.classId === classItem.id
+                              );
+                            })
+                            ?.marker.getElement()
                           .querySelectorAll('svg [fill="' + "#3FB1CE" + '"]')[0]
                           ?.setAttribute("fill", "red");
                       }
@@ -443,14 +455,12 @@ export default function Results() {
                         classItem.latitude
                       ) {
                         markers.current
-                          .find((marker) => {
-                            const { lng, lat } = marker.marker.getLngLat();
-                            return (
-                              lng === classItem.longitude &&
-                              lat === classItem.latitude
-                            );
-                          })
-                          ?.marker.getElement()
+                            .find((marker) => {
+                              return (
+                                marker.classId === classItem.id
+                              );
+                            })
+                            ?.marker.getElement()
                           .querySelectorAll('svg [fill="' + "red" + '"]')[0]
                           ?.setAttribute("fill", "#3FB1CE");
                       }

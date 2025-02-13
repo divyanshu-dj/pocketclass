@@ -67,7 +67,7 @@ function SportSelectionWidget({
                 <SwiperSlide key={index}>
                   <div
                     key={index}
-                    onClick={() => router.push(`/results?category=${selectedCategoryData.name}&subCategory=${subCategory.name}`)}
+                    onClick={() => router.push(`/browse/${selectedCategoryData.name}/${subCategory.name}`)}
                     className={`flex justify-start items-stretch flex-col gap-2 grow-0 shrink-0 basis-auto text-center cursor-pointer ${
                       activeSubCategory === subCategory.name
                         ? "opacity-100"
