@@ -1,7 +1,7 @@
 import Head from "next/head";
 import * as React from "react";
 import { useRouter } from "next/router";
-import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db, storage } from "../../firebaseConfig";
 import { toast, ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
@@ -100,6 +100,7 @@ function UpdateProfile() {
     await updateDoc(doc(db, "Users", id), {
       ...data,
       profileImage: imageURI,
+      updatedAt: serverTimestamp(),
     });
 
     toast.success("Profile updated successfully", {

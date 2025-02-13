@@ -22,6 +22,7 @@ import {
   collection,
   doc,
   GeoPoint,
+  serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
@@ -116,6 +117,7 @@ export default function CreateClass() {
         Images: imagesURL,
         classCreator: user?.uid,
         Packages: packages,
+        createdAt: serverTimestamp(),
       });
 
       // Upload images and get URLs in order

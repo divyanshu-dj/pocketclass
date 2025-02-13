@@ -16,7 +16,7 @@ import { useRouter } from "next/router";
 import { auth, db, storage } from "../../firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
@@ -112,6 +112,7 @@ export default function UpdateClass() {
         ...form,
         Images: loadedImgs,
         Packages: packages,
+        updatedAt: serverTimestamp(),
       });
 
       // Keep track of upload promises

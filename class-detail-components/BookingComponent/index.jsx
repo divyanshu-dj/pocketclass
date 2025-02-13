@@ -17,6 +17,7 @@ import {
   getDocs,
   deleteDoc,
   Timestamp,
+  serverTimestamp,
 } from "firebase/firestore";
 import moment from "moment-timezone";
 import { loadStripe } from "@stripe/stripe-js";
@@ -501,6 +502,7 @@ export default function index({ instructorId, classId, classData }) {
       mode: selectedSlot.classId ? "group" : "individual",
       price: price,
       paymentIntentId: payment_intent_id,
+      createdAt: serverTimestamp(),
     };
 
     const bookingsRef = collection(db, "Bookings");
@@ -889,6 +891,7 @@ END:VCALENDAR`.trim();
       groupSize: numberOfGroupMembers,
       expiry,
       mode: selectedSlot.classId ? "group" : "individual",
+      createdAt: serverTimestamp(),
     };
 
     const bookingsRef = collection(db, "Bookings");
