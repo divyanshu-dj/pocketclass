@@ -420,6 +420,39 @@ export default function Results() {
                           center: [classItem.longitude, classItem.latitude],
                           zoom: 12,
                         });
+                        markers.current
+                          .find((marker) => {
+                            const { lng, lat } = marker.marker.getLngLat();
+                            return (
+                              lng === classItem.longitude &&
+                              lat === classItem.latitude
+                            );
+                          })
+                          ?.marker.getElement()
+                          .querySelectorAll('svg [fill="' + "#3FB1CE" + '"]')[0]
+                          ?.setAttribute("fill", "red");
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (
+                        !(
+                          classItem.Mode === "Online" ||
+                          classItem.Address === "Online"
+                        ) &&
+                        classItem.longitude &&
+                        classItem.latitude
+                      ) {
+                        markers.current
+                          .find((marker) => {
+                            const { lng, lat } = marker.marker.getLngLat();
+                            return (
+                              lng === classItem.longitude &&
+                              lat === classItem.latitude
+                            );
+                          })
+                          ?.marker.getElement()
+                          .querySelectorAll('svg [fill="' + "red" + '"]')[0]
+                          ?.setAttribute("fill", "#3FB1CE");
                       }
                     }}
                     onClick={() => {
