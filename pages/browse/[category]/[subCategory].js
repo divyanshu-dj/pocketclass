@@ -418,7 +418,7 @@ export default function Results() {
       <NewHeader />
       <div className="flex flex-col md:flex-row md:overflow-hidden h-full">
         {/* Mobile view toggle for small screens */}
-        <div className="md:hidden flex justify-center my-2">
+        <div className="md:hidden w-full flex z-50 fixed bottom-0 items-center justify-center my-2">
           <div className="inline-flex bg-gray-200 rounded-full p-1">
             <button
               className={`px-4 py-2 rounded-full transition-all duration-300 
@@ -457,7 +457,7 @@ export default function Results() {
           ${activeView === "classes" || "hidden md:block"}
         `}
         >
-          <div className="flex flex-wrap gap-4 mb-6 mt-2 px-4">
+          <div className="flex flex-wrap gap-4 mb-2 mt-2 px-4">
             <Select
               options={categoryOptions}
               placeholder="Category"
