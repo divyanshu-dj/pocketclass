@@ -61,7 +61,7 @@ export default function Results() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [location?.longitude || 0, location?.latitude || 0],
+      center: [location?.longitude || -79.347015, location?.latitude || 43.65107],
       zoom: 9,
     });
     const geocoder = new MapboxGeocoder({
