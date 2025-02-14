@@ -61,7 +61,7 @@ export default function Results() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [location?.longitude || 0, location?.latitude || 0],
+      center: [location?.longitude || -79.347015, location?.latitude || 43.65107],
       zoom: 9,
     });
     const geocoder = new MapboxGeocoder({
@@ -88,7 +88,7 @@ export default function Results() {
     const bounds = new mapboxgl.LngLatBounds();
 
     filteredClasses.forEach((classItem) => {
-      if (classItem.longitude && classItem.latitude) {
+      if (classItem.longitude && classItem.latitude && !(classItem.Address === "Online") && !(classItem.Mode === "Online")) {
         const marker = new mapboxgl.Marker()
           .setLngLat([classItem.longitude, classItem.latitude])
           .addTo(map.current);
@@ -123,12 +123,9 @@ export default function Results() {
       }
     });
 
-    // Zoom to user location if available
+    
     if (location) {
-      map.current.flyTo({
-        center: [location.longitude, location.latitude],
-        zoom: 12,
-      });
+      bounds.extend([location.longitude, location.latitude]);
       const size = 150;
 
       const pulsingDot = {
@@ -215,13 +212,11 @@ export default function Results() {
         },
       });
     }
-    // Fit map to markers if any exist
-    else if (markers.current.length) {
-      map.current.fitBounds(bounds, {
-        padding: 50,
-        maxZoom: 12,
-      });
-    }
+    
+    map.current.fitBounds(bounds, {
+      padding: 50,
+      maxZoom: 12,
+    });
   }, [filteredClasses]);
   const [location, setLocation] = useState(null);
   useEffect(() => {
@@ -423,7 +418,7 @@ export default function Results() {
       <NewHeader />
       <div className="flex flex-col md:flex-row md:overflow-hidden h-full">
         {/* Mobile view toggle for small screens */}
-        <div className="md:hidden flex justify-center my-2">
+        <div className="md:hidden w-full flex z-50 fixed bottom-0 items-center justify-center my-2">
           <div className="inline-flex bg-gray-200 rounded-full p-1">
             <button
               className={`px-4 py-2 rounded-full transition-all duration-300 
@@ -462,7 +457,7 @@ export default function Results() {
           ${activeView === "classes" || "hidden md:block"}
         `}
         >
-          <div className="flex flex-wrap gap-4 mb-6 mt-2 px-4">
+          <div className="flex flex-wrap gap-4 mb-2 mt-2 px-4">
             <Select
               options={categoryOptions}
               placeholder="Category"
@@ -618,7 +613,7 @@ export default function Results() {
                 {filteredClasses.map((classItem) => (
                   <div
                     key={classItem.id}
-                    className="w-full md:w-[48%]"
+                    className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
                     onMouseEnter={() => {
                       if (
                         !(
