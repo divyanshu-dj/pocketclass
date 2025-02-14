@@ -672,6 +672,11 @@ export default function Results() {
                     />
                   </div>
                 ))}
+                {filteredClasses.length === 0 && (
+                  <p className="text-center text-gray-500">
+                    More classes coming soon!
+                  </p>
+                )}
               </div>
             )}
           </div>
