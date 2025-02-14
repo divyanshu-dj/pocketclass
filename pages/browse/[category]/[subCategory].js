@@ -88,7 +88,7 @@ export default function Results() {
     const bounds = new mapboxgl.LngLatBounds();
 
     filteredClasses.forEach((classItem) => {
-      if (classItem.longitude && classItem.latitude) {
+      if (classItem.longitude && classItem.latitude && !(classItem.Address === "Online") && !(classItem.Mode === "Online")) {
         const marker = new mapboxgl.Marker()
           .setLngLat([classItem.longitude, classItem.latitude])
           .addTo(map.current);
@@ -123,12 +123,9 @@ export default function Results() {
       }
     });
 
-    // Zoom to user location if available
+    
     if (location) {
-      map.current.flyTo({
-        center: [location.longitude, location.latitude],
-        zoom: 12,
-      });
+      bounds.extend([location.longitude, location.latitude]);
       const size = 150;
 
       const pulsingDot = {
@@ -215,13 +212,11 @@ export default function Results() {
         },
       });
     }
-    // Fit map to markers if any exist
-    else if (markers.current.length) {
-      map.current.fitBounds(bounds, {
-        padding: 50,
-        maxZoom: 12,
-      });
-    }
+    
+    map.current.fitBounds(bounds, {
+      padding: 50,
+      maxZoom: 12,
+    });
   }, [filteredClasses]);
   const [location, setLocation] = useState(null);
   useEffect(() => {
@@ -618,7 +613,7 @@ export default function Results() {
                 {filteredClasses.map((classItem) => (
                   <div
                     key={classItem.id}
-                    className="w-full md:w-[48%]"
+                    className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
                     onMouseEnter={() => {
                       if (
                         !(
