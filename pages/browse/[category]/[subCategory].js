@@ -625,10 +625,6 @@ export default function Results() {
                         classItem.longitude &&
                         classItem.latitude
                       ) {
-                        map.current.flyTo({
-                          center: [classItem.longitude, classItem.latitude],
-                          zoom: 12,
-                        });
                         markers.current
                           .find((marker) => {
                             return marker.classId === classItem.id;
