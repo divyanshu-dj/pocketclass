@@ -103,7 +103,9 @@ export default function Schedule() {
       .names()
       .filter((zone) => zone.startsWith("America/"));
 
-    setTimeZones(northAmericanTimeZones.map((zone) => ({ value: zone, label: zone })));
+    setTimeZones(
+      northAmericanTimeZones.map((zone) => ({ value: zone, label: zone }))
+    );
   }, []);
 
   useEffect(() => {
@@ -417,6 +419,7 @@ export default function Schedule() {
               );
 
               if (isBooked) {
+                current = next;
                 continue;
               }
               newEvents.push({
@@ -468,6 +471,7 @@ export default function Schedule() {
             );
 
             if (isBooked) {
+              current = next;
               continue;
             }
             newEvents.push({
@@ -516,7 +520,7 @@ export default function Schedule() {
       newEvents.push({
         title:
           students.length === 1
-            ? students[0]
+            ? (students[0] || "Booked by a student")
             : `${students.length} students booked`,
         start: new Date(start),
         end: new Date(end),
@@ -524,7 +528,7 @@ export default function Schedule() {
         tooltip:
           students.length === 1
             ? `Class: ${classDetail?.Name}, Booked by ${students[0]}`
-            : `${students} have booked the class ${classDetail?.Name}`,
+            : `Class: ${classDetail?.Name}\nStudents:\n- ${students.join("\n- ")} `,
       });
     });
 
@@ -543,7 +547,6 @@ export default function Schedule() {
     { value: 210, label: "3 hours 30 minutes" },
     { value: 240, label: "4 hours" },
   ];
-
 
   const timeOptions = Array.from({ length: 48 }, (_, i) => {
     const hour = Math.floor(i / 2)
@@ -608,10 +611,8 @@ export default function Schedule() {
               className="w-full"
             />
           </div>
-          
-          <h2 className="text-2xl font-bold text-gray-700 mb-3">
-            Timezone         
-             </h2>
+
+          <h2 className="text-2xl font-bold text-gray-700 mb-3">Timezone</h2>
 
           <div className="mb-6">
             <label
@@ -1400,7 +1401,7 @@ export default function Schedule() {
                   {moment(selectedBooking.end).format("MMMM Do YYYY, h:mm A")}
                 </p>
                 {selectedBooking.tooltip && (
-                  <p>
+                  <p className="whitespace-pre">
                     <strong>Details:</strong> {selectedBooking.tooltip}
                   </p>
                 )}
