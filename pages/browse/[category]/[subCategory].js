@@ -455,12 +455,12 @@ export default function Results({ category, subCategory }) {
   return (
     <>
       <Head>
-        <title>{SubCategory} Classes in Toronto | Affordable Lessons for All Levels</title>
-        <meta name="description" content={`Find the best ${SubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
+        <title>{selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels</title>
+        <meta name="description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
         <link rel="canonical" href={`/browse/${selectedCategory}/${selectedSubCategory}`} />
 				<link rel="icon" href="/pc_favicon.ico" />
-        <meta property="og:title" content={`Browse ${selectedCategory} classes`} />
-        <meta property="og:description" content={`Browse ${selectedCategory} classes`} />
+        <meta property="og:title" content={`${selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels`} />
+        <meta property="og:description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`/browse/${selectedCategory}/${selectedSubCategory}`} />
         <meta name="keywords" content={`${selectedCategory}, ${selectedSubCategory}, online classes, best ${selectedCategory} courses, top ${selectedSubCategory} tutorials, best ${selectedCategory} classes in Toronto, in-person, online, toronto`} />
