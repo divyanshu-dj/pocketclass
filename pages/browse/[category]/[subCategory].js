@@ -17,12 +17,42 @@ import {
 import { db } from "../../../firebaseConfig";
 import Select from "react-select";
 import InstructorSection from "../../../home-components/InstructorSection";
-
+import { categories as categoryList } from "../../../utils/categories";
+import Head from "next/head";
 mapboxgl.accessToken = process.env.mapbox_key;
 
-export default function Results() {
+export const getStaticPaths = async () => {
+  let paths = [];
+
+  categoryList.forEach((category) => {
+    category.subCategories.forEach((subCategory) => {
+      paths.push({
+        params: { category: category.name, subCategory: subCategory.name },
+      });
+    });
+  });
+
+  return {
+    paths,
+    fallback: "blocking", // Or "false" for 404 on unknown paths
+  };
+};
+
+export const getStaticProps = async ({ params }) => {
+  const { category, subCategory } = params;
+
+  return {
+    props: {
+      category,
+      subCategory,
+    },
+    revalidate: 60, // ISR: Regenerates page every 60 seconds
+  };
+};
+
+
+export default function Results({ category, subCategory }) {
   const router = useRouter();
-  const { subCategory, category } = router.query;
   const [classes, setClasses] = useState([]);
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +91,10 @@ export default function Results() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [location?.longitude || -79.347015, location?.latitude || 43.65107],
+      center: [
+        location?.longitude || -79.347015,
+        location?.latitude || 43.65107,
+      ],
       zoom: 9,
     });
     const geocoder = new MapboxGeocoder({
@@ -88,7 +121,12 @@ export default function Results() {
     const bounds = new mapboxgl.LngLatBounds();
 
     filteredClasses.forEach((classItem) => {
-      if (classItem.longitude && classItem.latitude && !(classItem.Address === "Online") && !(classItem.Mode === "Online")) {
+      if (
+        classItem.longitude &&
+        classItem.latitude &&
+        !(classItem.Address === "Online") &&
+        !(classItem.Mode === "Online")
+      ) {
         const marker = new mapboxgl.Marker()
           .setLngLat([classItem.longitude, classItem.latitude])
           .addTo(map.current);
@@ -123,7 +161,6 @@ export default function Results() {
       }
     });
 
-    
     if (location) {
       bounds.extend([location.longitude, location.latitude]);
       const size = 150;
@@ -212,8 +249,8 @@ export default function Results() {
         },
       });
     }
-    
-    if (location){
+
+    if (location) {
       map.current.fitBounds(bounds, {
         padding: 50,
         maxZoom: 12,
@@ -416,312 +453,329 @@ export default function Results() {
   ]);
 
   return (
-    <div className="md:overflow-hidden h-screen">
-      <NewHeader />
-      <div className="flex flex-col md:flex-row md:overflow-hidden h-full">
-        {/* Mobile view toggle for small screens */}
-        <div className="md:hidden w-full flex z-50 fixed bottom-0 items-center justify-center my-2">
-          <div className="inline-flex bg-gray-200 rounded-full p-1">
-            <button
-              className={`px-4 py-2 rounded-full transition-all duration-300 
+    <>
+      <Head>
+        <title>{selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels</title>
+        <meta name="description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
+        <link rel="canonical" href={`/browse/${selectedCategory}/${selectedSubCategory}`} />
+				<link rel="icon" href="/pc_favicon.ico" />
+        <meta property="og:title" content={`${selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels`} />
+        <meta property="og:description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`/browse/${selectedCategory}/${selectedSubCategory}`} />
+        <meta name="keywords" content={`${selectedCategory}, ${selectedSubCategory}, online classes, best ${selectedCategory} courses, top ${selectedSubCategory} tutorials, best ${selectedCategory} classes in Toronto, in-person, online, toronto`} />
+      </Head>
+      <div className="md:overflow-hidden h-screen">
+        <NewHeader />
+        <div className="flex flex-col md:flex-row md:overflow-hidden h-full">
+          {/* Mobile view toggle for small screens */}
+          <div className="md:hidden w-full flex z-50 fixed bottom-0 items-center justify-center my-2">
+            <div className="inline-flex bg-gray-200 rounded-full p-1">
+              <button
+                className={`px-4 py-2 rounded-full transition-all duration-300 
                 ${
                   activeView === "classes"
                     ? "bg-logo-red text-white"
                     : "text-gray-700"
                 }`}
-              onClick={() => setActiveView("classes")}
-            >
-              Classes
-            </button>
-            <button
-              className={`px-4 py-2 rounded-full transition-all duration-300 
+                onClick={() => setActiveView("classes")}
+              >
+                Classes
+              </button>
+              <button
+                className={`px-4 py-2 rounded-full transition-all duration-300 
                 ${
                   activeView === "map"
                     ? "bg-logo-red text-white"
                     : "text-gray-700"
                 }`}
-              onClick={() => {
-                setActiveView("map");
-                setTimeout(() => {
-                  map.current.resize();
-                }, 100);
-              }}
-            >
-              Map
-            </button>
+                onClick={() => {
+                  setActiveView("map");
+                  setTimeout(() => {
+                    map.current.resize();
+                  }, 100);
+                }}
+              >
+                Map
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Classes section - visible on mobile when "classes" view is active, always visible on larger screens */}
-        <div
-          className={`
+          {/* Classes section - visible on mobile when "classes" view is active, always visible on larger screens */}
+          <div
+            className={`
           w-full md:w-1/2 md:overflow-hidden h-full 
           ${activeView === "classes" || "hidden md:block"}
         `}
-        >
-          <div className="flex flex-wrap gap-4 mb-2 mt-2 px-4">
-            <Select
-              options={categoryOptions}
-              placeholder="Category"
-              className="w-auto md:w-40 rounded-lg"
-              value={
-                categoryOptions.find(
-                  (option) => option.value === selectedCategory
-                ) || null
-              }
-              onChange={(option) => {
-                setSelectedCategory(option ? option.value : "");
-                setSelectedSubCategory("");
-              }}
-            />
-            <Select
-              options={subCategoryOptions}
-              placeholder="Sub-category"
-              className="w-auto md:w-40 rounded-lg"
-              value={
-                subCategoryOptions.find(
-                  (option) => option.value === selectedSubCategory
-                ) || null
-              }
-              onChange={(option) =>
-                setSelectedSubCategory(option ? option.value : "")
-              }
-            />
-            <Select
-              options={distanceOptions}
-              placeholder="Distance"
-              className="hidden md:block md:w-40 rounded-lg"
-              value={
-                distanceOptions.find(
-                  (option) => option.value === selectedDistance
-                ) || null
-              }
-              onChange={(option) =>
-                setSelectedDistance(option ? option.value : "")
-              }
-            />
-            <Select
-              options={sortOptions}
-              placeholder="Sort By"
-              className="hidden md:block md:w-40 rounded-lg"
-              value={
-                sortOptions.find((option) => option.value === sortBy) || null
-              }
-              onChange={(option) => setSortBy(option ? option.value : "")}
-            />
-            <button
-              className="block md:hidden border-gray-300 border px-4 py-1 rounded-md transition-all duration-300 text-gray-700"
-              onClick={() => setModalVisible(true)}
-            >
-              Filters
-            </button>
-          </div>
+          >
+            <div className="flex flex-wrap gap-4 mb-2 mt-2 px-4">
+              <Select
+                options={categoryOptions}
+                placeholder="Category"
+                className="w-auto md:w-40 rounded-lg"
+                value={
+                  categoryOptions.find(
+                    (option) => option.value === selectedCategory
+                  ) || null
+                }
+                onChange={(option) => {
+                  setSelectedCategory(option ? option.value : "");
+                  setSelectedSubCategory("");
+                }}
+              />
+              <Select
+                options={subCategoryOptions}
+                placeholder="Sub-category"
+                className="w-auto md:w-40 rounded-lg"
+                value={
+                  subCategoryOptions.find(
+                    (option) => option.value === selectedSubCategory
+                  ) || null
+                }
+                onChange={(option) =>
+                  setSelectedSubCategory(option ? option.value : "")
+                }
+              />
+              <Select
+                options={distanceOptions}
+                placeholder="Distance"
+                className="hidden md:block md:w-40 rounded-lg"
+                value={
+                  distanceOptions.find(
+                    (option) => option.value === selectedDistance
+                  ) || null
+                }
+                onChange={(option) =>
+                  setSelectedDistance(option ? option.value : "")
+                }
+              />
+              <Select
+                options={sortOptions}
+                placeholder="Sort By"
+                className="hidden md:block md:w-40 rounded-lg"
+                value={
+                  sortOptions.find((option) => option.value === sortBy) || null
+                }
+                onChange={(option) => setSortBy(option ? option.value : "")}
+              />
+              <button
+                className="block md:hidden border-gray-300 border px-4 py-1 rounded-md transition-all duration-300 text-gray-700"
+                onClick={() => setModalVisible(true)}
+              >
+                Filters
+              </button>
+            </div>
 
-          {modalVisible && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center min-h-screen bg-black bg-opacity-50">
-              <div className="bg-white p-8 px-10 rounded-lg shadow-xl w-[400px]">
-                <div className="flex gap-8">
-                  {/* Distance Section */}
-                  <div className="w-1/2 flex flex-col gap-3">
-                    <h3 className="text-lg font-semibold">Distance</h3>
-                    {distanceOptions.map((option) => (
-                      <label
-                        key={option.value}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedDistance === option.value}
-                          onChange={() => setSelectedDistance(option.value)}
-                          className="hidden peer"
-                        />
-                        <div className="w-5 h-5 border-2 border-gray-400 rounded-md flex items-center justify-center peer-checked:border-logo-red peer-checked:bg-logo-red">
-                          {selectedDistance === option.value && (
-                            <svg
-                              className="w-4 h-4 text-white"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M5 12l4 4L19 7"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-gray-700">{option.label}</span>
-                      </label>
-                    ))}
+            {modalVisible && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center min-h-screen bg-black bg-opacity-50">
+                <div className="bg-white p-8 px-10 rounded-lg shadow-xl w-[400px]">
+                  <div className="flex gap-8">
+                    {/* Distance Section */}
+                    <div className="w-1/2 flex flex-col gap-3">
+                      <h3 className="text-lg font-semibold">Distance</h3>
+                      {distanceOptions.map((option) => (
+                        <label
+                          key={option.value}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedDistance === option.value}
+                            onChange={() => setSelectedDistance(option.value)}
+                            className="hidden peer"
+                          />
+                          <div className="w-5 h-5 border-2 border-gray-400 rounded-md flex items-center justify-center peer-checked:border-logo-red peer-checked:bg-logo-red">
+                            {selectedDistance === option.value && (
+                              <svg
+                                className="w-4 h-4 text-white"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <path
+                                  d="M5 12l4 4L19 7"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="text-gray-700">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* Sort By Section */}
+                    <div className="w-1/2 flex flex-col gap-3">
+                      <h3 className="text-lg font-semibold">Sort By</h3>
+                      {sortOptions.map((option) => (
+                        <label
+                          key={option.value}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={sortBy === option.value}
+                            onChange={() => setSortBy(option.value)}
+                            className="hidden peer"
+                          />
+                          <div className="w-5 h-5 border-2 border-gray-400 rounded-md flex items-center justify-center peer-checked:border-logo-red peer-checked:bg-logo-red">
+                            {sortBy === option.value && (
+                              <svg
+                                className="w-4 h-4 text-white"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <path
+                                  d="M5 12l4 4L19 7"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="text-gray-700">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Sort By Section */}
-                  <div className="w-1/2 flex flex-col gap-3">
-                    <h3 className="text-lg font-semibold">Sort By</h3>
-                    {sortOptions.map((option) => (
-                      <label
-                        key={option.value}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={sortBy === option.value}
-                          onChange={() => setSortBy(option.value)}
-                          className="hidden peer"
-                        />
-                        <div className="w-5 h-5 border-2 border-gray-400 rounded-md flex items-center justify-center peer-checked:border-logo-red peer-checked:bg-logo-red">
-                          {sortBy === option.value && (
-                            <svg
-                              className="w-4 h-4 text-white"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M5 12l4 4L19 7"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-gray-700">{option.label}</span>
-                      </label>
-                    ))}
+                  {/* Close Button */}
+                  <div className="flex justify-center mt-6">
+                    <button
+                      className="px-5 py-2 rounded-full text-logo-red border border-logo-red hover:bg-logo-red hover:text-white transition-all duration-300"
+                      onClick={() => setModalVisible(false)}
+                    >
+                      Close
+                    </button>
                   </div>
-                </div>
-
-                {/* Close Button */}
-                <div className="flex justify-center mt-6">
-                  <button
-                    className="px-5 py-2 rounded-full text-logo-red border border-logo-red hover:bg-logo-red hover:text-white transition-all duration-300"
-                    onClick={() => setModalVisible(false)}
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="p-4 md:overflow-auto h-full max-h-[80%]">
-            {loading ? (
-              <p className="text-center text-gray-500">Loading...</p>
-            ) : (
-              <div className="flex flex-row flex-wrap gap-4">
-                {filteredClasses.map((classItem) => (
-                  <div
-                    key={classItem.id}
-                    className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
-                    onMouseEnter={() => {
-                      if (
-                        !(
-                          classItem.Mode === "Online" ||
-                          classItem.Address === "Online"
-                        ) &&
-                        classItem.longitude &&
-                        classItem.latitude
-                      ) {
-                        markers.current
-                          .find((marker) => {
-                            return marker.classId === classItem.id;
-                          })
-                          ?.marker.getElement()
-                          .querySelectorAll('svg [fill="' + "#3FB1CE" + '"]')[0]
-                          ?.setAttribute("fill", "red");
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      if (
-                        !(
-                          classItem.Mode === "Online" ||
-                          classItem.Address === "Online"
-                        ) &&
-                        classItem.longitude &&
-                        classItem.latitude
-                      ) {
-                        markers.current
-                          .find((marker) => {
-                            return marker.classId === classItem.id;
-                          })
-                          ?.marker.getElement()
-                          .querySelectorAll('svg [fill="' + "red" + '"]')[0]
-                          ?.setAttribute("fill", "#3FB1CE");
-                      }
-                    }}
-                    onClick={() => {
-                      router.push(`/classes/id=${classItem.id}`);
-                      setSelectedClassDetails(classItem);
-                    }}
-                  >
-                    <InstructorSection
+            <div className="p-4 md:overflow-auto h-full max-h-[80%]">
+              {loading ? (
+                <p className="text-center text-gray-500">Loading...</p>
+              ) : (
+                <div className="flex flex-row flex-wrap gap-4">
+                  {filteredClasses.map((classItem) => (
+                    <div
                       key={classItem.id}
-                      classId={classItem.id}
-                      instructor={classItem}
-                      loading={false}
-                    />
-                  </div>
-                ))}
-                {filteredClasses.length === 0 && (
-                  <p className="text-center text-gray-500">
-                    More classes coming soon!
+                      className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
+                      onMouseEnter={() => {
+                        if (
+                          !(
+                            classItem.Mode === "Online" ||
+                            classItem.Address === "Online"
+                          ) &&
+                          classItem.longitude &&
+                          classItem.latitude
+                        ) {
+                          markers.current
+                            .find((marker) => {
+                              return marker.classId === classItem.id;
+                            })
+                            ?.marker.getElement()
+                            .querySelectorAll(
+                              'svg [fill="' + "#3FB1CE" + '"]'
+                            )[0]
+                            ?.setAttribute("fill", "red");
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (
+                          !(
+                            classItem.Mode === "Online" ||
+                            classItem.Address === "Online"
+                          ) &&
+                          classItem.longitude &&
+                          classItem.latitude
+                        ) {
+                          markers.current
+                            .find((marker) => {
+                              return marker.classId === classItem.id;
+                            })
+                            ?.marker.getElement()
+                            .querySelectorAll('svg [fill="' + "red" + '"]')[0]
+                            ?.setAttribute("fill", "#3FB1CE");
+                        }
+                      }}
+                      onClick={() => {
+                        router.push(`/classes/id=${classItem.id}`);
+                        setSelectedClassDetails(classItem);
+                      }}
+                    >
+                      <InstructorSection
+                        key={classItem.id}
+                        classId={classItem.id}
+                        instructor={classItem}
+                        loading={false}
+                      />
+                    </div>
+                  ))}
+                  {filteredClasses.length === 0 && (
+                    <p className="text-center text-gray-500">
+                      More classes coming soon!
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Map section - visible on mobile when "map" view is active, always visible on larger screens */}
+          <div
+            className={`
+          w-full md:w-1/2 p-4 relative h-full 
+          ${activeView === "map" || "hidden md:block"}
+        `}
+          >
+            <div
+              ref={mapContainer}
+              className="h-[90%] min-h-[600px] w-full rounded-xl bg-gray-200"
+            />
+            {selectedClassDetails && (
+              <div
+                key={selectedClassDetails.id}
+                onClick={() => {
+                  router.push(`/classes/id=${selectedClassDetails.id}`);
+                }}
+                className={`flex cursor-pointer items-center z-50 absolute bottom-24 box-border left-4 right-4 bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 border-2 border-gray-100 hover:border-logo-red`}
+              >
+                <img
+                  src={selectedClassDetails.Images[0] || "/default-image.jpg"}
+                  alt={selectedClassDetails.Name}
+                  className="w-32 h-32 object-cover rounded-xl"
+                />
+                <div className="p-4 flex flex-grow flex-col justify-between">
+                  <h3 className="text-lg font-semibold flex flex-row justify-between items-center text-gray-900">
+                    <p>{selectedClassDetails.Name}</p>
+                    <p className="text-logo-red">
+                      ${selectedClassDetails.Price}
+                    </p>
+                  </h3>
+                  <p className="text-sm text-blue-600 font-medium">
+                    {selectedClassDetails.Category} |{" "}
+                    {selectedClassDetails.SubCategory ||
+                      selectedClassDetails.Type ||
+                      "N/A"}
                   </p>
-                )}
+                  <p className="text-sm text-gray-600">
+                    {selectedClassDetails.Address || "No Address Available"}
+                  </p>
+                  <p className="text-yellow-500 text-sm">
+                    ⭐ {selectedClassDetails.averageRating.toFixed(1)} (
+                    {selectedClassDetails.reviewCount}+ reviews)
+                  </p>
+                </div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Map section - visible on mobile when "map" view is active, always visible on larger screens */}
-        <div
-          className={`
-          w-full md:w-1/2 p-4 relative h-full 
-          ${activeView === "map" || "hidden md:block"}
-        `}
-        >
-          <div
-            ref={mapContainer}
-            className="h-[90%] min-h-[600px] w-full rounded-xl bg-gray-200"
-          />
-          {selectedClassDetails && (
-            <div
-              key={selectedClassDetails.id}
-              onClick={() => {
-                router.push(`/classes/id=${selectedClassDetails.id}`);
-              }}
-              className={`flex cursor-pointer items-center z-50 absolute bottom-24 box-border left-4 right-4 bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 border-2 border-gray-100 hover:border-logo-red`}
-            >
-              <img
-                src={selectedClassDetails.Images[0] || "/default-image.jpg"}
-                alt={selectedClassDetails.Name}
-                className="w-32 h-32 object-cover rounded-xl"
-              />
-              <div className="p-4 flex flex-grow flex-col justify-between">
-                <h3 className="text-lg font-semibold flex flex-row justify-between items-center text-gray-900">
-                  <p>{selectedClassDetails.Name}</p>
-                  <p className="text-logo-red">${selectedClassDetails.Price}</p>
-                </h3>
-                <p className="text-sm text-blue-600 font-medium">
-                  {selectedClassDetails.Category} |{" "}
-                  {selectedClassDetails.SubCategory ||
-                    selectedClassDetails.Type ||
-                    "N/A"}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {selectedClassDetails.Address || "No Address Available"}
-                </p>
-                <p className="text-yellow-500 text-sm">
-                  ⭐ {selectedClassDetails.averageRating.toFixed(1)} (
-                  {selectedClassDetails.reviewCount}+ reviews)
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
+    </>
   );
 }
