@@ -98,12 +98,30 @@ export default function CreateClass() {
       toast.error("Please fill all fields");
       return;
     }
-
-    for (let pkg of packages) {
-      if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
+    let PackagesToBeAdded = packages;
+    if (packages.length === 1) {
+      if (
+        !packages[0].Name &&
+        !packages[0].num_sessions &&
+        !packages[0].Price
+      ) {
+        PackagesToBeAdded = [];
+      } else if (
+        !packages[0].Name ||
+        !packages[0].num_sessions ||
+        !packages[0].Price
+      ) {
         toast.error("Please fill all package fields");
         setLoading(false);
         return;
+      }
+    } else if (packages.length > 0) {
+      for (let pkg of packages) {
+        if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
+          toast.error("Please fill all package fields");
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -116,7 +134,7 @@ export default function CreateClass() {
         ...form,
         Images: imagesURL,
         classCreator: user?.uid,
-        Packages: packages,
+        Packages: PackagesToBeAdded,
         createdAt: serverTimestamp(),
       });
 
@@ -171,6 +189,7 @@ export default function CreateClass() {
       ]);
       setPreviewImages([]);
       setUploadedFiles([]);
+      router.push("/classes/id=" + addingClass.id);
       toast.success("Class Added");
     } catch (error) {
       console.error("Error adding class:", error);
@@ -205,16 +224,16 @@ export default function CreateClass() {
   const RemoveImg = (e, name) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Immediately update all three states
     const filteredImages = previewImages.filter((img) => img.name !== name);
     const filteredFiles = uploadedFiles.filter((file) => file.name !== name);
-    
+
     setPreviewImages(filteredImages);
     setUploadedFiles(filteredFiles);
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      Images: filteredFiles
+      Images: filteredFiles,
     }));
   };
 
@@ -273,9 +292,10 @@ export default function CreateClass() {
   }, [userLoading, user]);
 
   const SortableImage = ({ image, onRemove }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-      id: image.name
-    });
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({
+        id: image.name,
+      });
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -283,11 +303,11 @@ export default function CreateClass() {
     };
 
     return (
-      <div 
-        ref={setNodeRef} 
+      <div
+        ref={setNodeRef}
         style={style}
         className="flex justify-center relative touch-none"
-        {...attributes} 
+        {...attributes}
         {...listeners}
       >
         <button
@@ -295,7 +315,7 @@ export default function CreateClass() {
           className="text-logo-red absolute top-2 right-2 z-10"
           onClick={(e) => RemoveImg(e, image.name)}
           onMouseDown={(e) => {
-            e.stopPropagation();  // Prevent drag start when clicking delete
+            e.stopPropagation(); // Prevent drag start when clicking delete
           }}
         >
           <svg
@@ -382,7 +402,10 @@ export default function CreateClass() {
         </div>
 
         <div className="formContainer mt-10">
-          <form onSubmit={addClass} className="flex gap-6 flex-col justify-center items-center">
+          <form
+            onSubmit={addClass}
+            className="flex gap-6 flex-col justify-center items-center"
+          >
             {/* <div className="text-3xl w-full max-w-[750px] font-bold">
               About Class
             </div> */}
@@ -682,7 +705,7 @@ export default function CreateClass() {
               </button>
             </div>
             <div className="flex flex-col gap-3 w-full max-w-[750px]">
-              {packages.map((pkg, idx) => (
+              {packages && packages.map((pkg, idx) => (
                 <div
                   key={idx}
                   className="flex flex-col gap-6 rounded-3xl border-gray-200 p-5 px-6 border-[1px] "

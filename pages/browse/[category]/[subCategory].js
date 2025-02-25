@@ -660,11 +660,11 @@ export default function Results({ category, subCategory }) {
               {loading ? (
                 <p className="text-center text-gray-500">Loading...</p>
               ) : (
-                <div className="flex flex-row flex-wrap gap-4">
+                <div className="flex flex-row max-[1350px]:flex-col flex-wrap gap-4">
                   {filteredClasses.map((classItem) => (
                     <div
                       key={classItem.id}
-                      className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
+                      className="w-full min-[1350px]:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
                       onMouseEnter={() => {
                         if (
                           !(
