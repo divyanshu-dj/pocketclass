@@ -99,11 +99,13 @@ export default function CreateClass() {
       return;
     }
 
-    for (let pkg of packages) {
-      if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
-        toast.error("Please fill all package fields");
-        setLoading(false);
-        return;
+    if (packages.length > 0) {
+      for (let pkg of packages) {
+        if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
+          toast.error("Please fill all package fields");
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -162,12 +164,6 @@ export default function CreateClass() {
         status: "pending",
       });
       setPackages([
-        {
-          Name: "",
-          Price: 0,
-          num_sessions: 0,
-          Discount: 0,
-        },
       ]);
       setPreviewImages([]);
       setUploadedFiles([]);
@@ -181,12 +177,6 @@ export default function CreateClass() {
   };
 
   const [packages, setPackages] = useState([
-    {
-      Name: "",
-      Price: 0,
-      num_sessions: 0,
-      Discount: 0,
-    },
   ]);
 
   const addNewPackage = (e) => {
@@ -205,16 +195,16 @@ export default function CreateClass() {
   const RemoveImg = (e, name) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Immediately update all three states
     const filteredImages = previewImages.filter((img) => img.name !== name);
     const filteredFiles = uploadedFiles.filter((file) => file.name !== name);
-    
+
     setPreviewImages(filteredImages);
     setUploadedFiles(filteredFiles);
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      Images: filteredFiles
+      Images: filteredFiles,
     }));
   };
 
@@ -273,9 +263,10 @@ export default function CreateClass() {
   }, [userLoading, user]);
 
   const SortableImage = ({ image, onRemove }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-      id: image.name
-    });
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({
+        id: image.name,
+      });
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -283,11 +274,11 @@ export default function CreateClass() {
     };
 
     return (
-      <div 
-        ref={setNodeRef} 
+      <div
+        ref={setNodeRef}
         style={style}
         className="flex justify-center relative touch-none"
-        {...attributes} 
+        {...attributes}
         {...listeners}
       >
         <button
@@ -295,7 +286,7 @@ export default function CreateClass() {
           className="text-logo-red absolute top-2 right-2 z-10"
           onClick={(e) => RemoveImg(e, image.name)}
           onMouseDown={(e) => {
-            e.stopPropagation();  // Prevent drag start when clicking delete
+            e.stopPropagation(); // Prevent drag start when clicking delete
           }}
         >
           <svg
@@ -382,7 +373,10 @@ export default function CreateClass() {
         </div>
 
         <div className="formContainer mt-10">
-          <form onSubmit={addClass} className="flex gap-6 flex-col justify-center items-center">
+          <form
+            onSubmit={addClass}
+            className="flex gap-6 flex-col justify-center items-center"
+          >
             {/* <div className="text-3xl w-full max-w-[750px] font-bold">
               About Class
             </div> */}
