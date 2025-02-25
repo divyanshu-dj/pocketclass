@@ -98,8 +98,24 @@ export default function CreateClass() {
       toast.error("Please fill all fields");
       return;
     }
-
-    if (packages.length > 0) {
+    let PackagesToBeAdded = packages;
+    if (packages.length === 1) {
+      if (
+        !packages[0].Name &&
+        !packages[0].num_sessions &&
+        !packages[0].Price
+      ) {
+        PackagesToBeAdded = [];
+      } else if (
+        !packages[0].Name ||
+        !packages[0].num_sessions ||
+        !packages[0].Price
+      ) {
+        toast.error("Please fill all package fields");
+        setLoading(false);
+        return;
+      }
+    } else if (packages.length > 0) {
       for (let pkg of packages) {
         if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
           toast.error("Please fill all package fields");
@@ -118,7 +134,7 @@ export default function CreateClass() {
         ...form,
         Images: imagesURL,
         classCreator: user?.uid,
-        Packages: packages,
+        Packages: PackagesToBeAdded,
         createdAt: serverTimestamp(),
       });
 
@@ -164,9 +180,16 @@ export default function CreateClass() {
         status: "pending",
       });
       setPackages([
+        {
+          Name: "",
+          Price: 0,
+          num_sessions: 0,
+          Discount: 0,
+        },
       ]);
       setPreviewImages([]);
       setUploadedFiles([]);
+      router.push("/classes/id=" + addingClass.id);
       toast.success("Class Added");
     } catch (error) {
       console.error("Error adding class:", error);
@@ -177,6 +200,12 @@ export default function CreateClass() {
   };
 
   const [packages, setPackages] = useState([
+    {
+      Name: "",
+      Price: 0,
+      num_sessions: 0,
+      Discount: 0,
+    },
   ]);
 
   const addNewPackage = (e) => {
@@ -676,7 +705,7 @@ export default function CreateClass() {
               </button>
             </div>
             <div className="flex flex-col gap-3 w-full max-w-[750px]">
-              {packages.map((pkg, idx) => (
+              {packages && packages.map((pkg, idx) => (
                 <div
                   key={idx}
                   className="flex flex-col gap-6 rounded-3xl border-gray-200 p-5 px-6 border-[1px] "
