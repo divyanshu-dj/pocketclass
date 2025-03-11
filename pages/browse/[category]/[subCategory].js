@@ -395,6 +395,9 @@ export default function Results({ category, subCategory }) {
     if (selectedCategory && selectedCategory !== "All") {
       filtered = filtered.filter((data) => data.Category === selectedCategory);
     }
+    if (selectedCategory && selectedCategory === "All") {
+      setSelectedSubCategory("");
+    }
     if (selectedSubCategory) {
       filtered = filtered.filter(
         (data) =>
