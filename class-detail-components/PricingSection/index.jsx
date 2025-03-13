@@ -57,7 +57,9 @@ function PricingSection({ classData }) {
               >
                 {/* Ball animation effect */}
                 <div
-                  className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-red-500 rounded-full w-4 h-4 scale-0 group-hover:scale-[15] group-hover:translate-y-[-30px] transition-all duration-500 origin-center z-0`}
+                  className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-red-500 rounded-full w-4 h-4 scale-0 group-hover:scale-[15] group-hover:translate-y-[-30px] transition-all duration-500 origin-center z-0 ${
+                    selected === "oneOnOne" ? "hidden" : "text-black"
+                  }`}
                 ></div>
 
                 <p
@@ -87,7 +89,9 @@ function PricingSection({ classData }) {
               >
                 {/* Ball animation effect */}
                 <div
-                  className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-red-500 rounded-full w-4 h-4 scale-0 group-hover:scale-[15] group-hover:translate-y-[-30px] transition-all duration-500 origin-center z-0`}
+                  className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-red-500 rounded-full w-4 h-4 scale-0 group-hover:scale-[15] group-hover:translate-y-[-30px] transition-all duration-500 origin-center z-0 ${
+                    selected === "groupClass" ? "hidden" : "text-black"
+                  }`}
                 ></div>
 
                 <p
