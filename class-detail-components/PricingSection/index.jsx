@@ -4,8 +4,9 @@ function PricingSection({ classData }) {
   
   const packageCount = classData?.Packages.length || 0;
   const divWidth = `calc(300px + ${packageCount*200}px)`;
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [screenWidth, setScreenWidth] = useState(0);
   useEffect(() => {
+    setScreenWidth(window.innerWidth);
     const handleResize = () => setScreenWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
 
