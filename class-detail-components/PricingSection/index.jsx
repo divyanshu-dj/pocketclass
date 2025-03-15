@@ -78,6 +78,7 @@ function PricingSection({ classData }) {
                     width: screenWidth >= 600 ? divWidth : "100%",borderRadius: ((screenWidth >= 600) && index===(classData?.Packages.length-1))?'0px 1rem 1rem 0rem':'0px 0rem 0rem 0px'
                   }}
                 >
+                  <div>
                     <p className="font-quicksand tracking-tight text-wrap text-lg font-semibold text-left text-[#373E45] m-0 p-0">
                       {pkg.num_sessions} Lectures Package
                     </p>
@@ -92,6 +93,7 @@ function PricingSection({ classData }) {
                     <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[#707E92] m-0 p-0">
                       {(pkg.Price - (pkg.Discount * pkg.Price) / 100)}
                     </p>
+                    </div>
                 </div>
               ))}
             </div>
