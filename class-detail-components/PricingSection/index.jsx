@@ -1,4 +1,18 @@
+import { useState, useEffect } from "react";
+
 function PricingSection({ classData }) {
+  {/*The use Effect is used to continuously monitor the width and divWidth is used to set width of each block i have used overflow prop. for the situatuion when they appear in one column*/}
+  const packageCount = classData?.Packages.length || 0;
+  const divWidth = `calc((100% / ${packageCount+2}) - 6.3px)`;
+  const [screenWidth, setScreenWidth] = useState(0);
+  useEffect(() => {
+    setScreenWidth(window.innerWidth);
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup function to remove the event listener
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   // console.log("Insructor Data" + {instructorData});
   return (
     <>
@@ -31,42 +45,55 @@ function PricingSection({ classData }) {
               like-minded folks. If you're ready to commit to continuous
               improvement, a package is the way to go!
             </p>
-            <div className="flex flex-row flex-wrap mt-4 gap-3">
-              <div className="px-5 py-3 flex flex-col items-start justify-center border border-gray-500 rounded-lg flex-shrink-0">
-                <p className="[font-family:'DM_Sans',sans-serif] text-nowrap text-lg font-bold text-left text-[black] m-0 p-0">
-                  1-on-1s
-                </p>
-                <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[black] m-0 p-0">
-                  {classData?.Price}
-                </p>
+            <div className="flex flex-col dm:flex-row mt-4 gap-2 justify-center dm:justify-start overflow-hidden rounded-2xl dm:w-fit dm:min-w-[100%] dm:max-w-[100%] w-[98%]">
+              <div className="dm:h-[100px] px-5 py-3 h-[85px] flex flex-col items-center justify-center bg-gray-100 flex-shrink-0" style={{
+                  width: screenWidth >= 600 ? divWidth : "100%",
+                }}>
+                <div>
+                  <p className="font-quicksand tracking-tight text-nowrap text-lg font-semibold text-left text-[#373E45] m-0 p-0">
+                    1-on-1s
+                  </p>
+                  <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[#707E92] m-0 p-0">
+                    {classData?.Price}
+                  </p>
+                </div>
               </div>
-              <div className="px-5 py-3 flex flex-col items-start justify-center border border-gray-500 rounded-lg flex-shrink-0">
-                <p className="[font-family:'DM_Sans',sans-serif] text-nowrap text-lg font-bold text-left text-[black] m-0 p-0">
-                  Group Class
-                </p>
-                <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[black] m-0 p-0">
-                  {classData?.groupPrice}
-                </p>
+              <div className=" dm:h-[100px] px-5 py-3 h-[85px] flex flex-col items-center justify-center bg-gray-100 flex-shrink-0" style={{
+                  width: screenWidth >= 600 ? divWidth : "100%",
+                  borderRadius: ((screenWidth >= 600) && 0===(classData?.Packages.length))?'0px 1rem 1rem 0rem':'0px 0rem 0rem 0px'
+                }}>
+                <div>
+                  <p className="font-quicksand tracking-tight text-nowrap text-lg font-semibold text-left text-[#373E45] m-0 p-0">
+                    Group Class
+                  </p>
+                  <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[#707E92] m-0 p-0">
+                    {classData?.groupPrice}
+                  </p>
+                </div>
               </div>
               {classData?.Packages.map((pkg, index) => (
                 <div
                   key={index}
-                  className="px-5 items-start justify-center flex flex-col py-3 border border-gray-500 rounded-lg flex-shrink-0"
+                  className="dm:w-[200px] dm:h-[100px] px-5 w-[100%] h-[120px] items-center justify-center flex flex-col py-3 bg-gray-100 flex-shrink-0" style={{
+                    width: screenWidth >= 600 ? divWidth : "100%",borderRadius: ((screenWidth >= 600) && index===(classData?.Packages.length-1))?'0px 1rem 1rem 0rem':'0px 0rem 0rem 0px'
+                  }}
                 >
-                  <p className="[font-family:'DM_Sans',sans-serif] text-nowrap text-lg font-bold text-left text-[black] m-0 p-0">
-                    {pkg.num_sessions} Lectures Package
-                  </p>
-                  <p className="[font-family:'DM_Sans',sans-serif] text-base text-left  text-[black] m-0 p-0">
-                    <p className="line-through inline">
-                      {pkg.Price}
-                    </p>{" "}
-                    <p className="text-logo-red inline">
-                      ({pkg.Discount}% off)
+                  <div>
+                    <p className="font-quicksand tracking-tight text-wrap text-lg font-semibold text-left text-[#373E45] m-0 p-0">
+                      {pkg.num_sessions} Lectures Package
                     </p>
-                  </p>
-                  <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[black] m-0 p-0">
-                    {(pkg.Price - (pkg.Discount * pkg.Price) / 100)}
-                  </p>
+                    <p className="[font-family:'DM_Sans',sans-serif] text-base text-nowrap text-left  text-[#707E92] m-0 p-0">
+                      <p className="line-through inline">
+                        {pkg.Price}
+                      </p>{" "}
+                      <p className="text-logo-red inline">
+                        ({pkg.Discount}% off)
+                      </p>
+                    </p>
+                    <p className="[font-family:'DM_Sans',sans-serif] text-base text-left text-[#707E92] m-0 p-0">
+                      {(pkg.Price - (pkg.Discount * pkg.Price) / 100)}
+                    </p>
+                    </div>
                 </div>
               ))}
             </div>
