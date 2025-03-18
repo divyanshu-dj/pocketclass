@@ -223,7 +223,7 @@ function MyClasses() {
                                         ) : (
                                             <UserCircleIcon className="h-10 cursor-pointer inline mr-4" />
                                         )}
-                                        <p>{user.student_name || "User"}</p>
+                                        <p>{user.student_name || user.studentDetails.firstName +  " " + user.studentDetails.lastName || "User"}</p>
                                     </td>
                                     <td className="pb-1 pt-1 pr-8">
                                         {user.groupEmails && user.groupEmails.length > 0
