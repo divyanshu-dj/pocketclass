@@ -226,9 +226,8 @@ function MyClasses() {
                                         <p>{user.student_name || user.studentDetails.firstName +  " " + user.studentDetails.lastName || "User"}</p>
                                     </td>
                                     <td className="pb-1 pt-1 pr-8">
-                                        {user.groupEmails && user.groupEmails.length > 0
-                                            ? user.groupEmails[0]
-                                            : 'No Email Available'}
+                                        { user.studentDetails.email || user.groupEmails[0]
+                                            || 'No Email Available'}
                                     </td>
                                     <td className="pb-1 pt-1 pr-[15px] w-[35%]">
                                         {user.classDetails.Name || 'Class'} @{" "}
