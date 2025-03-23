@@ -184,7 +184,7 @@ function MyClasses() {
             <p className="mb-4 px-[2%]">A list of student's information to keep track of their details, bookings, and more.</p>
             <div className="px-[2%] rounded-3xl flex flex-col justify-center items-start flex-wrap overflow-x-scroll scrollbar-hide w-[99vw]">
                 {loading ? (
-                    <div className="w-full h-[60vh] flex flex-col justify-center">
+                    <div className="w-full min-w-[800px] h-[60vh] flex flex-col justify-center">
                         <div className=" flex flex-col justify-center items-start flex-wrap overflow-x-scroll scrollbar-hide w-[100%] mb-1">
                             <table className="w-[100%] min-w-[800px] border-spacing-8">
                                 <thead style={{ borderBottom: '3px solid #B6B6B6' }}>
@@ -206,7 +206,7 @@ function MyClasses() {
                     <table className="w-[100%] min-w-[800px] border-spacing-8">
                         <thead style={{ borderBottom: '3px solid #B6B6B6' }}>
                             <tr className="border-spacing-2">
-                                <th className="flex pb-2 pl-4 pr-8">Name</th>
+                                <th className="text-left pb-2 pl-[20px] pr-8">Name</th>
                                 <th className="text-left pb-2 pr-8">Email</th>
                                 <th className="text-left pb-2 pr-8">Most Recent Class Booked</th>
                             </tr>
