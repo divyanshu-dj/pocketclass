@@ -9,7 +9,7 @@ function Footer() {
       <div className='text-center space-y-4 text-xs text-gray-800'>
         <h5 className='font-bold'>ABOUT</h5>
         <p className='hover:text-logo-red hover:scale-105 transform transition duration-150 ease-out active:scale-90'><Link href="/community/whypocketclass">Why pocketclass?</Link></p>
-        <p className='hover:text-logo-red hover:scale-105 transform transition duration-150 ease-out active:scale-90'><Link href="/community/aboutus">About Us</Link></p>
+        <p className='hover:text-logo-red hover:scale-105 transform transition duration-150 ease-out active:scale-90'><Link href="/community/about">About</Link></p>
         <p className='hover:text-logo-red hover:scale-105 transform transition duration-150 ease-out active:scale-90'><Link href="https://medium.com/@pocketclass"><a target="_blank">Blog</a></Link></p>
       </div>
       <div className='text-center space-y-4 text-xs text-gray-800'>
