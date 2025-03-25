@@ -22,113 +22,101 @@ export default function AboutUs() {
       <NewHeader />
 
       {/*body*/}
-      <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
-        <div>
-          <div className="flex gap-16">
-            <div className="w-[70%]">
-            <h1 className="text-[60px] font-bold">We’re changing the way 
-            you connect with <span className="text-[#E63F2B]">Sport, 
-            Music, & Art instructors</span></h1><br></br>
-            <p className="text-gray-500 font-bold text-[18px]">Founded by a team who personally experienced the challenges of 
-            finding qualified instructors—from countless online searches to 
-            messy payment processes—we set out to build a better way. </p><br></br>
-            <p className="text-gray-500 font-bold text-[18px]">PocketClass connects students to freelance instructors in sports, 
-            music, and the arts, streamlining scheduling, secure payments, and 
-            administrative tasks into one seamless experience. </p></div>
-            <img
-              priority={true}
-              src="/AboutUs1.jpg"
-              className="max-w-[400px]"
-            />
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Hero Section - Image at Top on Small Screens */}
+        <div className="flex flex-col-reverse md:flex-row items-center gap-8">
+          <div className="md:w-[60%] text-left">
+            <h1 className="text-[25px] md:text-[40px] font-bold">
+              We’re changing the way you connect with{" "}
+              <span className="text-[#E63F2B]">Sport, Music, & Art instructors</span>
+            </h1>
+            <p className="text-gray-500 font-bold text-[15px] mt-4">
+              Founded by a team who personally experienced the challenges of 
+              finding qualified instructors—from countless online searches to 
+              messy payment processes—we set out to build a better way.
+            </p>
+            <p className="text-gray-500 font-bold text-[15px] mt-4">
+              PocketClass connects students to freelance instructors in sports, 
+              music, and the arts, streamlining scheduling, secure payments, and 
+              administrative tasks into one seamless experience.
+            </p>
           </div>
-          <div>
-            <h1 className="text-[60px] font-bold">Our Mission</h1><br></br>
-            <p className="text-gray-500 font-bold text-[18px]">By making life easier for both instructors and students, we aim to inspire people everywhere to explore new passions, master new skills, and thrive in a vibrant community dedicated to personal growth.</p><br></br><br></br>
-            <div className="flex justify-between">
-              <div className="flex flex-col items-center">
-                <img
-                  priority={true}
-                  src="/About21.jpg"
-                  className="max-w-[400px]"
-                /><br></br>
-                <p className="text-red-500 text-[25px] flex items-center"><img
-                  priority={true}
-                  src="/Check.png"
-                  className="w-[50px]"
-                />Find Classes Near You</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  priority={true}
-                  src="/About22.jpg"
-                  className="max-w-[400px]"
-                /><br></br>
-                <p className="text-red-500 text-[25px] flex items-center"><img
-                  priority={true}
-                  src="/Check.png"
-                  className="w-[50px]"
-                />Easy Scheduling</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <img
-                  priority={true}
-                  src="/About23.jpg"
-                  className="max-w-[400px]"
-                /><br></br>
-                <p className="text-red-500 text-[25px] flex items-center"><img
-                  priority={true}
-                  src="/Check.png"
-                  className="w-[50px]"
-                />Secure Payments</p>
-              </div>
-            </div>
-          </div><br></br><br></br>
-          <div>
-            <h1 className="text-[60px] font-bold">Our Values</h1><br></br>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-[20px]">
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Accessibility</h1>
-              <p>Everyone should have the chance to 
-              learn. We remove barriers like complex 
-              booking and uncertain payments so 
-              more people can pursue their passions.</p>
-            </div>
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Community</h1>
-              <p>We bring together instructors and 
-              students in a supportive environment, 
-              encouraging collaboration and shared 
-              success.</p>
-            </div>
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Trust & Transparency</h1>
-              <p>Secure payments, honest 
-              communication, and clear policies 
-              protect our users and build confidence 
-              on both sides.</p>
-            </div>
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Quality & Growth</h1>
-              <p>We aim for high standards and 
-              continuous improvement, ensuring 
-              instructors and students alike can reach 
-              their full potential.</p>
-            </div>
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Innovation & Adaptability</h1>
-              <p>We embrace fresh ideas and evolving 
-              technology, keeping PocketClass 
-              flexible and ready to meet changing 
-              learning needs.</p>
-            </div>
-            <div>
-              <h1 className="text-[25px] text-red-500 font-bold">Empowerment</h1>
-              <p>We help instructors grow their 
-              businesses and students gain new 
-              skills, empowering everyone to reach 
-              their goals.</p>
-            </div>
+          <img
+            priority={true}
+            src="/AboutUs1.jpg"
+            className="w-full md:w-[40%] max-w-[400px] object-cover"
+          />
+        </div>
+
+        {/* Our Mission Section */}
+        <div className="mt-16">
+          <h1 className="text-[25px] md:text-[40px] font-bold text-left">Our Mission</h1>
+          <p className="text-gray-500 font-bold text-[15px] text-left mt-4">
+            By making life easier for both instructors and students, we aim to inspire people 
+            everywhere to explore new passions, master new skills, and thrive in a vibrant 
+            community dedicated to personal growth.
+          </p>
+        </div>
+
+        {/* Three-Image Section - Column Layout on Small Screens */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mt-16">
+          <div className="flex flex-col items-center text-center">
+            <img priority={true} src="/About21.jpg" className="w-full max-w-[400px] object-cover" />
+            <p className="text-red-500 text-[15px] flex items-center mt-4">
+              <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
+              Find Classes Near You
+            </p>
           </div>
+          <div className="flex flex-col items-center text-center">
+            <img priority={true} src="/About22.jpg" className="w-full max-w-[400px] object-cover" />
+            <p className="text-red-500 text-[15px] flex items-center mt-4">
+              <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
+              Easy Scheduling
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <img priority={true} src="/About23.jpg" className="w-full max-w-[400px] object-cover" />
+            <p className="text-red-500 text-[15px] flex items-center mt-4">
+              <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
+              Secure Payments
+            </p>
+          </div>
+        </div>
+
+        {/* Our Values Section */}
+        <div className="mt-16">
+          <h1 className="text-[25px] md:text-[40px] font-bold text-left">Our Values</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-[20px] mt-8">
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Accessibility</h1>
+              <p className="text-[15px]">Everyone should have the chance to learn. We remove barriers like complex 
+                booking and uncertain payments so more people can pursue their passions.</p>
+            </div>
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Community</h1>
+              <p className="text-[15px]">We bring together instructors and students in a supportive environment, 
+                encouraging collaboration and shared success.</p>
+            </div>
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Trust & Transparency</h1>
+              <p className="text-[15px]">Secure payments, honest communication, and clear policies protect our 
+                users and build confidence on both sides.</p>
+            </div>
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Quality & Growth</h1>
+              <p className="text-[15px]">We aim for high standards and continuous improvement, ensuring instructors 
+                and students alike can reach their full potential.</p>
+            </div>
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Innovation & Adaptability</h1>
+              <p className="text-[15px]">We embrace fresh ideas and evolving technology, keeping PocketClass flexible 
+                and ready to meet changing learning needs.</p>
+            </div>
+            <div>
+              <h1 className="text-[20px] text-red-500 font-bold">Empowerment</h1>
+              <p className="text-[15px]">We help instructors grow their businesses and students gain new skills, 
+                empowering everyone to reach their goals.</p>
+            </div>
           </div>
         </div>
         {/* <section>
