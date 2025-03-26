@@ -155,7 +155,7 @@ const Chat = () => {
       const enrichedBookings = allBookings.map((booking) => ({
         ...booking,
         student_name: `${
-          students.find((s) => s?.userUid === booking.student_id)?.firstName ||
+          students.find((s) => s?.userUid === booking.student_id)?.firstName || allBookings.find((s) => s?.student_id === booking.student_id)?.student_name ||
           "Unknown"
         } ${
           students.find((s) => s?.userUid === booking.student_id)?.lastName ||
