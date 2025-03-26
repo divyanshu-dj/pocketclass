@@ -8,8 +8,8 @@ function StickyFooter() {
                 <div className="leftSide flex xl:flex-row lg:flex-row md:flex-col sm:flex-col sm:justify-center sm:items-center md:justify-center xl:justify-start lg:justify-start gap-x-5">
                     <p className='font-light'>&copy; pocketclass</p>
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/aboutus">About Us</Link></p>
-                    <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/instructorguide">Instructor Guide</Link></p>
-                    <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/studentguide">Student Guide</Link></p>
+                    <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/instructorguide"> Guide</Link></p>
+                    {/* <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/studentguide">Student Guide</Link></p> */}
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="/community/termsandconditions">Terms and Conditions</Link></p>
                     <p className='font-light hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150'><Link href="https://medium.com/@pocketclass"><a target="_blank">Blog</a></Link></p>
                 </div>

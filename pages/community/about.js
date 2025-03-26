@@ -43,7 +43,7 @@ export default function AboutUs() {
           </div>
           <img
             priority={true}
-            src="/AboutUs1.jpg"
+            src="/AboutUsGraphic.png"
             className="w-full md:w-[40%] max-w-[400px] object-cover"
           />
         </div>
@@ -61,21 +61,21 @@ export default function AboutUs() {
         {/* Three-Image Section - Column Layout on Small Screens */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 mt-16">
           <div className="flex flex-col items-center text-center">
-            <img priority={true} src="/About21.jpg" className="w-full max-w-[400px] object-cover" />
+            <img priority={true} src="/About21.jpg" className="w-full max-w-[400px] object-cover border border-[#E63F2B] rounded-md shadow-md" />
             <p className="text-red-500 text-[15px] flex items-center mt-4">
               <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
               Find Classes Near You
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <img priority={true} src="/About22.jpg" className="w-full max-w-[400px] object-cover" />
+            <img priority={true} src="/About22.jpg" className="w-full max-w-[400px] object-cover border border-[#E63F2B] rounded-md shadow-md" />
             <p className="text-red-500 text-[15px] flex items-center mt-4">
               <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
               Easy Scheduling
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <img priority={true} src="/About23.jpg" className="w-full max-w-[400px] object-cover" />
+            <img priority={true} src="/About23.jpg" className="w-full max-w-[400px] object-cover border border-[#E63F2B] rounded-md shadow-md" />
             <p className="text-red-500 text-[15px] flex items-center mt-4">
               <img priority={true} src="/Check.png" className="w-[30px] mr-2" />
               Secure Payments
