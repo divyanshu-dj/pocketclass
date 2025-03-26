@@ -10,7 +10,7 @@ function ClassroomFooter({ isHome = true }) {
         <div className="flex justify-start items-center flex-col md:flex-row gap-1 md:gap-[30px]">
           <p className="hidden md:block">© pocketclass</p>
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
-            <Link href="/community/aboutus">About Us</Link>
+            <Link href="/community/about">About</Link>
           </p>
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
             <Link href="/community/instructorguide">Instructor Guide</Link>
