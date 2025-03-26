@@ -13,11 +13,11 @@ function ClassroomFooter({ isHome = true }) {
             <Link href="/community/about">About</Link>
           </p>
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
-            <Link href="/community/instructorguide">Instructor Guide</Link>
+            <Link href="/community/instructorguide">Guide</Link>
           </p>
-          <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
+          {/* <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
             <Link href="/community/studentguide">Student Guide</Link>
-          </p>
+          </p> */}
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
             <Link href="https://medium.com/@pocketclass">
               <a target="_blank">Blog</a>
@@ -26,11 +26,11 @@ function ClassroomFooter({ isHome = true }) {
         </div>
         <div className="flex gap-0.5 md: justify-start items-center flex-col md:flex-row">
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
-            <Link href={`/support`}>Help Center</Link>
+            <Link href={`/support`}>Help</Link>
           </p>
           <p className="md:ml-[30px] hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
             <Link href="/community/termsandconditions">
-              Terms and Conditions
+              Terms
             </Link>
           </p>
         </div>
