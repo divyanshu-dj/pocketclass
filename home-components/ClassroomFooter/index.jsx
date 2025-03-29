@@ -36,7 +36,7 @@ function ClassroomFooter({ isHome = true }) {
           <p className="hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 transition duration-150">
             <Link href={`https://github.com/aliu5454/pocketclass`}><svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-7 w-7"
+              className="h-7 w-7 transition-colors duration-200 ease-out hover:fill-logo-red"
               fill="currentColor"
               style={{ color: "#333" }}
               viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ function ClassroomFooter({ isHome = true }) {
             <Link href="https://www.instagram.com/pocketclass.ca/">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7"
+                className="h-7 w-7 transition-colors duration-200 ease-out hover:fill-logo-red"
                 fill="black"
                 style={{ color: "#c13584" }}
                 viewBox="0 0 24 24"
