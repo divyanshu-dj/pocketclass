@@ -707,7 +707,8 @@ export default function Schedule() {
                               )
                             }
                             options={timeOptions}
-                            className="w-full"
+                            className="w-full min-w-[70px]"
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                           />
                           <span>-</span>
                           <Select
@@ -723,7 +724,8 @@ export default function Schedule() {
                               )
                             }
                             options={timeOptions}
-                            className="w-full"
+                            className="w-full min-w-[70px]"
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                           />
                           <button
                             onClick={() =>
@@ -847,13 +849,14 @@ export default function Schedule() {
                             )
                           }
                           options={timeOptions}
-                          className="w-full bg-gray-100"
+                          className="w-full bg-gray-100 min-w-[70px]"
                           styles={{
                             menu: (provided) => ({
                               ...provided,
                               maxHeight: "300px",
                             }),
                           }}
+                          components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                         />
 
                         <span>-</span>
@@ -870,13 +873,14 @@ export default function Schedule() {
                             )
                           }
                           options={timeOptions}
-                          className="w-full bg-gray-100"
+                          className="w-full bg-gray-100 min-w-[70px]"
                           styles={{
                             menu: (provided) => ({
                               ...provided,
                               maxHeight: "300px",
                             }),
                           }}
+                          components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                         />
                         <button
                           onClick={() => assignClass(dayIndex, slotIndex)}
@@ -1065,13 +1069,14 @@ export default function Schedule() {
                               )
                             }
                             options={timeOptions}
-                            className="w-full bg-gray-100"
+                            className="w-full min-w-[70px]"
                             styles={{
                               menu: (provided) => ({
                                 ...provided,
                                 maxHeight: "300px",
                               }),
                             }}
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                           />
 
                           <span>-</span>
@@ -1088,13 +1093,14 @@ export default function Schedule() {
                               )
                             }
                             options={timeOptions}
-                            className="w-full bg-gray-100"
+                            className="w-full min-w-[70px]"
                             styles={{
                               menu: (provided) => ({
                                 ...provided,
                                 maxHeight: "300px",
                               }),
                             }}
+                            components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                           />
                           <button
                             onClick={() =>
@@ -1216,13 +1222,14 @@ export default function Schedule() {
                             )
                           }
                           options={timeOptions}
-                          className="w-full"
+                          className="w-full min-w-[70px]"
                           styles={{
                             menu: (provided) => ({
                               ...provided,
                               maxHeight: "300px",
                             }),
                           }}
+                          components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                         />
 
                         <span>-</span>
@@ -1239,13 +1246,14 @@ export default function Schedule() {
                             )
                           }
                           options={timeOptions}
-                          className="w-full"
+                          className="w-full min-w-w[70px]"
                           styles={{
                             menu: (provided) => ({
                               ...provided,
                               maxHeight: "300px",
                             }),
                           }}
+                          components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }}
                         />
 
                         <button
