@@ -113,7 +113,8 @@ export default async function handler(req, res) {
   try {
     const currentTime = moment();
     const appointmentsRef = collection(db, "Bookings");
-    const appointmentsSnapshot = await getDocs(appointmentsRef);
+    const q = query(appointmentsRef, where("status", "==", "Confirmed"));
+    const appointmentsSnapshot = await getDocs(q);
     const appointments = appointmentsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
