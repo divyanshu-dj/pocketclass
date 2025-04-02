@@ -142,7 +142,8 @@ export default async function handler(req, res) {
         !appointment.reminderEmailSent
       );
     });
-
+    completedAppointments = completedAppointments.filter((a) => a.status !== "Pending");
+    console.log(completedAppointments)
     // Send review emails
     const emailPromises = completedAppointments.map((appointment) =>
       sendReviewEmail(
