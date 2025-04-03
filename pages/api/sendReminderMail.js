@@ -126,7 +126,7 @@ export default async function handler(req, res) {
       ...doc.data(),
     }));
 
-    const completedAppointments = appointments.filter((appointment) => {
+    let completedAppointments = appointments.filter((appointment) => {
       const endTime = moment(appointment.startTime).tz(
         appointment.timezone || "America/Toronto",
         true
