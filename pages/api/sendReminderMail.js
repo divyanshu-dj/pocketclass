@@ -111,7 +111,7 @@ async function sendReviewEmail(appointment, classData) {
 
 export default async function handler(req, res) {
   try {
-    const currentTime = moment();
+    // const currentTime = moment();
     const appointmentsRef = collection(db, "Bookings");
     const q = query(appointmentsRef, where("status", "==", "Confirmed"));
     const appointmentsSnapshot = await getDocs(q);
