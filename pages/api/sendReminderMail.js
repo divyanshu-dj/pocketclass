@@ -111,9 +111,10 @@ async function sendReviewEmail(appointment, classData) {
 
 export default async function handler(req, res) {
   try {
-    const currentTime = moment();
+    // const currentTime = moment();
     const appointmentsRef = collection(db, "Bookings");
-    const appointmentsSnapshot = await getDocs(appointmentsRef);
+    const q = query(appointmentsRef, where("status", "==", "Confirmed"));
+    const appointmentsSnapshot = await getDocs(q);
     const appointments = appointmentsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -125,7 +126,7 @@ export default async function handler(req, res) {
       ...doc.data(),
     }));
 
-    const completedAppointments = appointments.filter((appointment) => {
+    let completedAppointments = appointments.filter((appointment) => {
       const endTime = moment(appointment.startTime).tz(
         appointment.timezone || "America/Toronto",
         true
@@ -141,7 +142,8 @@ export default async function handler(req, res) {
         !appointment.reminderEmailSent
       );
     });
-
+    completedAppointments = completedAppointments.filter((a) => a.status !== "Pending");
+    console.log(completedAppointments)
     // Send review emails
     const emailPromises = completedAppointments.map((appointment) =>
       sendReviewEmail(

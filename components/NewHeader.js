@@ -280,27 +280,27 @@ const NewHeader = ({ isHome = true }) => {
                     {showDropDown && (
                       <div className="dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 z-50">
                         <ul>
-                          <li className="my-2 hover:text-logo-red">
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
                           </li>
-                          <li className="my-2 hover:text-logo-red">
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/myClass/${user.uid}`}>
                               My Classes
                             </Link>
                           </li>
-                          <li className="my-2 hover:text-logo-red">
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/chat`}>
                               My Messages
                             </Link>
                           </li>
-                          <li className="my-2 hover:text-logo-red" style={{display: category==="instructor"?"none":"block"}}>
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90" style={{display: category==="instructor"?"none":"block"}}>
                             <Link href={`/myPackages`}>
                               My Packages
                             </Link>
                           </li>
                           {category !== "instructor" && (
                             <>
-                              <li className="my-2 hover:text-logo-red">
+                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                 <Link href={`https://gm81lvnyohz.typeform.com/to/IoLpsf9g`}>Request a Class</Link>
                               </li>
                             </>
@@ -330,21 +330,21 @@ const NewHeader = ({ isHome = true }) => {
                             </>
                           )}
                           {userData?.isAdmin && (
-                            <li className="my-2 hover:text-logo-red">
+                            <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                               <Link href="/vouchers">Vouchers</Link>
                             </li>
                           )}
-                          <li className="my-2 hover:text-logo-red">
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href="/support">Support</Link>
                           </li>
                           {userData?.isAdmin && (
-                            <li className="my-2 hover:text-logo-red">
+                            <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                               <Link href="/dashboard">Dashboard</Link>
                             </li>
                           )}
                           <hr className="my-2" />
                           <li
-                            className="my-2 hover:text-logo-red cursor-pointer"
+                            className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 cursor-pointer"
                             onClick={() => signOut()}
                           >
                             Logout
