@@ -789,15 +789,15 @@ const Chat = () => {
                 <div className="flex w-full flex-col items-center justify-center py-3">
                   <div className="text-sm w-full md:text-base mx-auto text-gray-700 px-4 rounded-full cursor-default">
                     <span className="font-semibold">
-                      {selectedClassData?.Name}
-                    </span>{" "}
-                    -{" "}
-                    <span>
                       {isInstructor
                         ? groupStudents
                             .map((student) => student.name)
                             .join(", ")
                         : selectedClassData?.instructorName}
+                    </span>{" "}
+                    -{" "}
+                    <span>
+                      {selectedClassData?.Name}
                     </span>
                   </div>
                 </div>
