@@ -21,6 +21,7 @@ import {UserIcon} from '@heroicons/react/solid'
 import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
 import FAQAccordion from "../FAQAccordion";
+import Link from 'next/link';
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -227,7 +228,7 @@ function FitnessClassDetailsSection({
           </div>
         )}
 
-        <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
+        <div className="flex justify-start flex-row grow-0 shrink-0 basis-auto">
           {userId ? (
             isFavoriteLoading ? (
               <div className="flex items-center animate-pulse">
@@ -235,22 +236,28 @@ function FitnessClassDetailsSection({
                 <div className="h-4 w-24 bg-gray-200 rounded ml-[7px]"></div>
               </div>
             ) : (
-              <div
-                onClick={toggleFavorite}
-                className="cursor-pointer flex items-center"
-              >
-                {isFavorite ? (
-                  <AiFillHeart
-                    className={`w-6 h-6 flex grow-0 shrink-0 basis-auto text-red-500`}
-                  />
-                ) : (
-                  <AiOutlineHeart
-                    className={`w-6 h-6 flex grow-0 shrink-0 basis-auto`}
-                  />
+              <div className="flex flex-col">
+                <div
+                  onClick={toggleFavorite}
+                  className="cursor-pointer flex items-center"
+                >
+                  {isFavorite ? (
+                    <AiFillHeart className="w-6 h-6 text-red-500" />
+                  ) : (
+                    <AiOutlineHeart className="w-6 h-6" />
+                  )}
+                  <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] ml-[7px] m-0 p-0">
+                    {isFavorite ? "Remove Favorite" : "Add to Favorite"}
+                  </p>
+                </div>
+
+                {classCreatorData?.userUid === userId && (
+                  <Link href={`/updateClass/${classId}`}>
+                    <button className="mt-2 text-base font-semibold text-red-600 border border-red-600 px-4 py-1 rounded hover:bg-red-600 hover:text-white transition">
+                      Edit
+                    </button>
+                  </Link>
                 )}
-                <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
-                  {isFavorite ? "Remove Favorite" : "Add to Favorite"}
-                </p>
               </div>
             )
           ) : null}
