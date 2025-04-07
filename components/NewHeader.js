@@ -232,9 +232,10 @@ const NewHeader = ({ isHome = true }) => {
             {!loading ? (
               user ? (
                 <div className="flex items-center gap-4">
-                  {/* {category !== "" && user ? (
+                  <div className="hidden dm1:block">
+                  {category !== "" && user ? (
                     category !== "instructor" ? (
-                      <p className="text-sm hidden lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150">
+                      <p className="text-sm lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150">
                         <a
                           target="_blank"
                           href="https://gm81lvnyohz.typeform.com/to/IoLpsf9g"
@@ -245,7 +246,7 @@ const NewHeader = ({ isHome = true }) => {
                     ) : (
                       <p
                         onClick={() => router.push("/createClass")}
-                        className="text-sm hidden lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150"
+                        className="text-sm lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150"
                       >
                         Create Class
                       </p>
@@ -258,7 +259,8 @@ const NewHeader = ({ isHome = true }) => {
                       height={"30px"}
                       alt="Loading"
                     />
-                  )} */}
+                  )}
+                  </div>
 
                   {user && <Notifications user={user} />}
 
@@ -300,7 +302,7 @@ const NewHeader = ({ isHome = true }) => {
                           </li>
                           {category !== "instructor" && (
                             <>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                              <li className="my-2 block dm1:hidden hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                 <Link href={`https://gm81lvnyohz.typeform.com/to/IoLpsf9g`}>Request a Class</Link>
                               </li>
                             </>
@@ -313,7 +315,7 @@ const NewHeader = ({ isHome = true }) => {
                                 </p>
                               </li>
                               <li>
-                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                <p className="my-2 block dm1:hidden  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                   <a href={`/createClass`}>Create Class</a>
                                 </p>
                               </li>
