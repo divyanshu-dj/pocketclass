@@ -28,6 +28,7 @@ module.exports = {
       '2xl': '1536px',
       // => @media (min-width: 1536px) { ... }
       'dm': '600px',
+      'dm1': '450px',
       // => @media (min-width: 500px) { ... }
     }
   },

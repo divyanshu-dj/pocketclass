@@ -39,6 +39,7 @@ const Chat = () => {
   const [chid, setchid] = useState(router.query.chid);
   const [cid, setcid] = useState(router.query.cid);
   const [user] = useAuthState(auth);
+  const [isLeftPaneVisible, setIsLeftPaneVisible] = useState(true);
   const [roomData, setRoomData] = useState(null);
   const [classData, setClassData] = useState(null);
   const [classes, setClasses] = useState([]);
@@ -509,7 +510,11 @@ const Chat = () => {
       console.warn(error);
     }
   };
-
+  const toggleLeftPane = () => {
+    if (window.innerWidth < 770) {
+      setIsLeftPaneVisible((prevState) => !prevState);
+    }
+  };
   /**
    * NOTIFICATION/EMAIL FUNCTIONS
    */
@@ -651,7 +656,9 @@ const Chat = () => {
       {/* chat container */}
       <div className="flex-1 flex flex-col md:flex-row w-full overflow-hidden">
         {/* chat left pane */}
-        <div className="w-full flex flex-col  md:w-[25%] min-w-[200px] overflow-y-auto md:border-r-2 gap-6 shadow-md md:shadow-none border-b md:border-b-0">
+        <div className={`w-full flex flex-col md:w-[25%] min-w-[200px] overflow-y-auto md:border-r-2 gap-6 shadow-md md:shadow-none border-b md:border-b-0 ${
+          isLeftPaneVisible ? '' : 'hidden'
+           }`} onClick={toggleLeftPane}>
           <div>
             <div>
               {/* Check if chatroom has any Direct message chat room or not using filter */}
@@ -689,7 +696,7 @@ const Chat = () => {
                       {booking?.student_name &&
                       booking?.instructor_id == user?.uid
                         ? `${booking?.student_name} - `
-                        : ""}
+                        : `${classData?.instructorName} - `}
                       {classData?.Name}
                     </h1>
                     <div className="flex flex-col space-y-2 mx-2">
@@ -788,6 +795,11 @@ const Chat = () => {
               <div className="sticky top-0 z-10 bg-white shadow-md">
                 <div className="flex w-full flex-col items-center justify-center py-3">
                   <div className="text-sm w-full md:text-base mx-auto text-gray-700 px-4 rounded-full cursor-default">
+                    <span className="md:hidden inline" onClick={toggleLeftPane}>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 inline">
+                        <path d="M14 6l-6 6 6 6" stroke="red" />
+                      </svg>
+                    </span>
                     <span className="font-semibold">
                       {isInstructor
                         ? groupStudents
