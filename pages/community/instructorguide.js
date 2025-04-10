@@ -5,8 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import LargeCard from "/components/LargeCard";
 import NewHeader from "../../components/NewHeader";
+import { useState } from "react";
+import { Skeleton } from "@mui/material";
 
 export default function InstructorGuide() {
+  // Separate loading states for each video
+  const [isVideo1Loading, setIsVideo1Loading] = useState(true);
+  const [isVideo2Loading, setIsVideo2Loading] = useState(true);
+  const [isVideo3Loading, setIsVideo3Loading] = useState(true);
+  const [isVideo4Loading, setIsVideo4Loading] = useState(true);
   return (
     <div>
       <Head>
@@ -57,73 +64,98 @@ export default function InstructorGuide() {
           </p>
 
           {/* Responsive grid for Loom videos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          {/* 1) Setting Up Your Instructor Profile on Pocket Class */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-[#E63F2B]">
-              Set Up Your Instructor Profile
-            </h3>
-            <div className="relative pb-[62.5%] h-0">
-              <iframe
-                src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=6812caa9-45fb-46fe-8ec8-ff33a1ee799c"
-                frameBorder="0"
-                allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* 1) Setting Up Your Instructor Profile on Pocket Class */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-[#E63F2B]">
+            Set Up Your Instructor Profile
+          </h3>
+          <div className="relative pb-[62.5%] h-0">
+            {/* MUI Skeleton shown while loading */}
+            {isVideo1Loading && (
+              <Skeleton
+                variant="rectangular"
                 className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
               />
-            </div>
-          </div>
-
-          {/* 2) Creating Your Class on Pocket Class */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-[#E63F2B]">
-              Create Your Class
-            </h3>
-            <div className="relative pb-[62.5%] h-0">
-              <iframe
-                src="https://www.loom.com/embed/37d1dde5262648c99673f1573bee5b74?sid=b7865bc0-7f61-4390-b638-9c8e4f907797"
-                frameBorder="0"
-                allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            </div>
-          </div>
-
-          {/* 3) Setting Up Your Instructor Profile (second video) */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-[#E63F2B]">
-              Set Up Your Instructor Profile
-            </h3>
-            <div className="relative pb-[62.5%] h-0">
-              <iframe
-                src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=51ea5347-f007-4f49-b747-f814e173b6e0"
-                frameBorder="0"
-                allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            </div>
-          </div>
-
-          {/* 4) Receive Payments through Stripe */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-[#E63F2B]">Receive Payments through Stripe</h3>
-            <div className="relative pb-[62.5%] h-0">
-              <iframe
-                src="https://www.loom.com/embed/1a47fb3707a748faad78a01548149615?sid=1f396490-118c-48f3-a8a6-0b28b3d355ee"
-                frameBorder="0"
-                allowFullScreen
-                mozallowfullscreen="true"
-                webkitallowfullscreen="true"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            </div>
+            )}
+            <iframe
+              src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=6812caa9-45fb-46fe-8ec8-ff33a1ee799c"
+              frameBorder="0"
+              allowFullScreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              onLoad={() => setIsVideo1Loading(false)}
+              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+            />
           </div>
         </div>
+
+        {/* 2) Creating Your Class on Pocket Class */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-[#E63F2B]">Create Your Class</h3>
+          <div className="relative pb-[62.5%] h-0">
+            {isVideo2Loading && (
+              <Skeleton
+                variant="rectangular"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            )}
+            <iframe
+              src="https://www.loom.com/embed/37d1dde5262648c99673f1573bee5b74?sid=b7865bc0-7f61-4390-b638-9c8e4f907797"
+              frameBorder="0"
+              allowFullScreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              onLoad={() => setIsVideo2Loading(false)}
+              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+            />
+          </div>
+        </div>
+
+        {/* 3) Setting Up Your Instructor Profile (second video) */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-[#E63F2B]">Set Up Your Instructor Profile</h3>
+          <div className="relative pb-[62.5%] h-0">
+            {isVideo3Loading && (
+              <Skeleton
+                variant="rectangular"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            )}
+            <iframe
+              src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=51ea5347-f007-4f49-b747-f814e173b6e0"
+              frameBorder="0"
+              allowFullScreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              onLoad={() => setIsVideo3Loading(false)}
+              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+            />
+          </div>
+        </div>
+
+        {/* 4) Receive Payments through Stripe */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-[#E63F2B]">Receive Payments through Stripe</h3>
+          <div className="relative pb-[62.5%] h-0">
+            {isVideo4Loading && (
+              <Skeleton
+                variant="rectangular"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            )}
+            <iframe
+              src="https://www.loom.com/embed/1a47fb3707a748faad78a01548149615?sid=1f396490-118c-48f3-a8a6-0b28b3d355ee"
+              frameBorder="0"
+              allowFullScreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              onLoad={() => setIsVideo4Loading(false)}
+              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+            />
+          </div>
+        </div>
+      </div>
         </section>
 
           <h1 className="text-4xl font-semibold mt-10 mb-5">
