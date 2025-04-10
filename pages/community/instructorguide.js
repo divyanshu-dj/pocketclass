@@ -22,7 +22,7 @@ export default function InstructorGuide() {
       {/*body*/}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">
         <section>
-          <h1 className="text-4xl font-semibold py-5">Join Our Team</h1>
+          {/* <h1 className="text-4xl font-semibold py-5">Join Our Team</h1>
           <h1 className="text-xl font-semibold mt-5">
             Partner with PocketClass
           </h1>
@@ -35,7 +35,96 @@ export default function InstructorGuide() {
             Join the growing number of sports, music, and art instructors that
             are expanding their reach with PocketClass– get started for free
             today.
+          </p> */}
+
+          <h1 className="text-4xl font-semibold py-5">Join Our Team</h1>
+          
+          <ul className="list-disc text-md ml-5 text-gray-700">
+            <li>Market to your target audience</li>
+            <li>Student Reviews bring you credibility amongst your community!</li>
+            <li>Secure Payments</li>
+            <li>
+              Our cancellation policy protects instructors from late cancellations 
+              and missed classes
+            </li>
+          </ul>
+
+          <section className="mt-10">
+          <h1 className="text-4xl font-semibold mb-4">Instructor Onboarding Guides</h1>
+          <p className="text-md text-gray-700 mb-6">
+            Watch these quick walkthroughs to learn how to set up your PocketClass profile, 
+            schedule classes, and stand out to more students.
           </p>
+
+          {/* Responsive grid for Loom videos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {/* 1) Setting Up Your Instructor Profile on Pocket Class */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-[#E63F2B]">
+              Set Up Your Instructor Profile
+            </h3>
+            <div className="relative pb-[62.5%] h-0">
+              <iframe
+                src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=6812caa9-45fb-46fe-8ec8-ff33a1ee799c"
+                frameBorder="0"
+                allowFullScreen
+                mozallowfullscreen="true"
+                webkitallowfullscreen="true"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            </div>
+          </div>
+
+          {/* 2) Creating Your Class on Pocket Class */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-[#E63F2B]">
+              Create Your Class
+            </h3>
+            <div className="relative pb-[62.5%] h-0">
+              <iframe
+                src="https://www.loom.com/embed/37d1dde5262648c99673f1573bee5b74?sid=b7865bc0-7f61-4390-b638-9c8e4f907797"
+                frameBorder="0"
+                allowFullScreen
+                mozallowfullscreen="true"
+                webkitallowfullscreen="true"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            </div>
+          </div>
+
+          {/* 3) Setting Up Your Instructor Profile (second video) */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-[#E63F2B]">
+              Set Up Your Instructor Profile
+            </h3>
+            <div className="relative pb-[62.5%] h-0">
+              <iframe
+                src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=51ea5347-f007-4f49-b747-f814e173b6e0"
+                frameBorder="0"
+                allowFullScreen
+                mozallowfullscreen="true"
+                webkitallowfullscreen="true"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            </div>
+          </div>
+
+          {/* 4) Receive Payments through Stripe */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-[#E63F2B]">Receive Payments through Stripe</h3>
+            <div className="relative pb-[62.5%] h-0">
+              <iframe
+                src="https://www.loom.com/embed/1a47fb3707a748faad78a01548149615?sid=1f396490-118c-48f3-a8a6-0b28b3d355ee"
+                frameBorder="0"
+                allowFullScreen
+                mozallowfullscreen="true"
+                webkitallowfullscreen="true"
+                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+        </section>
 
           <h1 className="text-4xl font-semibold mt-10 mb-5">
             Instructor Verification Process
