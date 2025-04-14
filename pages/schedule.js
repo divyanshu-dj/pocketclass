@@ -594,17 +594,37 @@ export default function Schedule() {
     setAdjustedAvailability(updatedAvailability);
   };
   const handleSlotSelect = (slotInfo) => {
-    setSelectedSlot(slotInfo);
-    setTemporaryEvent({
-      start: slotInfo.start,
-      end: slotInfo.end,
-      title: `${slotInfo.start.toLocaleTimeString([], {
-        hour: "2-digit",minute: "2-digit",})}-${slotInfo.end.toLocaleTimeString([], {
-        hour: "2-digit",minute: "2-digit",})}`,
+    const { start, end: selectedEnd } = slotInfo;
+  
+    const selectedDuration = (selectedEnd - start) / (1000 * 60); // in minutes
+  
+    // Round up to nearest multiple of appointmentDuration
+    const multiplier = Math.ceil(selectedDuration / appointmentDuration);
+    const adjustedMinutes = multiplier * appointmentDuration;
+  
+    const adjustedEnd = new Date(start);
+    adjustedEnd.setMinutes(start.getMinutes() + adjustedMinutes);
+  
+    const newSlot = {
+      start,
+      end: adjustedEnd,
+      title: `${start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${adjustedEnd.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
       color: "#D8F5B6", // light green
-    });
+    };
+  
+    setSelectedSlot(newSlot);
+    setTemporaryEvent(newSlot);
     setShowPopup(true);
   };
+  
+  
+
   
   const formatDateTimeLocal = (date) => {
     const d = new Date(date);
@@ -1536,7 +1556,7 @@ export default function Schedule() {
                     const endDate = new Date(selectedSlot.end);
 
                     const formatDate = (date) =>
-                      date.toLocaleDateString(undefined, {
+                      date.toLocaleDateString("en-US", {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
