@@ -34,7 +34,7 @@ export const categories = [
       {
         name: "Rugby",
         imagePath: "/assets/Sport/Rugby_icon.png",
-      }
+      },
       {
         name: "Pilates",
         imagePath: "/assets/Sport/pilates_icon.png",
