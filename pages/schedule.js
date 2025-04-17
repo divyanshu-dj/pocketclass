@@ -332,7 +332,6 @@ export default function Schedule() {
   };
 
   const addAdjustedAvailabilityDate = (date) => {
-    console.log(date)
     const dateStr = moment(date).format("YYYY-MM-DD");
     if (!adjustedAvailability.some((item) => item.date === dateStr)) {
       setAdjustedAvailability((prev) => [
@@ -392,36 +391,73 @@ export default function Schedule() {
 
   const generateEvents = (general, adjusted) => {
     let newEvents = [];
-
+  
+    // Create a map from adjusted dates for easy access
+    const adjustedMap = {};
+    adjusted.forEach((item) => {
+      adjustedMap[item.date] = item.slots;
+    });
+  
     general.forEach((day, index) => {
-      day.slots.forEach((slot) => {
-        if (slot.startTime && slot.endTime) {
-          const slotStart = moment(slot.startTime, "HH:mm");
-          const slotEnd = moment(slot.endTime, "HH:mm");
-          let current = slotStart.clone();
-
-          while (current.isBefore(slotEnd)) {
-            const next = current.clone().add(appointmentDuration, "minutes");
-            if (next.isAfter(slotEnd)) break;
-
-            for (let i = 0; i < 52; i++) {
-              const start = moment()
-                .startOf("week")
-                .add(index + 1 > 6 ? 0 : index + 1, "days")
-                .add(i, "weeks")
-                .set({
-                  hour: current.hours(),
-                  minute: current.minutes(),
-                });
-              const end = moment()
-                .startOf("week")
-                .add(index + 1 > 6 ? 0 : index + 1, "days")
-                .add(i, "weeks")
-                .set({
-                  hour: next.hours(),
-                  minute: next.minutes(),
-                });
-
+      for (let i = 0; i < 52; i++) {
+        const currentDate = moment()
+          .startOf("week")
+          .add(index + 1 > 6 ? 0 : index + 1, "days")
+          .add(i, "weeks");
+  
+        const formattedDate = currentDate.format("YYYY-MM-DD");
+  
+        const mergedSlots = [];
+  
+        // Use both general and adjusted slots if they exist on that date
+        const generalSlots = day.slots || [];
+        const adjustedSlots = adjustedMap[formattedDate] || [];
+  
+        const allSlots = [...generalSlots];
+  
+        adjustedSlots.forEach((adjSlot) => {
+          let merged = false;
+          for (let genSlot of allSlots) {
+            const gStart = moment(genSlot.startTime, "HH:mm");
+            const gEnd = moment(genSlot.endTime, "HH:mm");
+            const aStart = moment(adjSlot.startTime, "HH:mm");
+            const aEnd = moment(adjSlot.endTime, "HH:mm");
+  
+            // If overlapping, merge the time
+            if (
+              aStart.isBefore(gEnd) &&
+              gStart.isBefore(aEnd)
+            ) {
+              genSlot.startTime = moment.min(gStart, aStart).format("HH:mm");
+              genSlot.endTime = moment.max(gEnd, aEnd).format("HH:mm");
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) {
+            allSlots.push(adjSlot); // Add separately if no overlap
+          }
+        });
+  
+        allSlots.forEach((slot) => {
+          if (slot.startTime && slot.endTime) {
+            const slotStart = moment(slot.startTime, "HH:mm");
+            const slotEnd = moment(slot.endTime, "HH:mm");
+            let current = slotStart.clone();
+  
+            while (current.isBefore(slotEnd)) {
+              const next = current.clone().add(appointmentDuration, "minutes");
+              if (next.isAfter(slotEnd)) break;
+  
+              const start = currentDate.clone().set({
+                hour: current.hours(),
+                minute: current.minutes(),
+              });
+              const end = currentDate.clone().set({
+                hour: next.hours(),
+                minute: next.minutes(),
+              });
+  
               const isBooked = bookedSlots.some(
                 (bookedSlot) =>
                   moment(bookedSlot.startTime).isSame(start) ||
@@ -431,87 +467,38 @@ export default function Schedule() {
                   (moment(bookedSlot.startTime).isBefore(end) &&
                     moment(bookedSlot.endTime).isAfter(end))
               );
-
+  
               if (isBooked) {
                 current = next;
                 continue;
               }
+  
               newEvents.push({
                 title: slot.groupSlot ? "Group Class" : "",
                 start: start.toDate(),
                 end: end.toDate(),
                 color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
               });
-            }
-            current = next;
-          }
-        }
-      });
-    });
-
-    adjusted.forEach((item) => {
-      const date = moment(item.date, "YYYY-MM-DD");
-
-      newEvents = newEvents.filter(
-        (event) => !moment(event.start).isSame(date, "day")
-      );
-
-      item.slots.forEach((slot) => {
-        if (slot.startTime && slot.endTime) {
-          const slotStart = moment(slot.startTime, "HH:mm");
-          const slotEnd = moment(slot.endTime, "HH:mm");
-          let current = slotStart.clone();
-
-          while (current.isBefore(slotEnd)) {
-            const next = current.clone().add(appointmentDuration, "minutes");
-            if (next.isAfter(slotEnd)) break;
-
-            const start = date.clone().set({
-              hour: current.hours(),
-              minute: current.minutes(),
-            });
-            const end = date.clone().set({
-              hour: next.hours(),
-              minute: next.minutes(),
-            });
-            const isBooked = bookedSlots.some(
-              (bookedSlot) =>
-                moment(bookedSlot.startTime).isSame(start) ||
-                moment(bookedSlot.endTime).isSame(end) ||
-                (moment(bookedSlot.startTime).isBefore(start) &&
-                  moment(bookedSlot.endTime).isAfter(start)) ||
-                (moment(bookedSlot.startTime).isBefore(end) &&
-                  moment(bookedSlot.endTime).isAfter(end))
-            );
-
-            if (isBooked) {
+  
               current = next;
-              continue;
             }
-            newEvents.push({
-              title: slot.groupSlot ? "Group Class" : "",
-              start: start.toDate(),
-              end: end.toDate(),
-              color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
-            });
-
-            current = next;
           }
-        }
-      });
+        });
+      }
     });
-
+  
+    // Render booked slots
     const groupedSlots = {};
-
+  
     bookedSlots.forEach((booked) => {
       const key = `${moment(booked.startTime).format()}/${moment(
         booked.endTime
       ).format()}`;
-
+  
       if (!groupedSlots[key]) {
         groupedSlots[key] = [];
       }
-
+  
       if (booked.groupSize && booked.groupSize > 1) {
         for (let i = 0; i < booked.groupSize; i++) {
           groupedSlots[key].push(booked.groupEmails[i]);
@@ -520,34 +507,36 @@ export default function Schedule() {
         groupedSlots[key].push(booked.student_name);
       }
     });
-
+  
     Object.entries(groupedSlots).forEach(([key, students]) => {
       const [start, end] = key.split("/");
-      // Get classId by find GroupedSlots in BookedSlot
+  
       const bookingSlot = bookedSlots.find(
         (bookedSlot) =>
           moment(bookedSlot.startTime).format() === start &&
           moment(bookedSlot.endTime).format() === end
       );
-
+  
       const classDetail = classes.find((c) => c.uid === bookingSlot.classId);
+  
       newEvents.push({
         title:
           students.length === 1
-            ? (students[0] || "Booked by a student")
+            ? students[0] || "Booked by a student"
             : `${students.length} students booked`,
         start: new Date(start),
         end: new Date(end),
-        color: students.length === 1 ? "#87CEEB" : "#369bc5", // Light blue for single bookings, yellow for group bookings
+        color: students.length === 1 ? "#87CEEB" : "#369bc5",
         tooltip:
           students.length === 1
             ? `Class: ${classDetail?.Name}, Booked by ${students[0]}`
-            : `Class: ${classDetail?.Name}\nStudents:\n- ${students.join("\n- ")} `,
+            : `Class: ${classDetail?.Name}\nStudents:\n- ${students.join("\n- ")}`,
       });
     });
-
+  
     setEvents(newEvents);
   };
+  
 
   // time slots from 30 minutes to 3 hours slotOptions
 
@@ -682,18 +671,18 @@ export default function Schedule() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <button onClick={() => onNavigate('TODAY')} style={{ marginRight: '8px', minWidth: 0  }}>Today</button>
-          <button onClick={() => onNavigate('PREV')} className="dm1:px-0 px-2 prev" style={{ marginRight: '8px', background: 'none', border: 'none', minWidth: 0  }}>
+          <div onClick={() => onNavigate('TODAY')} style={{ marginRight: '8px', minWidth: 0  }}>Today</div>
+          <div onClick={() => onNavigate('PREV')} className="dm1:px-0 px-2 prev" style={{ marginRight: '8px', background: 'none', border: 'none', minWidth: 0  }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
               <path d="M13.293 16.293a1 1 0 010-1.414L9.414 11l3.879-3.879a1 1 0 00-1.414-1.414l-4.586 4.586a1 1 0 000 1.414l4.586 4.586a1 1 0 001.414-1.414z"/>
             </svg>
-          </button>
+          </div>
           <ResponsiveLabel label={label} />
-          <button onClick={() => onNavigate('NEXT')} className="prev" style={{ background: 'none', border: 'none' }}>
+          <div onClick={() => onNavigate('NEXT')} className="prev" style={{ background: 'none', border: 'none' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
               <path d="M6.707 16.293a1 1 0 000-1.414L10.586 11 6.707 7.121a1 1 0 011.414-1.414l4.586 4.586a1 1 0 010 1.414l-4.586 4.586a1 1 0 01-1.414 0z"/>
             </svg>
-          </button>
+          </div>
         </div>
   
         <div>
@@ -1861,6 +1850,8 @@ export default function Schedule() {
                 className="bg-red-500 text-white rounded-md hover:bg-red-600"
                 style={{padding:'9px 20px'}}
                 onClick={() => {
+                  console.log(events)
+                  console.log(generalAvailability)
                   // Get the start and end times directly from selectedSlot
                   const startTime = selectedSlot.start.toLocaleTimeString("en-GB", {
                     hour: "2-digit",
@@ -1877,6 +1868,7 @@ export default function Schedule() {
 
                   // Create the new slot
                   const newSlot = { startTime, endTime, ...(isGroup && { groupSlot: true }) };
+                  console.log(newSlot)
 
                   // Define the function for converting time to minutes
                   const toMinutes = (time) => {
@@ -1952,19 +1944,47 @@ export default function Schedule() {
                   if (repeatOption === "Does not repeat") {
                     setAdjustedAvailability((prev) => {
                       const existingEntry = prev.find((item) => item.date === date);
-
+                  
+                      let updatedAvailability;
+                      let finalSlots;
+                  
                       if (!existingEntry) {
-                        return [...prev, { date, slots: [newSlot] }];
+                        finalSlots = [newSlot];
+                        updatedAvailability = [...prev, { date, slots: finalSlots }];
                       } else {
-                        const mergedSlots = mergeSlots(existingEntry.slots, newSlot);
-                        return prev.map((item) =>
-                          item.date === date ? { ...item, slots: mergedSlots } : item
+                        finalSlots = mergeSlots(existingEntry.slots, newSlot);
+                        updatedAvailability = prev.map((item) =>
+                          item.date === date ? { ...item, slots: finalSlots } : item
                         );
                       }
+                  
+                      // Now create events for the newSlot(s)
+                      const newEvents = finalSlots.map((slot) => {
+                        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+                        const [endHour, endMin] = slot.endTime.split(":").map(Number);
+                  
+                        const startDateTime = new Date(date);
+                        startDateTime.setHours(startHour, startMin, 0, 0);
+                  
+                        const endDateTime = new Date(date);
+                        endDateTime.setHours(endHour, endMin, 0, 0);
+                  
+                        return {
+                          start: startDateTime,
+                          end: endDateTime,
+                          title: "",
+                          color: "#d8f5b6",
+                        };
+                      });
+                  
+                      setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+                  
+                      return updatedAvailability;
                     });
-
+                  
                     setShowPopup(false);
-                  } else if (repeatOption === "Daily") {
+                  }
+                  else if (repeatOption === "Daily") {
                     const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                     updateAvailability(allDays);
                   } else if (repeatOption === "Every weekday (Monday to Friday)") {
