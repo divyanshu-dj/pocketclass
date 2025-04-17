@@ -32,6 +32,10 @@ export const categories = [
         imagePath: "/assets/Sport/ice_hockey_icon.png",
       },
       {
+        name: "Rugby",
+        imagePath: "/assets/Sport/Rugby_icon.png",
+      }
+      {
         name: "Pilates",
         imagePath: "/assets/Sport/pilates_icon.png",
       },
