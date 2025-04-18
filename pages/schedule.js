@@ -584,6 +584,7 @@ export default function Schedule() {
   };
   const handleSlotSelect = (slotInfo) => {
     const { start, end: selectedEnd } = slotInfo;
+    console.log(slotInfo)
   
     const selectedDuration = (selectedEnd - start) / (1000 * 60); // in minutes
   
@@ -606,6 +607,8 @@ export default function Schedule() {
       })}`,
       color: "#D8F5B6", // light green
     };
+
+    console.log(newSlot)
   
     setSelectedSlot(newSlot);
     setTemporaryEvent(newSlot);
@@ -1564,11 +1567,9 @@ export default function Schedule() {
                   value={timeOptions.find(
                     (option) =>
                       option.value ===
-                      new Date(selectedSlot.start).toLocaleTimeString("en-GB", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      `${new Date(selectedSlot.start).getHours().toString().padStart(2, "0")}:${new Date(selectedSlot.start).getMinutes().toString().padStart(2, "0")}`
                   )}
+
                   onChange={(selected) => {
                     const [hours, minutes] = selected.value.split(":").map(Number);
                     const updatedStart = new Date(selectedSlot.start);
@@ -1637,10 +1638,7 @@ export default function Schedule() {
                   value={timeOptions.find(
                     (option) =>
                       option.value ===
-                      new Date(selectedSlot.end).toLocaleTimeString("en-GB", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                      `${new Date(selectedSlot.end).getHours().toString().padStart(2, "0")}:${new Date(selectedSlot.end).getMinutes().toString().padStart(2, "0")}`
                   )}
                   onChange={(selected) => {
                     const [hours, minutes] = selected.value.split(":").map(Number);
@@ -1851,17 +1849,22 @@ export default function Schedule() {
                 style={{padding:'9px 20px'}}
                 onClick={() => {
                   console.log(events)
-                  console.log(generalAvailability)
+                  console.log(adjustedAvailability)
+                  console.log(selectedSlot)
                   // Get the start and end times directly from selectedSlot
-                  const startTime = selectedSlot.start.toLocaleTimeString("en-GB", {
+                  const startTime = selectedSlot.start.toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   });
 
-                  const endTime = selectedSlot.end.toLocaleTimeString("en-GB", {
+                  const endTime = selectedSlot.end.toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   });
+
+                  console.log(startTime, endTime)
 
                   // Get the date from the selectedSlot
                   const date = selectedSlot.start.toISOString().slice(0, 10); // "YYYY-MM-DD"
@@ -1977,7 +1980,7 @@ export default function Schedule() {
                         };
                       });
                   
-                      setEvents((prevEvents) => [...prevEvents, ...newEvents]);
+                      // setEvent((prevEvents) => [...prevEvents, ...newEvents]);
                   
                       return updatedAvailability;
                     });
@@ -1991,7 +1994,9 @@ export default function Schedule() {
                     const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                     updateAvailability(weekdays);
                   } else if (repeatOption.startsWith("Weekly")) {
-                    const weekday = new Date(date).toLocaleDateString("en-US", { weekday: "long" });
+                    const weekday = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
+                      weekday: "long",
+                    });
                     updateAvailability([weekday]);
                   } else {
                     alert("Custom repeat type not supported yet.");
