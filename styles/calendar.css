@@ -1,5 +1,4 @@
 .rbc-toolbar {
-    padding: 10px 0px;
     display: flex;
 }
 
@@ -15,12 +14,19 @@
 
 
 @media (max-width: 768px) {
-    .rbc-toolbar {
-        flex-direction: column;
-    }
-
     .rbc-toolbar .rbc-toolbar-label {
         margin: 10px;
+    }
+}
+
+@media (max-width: 350px) {
+    .prev {
+        padding: 0px !important;
+    }
+}
+@media (max-width: 290px) {
+    .prev {
+        display: none !important;
     }
 }
 
@@ -60,8 +66,6 @@
 }
 .rbc-toolbar{
     margin: 0!important;
-    background-color: white;
-    padding: 16px 20px;
     border-radius: 16px 16px 0 0;
 }
 .rbc-agenda-date-cell{
@@ -88,3 +92,6 @@
     color: #e73f2b;
   }
   
+  .rbc-slot-selection {
+    background-color: #D8F5B6 !important; /* light green with transparency */
+  }

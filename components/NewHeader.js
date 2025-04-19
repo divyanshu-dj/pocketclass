@@ -265,7 +265,7 @@ const NewHeader = ({ isHome = true }) => {
                   {user && <Notifications user={user} />}
 
                   <div
-                    className="relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer z-[999]"
+                    className="relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer z-[50]"
                     onClick={toggleDropDown}
                   >
                     <MenuIcon className="h-6 cursor-pointer ml-1" />

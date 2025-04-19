@@ -38,10 +38,14 @@ export default function Schedule() {
   const [showClassDropdown, setShowClassDropdown] = useState(null);
   const [timeZones, setTimeZones] = useState([]);
   const [selectedTimeZone, setSelectedTimeZone] = useState("America/Toronto");
+  const [isGroup, setIsGroup] = useState(false);
 
   const [events, setEvents] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker1, setShowDatePicker1] = useState(false);
   const [appointmentDuration, setAppointmentDuration] = useState(30);
+  const [currentView, setCurrentView] = useState('week');
+  const [temporaryEvent, setTemporaryEvent] = useState(null);
   const [generalAvailability, setGeneralAvailability] = useState(
     [
       "Monday",
@@ -67,6 +71,8 @@ export default function Schedule() {
   const [minDays, setMinDays] = useState(1);
   const [maxDays, setMaxDays] = useState(30);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleEventClick = (event) => {
     setSelectedBooking(event);
@@ -288,6 +294,7 @@ export default function Schedule() {
   ]);
 
   const handleGeneralInputChange = (dayIndex, slotIndex, key, value) => {
+    console.log(dayIndex,slotIndex,key,value)
     const updatedAvailability = [...generalAvailability];
     updatedAvailability[dayIndex].slots[slotIndex][key] = value;
     setGeneralAvailability(updatedAvailability);
@@ -334,17 +341,23 @@ export default function Schedule() {
     }
   };
 
-  const addAdjustedSlot = (date) => {
+  function formatDateTimeLocal1(date) {
+    return new Date(date).toISOString().slice(0, 16);
+  }  
+
+  const addAdjustedSlot = (date, startTime = "09:00", endTime = "09:30") => {
+    console.log(date,startTime,endTime)
     const updatedAvailability = adjustedAvailability.map((item) =>
       item.date === date
         ? {
             ...item,
-            slots: [...item.slots, { startTime: "09:00", endTime: "09:30" }],
+            slots: [...item.slots, { startTime, endTime }],
           }
         : item
     );
     setAdjustedAvailability(updatedAvailability);
   };
+  
 
   const handleAdjustedInputChange = (date, slotIndex, key, value) => {
     const updatedAvailability = adjustedAvailability.map((item) => {
@@ -378,36 +391,73 @@ export default function Schedule() {
 
   const generateEvents = (general, adjusted) => {
     let newEvents = [];
-
+  
+    // Create a map from adjusted dates for easy access
+    const adjustedMap = {};
+    adjusted.forEach((item) => {
+      adjustedMap[item.date] = item.slots;
+    });
+  
     general.forEach((day, index) => {
-      day.slots.forEach((slot) => {
-        if (slot.startTime && slot.endTime) {
-          const slotStart = moment(slot.startTime, "HH:mm");
-          const slotEnd = moment(slot.endTime, "HH:mm");
-          let current = slotStart.clone();
-
-          while (current.isBefore(slotEnd)) {
-            const next = current.clone().add(appointmentDuration, "minutes");
-            if (next.isAfter(slotEnd)) break;
-
-            for (let i = 0; i < 52; i++) {
-              const start = moment()
-                .startOf("week")
-                .add(index + 1 > 6 ? 0 : index + 1, "days")
-                .add(i, "weeks")
-                .set({
-                  hour: current.hours(),
-                  minute: current.minutes(),
-                });
-              const end = moment()
-                .startOf("week")
-                .add(index + 1 > 6 ? 0 : index + 1, "days")
-                .add(i, "weeks")
-                .set({
-                  hour: next.hours(),
-                  minute: next.minutes(),
-                });
-
+      for (let i = 0; i < 52; i++) {
+        const currentDate = moment()
+          .startOf("week")
+          .add(index + 1 > 6 ? 0 : index + 1, "days")
+          .add(i, "weeks");
+  
+        const formattedDate = currentDate.format("YYYY-MM-DD");
+  
+        const mergedSlots = [];
+  
+        // Use both general and adjusted slots if they exist on that date
+        const generalSlots = day.slots || [];
+        const adjustedSlots = adjustedMap[formattedDate] || [];
+  
+        const allSlots = [...generalSlots];
+  
+        adjustedSlots.forEach((adjSlot) => {
+          let merged = false;
+          for (let genSlot of allSlots) {
+            const gStart = moment(genSlot.startTime, "HH:mm");
+            const gEnd = moment(genSlot.endTime, "HH:mm");
+            const aStart = moment(adjSlot.startTime, "HH:mm");
+            const aEnd = moment(adjSlot.endTime, "HH:mm");
+  
+            // If overlapping, merge the time
+            if (
+              aStart.isBefore(gEnd) &&
+              gStart.isBefore(aEnd)
+            ) {
+              genSlot.startTime = moment.min(gStart, aStart).format("HH:mm");
+              genSlot.endTime = moment.max(gEnd, aEnd).format("HH:mm");
+              merged = true;
+              break;
+            }
+          }
+          if (!merged) {
+            allSlots.push(adjSlot); // Add separately if no overlap
+          }
+        });
+  
+        allSlots.forEach((slot) => {
+          if (slot.startTime && slot.endTime) {
+            const slotStart = moment(slot.startTime, "HH:mm");
+            const slotEnd = moment(slot.endTime, "HH:mm");
+            let current = slotStart.clone();
+  
+            while (current.isBefore(slotEnd)) {
+              const next = current.clone().add(appointmentDuration, "minutes");
+              if (next.isAfter(slotEnd)) break;
+  
+              const start = currentDate.clone().set({
+                hour: current.hours(),
+                minute: current.minutes(),
+              });
+              const end = currentDate.clone().set({
+                hour: next.hours(),
+                minute: next.minutes(),
+              });
+  
               const isBooked = bookedSlots.some(
                 (bookedSlot) =>
                   moment(bookedSlot.startTime).isSame(start) ||
@@ -417,87 +467,38 @@ export default function Schedule() {
                   (moment(bookedSlot.startTime).isBefore(end) &&
                     moment(bookedSlot.endTime).isAfter(end))
               );
-
+  
               if (isBooked) {
                 current = next;
                 continue;
               }
+  
               newEvents.push({
                 title: slot.groupSlot ? "Group Class" : "",
                 start: start.toDate(),
                 end: end.toDate(),
                 color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
               });
-            }
-            current = next;
-          }
-        }
-      });
-    });
-
-    adjusted.forEach((item) => {
-      const date = moment(item.date, "YYYY-MM-DD");
-
-      newEvents = newEvents.filter(
-        (event) => !moment(event.start).isSame(date, "day")
-      );
-
-      item.slots.forEach((slot) => {
-        if (slot.startTime && slot.endTime) {
-          const slotStart = moment(slot.startTime, "HH:mm");
-          const slotEnd = moment(slot.endTime, "HH:mm");
-          let current = slotStart.clone();
-
-          while (current.isBefore(slotEnd)) {
-            const next = current.clone().add(appointmentDuration, "minutes");
-            if (next.isAfter(slotEnd)) break;
-
-            const start = date.clone().set({
-              hour: current.hours(),
-              minute: current.minutes(),
-            });
-            const end = date.clone().set({
-              hour: next.hours(),
-              minute: next.minutes(),
-            });
-            const isBooked = bookedSlots.some(
-              (bookedSlot) =>
-                moment(bookedSlot.startTime).isSame(start) ||
-                moment(bookedSlot.endTime).isSame(end) ||
-                (moment(bookedSlot.startTime).isBefore(start) &&
-                  moment(bookedSlot.endTime).isAfter(start)) ||
-                (moment(bookedSlot.startTime).isBefore(end) &&
-                  moment(bookedSlot.endTime).isAfter(end))
-            );
-
-            if (isBooked) {
+  
               current = next;
-              continue;
             }
-            newEvents.push({
-              title: slot.groupSlot ? "Group Class" : "",
-              start: start.toDate(),
-              end: end.toDate(),
-              color: slot.groupSlot ? "#a1d564" : "#d8f5b6",
-            });
-
-            current = next;
           }
-        }
-      });
+        });
+      }
     });
-
+  
+    // Render booked slots
     const groupedSlots = {};
-
+  
     bookedSlots.forEach((booked) => {
       const key = `${moment(booked.startTime).format()}/${moment(
         booked.endTime
       ).format()}`;
-
+  
       if (!groupedSlots[key]) {
         groupedSlots[key] = [];
       }
-
+  
       if (booked.groupSize && booked.groupSize > 1) {
         for (let i = 0; i < booked.groupSize; i++) {
           groupedSlots[key].push(booked.groupEmails[i]);
@@ -506,34 +507,36 @@ export default function Schedule() {
         groupedSlots[key].push(booked.student_name);
       }
     });
-
+  
     Object.entries(groupedSlots).forEach(([key, students]) => {
       const [start, end] = key.split("/");
-      // Get classId by find GroupedSlots in BookedSlot
+  
       const bookingSlot = bookedSlots.find(
         (bookedSlot) =>
           moment(bookedSlot.startTime).format() === start &&
           moment(bookedSlot.endTime).format() === end
       );
-
+  
       const classDetail = classes.find((c) => c.uid === bookingSlot.classId);
+  
       newEvents.push({
         title:
           students.length === 1
-            ? (students[0] || "Booked by a student")
+            ? students[0] || "Booked by a student"
             : `${students.length} students booked`,
         start: new Date(start),
         end: new Date(end),
-        color: students.length === 1 ? "#87CEEB" : "#369bc5", // Light blue for single bookings, yellow for group bookings
+        color: students.length === 1 ? "#87CEEB" : "#369bc5",
         tooltip:
           students.length === 1
             ? `Class: ${classDetail?.Name}, Booked by ${students[0]}`
-            : `Class: ${classDetail?.Name}\nStudents:\n- ${students.join("\n- ")} `,
+            : `Class: ${classDetail?.Name}\nStudents:\n- ${students.join("\n- ")}`,
       });
     });
-
+  
     setEvents(newEvents);
   };
+  
 
   // time slots from 30 minutes to 3 hours slotOptions
 
@@ -579,6 +582,138 @@ export default function Schedule() {
       .slots[slotIdex];
     setAdjustedAvailability(updatedAvailability);
   };
+  const handleSlotSelect = (slotInfo) => {
+    const { start, end: selectedEnd } = slotInfo;
+    console.log(slotInfo)
+  
+    const selectedDuration = (selectedEnd - start) / (1000 * 60); // in minutes
+  
+    // Round up to nearest multiple of appointmentDuration
+    const multiplier = Math.ceil(selectedDuration / appointmentDuration);
+    const adjustedMinutes = multiplier * appointmentDuration;
+  
+    const adjustedEnd = new Date(start);
+    adjustedEnd.setMinutes(start.getMinutes() + adjustedMinutes);
+  
+    const newSlot = {
+      start,
+      end: adjustedEnd,
+      title: `${start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${adjustedEnd.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
+      color: "#D8F5B6", // light green
+    };
+
+    console.log(newSlot)
+  
+    setSelectedSlot(newSlot);
+    setTemporaryEvent(newSlot);
+    setShowPopup(true);
+  };
+  
+  
+
+  
+  const formatDateTimeLocal = (date) => {
+    const d = new Date(date);
+    const offset = d.getTimezoneOffset();
+    const localDate = new Date(d.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16);
+  };
+
+  function ResponsiveLabel({ label }) {
+    const [isSmallScreen, setIsSmallScreen] = useState(
+      typeof window !== "undefined" && window.innerWidth < 350
+    );
+  
+    useEffect(() => {
+      const handleResize = () => {
+        setIsSmallScreen(window.innerWidth < 350);
+      };
+  
+      // Listen to window resize
+      window.addEventListener("resize", handleResize);
+  
+      // Clean up
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+  
+    const firstSpaceIndex = label.indexOf(" ");
+  
+    // if (!isSmallScreen || firstSpaceIndex === -1) {
+    //   return <span className="font-bold mr-2 text-center leading-tight">{label}</span>;
+    // }
+  
+    const firstPart = label.slice(0, firstSpaceIndex);
+    const secondPart = label.slice(firstSpaceIndex + 1);
+  
+    return (
+      <p className="font-bold flex flex-col dm1:flex-row mr-2 text-center leading-tight" style={{ fontWeight: 'bold', marginRight: '8px', whiteSpace: 'nowrap', flexShrink: 1, }}>
+        <p className="block mr-1">{firstPart}</p>
+        <p className="block whitespace-nowrap">{secondPart}</p>
+      </p>
+    );
+  }
+  
+  function CustomToolbar({ label, onNavigate, onView, view, views }) {
+    return (
+      <div
+        className="rbc-toolbar dm1:px-4 py-4 dm1:bg-white-500 dm1:shadow-md bg-transparent shadow-none"
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          flexDirection:'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          borderRadius: '5px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div onClick={() => onNavigate('TODAY')} style={{ marginRight: '8px', minWidth: 0  }}>Today</div>
+          <div onClick={() => onNavigate('PREV')} className="dm1:px-0 px-2 prev" style={{ marginRight: '8px', background: 'none', border: 'none', minWidth: 0  }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13.293 16.293a1 1 0 010-1.414L9.414 11l3.879-3.879a1 1 0 00-1.414-1.414l-4.586 4.586a1 1 0 000 1.414l4.586 4.586a1 1 0 001.414-1.414z"/>
+            </svg>
+          </div>
+          <ResponsiveLabel label={label} />
+          <div onClick={() => onNavigate('NEXT')} className="prev" style={{ background: 'none', border: 'none' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M6.707 16.293a1 1 0 000-1.414L10.586 11 6.707 7.121a1 1 0 011.414-1.414l4.586 4.586a1 1 0 010 1.414l-4.586 4.586a1 1 0 01-1.414 0z"/>
+            </svg>
+          </div>
+        </div>
+  
+        <div>
+          <select
+            value={view}
+            onChange={(e) => onView(e.target.value)}
+            style={{
+              padding: '6px 8px',
+              width: '80px',
+              borderRadius: '5px',
+              border: '1px solid #ccc',
+              backgroundColor: '#fff',
+              outline: 'none',
+              boxShadow: 'none',
+            }}
+          >
+            {views
+            .filter((v) => v !== 'Agenda') 
+            .map((v) => (
+              <option key={v} value={v}>
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:h-screen">
@@ -1369,11 +1504,12 @@ export default function Schedule() {
         </div>
         <div className="flex-grow p-4">
           <BigCalendar
+            selectable
             timeslots={2}
             timeStep={30}
             defaultView={view}
             localizer={localizer}
-            events={events}
+            events={temporaryEvent ? [...events, temporaryEvent] : events}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "calc(100vh - 150px)" }}
@@ -1381,12 +1517,501 @@ export default function Schedule() {
             eventPropGetter={(event) => ({
               style: {
                 backgroundColor: event.color,
+                fontSize: '12px'
               },
             })}
+            views={['month', 'week', 'day']}
+            onView={(view) => setCurrentView(view)}
+            components={{ toolbar: CustomToolbar }}
+            onSelectSlot={handleSlotSelect}
             scrollToTime={new Date(1970, 1, 1, 8, 0, 0)}
             tooltipAccessor="tooltip"
             onSelectEvent={handleEventClick} // Event click handler
           />
+          {showPopup && selectedSlot && (
+            <div
+              className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-10 z-50 flex items-center justify-center"
+              onClick={() => {
+                setShowPopup(false);
+                setTemporaryEvent(null);
+              }}
+            >
+            <div className="relative bg-white p-6 rounded-xl shadow-lg w-[300px] popup dm1:w-[400px]" onClick={(e) => e.stopPropagation()}>
+              <h3>Add Availability</h3>
+
+              <div
+                className="flex flex-col dm1:flex-row items-start mt-2 justify-start gap-2 py-2 text-sm rounded cursor-pointer"
+              >
+                <span onClick={() => setShowDatePicker1(!showDatePicker1)} className="whitespace-nowrap border rounded px-4 py-1 min-h-[41px] bg-white shadow-sm cursor-pointer flex items-center">
+                  {(() => {
+                    const startDate = new Date(selectedSlot.start);
+                    const endDate = new Date(selectedSlot.end);
+
+                    const formatDate = (date) =>
+                      date.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      });
+
+                    const isSameDay = startDate.toDateString() === endDate.toDateString();
+
+                    return isSameDay
+                      ? formatDate(startDate)
+                      : `${formatDate(startDate)} – ${formatDate(endDate)}`;
+                  })()}
+                </span>
+                <div className="flex items-center">
+                <Select
+                  value={timeOptions.find(
+                    (option) =>
+                      option.value ===
+                      `${new Date(selectedSlot.start).getHours().toString().padStart(2, "0")}:${new Date(selectedSlot.start).getMinutes().toString().padStart(2, "0")}`
+                  )}
+
+                  onChange={(selected) => {
+                    const [hours, minutes] = selected.value.split(":").map(Number);
+                    const updatedStart = new Date(selectedSlot.start);
+
+                    updatedStart.setHours(hours);
+                    updatedStart.setMinutes(minutes);
+                    updatedStart.setSeconds(0);
+                    updatedStart.setMilliseconds(0);
+
+                    setSelectedSlot((prev) => {
+                      console.log(selectedSlot)
+                      // Adjust the start and end times to ensure they are in the correct order
+                      const adjustedStart = updatedStart < prev.end ? updatedStart : prev.end;
+                      const adjustedEnd = updatedStart < prev.end ? prev.end : updatedStart;
+                    
+                      const newSlot = { ...prev, start: adjustedStart, end: adjustedEnd };
+                    
+                      // Update the input field for start time
+                      const startInput = document.getElementById("startTimeInput");
+                      if (startInput) {
+                        startInput.value = formatDateTimeLocal(adjustedStart);
+                      }
+                    
+                      // Set the temporary event with adjusted times
+                      setTemporaryEvent({
+                        start: adjustedStart,  // Set the adjusted start time
+                        end: adjustedEnd,      // Set the adjusted end time
+                        title: `${adjustedStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${adjustedEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+                        color: "#D8F5B6",      // light green
+                      });
+                      console.log(newSlot)
+                      console.log(selectedSlot)
+                      return newSlot;  // Return the updated slot with adjusted start and end times
+                    });
+                    console.log(selectedSlot)
+                    
+                    // slotInfo = selectedSlot
+                    // setTemporaryEvent({
+                    //   start: slotInfo.start,
+                    //   end: slotInfo.end,
+                    //   title: ${slotInfo.start.toLocaleTimeString([], {
+                    //     hour: "2-digit",minute: "2-digit",})}-${slotInfo.end.toLocaleTimeString([], {
+                    //     hour: "2-digit",minute: "2-digit",})},
+                    //   color: "#D8F5B6", // light green
+                    // })
+                  }}
+                  options={timeOptions}
+                  className="text-sm w-fit mr-2"
+                  classNames={{
+                    control: () =>
+                      "border rounded min-w-[70px] px-0 py-1 min-h-[36px] bg-white shadow-sm cursor-pointer",
+                    option: ({ isFocused }) =>
+                      `px-2 py-1 cursor-pointer ${isFocused ? "bg-gray-100" : ""}`,
+                    singleValue: () => "text-sm",
+                    menu: () => "z-50 bg-white shadow-lg border rounded mt-1",
+                  }}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                />
+
+                <span>-</span>
+
+                <Select
+                  value={timeOptions.find(
+                    (option) =>
+                      option.value ===
+                      `${new Date(selectedSlot.end).getHours().toString().padStart(2, "0")}:${new Date(selectedSlot.end).getMinutes().toString().padStart(2, "0")}`
+                  )}
+                  onChange={(selected) => {
+                    const [hours, minutes] = selected.value.split(":").map(Number);
+                    const updatedEnd = new Date(selectedSlot.end);
+
+                    updatedEnd.setHours(hours);
+                    updatedEnd.setMinutes(minutes);
+                    updatedEnd.setSeconds(0);
+                    updatedEnd.setMilliseconds(0);
+
+                    setSelectedSlot((prev) => {
+                      console.log(selectedSlot)
+                      // Adjust the start and end times to ensure they are in the correct order
+                      const adjustedStart = updatedEnd < prev.start ? updatedEnd : prev.start;
+                      const adjustedEnd = updatedEnd < prev.start ? prev.start : updatedEnd;
+                    
+                      const newSlot = { ...prev, start: adjustedStart, end: adjustedEnd };
+                    
+                      // Update the input field for start time
+                      const startInput = document.getElementById("startTimeInput");
+                      if (startInput) {
+                        startInput.value = formatDateTimeLocal(adjustedStart);
+                      }
+                    
+                      // Set the temporary event with adjusted times
+                      setTemporaryEvent({
+                        start: adjustedStart,  // Set the adjusted start time
+                        end: adjustedEnd,      // Set the adjusted end time
+                        title: `${adjustedStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${adjustedEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+                        color: "#D8F5B6",      // light green
+                      });
+                      console.log(newSlot)
+                      console.log(selectedSlot)
+                      return newSlot;  // Return the updated slot with adjusted start and end times
+                    });
+                  }}
+                  options={timeOptions}
+                  className="text-sm w-fit ml-2"
+                  classNames={{
+                    control: () =>
+                      "border rounded px-0 py-1 min-w-[70px] focus:outline-none focus:ring-0 focus:border-none min-h-[36px] bg-white shadow-sm cursor-pointer",
+                    option: ({ isFocused }) =>
+                      `px-2 py-1 cursor-pointer ${isFocused ? "bg-gray-100" : ""}`,
+                    singleValue: () => "text-sm",
+                    menu: () => "z-50 bg-white shadow-lg border rounded mt-1",
+                  }}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                />
+              </div>
+              </div>
+              
+              {showDatePicker1 && (
+              <div className=" absolute max-h-[0vh] p-4 w-[390px] dm1:scale-100 scale-75 bg-transparent">
+                <div className="relative dm1:left-[-20px] left-[-100px] dm1:top-[-20px] top-[-100px] mt-3 border rounded-md p-3 bg-white">
+                <DayPicker
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (!date || !selectedSlot) return;
+
+                    const startInput = document.getElementById("startTimeInput");
+                    const endInput = document.getElementById("endTimeInput");
+
+                    const oldStart = new Date(selectedSlot.start);
+                    const oldEnd = new Date(selectedSlot.end);
+
+                    const updatedStart = new Date(date);
+                    updatedStart.setHours(oldStart.getHours(), oldStart.getMinutes(), 0, 0);
+
+                    const updatedEnd = new Date(date);
+                    updatedEnd.setHours(oldEnd.getHours(), oldEnd.getMinutes(), 0, 0);
+
+                    const pad = (n) => String(n).padStart(2, "0");
+                    const format = (d) =>
+                      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+                        d.getHours()
+                      )}:${pad(d.getMinutes())}`;
+
+                    if (startInput && endInput) {
+                      startInput.value = format(updatedStart);
+                      endInput.value = format(updatedEnd);
+                    }
+
+                    // ✅ Update selected slot
+                    setSelectedSlot({
+                      start: updatedStart,
+                      end: updatedEnd,
+                    });
+
+                    // ✅ Update temporary event
+                    setTemporaryEvent({
+                      start: updatedStart,
+                      end: updatedEnd,
+                      title: `${updatedStart.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })} - ${updatedEnd.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`,
+                      color: "#D8F5B6",
+                    });
+
+                    setSelectedDate(date);
+                    setShowDatePicker1(false);
+                  }}
+                  className="border rounded p-2 bg-gray-100 text-sm z-[1001]"
+                />
+
+                  <button
+                    className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    onClick={() => setShowDatePicker1(false)}
+                  >
+                    Close
+                  </button>
+                  </div>
+                </div>
+              )}
+
+              <label style={{"display":"none"}}>
+                Start:
+                <input
+                  id="startTimeInput"
+                  type="datetime-local"
+                  defaultValue={formatDateTimeLocal(selectedSlot.start)}
+                />
+              </label>
+
+              <label style={{"display":"none"}}>
+                End:
+                <input
+                  id="endTimeInput"
+                  type="datetime-local"
+                  defaultValue={formatDateTimeLocal(selectedSlot.end)}
+                />
+              </label>
+
+              <label>
+                Repeat:
+                <select id="repeatSelect" className="border rounded border-gray-300">
+                  <option>Does not repeat</option>
+                  <option>Daily</option>
+                  <option>
+                    Weekly on{" "}
+                    {new Date(selectedSlot.start).toLocaleDateString("en-US", {
+                      weekday: "long",
+                    })}
+                  </option>
+                  <option>Every weekday (Monday to Friday)</option>
+                </select>
+              </label>
+
+              {/* Group class checkbox properly styled and aligned */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  gap: "8px",
+                  marginTop: "8px",
+                }}
+              >
+                <input
+                id="groupCheckbox"
+                type="checkbox"
+                checked={isGroup}
+                onChange={(e) => setIsGroup(e.target.checked)}
+                style={{
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  height: "18px",
+                  width: "18px",
+                  borderRadius: "4px",
+                  border: "2px solid #ccc",
+                  backgroundColor: isGroup ? "#EF4444" : "#fff", // red when checked
+                  display: "grid",
+                  placeItems: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease-in-out",
+                  outline: "none", // kill outline on focus
+                  boxShadow: "none", // kill any browser shadow
+                }}
+                onFocus={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                }}
+                onBlur={(e) => {
+                  e.target.style.outline = "none";
+                  e.target.style.boxShadow = "none";
+                }}
+              />
+
+                <label htmlFor="groupCheckbox" style={{ margin: 0, fontSize: "14px" }}>
+                  Group class
+                </label>
+              </div>
+
+
+              <button className="border border-red-500 text-red-500 rounded-md hover:bg-red-50 mr-4 w-fit" style={{padding:'8px 14px'}} onClick={() => {
+                setShowPopup(false)
+                setTemporaryEvent(null);
+              }}>Close</button>
+              <button
+                className="bg-red-500 text-white rounded-md hover:bg-red-600"
+                style={{padding:'9px 20px'}}
+                onClick={() => {
+                  console.log(events)
+                  console.log(adjustedAvailability)
+                  console.log(selectedSlot)
+                  // Get the start and end times directly from selectedSlot
+                  const startTime = selectedSlot.start.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  });
+
+                  const endTime = selectedSlot.end.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  });
+
+                  console.log(startTime, endTime)
+
+                  // Get the date from the selectedSlot
+                  const date = selectedSlot.start.toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+                  // Create the new slot
+                  const newSlot = { startTime, endTime, ...(isGroup && { groupSlot: true }) };
+                  console.log(newSlot)
+
+                  // Define the function for converting time to minutes
+                  const toMinutes = (time) => {
+                    const [h, m] = time.split(":").map(Number);
+                    return h * 60 + m;
+                  };
+
+                  // Convert minutes to "HH:mm" format
+                  const toHHMM = (mins) =>
+                    `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+
+                  // Merge function to combine overlapping slots
+                  const mergeSlots = (slots, newSlot) => {
+                    const allSlots = [
+                      ...slots.map((s) => ({
+                        start: toMinutes(s.startTime),
+                        end: toMinutes(s.endTime),
+                        groupSlot: s.groupSlot || false,
+                      })),
+                      {
+                        start: toMinutes(newSlot.startTime),
+                        end: toMinutes(newSlot.endTime),
+                        groupSlot: newSlot.groupSlot || false,
+                      },
+                    ].sort((a, b) => a.start - b.start);
+
+                    const merged = [];
+                    let current = allSlots[0];
+
+                    for (let i = 1; i < allSlots.length; i++) {
+                      const next = allSlots[i];
+                      if (current.end >= next.start && current.groupSlot === next.groupSlot) {
+                        current.end = Math.max(current.end, next.end);
+                      } else {
+                        merged.push({ ...current });
+                        current = next;
+                      }
+                    }
+                    merged.push(current);
+
+                    return merged.map((slot) => ({
+                      startTime: toHHMM(slot.start),
+                      endTime: toHHMM(slot.end),
+                      ...(isGroup && { groupSlot: true }),
+                    }));
+                  };
+
+                  // Function to update availability for repeated days
+                  const updateAvailability = (daysArray) => {
+                    setGeneralAvailability((prev) => {
+                      const updated = [...prev];
+
+                      daysArray.forEach((day) => {
+                        const index = updated.findIndex((item) => item.day === day);
+
+                        if (index === -1) {
+                          updated.push({ day, slots: [newSlot] });
+                        } else {
+                          const mergedSlots = mergeSlots(updated[index].slots, newSlot);
+                          updated[index] = { ...updated[index], slots: mergedSlots };
+                        }
+                      });
+
+                      return updated;
+                    });
+
+                    setShowPopup(false);
+                  };
+
+                  // Handle the repeat option
+                  const repeatOption = document.getElementById("repeatSelect").value;
+
+                  if (repeatOption === "Does not repeat") {
+                    setAdjustedAvailability((prev) => {
+                      const existingEntry = prev.find((item) => item.date === date);
+                  
+                      let updatedAvailability;
+                      let finalSlots;
+                  
+                      if (!existingEntry) {
+                        finalSlots = [newSlot];
+                        updatedAvailability = [...prev, { date, slots: finalSlots }];
+                      } else {
+                        finalSlots = mergeSlots(existingEntry.slots, newSlot);
+                        updatedAvailability = prev.map((item) =>
+                          item.date === date ? { ...item, slots: finalSlots } : item
+                        );
+                      }
+                  
+                      // Now create events for the newSlot(s)
+                      const newEvents = finalSlots.map((slot) => {
+                        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+                        const [endHour, endMin] = slot.endTime.split(":").map(Number);
+                  
+                        const startDateTime = new Date(date);
+                        startDateTime.setHours(startHour, startMin, 0, 0);
+                  
+                        const endDateTime = new Date(date);
+                        endDateTime.setHours(endHour, endMin, 0, 0);
+                  
+                        return {
+                          start: startDateTime,
+                          end: endDateTime,
+                          title: "",
+                          color: "#d8f5b6",
+                        };
+                      });
+                  
+                      // setEvent((prevEvents) => [...prevEvents, ...newEvents]);
+                  
+                      return updatedAvailability;
+                    });
+                  
+                    setShowPopup(false);
+                  }
+                  else if (repeatOption === "Daily") {
+                    const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                    updateAvailability(allDays);
+                  } else if (repeatOption === "Every weekday (Monday to Friday)") {
+                    const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+                    updateAvailability(weekdays);
+                  } else if (repeatOption.startsWith("Weekly")) {
+                    const weekday = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
+                      weekday: "long",
+                    });
+                    updateAvailability([weekday]);
+                  } else {
+                    alert("Custom repeat type not supported yet.");
+                  }
+                  setIsGroup(false)
+                  setTemporaryEvent(null); // Clear the temporary event
+                }}
+              >
+                Save
+              </button>
+
+            </div>
+            </div>
+          )}
+
           {selectedBooking && (
             <ReactModal
               isOpen={!!selectedBooking}
@@ -1424,6 +2049,31 @@ export default function Schedule() {
           )}
         </div>
       </div>
+      <style>{`
+        .popup {
+          position: relative;
+          top:-20vh;
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+          z-index: 1000000000000000000000000000000000000000;
+        }
+        .popup label {
+          display: block;
+          margin: 10px 0;
+        }
+        .popup input,
+        .popup select {
+          width: 100%;
+          padding: 6px;
+          margin-top: 4px;
+        }
+        .popup button {
+          margin-top: 12px;
+          padding: 8px 16px;
+        }
+      `}</style>
     </div>
   );
 }
