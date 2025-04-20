@@ -203,12 +203,37 @@ export default function Schedule() {
       (item) =>
         !vacationDates.some((vacationDate) => vacationDate.date === item.date)
     );
-
-    setAdjustedAvailability([...updatedAdjustedAvailability, ...vacationDates]);
+  
+    const updatedEvents = events.map((event) => {
+      const eventDate = moment(event.start).startOf("day");
+  
+      if (
+        eventDate.isSameOrAfter(moment(vacationStartDate).startOf("day")) &&
+        eventDate.isSameOrBefore(moment(vacationEndDate).startOf("day"))
+      ) {
+        // ⬅️ add the `isVacation: true` flag
+        return {
+          ...event,
+          isVacation: true,
+        };
+      }
+  
+      // keep event as-is (ensures no unintended mutation)
+      return {
+        ...event,
+        isVacation: event.isVacation ?? false, // default to false if not present
+      };
+    });
+  
+    setAdjustedAvailability([
+      ...updatedAdjustedAvailability,
+      ...vacationDates,
+    ]);
+    setEvents(updatedEvents);
     setVacationStartDate(null);
     setVacationEndDate(null);
     setShowVacationPicker(false);
-  };
+  }; 
 
   const saveSchedule = async (
     db,
@@ -233,7 +258,6 @@ export default function Schedule() {
       setScheduleLoading(false);
     } catch (error) {
       toast.error("Error saving schedule");
-      console.error("Error saving schedule:", error);
       setScheduleLoading(false);
     }
   };
@@ -294,7 +318,6 @@ export default function Schedule() {
   ]);
 
   const handleGeneralInputChange = (dayIndex, slotIndex, key, value) => {
-    console.log(dayIndex,slotIndex,key,value)
     const updatedAvailability = [...generalAvailability];
     updatedAvailability[dayIndex].slots[slotIndex][key] = value;
     setGeneralAvailability(updatedAvailability);
@@ -346,7 +369,6 @@ export default function Schedule() {
   }  
 
   const addAdjustedSlot = (date, startTime = "09:00", endTime = "09:30") => {
-    console.log(date,startTime,endTime)
     const updatedAvailability = adjustedAvailability.map((item) =>
       item.date === date
         ? {
@@ -392,10 +414,16 @@ export default function Schedule() {
   const generateEvents = (general, adjusted) => {
     let newEvents = [];
   
-    // Create a map from adjusted dates for easy access
+    // Create a map for adjusted slots and a Set for vacation dates
     const adjustedMap = {};
+    const vacationDates = new Set();
+  
     adjusted.forEach((item) => {
-      adjustedMap[item.date] = item.slots;
+      if (item.slots.length === 0) {
+        vacationDates.add(item.date); // mark as vacation
+      } else {
+        adjustedMap[item.date] = item.slots;
+      }
     });
   
     general.forEach((day, index) => {
@@ -407,12 +435,13 @@ export default function Schedule() {
   
         const formattedDate = currentDate.format("YYYY-MM-DD");
   
-        const mergedSlots = [];
+        // ❌ Skip generating events on vacation dates
+        if (vacationDates.has(formattedDate)) {
+          continue;
+        }
   
-        // Use both general and adjusted slots if they exist on that date
         const generalSlots = day.slots || [];
         const adjustedSlots = adjustedMap[formattedDate] || [];
-  
         const allSlots = [...generalSlots];
   
         adjustedSlots.forEach((adjSlot) => {
@@ -423,11 +452,8 @@ export default function Schedule() {
             const aStart = moment(adjSlot.startTime, "HH:mm");
             const aEnd = moment(adjSlot.endTime, "HH:mm");
   
-            // If overlapping, merge the time
-            if (
-              aStart.isBefore(gEnd) &&
-              gStart.isBefore(aEnd)
-            ) {
+            // Merge overlapping time
+            if (aStart.isBefore(gEnd) && gStart.isBefore(aEnd)) {
               genSlot.startTime = moment.min(gStart, aStart).format("HH:mm");
               genSlot.endTime = moment.max(gEnd, aEnd).format("HH:mm");
               merged = true;
@@ -435,7 +461,7 @@ export default function Schedule() {
             }
           }
           if (!merged) {
-            allSlots.push(adjSlot); // Add separately if no overlap
+            allSlots.push(adjSlot);
           }
         });
   
@@ -534,8 +560,10 @@ export default function Schedule() {
       });
     });
   
+    // ✅ Set all generated events except vacation ones
     setEvents(newEvents);
   };
+  
   
 
   // time slots from 30 minutes to 3 hours slotOptions
@@ -584,7 +612,6 @@ export default function Schedule() {
   };
   const handleSlotSelect = (slotInfo) => {
     const { start, end: selectedEnd } = slotInfo;
-    console.log(slotInfo)
   
     const selectedDuration = (selectedEnd - start) / (1000 * 60); // in minutes
   
@@ -608,7 +635,6 @@ export default function Schedule() {
       color: "#D8F5B6", // light green
     };
 
-    console.log(newSlot)
   
     setSelectedSlot(newSlot);
     setTemporaryEvent(newSlot);
@@ -1509,7 +1535,11 @@ export default function Schedule() {
             timeStep={30}
             defaultView={view}
             localizer={localizer}
-            events={temporaryEvent ? [...events, temporaryEvent] : events}
+            events={
+              temporaryEvent
+                ? [...events.filter(e => !e.isVacation), temporaryEvent]
+                : events.filter(e => !e.isVacation)
+            }
             startAccessor="start"
             endAccessor="end"
             style={{ height: "calc(100vh - 150px)" }}
@@ -1580,7 +1610,6 @@ export default function Schedule() {
                     updatedStart.setMilliseconds(0);
 
                     setSelectedSlot((prev) => {
-                      console.log(selectedSlot)
                       // Adjust the start and end times to ensure they are in the correct order
                       const adjustedStart = updatedStart < prev.end ? updatedStart : prev.end;
                       const adjustedEnd = updatedStart < prev.end ? prev.end : updatedStart;
@@ -1600,11 +1629,8 @@ export default function Schedule() {
                         title: `${adjustedStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${adjustedEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
                         color: "#D8F5B6",      // light green
                       });
-                      console.log(newSlot)
-                      console.log(selectedSlot)
                       return newSlot;  // Return the updated slot with adjusted start and end times
                     });
-                    console.log(selectedSlot)
                     
                     // slotInfo = selectedSlot
                     // setTemporaryEvent({
@@ -1650,7 +1676,6 @@ export default function Schedule() {
                     updatedEnd.setMilliseconds(0);
 
                     setSelectedSlot((prev) => {
-                      console.log(selectedSlot)
                       // Adjust the start and end times to ensure they are in the correct order
                       const adjustedStart = updatedEnd < prev.start ? updatedEnd : prev.start;
                       const adjustedEnd = updatedEnd < prev.start ? prev.start : updatedEnd;
@@ -1670,8 +1695,6 @@ export default function Schedule() {
                         title: `${adjustedStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${adjustedEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
                         color: "#D8F5B6",      // light green
                       });
-                      console.log(newSlot)
-                      console.log(selectedSlot)
                       return newSlot;  // Return the updated slot with adjusted start and end times
                     });
                   }}
@@ -1848,9 +1871,6 @@ export default function Schedule() {
                 className="bg-red-500 text-white rounded-md hover:bg-red-600"
                 style={{padding:'9px 20px'}}
                 onClick={() => {
-                  console.log(events)
-                  console.log(adjustedAvailability)
-                  console.log(selectedSlot)
                   // Get the start and end times directly from selectedSlot
                   const startTime = selectedSlot.start.toLocaleTimeString("en-US", {
                     hour: "2-digit",
@@ -1864,14 +1884,12 @@ export default function Schedule() {
                     hour12: false,
                   });
 
-                  console.log(startTime, endTime)
 
                   // Get the date from the selectedSlot
                   const date = selectedSlot.start.toISOString().slice(0, 10); // "YYYY-MM-DD"
 
                   // Create the new slot
                   const newSlot = { startTime, endTime, ...(isGroup && { groupSlot: true }) };
-                  console.log(newSlot)
 
                   // Define the function for converting time to minutes
                   const toMinutes = (time) => {
