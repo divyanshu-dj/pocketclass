@@ -412,6 +412,7 @@ export default function Schedule() {
   };
 
   const generateEvents = (general, adjusted) => {
+    console.log(events);
     let newEvents = [];
   
     // Create a map for adjusted slots and a Set for vacation dates
@@ -452,8 +453,12 @@ export default function Schedule() {
             const aStart = moment(adjSlot.startTime, "HH:mm");
             const aEnd = moment(adjSlot.endTime, "HH:mm");
   
-            // Merge overlapping time
-            if (aStart.isBefore(gEnd) && gStart.isBefore(aEnd)) {
+            // ✅ Only merge if they overlap (not just touch)
+            if (
+              aStart.isBefore(gEnd) &&
+              gStart.isBefore(aEnd) &&
+              !(aStart.isSame(gEnd) || gStart.isSame(aEnd)) // Prevent merging if just touching
+            ) {
               genSlot.startTime = moment.min(gStart, aStart).format("HH:mm");
               genSlot.endTime = moment.max(gEnd, aEnd).format("HH:mm");
               merged = true;
@@ -517,9 +522,7 @@ export default function Schedule() {
     const groupedSlots = {};
   
     bookedSlots.forEach((booked) => {
-      const key = `${moment(booked.startTime).format()}/${moment(
-        booked.endTime
-      ).format()}`;
+      const key = `${moment(booked.startTime).format()}/${moment(booked.endTime).format()}`;
   
       if (!groupedSlots[key]) {
         groupedSlots[key] = [];
@@ -563,6 +566,7 @@ export default function Schedule() {
     // ✅ Set all generated events except vacation ones
     setEvents(newEvents);
   };
+  
   
   
 
@@ -1871,146 +1875,81 @@ export default function Schedule() {
                 className="bg-red-500 text-white rounded-md hover:bg-red-600"
                 style={{padding:'9px 20px'}}
                 onClick={() => {
-                  // Get the start and end times directly from selectedSlot
                   const startTime = selectedSlot.start.toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: false,
                   });
-
+                
                   const endTime = selectedSlot.end.toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: false,
                   });
-
-
-                  // Get the date from the selectedSlot
-                  const date = selectedSlot.start.toISOString().slice(0, 10); // "YYYY-MM-DD"
-
-                  // Create the new slot
+                
+                  const date = selectedSlot.start.toISOString().slice(0, 10);
+                
                   const newSlot = { startTime, endTime, ...(isGroup && { groupSlot: true }) };
-
-                  // Define the function for converting time to minutes
-                  const toMinutes = (time) => {
-                    const [h, m] = time.split(":").map(Number);
-                    return h * 60 + m;
-                  };
-
-                  // Convert minutes to "HH:mm" format
-                  const toHHMM = (mins) =>
-                    `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-
-                  // Merge function to combine overlapping slots
-                  const mergeSlots = (slots, newSlot) => {
-                    const allSlots = [
-                      ...slots.map((s) => ({
-                        start: toMinutes(s.startTime),
-                        end: toMinutes(s.endTime),
-                        groupSlot: s.groupSlot || false,
-                      })),
-                      {
-                        start: toMinutes(newSlot.startTime),
-                        end: toMinutes(newSlot.endTime),
-                        groupSlot: newSlot.groupSlot || false,
-                      },
-                    ].sort((a, b) => a.start - b.start);
-
-                    const merged = [];
-                    let current = allSlots[0];
-
-                    for (let i = 1; i < allSlots.length; i++) {
-                      const next = allSlots[i];
-                      if (current.end >= next.start && current.groupSlot === next.groupSlot) {
-                        current.end = Math.max(current.end, next.end);
-                      } else {
-                        merged.push({ ...current });
-                        current = next;
-                      }
-                    }
-                    merged.push(current);
-
-                    return merged.map((slot) => ({
-                      startTime: toHHMM(slot.start),
-                      endTime: toHHMM(slot.end),
-                      ...(isGroup && { groupSlot: true }),
-                    }));
-                  };
-
-                  // Function to update availability for repeated days
+                
                   const updateAvailability = (daysArray) => {
                     setGeneralAvailability((prev) => {
                       const updated = [...prev];
-
+                
                       daysArray.forEach((day) => {
                         const index = updated.findIndex((item) => item.day === day);
-
+                
                         if (index === -1) {
                           updated.push({ day, slots: [newSlot] });
                         } else {
-                          const mergedSlots = mergeSlots(updated[index].slots, newSlot);
-                          updated[index] = { ...updated[index], slots: mergedSlots };
+                          // Just append the slot, no merging
+                          updated[index] = {
+                            ...updated[index],
+                            slots: [...updated[index].slots, newSlot],
+                          };
                         }
                       });
-
+                
                       return updated;
                     });
-
+                
                     setShowPopup(false);
                   };
-
-                  // Handle the repeat option
+                
                   const repeatOption = document.getElementById("repeatSelect").value;
-
+                
                   if (repeatOption === "Does not repeat") {
                     setAdjustedAvailability((prev) => {
                       const existingEntry = prev.find((item) => item.date === date);
-                  
+                
                       let updatedAvailability;
-                      let finalSlots;
-                  
+                
                       if (!existingEntry) {
-                        finalSlots = [newSlot];
-                        updatedAvailability = [...prev, { date, slots: finalSlots }];
+                        updatedAvailability = [...prev, { date, slots: [newSlot] }];
                       } else {
-                        finalSlots = mergeSlots(existingEntry.slots, newSlot);
                         updatedAvailability = prev.map((item) =>
-                          item.date === date ? { ...item, slots: finalSlots } : item
+                          item.date === date
+                            ? { ...item, slots: [...item.slots, newSlot] }
+                            : item
                         );
                       }
-                  
-                      // Now create events for the newSlot(s)
-                      const newEvents = finalSlots.map((slot) => {
-                        const [startHour, startMin] = slot.startTime.split(":").map(Number);
-                        const [endHour, endMin] = slot.endTime.split(":").map(Number);
-                  
-                        const startDateTime = new Date(date);
-                        startDateTime.setHours(startHour, startMin, 0, 0);
-                  
-                        const endDateTime = new Date(date);
-                        endDateTime.setHours(endHour, endMin, 0, 0);
-                  
-                        return {
-                          start: startDateTime,
-                          end: endDateTime,
-                          title: "",
-                          color: "#d8f5b6",
-                        };
-                      });
-                  
-                      // setEvent((prevEvents) => [...prevEvents, ...newEvents]);
-                  
+                
+                      // (Optional) Create event object here if needed
                       return updatedAvailability;
                     });
-                  
+                
                     setShowPopup(false);
-                  }
-                  else if (repeatOption === "Daily") {
-                    const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-                    updateAvailability(allDays);
+                  } else if (repeatOption === "Daily") {
+                    updateAvailability([
+                      "Sunday",
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                    ]);
                   } else if (repeatOption === "Every weekday (Monday to Friday)") {
-                    const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-                    updateAvailability(weekdays);
+                    updateAvailability(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
                   } else if (repeatOption.startsWith("Weekly")) {
                     const weekday = new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
                       weekday: "long",
@@ -2019,9 +1958,10 @@ export default function Schedule() {
                   } else {
                     alert("Custom repeat type not supported yet.");
                   }
-                  setIsGroup(false)
-                  setTemporaryEvent(null); // Clear the temporary event
-                }}
+                
+                  setIsGroup(false);
+                  setTemporaryEvent(null);
+                }}                
               >
                 Save
               </button>
