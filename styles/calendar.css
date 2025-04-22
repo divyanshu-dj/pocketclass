@@ -76,16 +76,18 @@
     color: white;
 }
 .rdp-chevron{
-    fill: rgb(231 63 43 / var(--tw-text-opacity, 1))!important;
+    z-index: 2 !important;
+    fill: black !important;
+    font-weight: 100 !important;
 }
 
 .rdp-today:not(.rdp-outside){
     color: rgb(231, 63, 43)!important;
 }
 
-.rdp-selected .rdp-day_button{
+/* .rdp-selected .rdp-day_button{
     border: 2px solid rgb(231, 63, 43)!important;
-}
+} */
 
 .cross-icon {
     position: relative;

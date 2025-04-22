@@ -1165,7 +1165,8 @@ export default function Schedule() {
                       setVacationEndDate(range.to);
                     }
                   }}
-                  className="border rounded p-2 bg-gray-100 text-sm"
+                  className="p-2 bg-white-100 text-sm"
+                  disabled={{ before: new Date() }}
                 />
                 <div className="flex justify-end mt-2">
                   <button

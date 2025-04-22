@@ -262,3 +262,49 @@ a {
   width: 100%;
   height: 100%;
 }
+
+.rdp-range_start .rdp-day_button {
+  background-color: rgb(231, 63, 43) !important;
+  font-weight: 200 !important;
+  font-size: 15px !important;
+  border: none !important;
+}
+
+.rdp-range_end .rdp-day_button {
+  background-color: rgb(231, 63, 43) !important;
+  font-weight: 200 !important;
+  font-size: 15px !important;
+}
+
+.rdp-range_middle .rdp-day_button {
+  font-weight: 350 !important;
+  font-size: 15px !important;
+}
+
+.rdp-selected .rdp-day_button{
+  border: none !important;
+}
+
+.rdp-root{
+  --rdp-accent-background-color: #e8e8e8 !important
+}
+
+.rdp-caption_label {
+  z-index: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border: 0;
+  justify-content: center;
+  width: 100%;
+}
+
+.rdp-nav{
+  width: 100% !important;
+  justify-content: space-between !important;
+}
+
+.rdp-button_previous{
+  position: absolute;
+}
