@@ -277,8 +277,8 @@ function UpdateProfile() {
                 </div>
               </div>
               {droppedFile && showCropper && (
-                <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-50">
-                  <div className="w-[800px] px-4 pt-4 h-[600px] bg-white rounded-xl overflow-hidden">
+                <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-transparent md:bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-50">
+                  <div className="md:w-[800px] h-fit px-4 pt-4 h-[600px] bg-white rounded-xl overflow-hidden">
                     <Cropper
                       src={droppedFile ? URL.createObjectURL(droppedFile) : null}
                       className={'cropper'}
@@ -291,12 +291,12 @@ function UpdateProfile() {
                     />
                     <div className="flex justify-start mt-4">
                       <button
-                        className="border-2 border-red-500 text-red-500 px-4 py-2 w-[80px] rounded mr-2"
+                        className="border-2 border-red-500 text-red-500 px-2 min-w-[70px] py-2 w-[12vw] rounded mr-2"
                         onClick={onCancel}>
                         Cancel
                       </button>
                       <button
-                        className="bg-red-500 text-white px-4 py-2 w-[80px] rounded"
+                        className="bg-red-500 text-white py-2 w-[12vw] min-w-[70px] rounded"
                         onClick={onSave}>
                         Save
                       </button>
