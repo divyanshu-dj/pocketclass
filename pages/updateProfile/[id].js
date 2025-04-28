@@ -9,12 +9,16 @@ import Image from "next/image";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import NewHeader from "../../components/NewHeader";
 import { useDropzone } from "react-dropzone";
+import { CropperRef, Cropper, CircleStencil } from 'react-advanced-cropper';
+import 'react-advanced-cropper/dist/style.css'
 
 function UpdateProfile() {
   const [userData, setUserData] = useState();
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [droppedFile, setDroppedFile] = useState(null);
+  const cropperRef = React.useRef(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const router = useRouter();
   const { id } = router.query;
@@ -58,6 +62,7 @@ function UpdateProfile() {
     );
     if (imageFile) {
       setDroppedFile(imageFile);
+      setShowCropper(true); // Show the cropper when a file is dropped
     }
   };
 
@@ -124,6 +129,40 @@ function UpdateProfile() {
     );
   }
 
+  const onCancel = () => {
+    setDroppedFile(null); // Reset the dropped image state to null
+  };
+
+  const onSave = () => {
+    if (cropperRef.current) {
+      // Get the coordinates and canvas from the Cropper instance
+      const coordinates = cropperRef.current.getCoordinates();
+      const canvas = cropperRef.current.getCanvas();
+
+      // Get the base64 image data URL of the cropped canvas
+      const croppedImageDataURL = canvas?.toDataURL();
+
+      if (croppedImageDataURL) {
+        // Create a Blob from the data URL to make it a file object
+        const byteString = atob(croppedImageDataURL.split(',')[1]);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uintArray = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < byteString.length; i++) {
+          uintArray[i] = byteString.charCodeAt(i);
+        }
+
+        const blob = new Blob([uintArray], { type: 'image/jpeg' });
+        const file = new File([blob], droppedFile.name, { type: 'image/jpeg' });
+
+        // Now update the droppedFile state with the new file
+        setShowCropper(false);
+        setDroppedFile(file);
+
+        // Optionally log the cropped file
+      }
+    } // Close the cropper after saving
+  };
   return (
     <>
       <Head>
@@ -134,7 +173,7 @@ function UpdateProfile() {
 
       <NewHeader />
 
-      <div className="px-10 rounded-3xl flex flex-col justify-center items-center h-[100vh]">
+      <div className="px-10 rounded-3xl flex flex-col justify-center items-center mt-10">
         <div className="registrationContainer lg:w-[50%] sm:w-[100%]">
           <h1 className="text-5xl font-semibold text-center">Update Profile</h1>
 
@@ -146,11 +185,10 @@ function UpdateProfile() {
                   <input
                     defaultValue={userData?.firstName}
                     name="firstName"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.firstName
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.firstName
                         ? "border-red-500"
                         : "border-gray-100"
-                    }`}
+                      }`}
                     placeholder="Enter your First name"
                   />
                 </div>
@@ -159,9 +197,8 @@ function UpdateProfile() {
                   <input
                     defaultValue={userData?.lastName}
                     name="lastName"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.lastName ? "border-red-500" : "border-gray-100"
-                    }`}
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.lastName ? "border-red-500" : "border-gray-100"
+                      }`}
                     placeholder="Enter your Last Name"
                   />
                 </div>
@@ -175,11 +212,10 @@ function UpdateProfile() {
                   <input
                     defaultValue={userData?.phoneNumber}
                     name="phoneNumber"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.phoneNumber
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.phoneNumber
                         ? "border-red-500"
                         : "border-gray-100"
-                    }`}
+                      }`}
                     placeholder="Enter your Phone Number"
                   />
                 </div>
@@ -191,9 +227,8 @@ function UpdateProfile() {
                     defaultValue={userData?.dob}
                     name="dob"
                     type="date"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.dob ? "border-red-500" : "border-gray-100"
-                    }`}
+                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.dob ? "border-red-500" : "border-gray-100"
+                      }`}
                     placeholder="Enter your Date of Birth"
                   />
                 </div>
@@ -204,9 +239,8 @@ function UpdateProfile() {
                   <label className="text-medium font-medium">Gender</label>
                   <select
                     name="gender"
-                    className={`w-full border-2 text-sm rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                      formErrors.gender ? "border-red-500" : "border-gray-100"
-                    }`}
+                    className={`w-full border-2 text-sm rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.gender ? "border-red-500" : "border-gray-100"
+                      }`}
                     defaultValue={userData?.gender}
                   >
                     <option value="" hidden>
@@ -222,9 +256,8 @@ function UpdateProfile() {
                   <label className="text-medium font-medium">Image</label>
                   <div
                     {...getRootProps({
-                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                        formErrors.images ? "border-red-500" : "border-gray-100"
-                      }`,
+                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.images ? "border-red-500" : "border-gray-100"
+                        }`,
                     })}
                     style={{
                       border: "solid",
@@ -243,17 +276,44 @@ function UpdateProfile() {
                   </div>
                 </div>
               </div>
+              {droppedFile && showCropper && (
+                <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-50">
+                  <div className="w-[800px] px-4 pt-4 h-[600px] bg-white rounded-xl overflow-hidden">
+                    <Cropper
+                      src={droppedFile ? URL.createObjectURL(droppedFile) : null}
+                      className={'cropper'}
+                      ref={cropperRef}
+                      canvas="false"
+                      transition="true"
+                      maxWidth={1200}
+                      maxHeight={1200}
+                      stencilComponent={CircleStencil}
+                    />
+                    <div className="flex justify-start mt-4">
+                      <button
+                        className="border-2 border-red-500 text-red-500 px-4 py-2 w-[80px] rounded mr-2"
+                        onClick={onCancel}>
+                        Cancel
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 w-[80px] rounded"
+                        onClick={onSave}>
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="text-medium font-medium">Description</label>
                 <textarea
                   defaultValue={userData?.profileDescription}
                   name="profileDescription"
-                  className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${
-                    formErrors.profileDescription
+                  className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.profileDescription
                       ? "border-red-500"
                       : "border-gray-100"
-                  }`}
+                    }`}
                   placeholder="Enter a profile description"
                 />
               </div>
