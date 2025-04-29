@@ -186,8 +186,8 @@ function UpdateProfile() {
                     defaultValue={userData?.firstName}
                     name="firstName"
                     className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.firstName
-                        ? "border-red-500"
-                        : "border-gray-100"
+                      ? "border-red-500"
+                      : "border-gray-100"
                       }`}
                     placeholder="Enter your First name"
                   />
@@ -213,8 +213,8 @@ function UpdateProfile() {
                     defaultValue={userData?.phoneNumber}
                     name="phoneNumber"
                     className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.phoneNumber
-                        ? "border-red-500"
-                        : "border-gray-100"
+                      ? "border-red-500"
+                      : "border-gray-100"
                       }`}
                     placeholder="Enter your Phone Number"
                   />
@@ -277,8 +277,8 @@ function UpdateProfile() {
                 </div>
               </div>
               {droppedFile && showCropper && (
-                <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-transparent md:bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-50">
-                  <div className="md:w-[800px] h-fit px-4 pt-4 h-[600px] bg-white rounded-xl overflow-hidden">
+                <div className="w-[100vw] max-h-[100vh] h-[100vh] absolute top-0 left-0 bg-transparent md:bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-50">
+                  <div className="w-fit md:w-[800px] h-fit px-4 py-4 h-[600px] bg-white rounded-xl">
                     <Cropper
                       src={droppedFile ? URL.createObjectURL(droppedFile) : null}
                       className={'cropper'}
@@ -289,7 +289,7 @@ function UpdateProfile() {
                       maxHeight={1200}
                       stencilComponent={CircleStencil}
                     />
-                    <div className="flex justify-start mt-4">
+                    <div className="flex justify-start mt-4 mb-2">
                       <button
                         className="border-2 border-red-500 text-red-500 px-2 min-w-[70px] py-2 w-[12vw] rounded mr-2"
                         onClick={onCancel}>
@@ -311,8 +311,8 @@ function UpdateProfile() {
                   defaultValue={userData?.profileDescription}
                   name="profileDescription"
                   className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.profileDescription
-                      ? "border-red-500"
-                      : "border-gray-100"
+                    ? "border-red-500"
+                    : "border-gray-100"
                     }`}
                   placeholder="Enter a profile description"
                 />
