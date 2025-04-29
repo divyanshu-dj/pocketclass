@@ -322,7 +322,7 @@ a {
 @media (max-width: 500px) {
   .cropper{
     height: 500px;
-    width: 250px;
+    width: 280px;
   }
 }
 @media (max-height: 650px) {
