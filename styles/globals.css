@@ -308,3 +308,25 @@ a {
 .rdp-button_previous{
   position: absolute;
 }
+
+.cropper{
+  height: 600px;
+}
+
+@media (max-width: 768px) {
+  .cropper{
+    height: 500px;
+    width: 500px;
+  }
+}
+@media (max-width: 500px) {
+  .cropper{
+    height: 500px;
+    width: 280px;
+  }
+}
+@media (max-height: 650px) {
+  .cropper{
+    height: 500px;
+  }
+}
