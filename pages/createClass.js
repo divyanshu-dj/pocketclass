@@ -7,6 +7,8 @@ import { categories } from "../utils/categories";
 import { useDropzone } from "react-dropzone";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import { useFormik } from 'formik';
+import { classSchema } from "../Validation/createClass";
 
 const MapCoordinates = dynamic(() => import("../components/MapCoordinates"), {
   ssr: false,
@@ -78,6 +80,30 @@ export default function CreateClass() {
     longitude: "",
   });
 
+  const formik = useFormik({
+    initialValues: {
+      class_name: '',
+      category: '',
+      sub_category: '',
+      mode_of_class: '',
+      description: '',
+      price: '',
+      pricing: '',
+      groupSize: '',
+      groupPrice: '',
+      experience: '',
+      about: '',
+      funfact: '',
+      name: '',
+      numberOfSessions: '',
+      priceOfCompleteCourse: '',
+      discount: '',
+    },
+    validationSchema: classSchema,  // Use Yup validation schema
+    validateOnChange: true,  // Ensure validation happens on each change
+    validateOnBlur: true,    // Ensure validation happens on blur
+  });
+
   const addClass = async (e) => {
     e.preventDefault();
 
@@ -140,11 +166,10 @@ export default function CreateClass() {
 
       // Upload images and get URLs in order
       const uploadPromises = form.Images.map((img, index) => {
-        const fileName = `${
-          Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
+        const fileName = `${Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
           "-" +
           img.name
-        }`;
+          }`;
         const fileRef = ref(storage, `images/${fileName}`);
         return uploadBytes(fileRef, img).then((res) =>
           getDownloadURL(ref(storage, res.metadata.fullPath))
@@ -413,14 +438,20 @@ export default function CreateClass() {
               <div className="flex-grow">
                 <label className="text-lg font-bold">Class Name</label>
                 <input
-                  required
                   name="className"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  type="text"
                   placeholder="e.g., Beginner Tennis for Adults"
-                  type={"text"}
+                  onBlur={formik.handleBlur}
                   value={form.Name}
-                  onChange={(e) => setForm({ ...form, Name: e.target.value })}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    setForm({ ...form, Name: e.target.value })
+                  }}
+                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                 />
+                {formik.touched.className && formik.errors.className && (
+                  <div className="text-red-500 text-sm">{formik.errors.className}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 flex-wrap w-full max-w-[750px]">
@@ -431,8 +462,11 @@ export default function CreateClass() {
                   name="category"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   value={form.Category}
-                  onChange={(e) =>
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
                     setForm({ ...form, Category: e.target.value })
+                  }
                   }
                 >
                   <option value="">Select Category</option>
@@ -444,6 +478,9 @@ export default function CreateClass() {
                       </option>
                     ))}
                 </select>
+                {formik.touched.category && formik.errors.category && (
+                  <div className="text-red-500 text-sm">{formik.errors.category}</div>
+                )}
               </div>
               <div className="flex-grow">
                 <label className="text-lg font-bold">Sub Category</label>
@@ -452,8 +489,11 @@ export default function CreateClass() {
                   name="subCategory"
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   value={form.SubCategory}
-                  onChange={(e) =>
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
                     setForm({ ...form, SubCategory: e.target.value })
+                  }
                   }
                 >
                   <option value="">Select Sub Category</option>
@@ -467,6 +507,9 @@ export default function CreateClass() {
                         </option>
                       ))}
                 </select>
+                {formik.touched.sub_category && formik.errors.sub_category && (
+                  <div className="text-red-500 text-sm">{formik.errors.sub_category}</div>
+                )}
               </div>
             </div>
 
@@ -476,11 +519,18 @@ export default function CreateClass() {
                 <select
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   value={form.Mode}
-                  onChange={(e) => setForm({ ...form, Mode: e.target.value })}
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    setForm({ ...form, Mode: e.target.value })
+                  }}
                 >
                   <option value="Online">Online</option>
                   <option value="Offline">In Person</option>
                 </select>
+                {formik.touched.mode_of_class && formik.errors.mode_of_class && (
+                  <div className="text-red-500 text-sm">{formik.errors.mode_of_class}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -493,10 +543,16 @@ export default function CreateClass() {
                   placeholder="Write a brief overview of your class. Highlight what students will learn, the skills they'll develop, or the unique value your class offers. e.g., Learn the basics of tennis, including forehand, backhand, and serving techniques, in a fun and supportive environment."
                   type={"text"}
                   value={form.Description}
-                  onChange={(e) =>
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
                     setForm({ ...form, Description: e.target.value })
                   }
+                  }
                 />
+                {formik.touched.description && formik.errors.description && (
+                  <div className="text-red-500 text-sm">{formik.errors.description}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -509,8 +565,15 @@ export default function CreateClass() {
                   placeholder="e.g., $50"
                   type={"number"}
                   value={form.Price}
-                  onChange={(e) => setForm({ ...form, Price: e.target.value })}
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    setForm({ ...form, Price: e.target.value })
+                  }}
                 />
+                {formik.touched.price && formik.errors.price && (
+                  <div className="text-red-500 text-sm">{formik.errors.price}</div>
+                )}
               </div>
             </div>
 
@@ -523,10 +586,16 @@ export default function CreateClass() {
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   placeholder="Provide additional pricing details if applicable. e.g., Discounts for group sessions or bulk bookings."
                   value={form.Pricing}
-                  onChange={(e) =>
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
                     setForm({ ...form, Pricing: e.target.value })
                   }
+                  }
                 />
+                {formik.touched.pricing && formik.errors.pricing && (
+                  <div className="text-red-500 text-sm">{formik.errors.pricing}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -539,10 +608,15 @@ export default function CreateClass() {
                   placeholder="e.g., 2-4"
                   type={"number"}
                   value={form.groupSize}
-                  onChange={(e) =>
-                    setForm({ ...form, groupSize: e.target.value })
+                  onBlur={formik.handleBlur}
+                  onChange={(e) =>{
+                    formik.handleChange(e);
+                    setForm({ ...form, groupSize: e.target.value })}
                   }
                 />
+                {formik.touched.groupSize && formik.errors.groupSize && (
+                  <div className="text-red-500 text-sm">{formik.errors.groupSize}</div>
+                )}
               </div>
 
               <div className="flex-grow">
@@ -556,10 +630,15 @@ export default function CreateClass() {
                   placeholder="e.g., $30"
                   type={"number"}
                   value={form.groupPrice}
-                  onChange={(e) =>
-                    setForm({ ...form, groupPrice: e.target.value })
+                  onBlur={formik.handleBlur}
+                  onChange={(e) =>{
+                    formik.handleChange(e);
+                    setForm({ ...form, groupPrice: e.target.value })}
                   }
                 />
+                {formik.touched.groupPrice && formik.errors.groupPrice && (
+                  <div className="text-red-500 text-sm">{formik.errors.groupPrice}</div>
+                )}
               </div>
             </div>
             <div className="w-full max-w-[750px]">
@@ -619,10 +698,15 @@ export default function CreateClass() {
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
                   value={form.Experience}
-                  onChange={(e) =>
-                    setForm({ ...form, Experience: e.target.value })
+                  onBlur={formik.handleBlur}
+                  onChange={(e) =>{
+                    formik.handleChange(e);
+                    setForm({ ...form, Experience: e.target.value })}
                   }
                 />
+                {formik.touched.experience && formik.errors.experience && (
+                  <div className="text-red-500 text-sm">{formik.errors.experience}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -634,8 +718,14 @@ export default function CreateClass() {
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   placeholder="Introduce yourself to potential students. Share your background, qualifications, and passion for teaching. e.g., I'm a certified tennis coach who loves helping beginners find their rhythm and passion for the sport!"
                   value={form.About}
-                  onChange={(e) => setForm({ ...form, About: e.target.value })}
+                  onBlur={formik.handleBlur}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    setForm({ ...form, About: e.target.value })}}
                 />
+                {formik.touched.about && formik.errors.about && (
+                  <div className="text-red-500 text-sm">{formik.errors.about}</div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -647,10 +737,15 @@ export default function CreateClass() {
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                   placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
                   value={form.FunFact}
-                  onChange={(e) =>
-                    setForm({ ...form, FunFact: e.target.value })
+                  onBlur={formik.handleBlur}
+                  onChange={(e) =>{
+                    formik.handleChange(e);
+                    setForm({ ...form, FunFact: e.target.value })}
                   }
                 />
+                {formik.touched.funfact && formik.errors.funfact && (
+                  <div className="text-red-500 text-sm">{formik.errors.funfact}</div>
+                )}
               </div>
             </div>
 

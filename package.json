@@ -32,6 +32,7 @@
     "currency-symbol-map": "^5.1.0",
     "date-fns": "^2.29.2",
     "firebase": "^9.10.0",
+    "formik": "^2.4.6",
     "geolib": "^3.3.3",
     "googleapis": "^144.0.0",
     "ics": "^3.8.1",
@@ -68,7 +69,8 @@
     "stripe": "^13.10.0",
     "swiper": "^8.4.5",
     "tailwind-scrollbar-hide": "^1.1.7",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
