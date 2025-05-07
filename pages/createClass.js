@@ -49,6 +49,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import imageCompression from "browser-image-compression";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -281,22 +282,48 @@ export default function CreateClass() {
     }));
   };
 
-  const onDrop = (acceptedFiles) => {
-    setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
-
-    const previews = acceptedFiles.map((file) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
+  const onDrop = async (acceptedFiles) => {
+    const compressedFiles = await Promise.all(
+      acceptedFiles.map(async (file) => {
+        if (file.type.startsWith("image/")) {
+          try {
+            const compressed = await imageCompression(file, {
+              maxSizeMB: 1, // Compress to under 1MB (adjust as needed)
+              maxWidthOrHeight: 1920,
+              useWebWorker: true,
+            });
+            return compressed;
+          } catch (err) {
+            console.error("Image compression failed:", err);
+            return file; // fallback
+          }
+        } else {
+          return file; // No compression for videos
+        }
+      })
+    );
+  
+    setUploadedFiles((prev) => [...prev, ...compressedFiles]);
+    setForm((prevForm) => ({
+      ...prevForm,
+      Images: [...prevForm.Images, ...compressedFiles],
+    }));
+  
+    const previews = compressedFiles.map((file) => {
       return new Promise((resolve) => {
-        reader.onload = () => resolve({ src: reader.result, name: file.name });
+        const reader = new FileReader();
+        reader.onload = () =>
+          resolve({
+            src: reader.result,
+            name: file.name,
+            type: file.type,
+          });
+        reader.readAsDataURL(file);
       });
     });
-
-    setForm({ ...form, Images: [...form.Images, ...acceptedFiles] });
-
+  
     Promise.all(previews).then((dataURLs) =>
-      setPreviewImages([...previewImages, ...dataURLs])
+      setPreviewImages((prev) => [...prev, ...dataURLs])
     );
   };
 
@@ -366,6 +393,8 @@ export default function CreateClass() {
       transform: CSS.Transform.toString(transform),
       transition,
     };
+    console.log(image);
+    const isImage = image.type?.startsWith("image");
 
     return (
       <div
@@ -398,11 +427,11 @@ export default function CreateClass() {
             ></path>
           </svg>
         </button>
-        <img
-          src={image.src}
-          alt={`Preview ${image.name}`}
-          className="w-full h-48 object-cover rounded-lg border"
-        />
+        {isImage ? (
+        <img src={image.src} alt={`Preview ${image.name}`} className="w-full h-48 object-cover rounded-lg border" />
+      ) : (
+        <video src={image.src} className="object-cover w-full h-48" />
+      )}
       </div>
     );
   };
@@ -682,13 +711,13 @@ export default function CreateClass() {
               </div>
             </div>
             <div className="w-full max-w-[750px]">
-              <div className="text-lg font-bold w-full pb-1">Images</div>
+              <div className="text-lg font-bold w-full pb-1">Media</div>
               <div className="text-base text-gray-500  w-full pb-6">
-                Upload high-quality images of your class setup or teaching
+                Upload high-quality media of your class setup or teaching
                 environment. Studies show that engaging visuals can
                 significantly enhance student interest and enrollment. <br></br>
                 <br></br>
-                <b>Pro Tip:</b> Use bright, clear photos that highlight the
+                <b>Pro Tip:</b> Use bright, clear media that highlight the
                 unique aspects of your class to attract more students.
               </div>
               <div
@@ -704,7 +733,7 @@ export default function CreateClass() {
                       : "Click to upload files or Drag & Drop"}
                   </p>
                   <p className="text-gray-500 text-base">
-                    JPG or PNG(10MB max)
+                    files(10MB max)
                   </p>
                 </div>
               </div>
