@@ -52,6 +52,8 @@ import { CSS } from "@dnd-kit/utilities";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
+  const [imageError, setImageError] = useState(null);
+  const [addressError, setAddressError] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [classLoading, setClassLoading] = useState(false);
   const [form, setForm] = useState({
@@ -111,7 +113,6 @@ export default function CreateClass() {
       !form.Name ||
       !form.Category ||
       !form.SubCategory ||
-      !form.Address ||
       !form.Price ||
       !form.Pricing ||
       !form.About ||
@@ -122,6 +123,24 @@ export default function CreateClass() {
       !form.groupPrice
     ) {
       toast.error("Please fill all fields");
+      return;
+    }if (form.Images.length < 1) {
+      setImageError("Please upload at least 1 image");
+      toast.error("Please upload at least 1 image");
+      setLoading(false);
+      return;
+    }
+    if(!form.Address){
+      setAddressError("Please select a location on the map");
+      toast.error("Please select a location on the map");
+      setLoading(false);
+      return;
+    }
+    const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 10*1024*1024) { // 10MB
+      setImageError("Total size of all images must be less than or equal to 10MB");
+      toast.error("Total size of all images must be less than or equal to 10MB");
+      setLoading(false);
       return;
     }
     let PackagesToBeAdded = packages;
@@ -281,9 +300,30 @@ export default function CreateClass() {
     );
   };
 
+  useEffect(() => {
+    if (form.Images.length > 0) {
+      setImageError(null); // Clear error if images are present
+    }
+    const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 10*1024*1024) { // 10MB
+      setImageError("Total size of all images must be less than or equal to 10MB");
+      setLoading(false);
+      return;
+    }
+  },[form.Images]);
+
+  useEffect(() => {
+    if (form.Address) {
+      setAddressError(null); // Clear error if address is present
+    }
+  },[form.Address]);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: "image/*",
+    accept: {
+      'image/*': [],
+      'video/*': []
+    },
     multiple: true,
   });
   const formatDate = () => {
@@ -668,6 +708,9 @@ export default function CreateClass() {
                   </p>
                 </div>
               </div>
+              {imageError && (
+                  <div className="text-red-500 text-sm">{imageError}</div>
+                )}
             </div>
             <DndContext
               sensors={sensors}
@@ -764,10 +807,18 @@ export default function CreateClass() {
               <div className="mt-4">
                 <label className="text-m font-bold">Selected Address</label>
                 <input
+                  name="address"
                   readOnly
+                  onBlur={formik.handleBlur}
                   value={form.Address}
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                  onChange={(e) =>{
+                    formik.handleChange(e);}
+                  }
+                  className="w-full border-0 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                 />
+                {addressError && (
+                  <div className="text-red-500 text-sm">{addressError}</div>
+                )}
               </div>
             </div>
             <div className="w-full max-w-[750px] mt-4 flex flex-wrap gap-2 justify-between items-center">
