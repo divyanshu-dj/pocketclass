@@ -50,6 +50,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import imageCompression from "browser-image-compression";
+import ToggleSwitch from "../components/toggle";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -686,49 +687,6 @@ export default function CreateClass() {
                 )}
               </div>
             </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Max Group Size</label>
-                <input
-                  required
-                  name="groupSize"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="e.g., 2-4"
-                  type={"number"}
-                  value={form.groupSize}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) =>{
-                    formik.handleChange(e);
-                    setForm({ ...form, groupSize: e.target.value })}
-                  }
-                />
-                {formik.touched.groupSize && formik.errors.groupSize && (
-                  <div className="text-red-500 text-sm">{formik.errors.groupSize}</div>
-                )}
-              </div>
-
-              <div className="flex-grow">
-                <label className="text-lg font-bold">
-                  Group Price Per Person
-                </label>
-                <input
-                  required
-                  name="groupPrice"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="e.g., $30"
-                  type={"number"}
-                  value={form.groupPrice}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) =>{
-                    formik.handleChange(e);
-                    setForm({ ...form, groupPrice: e.target.value })}
-                  }
-                />
-                {formik.touched.groupPrice && formik.errors.groupPrice && (
-                  <div className="text-red-500 text-sm">{formik.errors.groupPrice}</div>
-                )}
-              </div>
-            </div>
             <div className="w-full max-w-[750px]">
               <div className="text-lg font-bold w-full pb-1">Media</div>
               <div className="text-base text-gray-500  w-full pb-6">
@@ -869,6 +827,7 @@ export default function CreateClass() {
                 )}
               </div>
             </div>
+            <ToggleSwitch form={form} setForm={setForm} formik={formik}/>
             <div className="w-full max-w-[750px] mt-4 flex flex-wrap gap-2 justify-between items-center">
               <div>
                 <div className="text-xl font-bold">Create a Package</div>
