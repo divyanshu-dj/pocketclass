@@ -282,6 +282,31 @@ export default function CreateClass() {
   };
 
   const onDrop = async (acceptedFiles) => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    const previews = acceptedFiles.map((file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () =>
+          resolve({
+            src: reader.result,
+            name: file.name,
+            type: file.type,
+          });
+        reader.readAsDataURL(file);
+      });
+    });
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  
+    Promise.all(previews).then((dataURLs) =>
+      setPreviewImages((prev) => [...prev, ...dataURLs])
+    );
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     const compressedFiles = await Promise.all(
       acceptedFiles.map(async (file) => {
         if (file.type.startsWith("image/")) {
@@ -316,23 +341,6 @@ export default function CreateClass() {
       ...prevForm,
       Images: [...prevForm.Images, ...compressedFiles],
     }));
-  
-    const previews = compressedFiles.map((file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () =>
-          resolve({
-            src: reader.result,
-            name: file.name,
-            type: file.type,
-          });
-        reader.readAsDataURL(file);
-      });
-    });
-  
-    Promise.all(previews).then((dataURLs) =>
-      setPreviewImages((prev) => [...prev, ...dataURLs])
-    );
   };
 
   useEffect(() => {
