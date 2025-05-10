@@ -120,9 +120,7 @@ export default function CreateClass() {
       !form.About ||
       !form.Experience ||
       !form.Description ||
-      !form.FunFact ||
-      !form.groupSize ||
-      !form.groupPrice
+      !form.FunFact
     ) {
       toast.error("Please fill all fields");
       return;
