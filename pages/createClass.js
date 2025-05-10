@@ -400,17 +400,17 @@ export default function CreateClass() {
       <div
         ref={setNodeRef}
         style={style}
-        className="flex justify-center relative touch-none"
-        {...attributes}
-        {...listeners}
+        className="relative touch-none"
+        {...attributes} // only structural attributes
       >
         <button
           type="button"
-          className="text-logo-red absolute top-2 right-2 z-10"
-          onClick={(e) => RemoveImg(e, image.name)}
-          onMouseDown={(e) => {
-            e.stopPropagation(); // Prevent drag start when clicking delete
+          className="text-logo-red absolute top-2 right-2 z-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(e, image.name);
           }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -428,10 +428,20 @@ export default function CreateClass() {
           </svg>
         </button>
         {isImage ? (
-        <img src={image.src} alt={`Preview ${image.name}`} className="w-full h-48 object-cover rounded-lg border" />
-      ) : (
-        <video src={image.src} className="object-cover w-full h-48" />
-      )}
+          <img
+            src={image.src}
+            alt={`Preview ${image.name}`}
+            className="w-full h-48 object-cover rounded-lg border"
+          />
+        ) : (
+          <video src={image.src} className="object-cover w-full h-48" />
+        )}
+  
+        <div
+          {...listeners}
+          className="absolute bottom-0 h-full w-full px-2 py-1 rounded shadow cursor-grab z-10"
+        >
+        </div>
       </div>
     );
   };
