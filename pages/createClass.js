@@ -292,12 +292,21 @@ export default function CreateClass() {
               maxWidthOrHeight: 1920,
               useWebWorker: true,
             });
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
             return compressed;
           } catch (err) {
             console.error("Image compression failed:", err);
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
             return file; // fallback
           }
         } else {
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
           return file; // No compression for videos
         }
       })
