@@ -42,7 +42,7 @@ const BillingAddress = () => {
             <div style={{ display: isAddressReady ? "block" : "none" }}>
                 <AddressElement
                     options={{ mode: "billing" }}
-                    onReady={() => setIsAddressReady(true)}
+                    onReady={() => setIsAddressReady(false)}
                 />
             </div>
         </div>
