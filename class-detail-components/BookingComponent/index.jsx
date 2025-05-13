@@ -1901,8 +1901,12 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      <AddressElement options={{ mode: "billing" }} onReady={() => setIsAddressReady(true)}/>
-      <PaymentElement onReady={() => setIsPaymentReady(true)}/>
+      <AddressElement options={{ mode: "billing" }} onReady={() => {setTimeout(() => {
+      setIsAddressReady(true);
+    }, 500);}}/>
+      <PaymentElement onReady={() => {setTimeout(() => {
+      setIsPaymentReady(true);
+    }, 500);}}/>
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
