@@ -39,10 +39,14 @@ const BillingAddress = () => {
                 </div>
             )}
 
-            <div className="z-[60]" style={{ display: isAddressReady ? "block" : "none" }}>
+            <div style={{ display: isAddressReady ? "block" : "none" }}>
                 <AddressElement
                     options={{ mode: "billing" }}
-                    onReady={() => setIsAddressReady(true)}
+                    onReady={() => {
+                        setTimeout(() => {
+                            setIsAddressReady(true);
+                        }, 1000); // 1000ms = 1 second delay
+                    }}
                 />
             </div>
         </div>
