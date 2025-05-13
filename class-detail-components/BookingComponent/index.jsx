@@ -1904,16 +1904,26 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      <AddressElement options={{ mode: "billing" }} onReady={() => {
-        setTimeout(() => {
-          setIsAddressReady(true);
-        }, 1000);
-      }} />
-      <PaymentElement onReady={() => {
-        setTimeout(() => {
-          setIsPaymentReady(true);
-        }, 1000);
-      }} />
+      {!isAddressReady && !isElementsReady ? (
+          <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
+        ) : (
+          <AddressElement
+            options={{ mode: "billing" }}
+            onReady={() => {
+              setIsAddressReady(true);
+            }}
+          />
+        )}
+
+        {!isPaymentReady && !isElementsReady ? (
+          <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse"></div>
+        ) : (
+          <PaymentElement
+            onReady={() => {
+                setIsPaymentReady(true);
+            }}
+          />
+        )}
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
