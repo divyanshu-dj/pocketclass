@@ -1899,7 +1899,6 @@ END:VCALENDAR`.trim();
         </div>
       </div>
       <BillingAddress />
-      <PaymentElement />
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
