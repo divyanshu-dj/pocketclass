@@ -1914,7 +1914,7 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      {!isAddressReady && !isElementsReady ? (
+      {!isElementsReady ? (
           <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
         ) : (
           <AddressElement
@@ -1925,7 +1925,7 @@ END:VCALENDAR`.trim();
           />
         )}
 
-        {!isPaymentReady && !isElementsReady ? (
+        {!isElementsReady ? (
           <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse"></div>
         ) : (
           <PaymentElement
