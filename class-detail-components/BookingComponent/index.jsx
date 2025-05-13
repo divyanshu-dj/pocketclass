@@ -1509,6 +1509,11 @@ END:VCALENDAR`.trim();
               selectedSlot={selectedSlot}
               selectedPackage={selectedPackage}
               classId={classId}
+              isAddressReady={isAddressReady}
+              isElementsReady={isElementsReady}
+              isPaymentReady={isPaymentReady}
+              setIsAddressReady={setIsAddressReady}
+              setIsPaymentReady={setIsPaymentReady}
             />
           </Elements>
         </div>
@@ -1568,7 +1573,12 @@ const CheckoutForm = ({
   selectedSlot,
   price,
   selectedPackage,
-  classId
+  classId,
+  isAddressReady,
+  isElementsReady,
+  isPaymentReady,
+  setIsAddressReady,
+  setIsPaymentReady,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
