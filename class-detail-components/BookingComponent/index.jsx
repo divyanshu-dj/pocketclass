@@ -83,6 +83,10 @@ export default function index({
   const [maxDays, setMaxDays] = useState(30);
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
+  const [isAddressReady, setIsAddressReady] = useState(false);
+  const [isPaymentReady, setIsPaymentReady] = useState(false);
+  
+  const isElementsReady = isAddressReady && isPaymentReady;
 
   useEffect(() => {
     const getPackages = async () => {
@@ -1471,7 +1475,7 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
-      {stripeLoading && <CheckoutSkeleton />}
+      {stripeLoading && isElementsReady && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <Elements stripe={stripePromise} options={stripeOptions}>
@@ -1898,7 +1902,8 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      <BillingAddress />
+      <AddressElement options={{ mode: "billing" }} onReady={() => setIsAddressReady(true)}/>
+      <PaymentElement onReady={() => setIsPaymentReady(true)}/>
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
