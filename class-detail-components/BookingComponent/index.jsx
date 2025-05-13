@@ -5,6 +5,7 @@ import { Chevron, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import BillingAddress from "./Billing";
 import { auth, db } from "../../firebaseConfig";
 import {
   doc,
@@ -1897,7 +1898,7 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      <AddressElement options={{ mode: "billing" }} />
+      <BillingAddress />
       <PaymentElement />
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
