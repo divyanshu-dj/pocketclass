@@ -5,7 +5,6 @@ import { Chevron, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
-import BillingAddress from "./Billing";
 import { auth, db } from "../../firebaseConfig";
 import {
   doc,
