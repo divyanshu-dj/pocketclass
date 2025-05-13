@@ -1921,32 +1921,8 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      {!isElementsReady1 ? (
-          <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
-        ) : (
-          <AddressElement
-            options={{ mode: "billing" }}
-            onReady={() => {
-              console.log("Address Element is ready");
-              console.log(isAddressReady1)
-              setIsAddressReady1(true);
-              console.log(isAddressReady1)
-            }}
-          />
-        )}
-
-        {!isElementsReady1 ? (
-          <div>
-            <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
-            <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        ) : (
-          <PaymentElement
-            onReady={() => {
-                setIsPaymentReady1(true);
-            }}
-          />
-        )}
+      <AddressElement options={{ mode: "billing" }}/>
+      <PaymentElement/>
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
