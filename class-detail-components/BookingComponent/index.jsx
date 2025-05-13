@@ -1907,12 +1907,12 @@ END:VCALENDAR`.trim();
       <AddressElement options={{ mode: "billing" }} onReady={() => {
         setTimeout(() => {
           setIsAddressReady(true);
-        }, 500);
+        }, 1000);
       }} />
       <PaymentElement onReady={() => {
         setTimeout(() => {
           setIsPaymentReady(true);
-        }, 500);
+        }, 1000);
       }} />
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
