@@ -1883,6 +1883,11 @@ END:VCALENDAR`.trim();
     setLoading(false);
   };
 
+  const [isAddressReady1, setIsAddressReady1] = useState(false);
+  const [isPaymentReady1, setIsPaymentReady1] = useState(false);
+
+  const isElementsReady1 = isAddressReady1 && isPaymentReady1;
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -1914,23 +1919,26 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      {!isElementsReady ? (
+      {!isElementsReady1 ? (
           <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
         ) : (
           <AddressElement
             options={{ mode: "billing" }}
             onReady={() => {
-              setIsAddressReady(true);
+              setIsAddressReady1(true);
             }}
           />
         )}
 
-        {!isElementsReady ? (
-          <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse"></div>
+        {!isElementsReady1 ? (
+          <div>
+            <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="h-[100px] w-full bg-gray-200 rounded animate-pulse"></div>
+          </div>
         ) : (
           <PaymentElement
             onReady={() => {
-                setIsPaymentReady(true);
+                setIsPaymentReady1(true);
             }}
           />
         )}
