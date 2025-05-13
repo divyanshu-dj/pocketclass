@@ -1927,7 +1927,10 @@ END:VCALENDAR`.trim();
           <AddressElement
             options={{ mode: "billing" }}
             onReady={() => {
+              console.log("Address Element is ready");
+              console.log(isAddressReady1)
               setIsAddressReady1(true);
+              console.log(isAddressReady1)
             }}
           />
         )}
