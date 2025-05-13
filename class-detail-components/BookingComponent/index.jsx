@@ -82,10 +82,6 @@ export default function index({
   const [maxDays, setMaxDays] = useState(30);
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
-  const [isAddressReady, setIsAddressReady] = useState(false);
-  const [isPaymentReady, setIsPaymentReady] = useState(false);
-
-  const isElementsReady = isAddressReady && isPaymentReady;
 
   useEffect(() => {
     const getPackages = async () => {
@@ -1509,11 +1505,6 @@ END:VCALENDAR`.trim();
               selectedSlot={selectedSlot}
               selectedPackage={selectedPackage}
               classId={classId}
-              isAddressReady={isAddressReady}
-              isElementsReady={isElementsReady}
-              isPaymentReady={isPaymentReady}
-              setIsAddressReady={setIsAddressReady}
-              setIsPaymentReady={setIsPaymentReady}
             />
           </Elements>
         </div>
@@ -1574,11 +1565,6 @@ const CheckoutForm = ({
   price,
   selectedPackage,
   classId,
-  isAddressReady,
-  isElementsReady,
-  isPaymentReady,
-  setIsAddressReady,
-  setIsPaymentReady,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -1882,13 +1868,6 @@ END:VCALENDAR`.trim();
 
     setLoading(false);
   };
-
-  const [isAddressReady1, setIsAddressReady1] = useState(false);
-  const [isPaymentReady1, setIsPaymentReady1] = useState(false);
-  const [isElementsReady1, setIsElementsReady1] = useState(false);
-  useEffect(() => {
-    setIsElementsReady1(isAddressReady1 && isPaymentReady1);
-  }, [isAddressReady1, isPaymentReady1]);
 
   return (
     <form
