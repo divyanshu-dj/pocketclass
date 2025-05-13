@@ -48,7 +48,7 @@ function Balance({ }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [currencySelected, setCurrencySelected] = React.useState("cad");
   const [pendingAmount, setPendingAmount] = React.useState(0);
-  const [bookingsData, setBookingsData] = React.useState([]);
+  const [bookingsData, setBookingsData] = React.useState(null);
   const fetchEverthing = async () => {
     toast.loading("Loading Balance and Details...");
     //get account from the firebase
@@ -401,7 +401,7 @@ function Balance({ }) {
                 </h4>
               </div>
               <div className="card-body">
-                {!bookingsData || bookingsData.length === 0 ? (
+                {!bookingsData ? (
                   <div className="space-y-4">
                     {[...Array(1)].map((_, i) => (
                       <div key={i} className="flex space-x-4 animate-pulse">
@@ -451,6 +451,9 @@ function Balance({ }) {
                     </table>
                   </div>
                 )}
+                {!bookingsData || !bookingsData.length > 0 && (
+                    <div className="text-center">No Transactions</div>
+                  )}
               </div>
             </div>
           </div>
