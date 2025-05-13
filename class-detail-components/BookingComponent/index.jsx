@@ -1885,8 +1885,10 @@ END:VCALENDAR`.trim();
 
   const [isAddressReady1, setIsAddressReady1] = useState(false);
   const [isPaymentReady1, setIsPaymentReady1] = useState(false);
-
-  const isElementsReady1 = isAddressReady1 && isPaymentReady1;
+  const [isElementsReady1, setIsElementsReady1] = useState(false);
+  useEffect(() => {
+    setIsElementsReady1(isAddressReady1 && isPaymentReady1);
+  }, [isAddressReady1, isPaymentReady1]);
 
   return (
     <form
