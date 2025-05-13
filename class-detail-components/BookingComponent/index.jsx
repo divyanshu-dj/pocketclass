@@ -1223,7 +1223,7 @@ END:VCALENDAR`.trim();
                 </button>
               )}
 
-              {classPackages.length > 0 &&
+              {Array.isArray(classPackages) && classPackages.length > 0 &&
                 classPackages.map((pkg, i) => (
                   <button
                     onClick={() => setSelectedPackage(pkg)}
@@ -1474,7 +1474,7 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
-      {stripeLoading && isElementsReady && <CheckoutSkeleton />}
+      {stripeLoading && !isElementsReady && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <Elements stripe={stripePromise} options={stripeOptions}>
