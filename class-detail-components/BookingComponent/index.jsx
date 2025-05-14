@@ -1480,7 +1480,7 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
-      {stripeLoading && !isElementsReady && <CheckoutSkeleton />}
+      {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <Elements stripe={stripePromise} options={stripeOptions}>
