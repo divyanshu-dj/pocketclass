@@ -13,12 +13,18 @@ import {
   onSnapshot,
   doc as firestoreDoc,
   getDoc,
+  doc,
 } from "firebase/firestore";
+import dayjs from "dayjs";
 import { db } from "../../../firebaseConfig";
 import Select from "react-select";
 import InstructorSection from "../../../home-components/InstructorSection";
 import { categories as categoryList } from "../../../utils/categories";
 import Head from "next/head";
+import { DatePicker } from "antd";
+const { RangePicker } = DatePicker;
+import moment from "moment";
+
 mapboxgl.accessToken = process.env.mapbox_key;
 
 export const getStaticPaths = async () => {
@@ -50,6 +56,13 @@ export const getStaticProps = async ({ params }) => {
   };
 };
 
+const distanceOptions = [
+  { value: "2", label: "2 km" },
+  { value: "5", label: "5 km" },
+  { value: "15", label: "15 km" },
+  { value: "30", label: "30 km" },
+  { value: "", label: "All" },
+];
 
 export default function Results({ category, subCategory }) {
   const router = useRouter();
@@ -57,6 +70,14 @@ export default function Results({ category, subCategory }) {
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [instructorSchedules, setInstructorSchedules] = useState({});
+  const [selectedDistance, setSelectedDistance] = useState(
+    distanceOptions?.[2].value
+  );
+  const [location, setLocation] = useState(null);
+
   const [selectedSubCategory, setSelectedSubCategory] = useState(
     subCategory || ""
   );
@@ -79,10 +100,231 @@ export default function Results({ category, subCategory }) {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // useEffect(() => {
+  //   setSelectedSubCategory(subCategory || "");
+  //   setSelectedCategory(category || "");
+  // }, [subCategory, category]);
+
+  // useEffect(() => {
+  //   setSelectedSubCategory(subCategory || "");
+  //   setSelectedCategory(category || "");
+
+  //   if (router.query.distance) {
+  //     setSelectedDistance(router.query.distance);
+  //   }
+
+  //   if (router.query.sortBy) {
+  //     setSortBy(router.query.sortBy);
+  //   }
+
+  //   // Get date range from URL query parameters if present
+  //   if (router.query.startDate && router.query.endDate) {
+  //     // You would need to add state variables for these
+  //     // setStartDate(new Date(router.query.startDate));
+  //     // setEndDate(new Date(router.query.endDate));
+  //   }
+  // }, [subCategory, category, router.query]);
+
   useEffect(() => {
     setSelectedSubCategory(subCategory || "");
     setSelectedCategory(category || "");
-  }, [subCategory, category]);
+
+    if (router.query.distance) {
+      setSelectedDistance(router.query.distance);
+    }
+
+    if (router.query.sortBy) {
+      setSortBy(router.query.sortBy);
+    }
+
+    // Parse date range from URL
+    if (router.query.startDate && router.query.endDate) {
+      setStartDate(new Date(router.query.startDate));
+      setEndDate(new Date(router.query.endDate));
+    }
+  }, [subCategory, category, router.query]);
+
+  // will be live later
+
+  useEffect(() => {
+    const fetchInstructorSchedules = async () => {
+      if (!classes || !startDate || !endDate) return;
+
+      // Get unique instructor IDs
+      const instructorIds = [
+        ...new Set(classes.map((cls) => cls.classCreator)),
+      ];
+
+      // Fetch schedule for each instructor
+      const schedules = {};
+      await Promise.all(
+        instructorIds.map(async (instructorId) => {
+          const scheduleRef = doc(db, "Schedule", instructorId);
+          const scheduleSnap = await getDoc(scheduleRef);
+
+          console.log(
+            "scheduleSnap: ",
+            JSON.stringify(scheduleSnap.data(), null, 2)
+          );
+
+          if (scheduleSnap.exists()) {
+            schedules[instructorId] = scheduleSnap.data();
+          }
+        })
+      );
+
+      // setInstructorSchedules(schedules);
+    };
+
+    fetchInstructorSchedules();
+  }, [classes, startDate, endDate]);
+
+  const isInstructorAvailableOnDate = (schedule, date) => {
+    if (!schedule) return false;
+
+    // Get day of week (0 = Sunday, 1 = Monday, etc.)
+    const dayOfWeek = date.getDay();
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const dayName = daysOfWeek[dayOfWeek];
+
+    // Check if instructor has general availability for this day
+    const dayAvailability = schedule.generalAvailability?.find(
+      (day) => day.day === dayName
+    );
+    if (
+      !dayAvailability ||
+      !dayAvailability.slots ||
+      dayAvailability.slots.length === 0
+    ) {
+      return false;
+    }
+
+    // Check for adjusted availability (specific date overrides)
+    const dateString = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    const adjustedDay = schedule.adjustedAvailability?.find(
+      (adj) => adj.date === dateString
+    );
+
+    // If there's an adjusted availability with no slots, instructor is unavailable
+    if (adjustedDay && (!adjustedDay.slots || adjustedDay.slots.length === 0)) {
+      return false;
+    }
+
+    // If there's an adjusted availability with slots, instructor is available
+    if (adjustedDay && adjustedDay.slots && adjustedDay.slots.length > 0) {
+      return true;
+    }
+
+    // Otherwise, fall back to general availability
+    return true;
+  };
+  const isInstructorAvailableInRange = (schedule, start, end) => {
+    if (!schedule) return false;
+
+    // Create array of dates between start and end
+    const dates = [];
+    const currentDate = new Date(start);
+    const endDate = new Date(end);
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Check if instructor is available on at least one day in the range
+    return dates.some((date) => isInstructorAvailableOnDate(schedule, date));
+  };
+
+  useEffect(() => {
+    let filtered = [...classes];
+
+    if (selectedCategory && selectedCategory !== "All") {
+      filtered = filtered.filter((data) => data.Category === selectedCategory);
+    }
+
+    if (selectedSubCategory) {
+      filtered = filtered.filter(
+        (data) =>
+          data.SubCategory === selectedSubCategory ||
+          data.Type === selectedSubCategory
+      );
+    }
+
+    if (selectedDistance) {
+      if (location) {
+        filtered = filtered.filter((data) => {
+          const distance = distanceCalculator(
+            location.latitude,
+            location.longitude,
+            data.latitude,
+            data.longitude
+          );
+          return (
+            distance <= Number(selectedDistance) ||
+            data.Mode === "Online" ||
+            data.Address === "Online"
+          );
+        });
+      }
+    }
+
+    // Filter by date range availability
+    if (startDate && endDate && Object.keys(instructorSchedules).length > 0) {
+      filtered = filtered.filter((classItem) => {
+        const instructorId = classItem.classCreator;
+        const instructorSchedule = instructorSchedules[instructorId];
+
+        return isInstructorAvailableInRange(
+          instructorSchedule,
+          startDate,
+          endDate
+        );
+      });
+    }
+
+    // Apply sorting
+    if (sortBy === "rating") {
+      filtered.sort((a, b) => b.averageRating - a.averageRating);
+    } else if (sortBy === "price") {
+      filtered.sort((a, b) => a.Price - b.Price);
+    } else if (sortBy === "distance" && location) {
+      filtered.sort((a, b) => {
+        const distanceA = distanceCalculator(
+          location.latitude,
+          location.longitude,
+          a.latitude,
+          a.longitude
+        );
+        const distanceB = distanceCalculator(
+          location.latitude,
+          location.longitude,
+          b.latitude,
+          b.longitude
+        );
+        return distanceA - distanceB;
+      });
+    }
+
+    setFilteredClasses(filtered);
+  }, [
+    selectedCategory,
+    selectedSubCategory,
+    sortBy,
+    classes,
+    selectedDistance,
+    location,
+    startDate,
+    endDate,
+    instructorSchedules,
+  ]);
 
   // MapBox Initialization
   useEffect(() => {
@@ -257,7 +499,7 @@ export default function Results({ category, subCategory }) {
       });
     }
   }, [filteredClasses]);
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
   useEffect(() => {
     (async () => {
       const { geolocation } = navigator;
@@ -303,16 +545,16 @@ export default function Results({ category, subCategory }) {
     setSubCategoryOptions(options || []);
   }, [selectedCategory]);
 
-  const distanceOptions = [
-    { value: "2", label: "2 km" },
-    { value: "5", label: "5 km" },
-    { value: "15", label: "15 km" },
-    { value: "30", label: "30 km" },
-    { value: "", label: "All" },
-  ];
-  const [selectedDistance, setSelectedDistance] = useState(
-    distanceOptions[2].value
-  );
+  // const distanceOptions = [
+  //   { value: "2", label: "2 km" },
+  //   { value: "5", label: "5 km" },
+  //   { value: "15", label: "15 km" },
+  //   { value: "30", label: "30 km" },
+  //   { value: "", label: "All" },
+  // ];
+  // const [selectedDistance, setSelectedDistance] = useState(
+  //   distanceOptions[2].value
+  // );
 
   const sortOptions = [
     { value: "rating", label: "Rating" },
@@ -389,12 +631,76 @@ export default function Results({ category, subCategory }) {
     return () => unsubscribe();
   }, []);
 
+  // useEffect(() => {
+  //   let filtered = [...classes];
+
+  //   if (selectedCategory && selectedCategory !== "All") {
+  //     filtered = filtered.filter((data) => data.Category === selectedCategory);
+  //   }
+  //   if (selectedSubCategory) {
+  //     filtered = filtered.filter(
+  //       (data) =>
+  //         data.SubCategory === selectedSubCategory ||
+  //         data.Type === selectedSubCategory
+  //     );
+  //   }
+  //   if (selectedDistance) {
+  //     if (location) {
+  //       filtered = filtered.filter((data) => {
+  //         const distance = distanceCalculator(
+  //           location.latitude,
+  //           location.longitude,
+  //           data.latitude,
+  //           data.longitude
+  //         );
+  //         return (
+  //           distance <= Number(selectedDistance) ||
+  //           data.Mode === "Online" ||
+  //           data.Address === "Online"
+  //         );
+  //       });
+  //     }
+  //   }
+  //   if (sortBy === "rating") {
+  //     filtered.sort((a, b) => b.averageRating - a.averageRating);
+  //   } else if (sortBy === "price") {
+  //     filtered.sort((a, b) => a.Price - b.Price);
+  //   } else if (sortBy === "distance" && location) {
+  //     if (location) {
+  //       filtered.sort((a, b) => {
+  //         const distanceA = distanceCalculator(
+  //           location.latitude,
+  //           location.longitude,
+  //           a.latitude,
+  //           a.longitude
+  //         );
+  //         const distanceB = distanceCalculator(
+  //           location.latitude,
+  //           location.longitude,
+  //           b.latitude,
+  //           b.longitude
+  //         );
+  //         return distanceA - distanceB;
+  //       });
+  //     }
+  //   }
+  //   setFilteredClasses(filtered);
+  // }, [
+  //   selectedCategory,
+  //   selectedSubCategory,
+  //   sortBy,
+  //   classes,
+  //   selectedDistance,
+  //   location,
+  // ]);
+
   useEffect(() => {
     let filtered = [...classes];
 
     if (selectedCategory && selectedCategory !== "All") {
       filtered = filtered.filter((data) => data.Category === selectedCategory);
     }
+
     if (selectedSubCategory) {
       filtered = filtered.filter(
         (data) =>
@@ -402,6 +708,7 @@ export default function Results({ category, subCategory }) {
           data.Type === selectedSubCategory
       );
     }
+
     if (selectedDistance) {
       if (location) {
         filtered = filtered.filter((data) => {
@@ -419,6 +726,17 @@ export default function Results({ category, subCategory }) {
         });
       }
     }
+
+    // Add date range filtering
+    if (startDate && endDate) {
+      filtered = filtered.filter((data) => {
+        // This is a placeholder - you would need to implement logic to check
+        // if the class is available between startDate and endDate
+        // This might involve checking the instructor's schedule
+        return true; // Replace with actual availability check
+      });
+    }
+
     if (sortBy === "rating") {
       filtered.sort((a, b) => b.averageRating - a.averageRating);
     } else if (sortBy === "price") {
@@ -442,6 +760,7 @@ export default function Results({ category, subCategory }) {
         });
       }
     }
+
     setFilteredClasses(filtered);
   }, [
     selectedCategory,
@@ -450,20 +769,43 @@ export default function Results({ category, subCategory }) {
     classes,
     selectedDistance,
     location,
+    startDate,
+    endDate,
   ]);
 
   return (
     <>
       <Head>
-        <title>{selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels</title>
-        <meta name="description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
-        <link rel="canonical" href={`/browse/${selectedCategory}/${selectedSubCategory}`} />
-				<link rel="icon" href="/pc_favicon.ico" />
-        <meta property="og:title" content={`${selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels`} />
-        <meta property="og:description" content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`} />
+        <title>
+          {selectedSubCategory} Classes in Toronto | Affordable Lessons for All
+          Levels
+        </title>
+        <meta
+          name="description"
+          content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`}
+        />
+        <link
+          rel="canonical"
+          href={`/browse/${selectedCategory}/${selectedSubCategory}`}
+        />
+        <link rel="icon" href="/pc_favicon.ico" />
+        <meta
+          property="og:title"
+          content={`${selectedSubCategory} Classes in Toronto | Affordable Lessons for All Levels`}
+        />
+        <meta
+          property="og:description"
+          content={`Find the best ${selectedSubCategory} classes in Toronto. Learn from top instructors and improve your game today!`}
+        />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`/browse/${selectedCategory}/${selectedSubCategory}`} />
-        <meta name="keywords" content={`${selectedCategory}, ${selectedSubCategory}, online classes, best ${selectedCategory} courses, top ${selectedSubCategory} tutorials, best ${selectedCategory} classes in Toronto, in-person, online, toronto`} />
+        <meta
+          property="og:url"
+          content={`/browse/${selectedCategory}/${selectedSubCategory}`}
+        />
+        <meta
+          name="keywords"
+          content={`${selectedCategory}, ${selectedSubCategory}, online classes, best ${selectedCategory} courses, top ${selectedSubCategory} tutorials, best ${selectedCategory} classes in Toronto, in-person, online, toronto`}
+        />
       </Head>
       <div className="md:overflow-hidden h-screen">
         <NewHeader />
@@ -558,6 +900,52 @@ export default function Results({ category, subCategory }) {
                 }
                 onChange={(option) => setSortBy(option ? option.value : "")}
               />
+              {/* <div className="hidden md:block md:w-auto rounded-lg">
+                <RangePicker
+                  defaultValue={[
+                    moment("2025-05-27").clone(),
+                    moment("2025-06-29").clone(),
+                  ]}
+                  format="YYYY-MM-DD"
+                  onChange={(dates) => {
+                    if (dates) {
+                      setStartDate(dates[0].toDate());
+                      setEndDate(dates[1].toDate());
+                    } else {
+                      setStartDate(null);
+                      setEndDate(null);
+                    }
+                  }}
+                  disabledDate={(current) =>
+                    current && current < moment().startOf("day")
+                  }
+                  allowClear={true}
+                />{" "}
+              </div> */}
+              <div className="hidden md:flex md:space-x-2 md:w-auto rounded-lg">
+                <DatePicker
+                  value={startDate ? moment(startDate) : null}
+                  onChange={(date) => setStartDate(date ? date.toDate() : null)}
+                  format="YYYY-MM-DD"
+                  placeholder="Start Date"
+                  disabledDate={(current) =>
+                    current && current < moment().startOf("day")
+                  }
+                  allowClear={true}
+                />
+                <DatePicker
+                  value={endDate ? moment(endDate) : null}
+                  onChange={(date) => setEndDate(date ? date.toDate() : null)}
+                  format="YYYY-MM-DD"
+                  placeholder="End Date"
+                  disabledDate={(current) =>
+                    (current && current < moment().startOf("day")) ||
+                    (startDate && current && current < moment(startDate))
+                  }
+                  allowClear={true}
+                />
+              </div>
+
               <button
                 className="block md:hidden border-gray-300 border px-4 py-1 rounded-md transition-all duration-300 text-gray-700"
                 onClick={() => setModalVisible(true)}

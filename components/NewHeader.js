@@ -16,6 +16,7 @@ import Image from "next/image";
 import Notifications from "./Notifications";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import TeacherSearch from "./TeacherSearch";
 
 const NewHeader = ({ isHome = true }) => {
   const [user, loading] = useAuthState(auth);
@@ -227,6 +228,11 @@ const NewHeader = ({ isHome = true }) => {
               className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
             />
           </Link>
+             {/* Adding the TeacherSearch component here */}
+             <div className="hidden md:block">
+            <TeacherSearch />
+          </div>
+
 
           <div className="flex justify-start items-center flex-row gap-4">
             {!loading ? (
