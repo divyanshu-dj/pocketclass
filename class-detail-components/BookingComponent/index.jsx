@@ -1113,9 +1113,9 @@ END:VCALENDAR`.trim();
                   key={i}
                   onClick={() => handleSlotClick(slot.date, slot)}
                   className={`p-3 border rounded cursor-pointer ${selectedSlot?.startTime === slot.startTime &&
-                      selectedSlot?.date === slot.date
-                      ? "bg-[#E73F2B] text-white"
-                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
+                    selectedSlot?.date === slot.date
+                    ? "bg-[#E73F2B] text-white"
+                    : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
                     }`}
                 >
                   {slot.startTime} - {slot.endTime}
@@ -1133,9 +1133,9 @@ END:VCALENDAR`.trim();
                   key={i}
                   onClick={() => handleSlotClick(slot.date, slot)}
                   className={`p-3 border rounded cursor-pointer ${selectedSlot?.startTime === slot.startTime &&
-                      selectedSlot?.date === slot.date
-                      ? "bg-[#E73F2B] text-white"
-                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
+                    selectedSlot?.date === slot.date
+                    ? "bg-[#E73F2B] text-white"
+                    : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
                     }`}
                 >
                   {slot.startTime} - {slot.endTime}
@@ -1615,6 +1615,16 @@ const CheckoutForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (!stripe || !elements) {
+      toast.error("Stripe is not loaded yet.");
+      return;
+    }
+
+    if (!user?.displayName || !user?.email) {
+      toast.error("Your name and email are required for payment.");
+      setLoading(false);
+      return;
+    }
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
@@ -1629,7 +1639,7 @@ const CheckoutForm = ({
       redirect: "if_required",
     });
 
-    if (!error && paymentIntent?.status === "succeeded") {
+    if (!error && paymentIntent && paymentIntent?.status === "succeeded") {
       const bookingDocRef = doc(db, "Bookings", bookingRef);
 
       const bookingSnapshot = await getDoc(bookingDocRef);
@@ -1646,6 +1656,11 @@ const CheckoutForm = ({
       const startDateTime = moment
         .utc(`${date} ${startTime}`)
         .format("YYYY-MM-DDTHH:mm:ss");
+      if (!instructorData?.email) {
+        toast.error("Instructor email is missing.");
+        setLoading(false);
+        return;
+      }
       const organizer = instructorData.email;
       const location = classData.Address || "Online";
       const endDateTime = moment
@@ -1679,10 +1694,15 @@ const CheckoutForm = ({
               )
             )
           );
-          if (querySnapshot.size > 0) {
+          if (querySnapshot && querySnapshot.size > 0 && Array.isArray(querySnapshot.docs)) {
             const otherBookings = querySnapshot.docs.map((doc) => doc.data());
             meetingLink = otherBookings[0]?.meetingLink;
           }
+        }
+        else if (!mode) {
+          toast.error("Class mode is not specified.");
+          setLoading(false);
+          return;
         }
         if (!meetingLink) {
           try {
@@ -1711,6 +1731,10 @@ const CheckoutForm = ({
             console.error("Error generating meeting link:", error);
           }
         }
+      } else if (!classData?.Mode) {
+        toast.error("Class mode is not specified.");
+        setLoading(false);
+        return;
       }
       await updateDoc(bookingDocRef, {
         status: "Confirmed",
@@ -1900,8 +1924,8 @@ END:VCALENDAR`.trim();
           </p>
         </div>
       </div>
-      <AddressElement options={{ mode: "billing" }}/>
-      <PaymentElement/>
+      <AddressElement options={{ mode: "billing" }} />
+      <PaymentElement />
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
