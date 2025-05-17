@@ -58,7 +58,9 @@ export function ConfirmBookingDetails({ bookingDetails }) {
               >
                 {classDetails?.Mode === "Online"
                   ? bookingDetails?.meetingLink || "Online Class"
-                  : classDetails?.Location}
+                  : classDetails?.Location
+                    ? `${classDetails.Location._latitude}, ${classDetails.Location._longitude}`
+                    : "Location not available"}
               </div>
             </div>
           </div>
