@@ -114,7 +114,7 @@ export default function InstructorGuide() {
 
         {/* 3) Setting Up Your Instructor Profile (second video) */}
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-[#E63F2B]">Set Up Your Instructor Profile</h3>
+          <h3 className="text-lg font-semibold text-[#E63F2B]">Manage Your Schedule</h3>
           <div className="relative pb-[62.5%] h-0">
             {isVideo3Loading && (
               <Skeleton
@@ -123,12 +123,12 @@ export default function InstructorGuide() {
               />
             )}
             <iframe
-              src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=51ea5347-f007-4f49-b747-f814e173b6e0"
+              src="https://www.loom.com/embed/5b871e3e177c4671a5831f520c1e5af2?sid=649644d8-e89f-4fe8-9a2c-8c151a89f630"
               frameBorder="0"
               allowFullScreen
               mozallowfullscreen="true"
               webkitallowfullscreen="true"
-              onLoad={() => setIsVideo3Loading(false)}
+              onLoad={() => setIsVideo4Loading(false)}
               className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
             />
           </div>
@@ -156,7 +156,7 @@ export default function InstructorGuide() {
           </div>
         </div>
       </div>
-        </section>
+        </section> 
 
           <h1 className="text-4xl font-semibold mt-10 mb-5">
             Instructor Verification Process
@@ -218,6 +218,48 @@ export default function InstructorGuide() {
               </dl>
             </div>
           </div>
+
+          <section className="mt-16">
+  <h1 className="text-4xl font-semibold mb-4">Built to Protect Instructors</h1>
+  <p className="text-md text-gray-700 mb-6">
+    We’ve designed every part of PocketClass with instructors in mind — from handling no-shows 
+    to ensuring you actually get paid, here’s how we’ve got your back.
+  </p>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    {/* Card 1 */}
+    <div className="bg-white p-5 rounded-xl shadow hover:shadow-md transition">
+      <h3 className="text-lg font-semibold text-[#E63F2B]">Cancellation Protection</h3>
+      <p className="text-sm text-gray-700 mt-2">
+        If a student cancels late or doesn’t show up, you’ll still get paid.
+      </p>
+    </div>
+
+    {/* Card 2 */}
+    <div className="bg-white p-5 rounded-xl shadow hover:shadow-md transition">
+      <h3 className="text-lg font-semibold text-[#E63F2B]">Secure Payments</h3>
+      <p className="text-sm text-gray-700 mt-2">
+        Every booking is handled through Stripe, so no more chasing down e-transfers or getting ghosted.
+      </p>
+    </div>
+
+    {/* Card 3 */}
+    <div className="bg-white p-5 rounded-xl shadow hover:shadow-md transition">
+      <h3 className="text-lg font-semibold text-[#E63F2B]">Verified Reviews</h3>
+      <p className="text-sm text-gray-700 mt-2">
+        Every review is tied to a real booking — helping you build trust and rank higher.
+      </p>
+    </div>
+
+    {/* Card 4 */}
+    <div className="bg-white p-5 rounded-xl shadow hover:shadow-md transition">
+      <h3 className="text-lg font-semibold text-[#E63F2B]">Set Your Own Policies</h3>
+      <p className="text-sm text-gray-700 mt-2">
+        Choose how you want to get booked — with your own rules around schedules, group classes, and location.
+      </p>
+    </div>
+  </div>
+</section>
 
           <h1 className="text-4xl font-semibold mt-10 mb-5">
             Make money from your passion with PocketClass!
