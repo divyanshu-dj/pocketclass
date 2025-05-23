@@ -27,7 +27,19 @@ function InstructorFinderView() {
       image: '/assets/Yoga_Testamonial.jpg',
       testimonial: '“PocketClass helped me find an amazing yoga session effortlessly! Highly recommend PocketClass for anyone looking to find quality classes!”',
       aboutText: 'Yoga Enthusiast'
-    }
+    },
+    {
+      parentName: 'Lucy',
+      image: '/assets/Tennis_Testamonial.jpg',
+      testimonial: '“Coach Eugene was so helpful in getting me to the next level in Tennis. Thank you to PocketClass for helping me find a coach so easily!!”',
+      aboutText: 'Intermediate Tennis Player'
+    },
+    {
+      parentName: 'Ben',
+      image: '/assets/Gym_Testamonial.jpg',
+      testimonial: '“PocketClass made it easy for me to find fitness help wheneve and wherever I needed it!"',
+      aboutText: 'Gym Bro'
+    },
   ]
 
   const [isMobile, setIsMobile] = useState(false);
