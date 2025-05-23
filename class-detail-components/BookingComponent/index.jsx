@@ -203,7 +203,7 @@ export default function index({
         )
         .map((booking) => (booking.groupSize ? booking.groupSize : 1));
       const remainingSlots =
-        classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0);
+        classData.groupSize - bookingSizes.length;
       if (isGroup && remainingSlots > 0) {
         return true;
       }
