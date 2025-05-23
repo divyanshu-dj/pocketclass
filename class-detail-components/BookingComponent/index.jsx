@@ -57,6 +57,7 @@ export default function index({
     generalAvailability: [],
     adjustedAvailability: [],
   });
+  const [totalBookings, setTotalBookings] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookLoading, setBookLoading] = useState(false);
   const [displayConfirmation, setDisplayConfirmation] = useState(false);
@@ -509,6 +510,37 @@ export default function index({
       console.warn("Error sending email: ", error);
     }
   };
+
+  useEffect(() => {
+    if (!selectedDate || !instructorId || !schedule) {
+      return;
+    }
+
+    const fetchBookings = async () => {
+      const startOfDayUTC = moment(selectedDate).utc().startOf("day").toISOString();
+      const endOfDayUTC = moment(selectedDate).utc().endOf("day").toISOString();
+
+      const bookingsRef = collection(db, "Bookings");
+      const startTimeQuery = query(
+        bookingsRef,
+        where("instructor_id", "==", instructorId),
+        where("startTime", ">=", startOfDayUTC),
+        where("startTime", "<=", endOfDayUTC)
+      );
+
+      try {
+        const [startSnap] = await Promise.all([getDocs(startTimeQuery)]);
+        const allBookings = startSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setTotalBookings(allBookings.length);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    };
+
+    fetchBookings();
+  }, [selectedDate, instructorId, schedule]);
+
 
   const handleSubmit = async (price, payment_intent_id) => {
     const bookingData = {
@@ -1142,10 +1174,12 @@ END:VCALENDAR`.trim();
                 </button>
               ))}
             </div>
-            {groupedSlots.length == 0 && individualSlots.length == 0 && (
+            {groupedSlots.length === 0 && individualSlots.length === 0 && (
               <div className="flex flex-col items-center">
                 <div className="text-gray-600 m-2 mb-0 text-lg">
-                  No Time Slots available for this day
+                  {totalBookings > 0
+                    ? "All classes for today are booked"
+                    : "No Time Slots available for this day"}
                 </div>
                 <button
                   onClick={() => JumpToNextAvail()}
@@ -1155,6 +1189,7 @@ END:VCALENDAR`.trim();
                 </button>
               </div>
             )}
+
 
             {/* {groupedSlots.map((group, index) => (
               <div key={index} className="mb-6">
