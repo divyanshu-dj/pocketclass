@@ -1185,12 +1185,6 @@ END:VCALENDAR`.trim();
                     ? "All classes for today are booked"
                     : "No Time Slots available for this day"}
                 </div>
-                <button
-                  onClick={() => JumpToNextAvail()}
-                  className="mt-1 text-blue-600 rounded"
-                >
-                  Jump to next available day
-                </button>
               </div>
             )}
 
