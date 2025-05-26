@@ -879,7 +879,7 @@ export default function CreateClass() {
                       <input
                         required
                         name={`discount-${idx}`}
-                        className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                        className="border-2 text-center w-full sm:w-auto border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                         placeholder="Discount"
                         type={"number"}
                         value={pkg.Discount}

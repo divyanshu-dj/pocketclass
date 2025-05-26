@@ -11,6 +11,7 @@ import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { useFormik } from 'formik';
 import { classSchema } from "../../Validation/createClass";
 import imageCompression from "browser-image-compression";
+import ToggleSwitch from "../../components/toggle";
 
 const LocationMap = dynamic(() => import("../../components/LocationMap"), {
   ssr: false,
@@ -816,6 +817,7 @@ export default function UpdateClass() {
                 )}
               </div>
             </div>
+            <ToggleSwitch form={form} setForm={setForm} formik={formik} />
             <div className="w-full max-w-[750px] mt-4 flex flex-wrap gap-2 justify-between items-center">
               <div>
                 <div className="text-xl font-bold">Create a Package</div>
