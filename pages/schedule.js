@@ -1129,7 +1129,7 @@ export default function Schedule() {
             htmlFor="general-availability"
             className="block font-semibold text-gray-600 mb-4"
           >
-            Indivate times you are available for specific dates
+            Indicate times you are available for specific dates
           </label>
           <div className="mb-6">
             <button

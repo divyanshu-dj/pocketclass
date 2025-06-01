@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 function PricingSection({ classData }) {
   {/*The use Effect is used to continuously monitor the width and divWidth is used to set width of each block i have used overflow prop. for the situatuion when they appear in one column*/}
-  const packageCount = classData?.Packages.length || 0;
+  const packageCount = (classData?.Packages) ? classData.Packages.length : 0;
   const divWidth = `calc((100% / ${packageCount+2}) - 6.3px)`;
   const [screenWidth, setScreenWidth] = useState(0);
   useEffect(() => {
@@ -45,7 +45,7 @@ function PricingSection({ classData }) {
               like-minded folks. If you're ready to commit to continuous
               improvement, a package is the way to go!
             </p>
-            <div className="flex flex-col dm:flex-row mt-4 gap-2 justify-center dm:justify-start overflow-hidden rounded-2xl dm:w-fit dm:min-w-[100%] dm:max-w-[100%] w-[98%]" style={{ flexDirection: classData?.Packages.length === 0 ? 'row' : '' }}>
+            <div className="flex flex-col dm:flex-row mt-4 gap-2 justify-center dm:justify-start overflow-hidden rounded-2xl dm:w-fit dm:min-w-[100%] dm:max-w-[100%] w-[98%]" style={{ flexDirection: packageCount === 0 ? 'row' : '' }}>
               <div className="dm:h-[100px] px-5 py-3 h-[85px] flex flex-col items-center justify-center bg-gray-100 flex-shrink-0" style={{
                   width: ((packageCount===0) || (screenWidth>=600))?divWidth:'100%'
                 }}>
@@ -60,7 +60,7 @@ function PricingSection({ classData }) {
               </div>
               <div className=" dm:h-[100px] px-5 py-3 h-[85px] flex flex-col items-center justify-center bg-gray-100 flex-shrink-0" style={{
                   width: ((packageCount===0) || (screenWidth>=600))?divWidth:'100%',
-                  borderRadius: ((screenWidth >= 600) && 0===(classData?.Packages.length))?'0px 1rem 1rem 0rem':'0px 0rem 0rem 0px'
+                  borderRadius: ((screenWidth >= 600) && 0===(packageCount))?'0px 1rem 1rem 0rem':'0px 0rem 0rem 0px'
                 }}>
                 <div>
                   <p className="font-quicksand tracking-tight text-nowrap text-lg font-semibold text-left text-[#373E45] m-0 p-0">
@@ -71,7 +71,7 @@ function PricingSection({ classData }) {
                   </p>
                 </div>
               </div>
-              {classData?.Packages.map((pkg, index) => (
+              {packageCount > 0 && classData?.Packages.map((pkg, index) => (
                 <div
                   key={index}
                   className="dm:w-[200px] dm:h-[100px] px-5 w-[100%] h-[120px] items-center justify-center flex flex-col py-3 bg-gray-100 flex-shrink-0" style={{
