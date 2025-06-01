@@ -24,6 +24,7 @@ import Head from "next/head";
 import { DatePicker } from "antd";
 const { RangePicker } = DatePicker;
 import moment from "moment";
+import {smartDefaults} from "../../../utils/smartDefaults";
 
 mapboxgl.accessToken = process.env.mapbox_key;
 
@@ -73,9 +74,7 @@ export default function Results({ category, subCategory }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [instructorSchedules, setInstructorSchedules] = useState({});
-  const [selectedDistance, setSelectedDistance] = useState(
-    distanceOptions?.[2].value
-  );
+  const [selectedDistance, setSelectedDistance] = useState('');
   const [location, setLocation] = useState(null);
 
   const [selectedSubCategory, setSelectedSubCategory] = useState(
@@ -162,10 +161,10 @@ export default function Results({ category, subCategory }) {
           const scheduleRef = doc(db, "Schedule", instructorId);
           const scheduleSnap = await getDoc(scheduleRef);
 
-          console.log(
-            "scheduleSnap: ",
-            JSON.stringify(scheduleSnap.data(), null, 2)
-          );
+          // console.log(
+          //   "scheduleSnap: ",
+          //   JSON.stringify(scheduleSnap.data(), null, 2)
+          // );
 
           if (scheduleSnap.exists()) {
             schedules[instructorId] = scheduleSnap.data();
@@ -697,16 +696,21 @@ export default function Results({ category, subCategory }) {
   useEffect(() => {
     let filtered = [...classes];
 
-    if (selectedCategory && selectedCategory !== "All") {
-      filtered = filtered.filter((data) => data.Category === selectedCategory);
-    }
+    if (smartDefaults.map((item) => item.name).includes(selectedCategory)) {
+      const subCategoriesList = selectedSubCategory.split(',');
+      filtered = filtered.filter((data) => subCategoriesList.includes(data.SubCategory));
+    } else {
+      if (selectedCategory && selectedCategory !== "All") {
+        filtered = filtered.filter((data) => data.Category === selectedCategory);
+      }
 
-    if (selectedSubCategory) {
-      filtered = filtered.filter(
-        (data) =>
-          data.SubCategory === selectedSubCategory ||
-          data.Type === selectedSubCategory
-      );
+      if (selectedSubCategory && selectedSubCategory !== 'All') {
+        filtered = filtered.filter(
+            (data) =>
+                data.SubCategory === selectedSubCategory ||
+                data.Type === selectedSubCategory
+        );
+      }
     }
 
     if (selectedDistance) {
@@ -922,29 +926,29 @@ export default function Results({ category, subCategory }) {
                   allowClear={true}
                 />{" "}
               </div> */}
-              <div className="hidden md:flex md:space-x-2 md:w-auto rounded-lg">
-                <DatePicker
-                  value={startDate ? moment(startDate) : null}
-                  onChange={(date) => setStartDate(date ? date.toDate() : null)}
-                  format="YYYY-MM-DD"
-                  placeholder="Start Date"
-                  disabledDate={(current) =>
-                    current && current < moment().startOf("day")
-                  }
-                  allowClear={true}
-                />
-                <DatePicker
-                  value={endDate ? moment(endDate) : null}
-                  onChange={(date) => setEndDate(date ? date.toDate() : null)}
-                  format="YYYY-MM-DD"
-                  placeholder="End Date"
-                  disabledDate={(current) =>
-                    (current && current < moment().startOf("day")) ||
-                    (startDate && current && current < moment(startDate))
-                  }
-                  allowClear={true}
-                />
-              </div>
+              {/*<div className="hidden md:flex md:space-x-2 md:w-auto rounded-lg">*/}
+              {/*  <DatePicker*/}
+              {/*    value={startDate ? moment(startDate) : null}*/}
+              {/*    onChange={(date) => setStartDate(date ? date.toDate() : null)}*/}
+              {/*    format="YYYY-MM-DD"*/}
+              {/*    placeholder="Start Date"*/}
+              {/*    disabledDate={(current) =>*/}
+              {/*      current && current < moment().startOf("day")*/}
+              {/*    }*/}
+              {/*    allowClear={true}*/}
+              {/*  />*/}
+              {/*  <DatePicker*/}
+              {/*    value={endDate ? moment(endDate) : null}*/}
+              {/*    onChange={(date) => setEndDate(date ? date.toDate() : null)}*/}
+              {/*    format="YYYY-MM-DD"*/}
+              {/*    placeholder="End Date"*/}
+              {/*    disabledDate={(current) =>*/}
+              {/*      (current && current < moment().startOf("day")) ||*/}
+              {/*      (startDate && current && current < moment(startDate))*/}
+              {/*    }*/}
+              {/*    allowClear={true}*/}
+              {/*  />*/}
+              {/*</div>*/}
 
               <button
                 className="block md:hidden border-gray-300 border px-4 py-1 rounded-md transition-all duration-300 text-gray-700"
