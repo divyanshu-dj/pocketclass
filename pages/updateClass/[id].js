@@ -52,9 +52,6 @@ const SortableImage = ({ image, onRemove }) => {
     transition,
   };
 
-  console.log("Image src:", image.src);
-  console.log("Image type:", image.type);
-
   const isVideo = image.type?.startsWith("video/") || 
                  (typeof image.src === 'string' && (
                    /\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i.test(image.src) ||
@@ -174,6 +171,12 @@ export default function UpdateClass() {
         if (docSnap.exists()) {
           const classData = docSnap.data();
           setForm(classData);
+          if(!classData.subCategory&& classData.Type){
+            setForm((prev) => ({
+              ...prev,
+              SubCategory: classData.Type,
+            }));
+          }
           setPackages(classData.Packages || []);
           const typedImages = classData.Images.map((url) => {
             const isVideo = /\.(mp4|webm|ogg)$/i.test(url);
@@ -185,7 +188,6 @@ export default function UpdateClass() {
           });
           setPreviewImages(typedImages);
           setLoadedImgs(classData.Images);
-          console.log(typedImages)
           formik.setValues({
           class_name: classData.Name || '',
           category: classData.Category || '',
