@@ -24,7 +24,7 @@ import Head from "next/head";
 import { DatePicker } from "antd";
 const { RangePicker } = DatePicker;
 import moment from "moment";
-import { smartDefaults } from "../../../utils/smartDefaults";
+import {smartDefaults} from "../../../utils/smartDefaults";
 
 mapboxgl.accessToken = process.env.mapbox_key;
 
@@ -358,10 +358,6 @@ export default function Results({ category, subCategory }) {
     markers.current.forEach((marker) => marker.marker.remove());
     markers.current = [];
 
-    if (map.current.hasImage('pulsing-dot')) {
-      map.current.removeImage('pulsing-dot');
-    }
-
     // Determine map bounds
     const bounds = new mapboxgl.LngLatBounds();
 
@@ -380,14 +376,17 @@ export default function Results({ category, subCategory }) {
         const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
           <div class="p-2">
             <h3 class="text-lg font-bold">${classItem.Name}</h3>
-            <p class="text-sm text-gray-600">${classItem.Address || "No Address"
-          }</p>
-            <p class="text-sm text-blue-600">${classItem.Category} | ${classItem.SubCategory || classItem.Type || "N/A"
-          }</p>
-            <p class="text-sm text-yellow-500">⭐ ${classItem.averageRating
-            ? classItem.averageRating.toFixed(1)
-            : "N/A"
-          } (${classItem.reviewCount || 0}+ reviews)</p>
+            <p class="text-sm text-gray-600">${
+              classItem.Address || "No Address"
+            }</p>
+            <p class="text-sm text-blue-600">${classItem.Category} | ${
+          classItem.SubCategory || classItem.Type || "N/A"
+        }</p>
+            <p class="text-sm text-yellow-500">⭐ ${
+              classItem.averageRating
+                ? classItem.averageRating.toFixed(1)
+                : "N/A"
+            } (${classItem.reviewCount || 0}+ reviews)</p>
             <p class="text-sm text-logo-red">Price: $${classItem.Price}</p>
           </div>
         `);
@@ -455,15 +454,11 @@ export default function Results({ category, subCategory }) {
         },
       };
 
-      if (!map.current.hasImage('pulsing-dot')) {
-        map.current.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
-      }
+      map.current.addImage("pulsing-dot", pulsingDot, { pixelRatio: 2 });
 
-      if (map.current.getLayer('layer-with-pulsing-dot')) {
-        map.current.removeLayer('layer-with-pulsing-dot');
-      }
-      if (map.current.getSource('dot-point')) {
-        map.current.removeSource('dot-point');
+      if (map.current.getSource("dot-point")) {
+        map.current.removeLayer("layer-with-pulsing-dot");
+        map.current.removeSource("dot-point");
       }
 
       map.current.addSource("dot-point", {
@@ -530,9 +525,9 @@ export default function Results({ category, subCategory }) {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distance = R * c;
@@ -586,8 +581,8 @@ export default function Results({ category, subCategory }) {
               if (instructorDoc.exists()) {
                 classData.instructorName = instructorDoc.data().firstName
                   ? instructorDoc.data().firstName +
-                  " " +
-                  instructorDoc.data().lastName
+                    " " +
+                    instructorDoc.data().lastName
                   : "N/A";
               }
             }
@@ -603,14 +598,14 @@ export default function Results({ category, subCategory }) {
             const avgRating =
               classReviews.length > 0
                 ? classReviews.reduce(
-                  (acc, rev) =>
-                    acc +
-                    (rev.qualityRating +
-                      rev.recommendRating +
-                      rev.safetyRating) /
-                    3,
-                  0
-                ) / classReviews.length
+                    (acc, rev) =>
+                      acc +
+                      (rev.qualityRating +
+                        rev.recommendRating +
+                        rev.safetyRating) /
+                        3,
+                    0
+                  ) / classReviews.length
                 : 0;
 
             classData.averageRating = avgRating;
@@ -711,9 +706,9 @@ export default function Results({ category, subCategory }) {
 
       if (selectedSubCategory && selectedSubCategory !== 'All') {
         filtered = filtered.filter(
-          (data) =>
-            data.SubCategory === selectedSubCategory ||
-            data.Type === selectedSubCategory
+            (data) =>
+                data.SubCategory === selectedSubCategory ||
+                data.Type === selectedSubCategory
         );
       }
     }
@@ -824,20 +819,22 @@ export default function Results({ category, subCategory }) {
             <div className="inline-flex bg-gray-200 rounded-full p-1">
               <button
                 className={`px-4 py-2 rounded-full transition-all duration-300 
-                ${activeView === "classes"
+                ${
+                  activeView === "classes"
                     ? "bg-logo-red text-white"
                     : "text-gray-700"
-                  }`}
+                }`}
                 onClick={() => setActiveView("classes")}
               >
                 Classes
               </button>
               <button
                 className={`px-4 py-2 rounded-full transition-all duration-300 
-                ${activeView === "map"
+                ${
+                  activeView === "map"
                     ? "bg-logo-red text-white"
                     : "text-gray-700"
-                  }`}
+                }`}
                 onClick={() => {
                   setActiveView("map");
                   setTimeout(() => {
