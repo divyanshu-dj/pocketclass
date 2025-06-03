@@ -1,41 +1,68 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export const useActiveIndicator = () => {
     const containerRef = useRef(null);
-    const [activeStyle, setActiveStyle] = useState({ left: 0, width: 0, opacity: 0 });
+    const [activeStyle, setActiveStyle] = useState({ 
+        left: 0, 
+        width: 0, 
+        opacity: 0 
+    });
 
-    const updateIndicator = (index) => {
+    const updateIndicator = useCallback((index) => {
         const container = containerRef.current;
         if (!container) return;
 
-        const items = container.querySelectorAll(".search-bar-option");
-        items.forEach((item) => {
-            if (!item.classList.contains('group'))
-                item.classList.add("group");
-            item.querySelector('.search-hover.initial').classList.add('hidden');
-            item.querySelector('.search-hover.active').classList.remove('hidden');
-        })
-        const target = items[index];
-        target.classList.remove("group");
+        // Use requestAnimationFrame for smoother animations
+        requestAnimationFrame(() => {
+            const items = container.querySelectorAll(".search-bar-option");
+            if (index >= items.length) return;
 
-        if (target) {
-            const { offsetLeft, offsetWidth } = target;
-            setActiveStyle({ left: offsetLeft, width: offsetWidth, opacity: 100 });
-        }
-    };
+            items.forEach((item) => {
+                const initial = item.querySelector('.search-hover.initial');
+                const active = item.querySelector('.search-hover.active');
+                
+                if (initial && active) {
+                    initial.classList.add('hidden');
+                    active.classList.remove('hidden');
+                }
+            });
 
-    const resetActiveBG = () => {
-        setActiveStyle({ opacity: 0 });
+            const target = items[index];
+            if (target) {
+                const { offsetLeft, offsetWidth } = target;
+                setActiveStyle({ 
+                    left: offsetLeft, 
+                    width: offsetWidth, 
+                    opacity: 100 
+                });
+            }
+        });
+    }, []);
+
+    const resetActiveBG = useCallback(() => {
+        setActiveStyle(prev => ({ ...prev, opacity: 0 }));
+        
         const container = containerRef.current;
         if (!container) return;
 
-        const items = container.querySelectorAll(".search-bar-option");
-        items.forEach((item) => {
-            item.classList.add("group");
-            item.querySelector('.search-hover.initial').classList.remove('hidden');
-            item.querySelector('.search-hover.active').classList.add('hidden');
-        })
-    };
+        requestAnimationFrame(() => {
+            const items = container.querySelectorAll(".search-bar-option");
+            items.forEach((item) => {
+                const initial = item.querySelector('.search-hover.initial');
+                const active = item.querySelector('.search-hover.active');
+                
+                if (initial && active) {
+                    initial.classList.remove('hidden');
+                    active.classList.add('hidden');
+                }
+            });
+        });
+    }, []);
 
-    return { containerRef, activeStyle, updateIndicator, resetActiveBG };
+    return { 
+        containerRef, 
+        activeStyle, 
+        updateIndicator, 
+        resetActiveBG 
+    };
 };
