@@ -19,7 +19,10 @@ import { toast } from "react-toastify";
 import TeacherSearch from "./TeacherSearch";
 import {categories as categoryData} from "../utils/categories";
 import {Tag} from "antd";
+import {categories as categoryData} from "../utils/categories";
+import {Tag} from "antd";
 
+const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) => {
 const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) => {
   const [user, loading] = useAuthState(auth);
   const [signOut] = useSignOut(auth);

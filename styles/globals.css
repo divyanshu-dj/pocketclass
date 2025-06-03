@@ -245,6 +245,7 @@ a {
 
 .ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #ff0000 !important;
+  color: #ff0000 !important;
 }
 .ant-tabs-nav-wrap{
   justify-content: center !important;
@@ -252,6 +253,7 @@ a {
 
 .ant-tabs-ink-bar {
   height: 4px !important;
+  background-color: #ff0000 !important;
   background-color: #ff0000 !important;
 }
 .ant-tabs-tab:hover .ant-tabs-tab-btn {
