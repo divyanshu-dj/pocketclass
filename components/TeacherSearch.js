@@ -232,7 +232,7 @@ const TeacherSearch = ({ isShrunk, expandMenu }) => {
   }, [isShrunk, expandMenu, toggleDropdown, updateIndicator]);
 
   return (
-    <div className={`menu-search-bar relative z-50 w-full transition-all duration-500 ${isShrunk ? 'max-w-[230px] h-[48px] translate-y-[-75px]' : 'max-w-[650px] max-md:px-3'
+    <div className={`menu-search-bar mx-auto relative z-50 w-full transition-all duration-500 ${isShrunk ? 'max-w-[230px] h-[48px] translate-y-[-75px]' : 'max-w-[650px] max-md:px-3'
       }`}>
       <div
         onClick={() => isShrunk ? expandMenu() : null}

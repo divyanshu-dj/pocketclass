@@ -466,12 +466,12 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
         </div>
 
         {/*NavBar Search Part*/}
-        <div className="flex justify-center">
+        {/* <div className="flex justify-center"> */}
           <TeacherSearch
               isShrunk={isMenuShrunk}
               expandMenu={() => setIsMenuShrunk(false)}
           />
-        </div>
+        {/* </div> */}
       </div>
     </>
   );
