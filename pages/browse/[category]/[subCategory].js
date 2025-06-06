@@ -561,67 +561,103 @@ export default function Results({ category, subCategory }) {
     { value: "distance", label: "Distance" },
   ];
 
-  useEffect(() => {
-    const fetchClassesAndInstructors = async () => {
-      setLoading(true);
-      try {
-        const classesQuery = query(collection(db, "classes"));
-        const classesSnapshot = await getDocs(classesQuery);
-        const classesWithInstructors = await Promise.all(
-          classesSnapshot.docs.map(async (doc) => {
-            const classData = { id: doc.id, ...doc.data() };
+ useEffect(() => {
+  const fetchClassesAndInstructors = async () => {
+    setLoading(true);
+    console.log("Selected SubCategory:", selectedSubCategory);
 
-            if (classData.classCreator) {
-              const instructorRef = firestoreDoc(
-                db,
-                "Users",
-                classData.classCreator
-              );
-              const instructorDoc = await getDoc(instructorRef);
-              if (instructorDoc.exists()) {
-                classData.instructorName = instructorDoc.data().firstName
-                  ? instructorDoc.data().firstName +
-                    " " +
-                    instructorDoc.data().lastName
-                  : "N/A";
-              }
-            }
+    try {
+      const snapshot = await getDocs(query(collection(db, "classes")));
+      const allClassDocs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-            classData.name = classData.Name || "N/A";
-            classData.profileImage = classData.Images?.[0] || "N/A";
-            classData.category = classData.Category || "N/A";
-            classData.instructorName = classData.instructorName || "N/A";
+      // Filter by selectedSubCategory
+      const matching = selectedSubCategory
+        ? allClassDocs.filter(
+            (cls) => cls.SubCategory === selectedSubCategory
+          )
+        : allClassDocs;
 
-            const classReviews = reviews.filter(
-              (rev) => rev.classID === classData.id
-            );
-            const avgRating =
-              classReviews.length > 0
-                ? classReviews.reduce(
-                    (acc, rev) =>
-                      acc +
-                      (rev.qualityRating +
-                        rev.recommendRating +
-                        rev.safetyRating) /
-                        3,
-                    0
-                  ) / classReviews.length
-                : 0;
+      const rest = selectedSubCategory
+        ? allClassDocs.filter(
+            (cls) => cls.SubCategory !== selectedSubCategory
+          )
+        : [];
 
-            classData.averageRating = avgRating;
-            classData.reviewCount = classReviews.length;
-            return classData;
-          })
-        );
+      // Fetch and show matching subcategory classes first
+      const matchingProcessed = await processClasses(matching);
+      setClasses(matchingProcessed);
 
-        setClasses(classesWithInstructors);
-      } finally {
-        setLoading(false);
+      // Fetch the rest in background
+      if (rest.length > 0) {
+        processClasses(rest).then((restProcessed) => {
+          setClasses((prev) => [...prev, ...restProcessed]);
+        });
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchClassesAndInstructors();
-  }, [reviews]);
+  fetchClassesAndInstructors();
+}, [selectedSubCategory, reviews]);
+
+// ⬇ Reusable processing logic for instructor + review merging
+const processClasses = async (classDocs) => {
+  const creatorIds = Array.from(
+    new Set(classDocs.map((cls) => cls.classCreator).filter(Boolean))
+  );
+
+  const instructorDocs = await Promise.all(
+    creatorIds.map((id) => getDoc(doc(db, "Users", id)))
+  );
+
+  const instructorsMap = new Map();
+  instructorDocs.forEach((docSnap, idx) => {
+    if (docSnap.exists()) {
+      instructorsMap.set(creatorIds[idx], docSnap.data());
+    }
+  });
+
+  const reviewMap = new Map();
+  reviews.forEach((rev) => {
+    if (!reviewMap.has(rev.classID)) {
+      reviewMap.set(rev.classID, []);
+    }
+    reviewMap.get(rev.classID).push(rev);
+  });
+
+  return classDocs.map((classData) => {
+    const instructor = instructorsMap.get(classData.classCreator);
+    const instructorName = instructor
+      ? `${instructor.firstName || ""} ${instructor.lastName || ""}`.trim()
+      : "N/A";
+
+    const classReviews = reviewMap.get(classData.id) || [];
+    const avgRating =
+      classReviews.length > 0
+        ? classReviews.reduce(
+            (acc, rev) =>
+              acc +
+              (rev.qualityRating + rev.recommendRating + rev.safetyRating) / 3,
+            0
+          ) / classReviews.length
+        : 0;
+
+    return {
+      ...classData,
+      name: classData.Name || "N/A",
+      profileImage: classData.Images?.[0] || "N/A",
+      category: classData.Category || "N/A",
+      instructorName,
+      averageRating: avgRating,
+      reviewCount: classReviews.length,
+    };
+  });
+};
+
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "Reviews"), (snapshot) => {

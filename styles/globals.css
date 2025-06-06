@@ -245,6 +245,7 @@ a {
 
 .ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #ff0000 !important;
+  color: #ff0000 !important;
 }
 .ant-tabs-nav-wrap{
   justify-content: center !important;
@@ -252,6 +253,7 @@ a {
 
 .ant-tabs-ink-bar {
   height: 4px !important;
+  background-color: #ff0000 !important;
   background-color: #ff0000 !important;
 }
 .ant-tabs-tab:hover .ant-tabs-tab-btn {
@@ -312,9 +314,11 @@ a {
 .searchable-select input{
   @apply !shadow-none;
 }
-
+.search-bar-wrapper{
+  @apply grid grid-cols-[minmax(0,_2fr)_1px_minmax(0,_2.5fr)] gap-1 relative h-full
+}
 .search-bar-option{
-  @apply flex flex-col justify-center w-full py-3 px-6 relative rounded-full transition duration-500 cursor-pointer overflow-hidden;
+  @apply flex flex-col justify-center w-full py-1.5 sm:py-3 px-3 sm:px-6 relative rounded-full transition duration-500 cursor-pointer overflow-hidden;
 }
 .search-bar-option .search-hover{
   @apply opacity-0 absolute inset-0;

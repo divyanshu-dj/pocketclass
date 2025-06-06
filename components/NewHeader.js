@@ -34,6 +34,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
   const [classCreated, setClassCreated] = useState(true);
   const [scheduleCreated, setScheduleCreated] = useState(true);
 
+
   const [activeKey, setActiveKey] = useState("sport");
 
   const handleCategoryClick = (category) => {
@@ -134,8 +135,8 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
 
   useEffect(() => {
     const handleScroll = () => {
+      if (window.innerWidth < 768) return;
       setScrollPosition(window.scrollY);
-      console.log('shrunk ', window.scrollY > 5 && !isSearchExpanded)
       if (window.scrollY > 5 && !isSearchExpanded) {
         setIsMenuShrunk(true);
       } else if (window.scrollY <= 5 && !isSearchExpanded) {
@@ -143,7 +144,8 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    if (router.pathname.includes('/browse')) setIsMenuShrunk(true);
+    else window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -464,12 +466,12 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
         </div>
 
         {/*NavBar Search Part*/}
-        <div className="flex justify-center">
+        {/* <div className="flex justify-center"> */}
           <TeacherSearch
               isShrunk={isMenuShrunk}
               expandMenu={() => setIsMenuShrunk(false)}
           />
-        </div>
+        {/* </div> */}
       </div>
     </>
   );
