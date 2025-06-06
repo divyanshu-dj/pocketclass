@@ -399,6 +399,12 @@ function InstructorCard({
                 >
                   Edit
                 </a>
+                <a
+                  href={"/schedule/" + id}
+                  className="px-4 text-center w-full py-1 border-solid border border-logo-red text-logo-red rounded-md hover:bg-logo-red hover:text-white hover:opacity-80 transition duration-200 ease-out"
+                >
+                  Manage Schedule
+                </a>
               </>
             )}
           </div>
