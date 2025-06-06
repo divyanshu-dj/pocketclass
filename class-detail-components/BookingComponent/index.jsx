@@ -50,6 +50,7 @@ export default function index({
   classPackages,
 }) {
   const router = useRouter();
+  const {id} = router.query
   const [timer, setTimer] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -226,79 +227,120 @@ export default function index({
   }, [schedule, bookedSlots, appointmentDuration, classData]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!instructorId || !classId) return;
-      const docRef = doc(db, "Schedule", instructorId);
-      const snapshot = await getDoc(docRef);
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        data.generalAvailability.forEach((day) => {
-          day.slots.forEach((slot) => {
-            if (slot.groupSlot) {
-              slot.classId = classId;
-              slot.groupSize = classData.groupSize;
-            }
-          });
-        });
-        data.adjustedAvailability.forEach((day) => {
-          day.slots.forEach((slot) => {
-            if (slot.groupSlot) {
-              slot.classId = classId;
-              slot.groupSize = classData.groupSize;
-            }
-          });
-        });
-        setSchedule({
-          generalAvailability: data.generalAvailability || [],
-          adjustedAvailability: data.adjustedAvailability || [],
-        });
-        setMinDays(data.minDays || 0);
-        setMaxDays(data.maxDays || 30);
-        setAppointmentDuration(data.appointmentDuration || 30);
-        setTimeZone(data.timezone || "America/Toronto");
-        const date = moment(today);
-        setSelectedDate(new Date(date));
+  const fetchData = async () => {
+    if (!instructorId || !classId) return;
+    console.log(classId);
+
+    let scheduleData = null;
+
+    // 1. Try to get Schedule for classId
+    const classDocRef = doc(db, "Schedule", classId);
+    const classSnapshot = await getDoc(classDocRef);
+
+    if (classSnapshot.exists()) {
+      scheduleData = classSnapshot.data();
+
+      // Merge empty slot days from instructor schedule
+      const instructorDocRef = doc(db, "Schedule", instructorId);
+      const instructorSnapshot = await getDoc(instructorDocRef);
+      if (instructorSnapshot.exists()) {
+        const instructorData = instructorSnapshot.data();
+        const emptySlotAdjustments = instructorData.adjustedAvailability?.filter(
+          (entry) => Array.isArray(entry.slots) && entry.slots.length === 0
+        ) || [];
+
+        // Merge only unique dates (avoid duplicates)
+        const existingDates = new Set(
+          scheduleData.adjustedAvailability?.map((d) => d.date)
+        );
+
+        scheduleData.adjustedAvailability = [
+          ...(scheduleData.adjustedAvailability || []),
+          ...emptySlotAdjustments.filter((entry) => !existingDates.has(entry.date))
+        ];
       }
+    } else {
+      // Fallback to instructor schedule
+      const instructorDocRef = doc(db, "Schedule", instructorId);
+      const instructorSnapshot = await getDoc(instructorDocRef);
+      if (instructorSnapshot.exists()) {
+        scheduleData = instructorSnapshot.data();
+      }
+    }
 
-      const now = moment.utc();
-      const bookingsQuery = query(
-        collection(db, "Bookings"),
-        where("instructor_id", "==", instructorId)
-      );
-      const bookingsSnapshot = await getDocs(bookingsQuery);
-
-      const validBookings = [];
-      bookingsSnapshot.forEach(async (docSnapshot) => {
-        const booking = docSnapshot.data();
-        const bookingRef = docSnapshot.ref;
-
-        const bookingStartTime = moment.utc(booking.startTime); // Convert to UTC
-        const bookingExpiry = booking.expiry
-          ? moment.utc(booking.expiry)
-          : null;
-
-        if (
-          booking.status === "Pending" &&
-          bookingExpiry &&
-          bookingExpiry.isBefore(now)
-        ) {
-          await deleteDoc(bookingRef);
-        } else {
-          validBookings.push({
-            startTime: bookingStartTime.format("HH:mm"),
-            endTime: moment.utc(booking.endTime).format("HH:mm"),
-            date: bookingStartTime.format("YYYY-MM-DD"),
-            classId: booking.class_id,
-            groupSize: booking.groupSize,
-          });
-        }
+    if (scheduleData) {
+      scheduleData.generalAvailability?.forEach((day) => {
+        day.slots.forEach((slot) => {
+          if (slot.groupSlot) {
+            slot.classId = classId;
+            slot.groupSize = classData.groupSize;
+          }
+        });
       });
 
-      setBookedSlots(validBookings);
-    };
+      scheduleData.adjustedAvailability?.forEach((day) => {
+        day.slots.forEach((slot) => {
+          if (slot.groupSlot) {
+            slot.classId = classId;
+            slot.groupSize = classData.groupSize;
+          }
+        });
+      });
 
-    fetchData();
-  }, [instructorId, classId]);
+      setSchedule({
+        generalAvailability: scheduleData.generalAvailability || [],
+        adjustedAvailability: scheduleData.adjustedAvailability || [],
+      });
+
+      setMinDays(scheduleData.minDays || 0);
+      setMaxDays(scheduleData.maxDays || 30);
+      setAppointmentDuration(scheduleData.appointmentDuration || 30);
+      setTimeZone(scheduleData.timezone || "America/Toronto");
+
+      const date = moment(today);
+      setSelectedDate(new Date(date));
+    }
+
+    const now = moment.utc();
+    const bookingsQuery = query(
+      collection(db, "Bookings"),
+      where("instructor_id", "==", instructorId)
+    );
+    const bookingsSnapshot = await getDocs(bookingsQuery);
+
+    const validBookings = [];
+    bookingsSnapshot.forEach(async (docSnapshot) => {
+      const booking = docSnapshot.data();
+      const bookingRef = docSnapshot.ref;
+
+      const bookingStartTime = moment.utc(booking.startTime);
+      const bookingExpiry = booking.expiry
+        ? moment.utc(booking.expiry)
+        : null;
+
+      if (
+        booking.status === "Pending" &&
+        bookingExpiry &&
+        bookingExpiry.isBefore(now)
+      ) {
+        await deleteDoc(bookingRef);
+      } else {
+        validBookings.push({
+          startTime: bookingStartTime.format("HH:mm"),
+          endTime: moment.utc(booking.endTime).format("HH:mm"),
+          date: bookingStartTime.format("YYYY-MM-DD"),
+          classId: booking.class_id,
+          groupSize: booking.groupSize,
+        });
+      }
+    });
+
+    setBookedSlots(validBookings);
+  };
+
+  fetchData();
+}, [instructorId, classId]);
+
 
   const calculateRemainingGroupedClassSlots = () => {
     const selected = moment
