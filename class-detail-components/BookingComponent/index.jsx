@@ -1704,11 +1704,11 @@ const CheckoutForm = ({
       return;
     }
 
-    if (!user?.displayName || !user?.email) {
-      toast.error("Your name and email are required for payment.");
-      setLoading(false);
-      return;
-    }
+    // if (!user?.displayName || !user?.email) {
+    //   toast.error("Your name and email are required for payment.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
