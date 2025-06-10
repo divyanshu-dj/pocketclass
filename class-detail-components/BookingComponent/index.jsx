@@ -363,6 +363,24 @@ export default function index({
 
   // Generate slots
   useEffect(() => {
+    const calculateRemainingGroupedSlots = (selectSlot) => {
+      const filteredBookings = bookedSlots.filter(
+          (booking) =>
+            booking.startTime === selectSlot.startTime &&
+            booking.date === selectSlot.date
+        );
+
+        const bookingSizes = filteredBookings.map(
+          (booking) => booking.groupSize || 1
+        );
+
+        const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
+        const remainingSlots = Math.max((classData?.groupSize || 0) - totalBooked, 0);
+        console.log(remainingSlots)
+        return remainingSlots;
+      };
+  
+
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
       if (!selectedDate) return;
@@ -442,7 +460,9 @@ export default function index({
 
       groupSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
       individualSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
-
+      groupSlots.forEach((s) => {
+        s.emptyClasses = calculateRemainingGroupedSlots(s);
+      });
       setGroupedSlots(groupSlots);
       setIndividualSlots(individualSlots);
     };
@@ -1188,9 +1208,9 @@ END:VCALENDAR`.trim();
                 return (
                   <button
                     key={i}
-                    disabled={calculateRemainingGroupedClassSlots()<1}
+                    disabled={slot.emptyClasses<1}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${calculateRemainingGroupedClassSlots()<1
+                    className={`${baseClasses} ${slot.emptyClasses<1
                       ? disabledClasses
                       : isSelected
                         ? selectedClasses
