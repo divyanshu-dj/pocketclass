@@ -40,7 +40,7 @@ import {
 import { set } from "date-fns";
 
 const stripePromise = loadStripe(
-  'pk_test_51R8gqeCQh7zMEt743bOzOwzMTOnfe8du85LIPUOZCnA878GT4zH6i0aSbdWDXdyAaXhLOoI9igsDeEz67W5L9Oi900FaXayVtV'
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
 export default function index({
@@ -443,7 +443,6 @@ export default function index({
       groupSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
       individualSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-      console.log(individualSlots)
       setGroupedSlots(groupSlots);
       setIndividualSlots(individualSlots);
     };
