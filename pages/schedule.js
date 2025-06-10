@@ -717,6 +717,7 @@ export default function Schedule() {
             </svg>
           </div>
         </div>
+        <h2>Common Schedule</h2>
 
         <div>
           <select
@@ -1546,6 +1547,17 @@ export default function Schedule() {
               tooltipAccessor="tooltip"
               onSelectEvent={handleEventClick} // Event click handler
             />
+            <div className='w-full flex justify-end'>
+              <button
+                onClick={() =>
+                  saveSchedule(db, user, generalAvailability, adjustedAvailability)
+                }
+                disabled={scheduleLoading}
+                className={` px-4 py-2 bg-logo-red text-white mt-4 mb-2 scheduleButton absolute rounded-md hover:bg-red-600`}
+              >
+                {scheduleLoading ? "Saving..." : "Save Schedule"}
+              </button>
+            </div>
           </div>
           <div
             className='

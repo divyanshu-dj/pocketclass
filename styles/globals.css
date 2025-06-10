@@ -385,3 +385,11 @@ a {
     height: 500px;
   }
 }
+
+@media (max-width: 450px) {
+  .scheduleButton {
+    position: fixed;
+    bottom: 0;
+    width: 90%;
+  }
+}
