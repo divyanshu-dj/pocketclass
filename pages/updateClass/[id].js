@@ -52,12 +52,12 @@ const SortableImage = ({ image, onRemove }) => {
     transition,
   };
 
-  const isVideo = image.type?.startsWith("video/") || 
-                 (typeof image.src === 'string' && (
-                   /\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i.test(image.src) ||
-                   /%2F.*video/i.test(image.src) ||
-                   /SampleVideo/i.test(image.src)
-                 ));
+  const isVideo = image.type?.startsWith("video/") ||
+    (typeof image.src === 'string' && (
+      /\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i.test(image.src) ||
+      /%2F.*video/i.test(image.src) ||
+      /SampleVideo/i.test(image.src)
+    ));
 
   return (
     <div
@@ -171,7 +171,7 @@ export default function UpdateClass() {
         if (docSnap.exists()) {
           const classData = docSnap.data();
           setForm(classData);
-          if(!classData.subCategory&& classData.Type){
+          if (!classData.subCategory && classData.Type) {
             setForm((prev) => ({
               ...prev,
               SubCategory: classData.Type,
@@ -189,20 +189,20 @@ export default function UpdateClass() {
           setPreviewImages(typedImages);
           setLoadedImgs(classData.Images);
           formik.setValues({
-          class_name: classData.Name || '',
-          category: classData.Category || '',
-          sub_category: classData.SubCategory || '',
-          mode_of_class: classData.Mode || '',
-          description: classData.Description || '',
-          price: classData.Price || '',
-          pricing: classData.Pricing || '',
-          groupSize: classData.groupSize || '',
-          groupPrice: classData.groupPrice || '',
-          experience: classData.Experience || '',
-          about: classData.About || '',
-          funfact: classData.FunFact || '',
-          // Package fields if needed
-        });
+            class_name: classData.Name || '',
+            category: classData.Category || '',
+            sub_category: classData.SubCategory || '',
+            mode_of_class: classData.Mode || '',
+            description: classData.Description || '',
+            price: classData.Price || '',
+            pricing: classData.Pricing || '',
+            groupSize: classData.groupSize || '',
+            groupPrice: classData.groupPrice || '',
+            experience: classData.Experience || '',
+            about: classData.About || '',
+            funfact: classData.FunFact || '',
+            // Package fields if needed
+          });
         } else {
           toast.error("Class not found");
           router.push("/");
@@ -220,6 +220,37 @@ export default function UpdateClass() {
   const updateClass = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (
+      !form.Name ||
+      !form.Category ||
+      !form.SubCategory ||
+      !form.Price ||
+      !form.Pricing ||
+      !form.Description
+    ) {
+      toast.error("Please fill all fields");
+      setLoading(false);
+      return;
+    }
+    if (stablePreviewImages.length < 1) {
+      setImageError("Please upload at least 1 image");
+      toast.error("Please upload at least 1 image");
+      setLoading(false);
+      return;
+    }
+    if(!form.Address){
+      setAddressError("Please select a location on the map");
+      toast.error("Please select a location on the map");
+      setLoading(false);
+      return;
+    }
+    const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 10*1024*1024) { // 10MB
+      setImageError("Total size of all images must be less than or equal to 10MB");
+      toast.error("Total size of all images must be less than or equal to 10MB");
+      setLoading(false);
+      return;
+    }
     const docRef = doc(db, "classes", id);
     for (let pkg of packages) {
       if (!pkg.Name || !pkg.num_sessions || !pkg.Price) {
@@ -732,7 +763,7 @@ export default function UpdateClass() {
             </div> */}
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Experience</label>
+                <label className="text-lg font-bold">Experience (Optional)</label>
                 <textarea
                   required
                   name="experience"
@@ -746,14 +777,11 @@ export default function UpdateClass() {
                   }
                   }
                 />
-                {((formik.touched.Experience && formik.errors.Experience) || !form.Experience || form.Experience.trim() === "") && (
-                  <div className="text-red-500 text-sm">Experience is required</div>
-                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">About</label>
+                <label className="text-lg font-bold">About (Optional)</label>
                 <textarea
                   required
                   name="about"
@@ -766,14 +794,11 @@ export default function UpdateClass() {
                     setForm({ ...form, About: e.target.value })
                   }}
                 />
-                {((formik.touched.about && formik.errors.about) || !form.About || form.About.trim() === "") && (
-                  <div className="text-red-500 text-sm">About is required</div>
-                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Fun Fact</label>
+                <label className="text-lg font-bold">Fun Fact (Optional)</label>
                 <textarea
                   required
                   name="funfact"
@@ -787,12 +812,6 @@ export default function UpdateClass() {
                   }
                   }
                 />
-                {/* {formik.touched.funfact && formik.errors.funfact && (
-                  <div className="text-red-500 text-sm">{formik.errors.funfact}</div>
-                )} */}
-                {((formik.touched.funfact && formik.errors.funfact) || !form.FunFact || form.FunFact.trim() === "") && (
-                  <div className="text-red-500 text-sm">Fun Fact is required</div>
-                )}
               </div>
             </div>
             <div className="w-full max-w-[750px]">
