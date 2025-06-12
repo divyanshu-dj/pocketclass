@@ -414,21 +414,23 @@ export default function index({
   useEffect(() => {
     const calculateRemainingGroupedSlots = (selectSlot) => {
       const filteredBookings = bookedSlots.filter(
-          (booking) =>
-            booking.startTime === selectSlot.startTime &&
-            booking.date === selectSlot.date
-        );
+        (booking) =>
+          booking.startTime === selectSlot.startTime &&
+          booking.date === selectSlot.date
+      );
 
-        const bookingSizes = filteredBookings.map(
-          (booking) => booking.groupSize || 1
-        );
+      const bookingSizes = filteredBookings.map(
+        (booking) => booking.groupSize || 1
+      );
 
-        const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
-        const remainingSlots = Math.max((classData?.groupSize || 0) - totalBooked, 0);
-        console.log(remainingSlots)
-        return remainingSlots;
-      };
-  
+      const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
+      const remainingSlots = Math.max(
+        (classData?.groupSize || 0) - totalBooked,
+        0
+      );
+      console.log(remainingSlots);
+      return remainingSlots;
+    };
 
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
@@ -540,12 +542,12 @@ export default function index({
           .reduce((a, b) => a + b, 0);
 
         slots.push({
-            startTime: slotStart.format("HH:mm"),
-            endTime: nextSlot.format("HH:mm"),
-            date: dateStr,
-            classId: classId,
-            isBooked: isBooked
-          });
+          startTime: slotStart.format("HH:mm"),
+          endTime: nextSlot.format("HH:mm"),
+          date: dateStr,
+          classId: classId,
+          isBooked: isBooked,
+        });
 
         slotStart.add(appointmentDuration, "minutes");
       }
@@ -1122,7 +1124,7 @@ END:VCALENDAR`.trim();
     let finalPrice = actualPrice;
 
     if (discountType === "percentage") {
-      const discountAmount = (finalPrice * discount) / 100;
+      const discountAmount = ((finalPrice * discount) / 100).toFixed(2);
       finalPrice -= discountAmount;
     } else if (discountType === "Fixed") {
       finalPrice -= discount;
@@ -1253,19 +1255,21 @@ END:VCALENDAR`.trim();
                 const baseClasses = "p-3 border rounded";
                 const selectedClasses = "bg-[#E73F2B] text-white";
                 const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
-                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
+                const disabledClasses =
+                  "bg-gray-300 text-gray-500 cursor-not-allowed";
 
                 return (
                   <button
                     key={i}
                     disabled={slot?.isBooked}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${slot?.isBooked
-                      ? disabledClasses
-                      : isSelected
+                    className={`${baseClasses} ${
+                      slot?.isBooked
+                        ? disabledClasses
+                        : isSelected
                         ? selectedClasses
                         : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                      }`}
+                    }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1286,19 +1290,21 @@ END:VCALENDAR`.trim();
                 const baseClasses = "p-3 border rounded";
                 const selectedClasses = "bg-[#E73F2B] text-white";
                 const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
-                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
+                const disabledClasses =
+                  "bg-gray-300 text-gray-500 cursor-not-allowed";
 
                 return (
                   <button
                     key={i}
-                    disabled={slot.emptyClasses<1}
+                    disabled={slot.emptyClasses < 1}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${slot.emptyClasses<1
-                      ? disabledClasses
-                      : isSelected
+                    className={`${baseClasses} ${
+                      slot.emptyClasses < 1
+                        ? disabledClasses
+                        : isSelected
                         ? selectedClasses
                         : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                      }`}
+                    }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1422,12 +1428,13 @@ END:VCALENDAR`.trim();
                   </button>
                 ))}
             </div>
-            {!voucherVerified && (
-              <div className="mt-4">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Have a voucher code?
-                </label>
-                <div className="flex gap-2">
+
+            <div className="mt-4 mb-4 flex flex-col lg:flex-row gap-4 items-center w-full">
+              <label className="block text-gray-700 font-semibold">
+                Have a voucher code?
+              </label>
+              {!voucherVerified && (
+                <div className="flex flex-grow gap-2">
                   <input
                     type="text"
                     value={voucher}
@@ -1446,14 +1453,74 @@ END:VCALENDAR`.trim();
                     Apply
                   </button>
                 </div>
-                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-                {voucherVerified && (
-                  <p className="text-green-500 text-sm mt-1">
-                    Voucher applied successfully!
-                  </p>
-                )}
-              </div>
-            )}
+              )}
+              {error && !voucherVerified && (
+                <p className="text-red-500 text-sm mt-1">{error}</p>
+              )}
+              {voucherVerified && (
+                // Voucher successfully verified Box with green border, Voucher code and discount amount
+                <div className="flex  w-full flex-grow flex-row gap-4 justify-between border border-green-500 bg-green-50 p-3 rounded">
+                  <div className="flex items-center flex-row gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-green-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="flex flex-col w-full text-sm">
+                      <p className="">
+                        <strong>{voucher}</strong> applied!
+                      </p>
+                      <p className="">
+                        <strong>
+                          {discountType === "percentage"
+                            ? `${discount}%`
+                            : `$${discount}`}
+                        </strong>{" "} off
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Cross button to remove voucher  */}
+                  <button
+                    onClick={() => {
+                      setVoucher("");
+                      setVoucherVerified(false);
+                      setDiscount(0);
+                      setDiscountType("percentage");
+                    }}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="flex hg w-full justify-between items-center md:flex-row flex-col gap-8 mt-8">
               <div className="w-full md:w-auto flex-col flex-grow gap-1">
                 <div className="flex flex-row w-full justify-between">
@@ -1494,40 +1561,11 @@ END:VCALENDAR`.trim();
 
                 {voucherVerified && (
                   <div className="flex flex-row w-full justify-between">
-                      <strong>Voucher Discount:</strong>
-                      <p>
-                        {discountType === "percentage"
-                          ?( (discount *
-                              (selectedPackage?.num_sessions
-                                ? selectedPackage.Price -
-                                  ((selectedPackage?.Discount ??
-                                    selectedPackage?.discountPercentage) *
-                                    selectedPackage?.Price) /
-                                    100
-                                : selectedSlot.classId
-                                ? classData.groupPrice
-                                : classData.Price)) /
-                            100)
-                          : discount}
-                      </p>
-                  </div>
-                )}
-
-                <div className="flex flex-row w-full justify-between">
-                  <p>
-                    <strong>Total:</strong>
-                  </p>
-                  <p>
-                    {(selectedPackage?.num_sessions
-                      ? selectedPackage.Price -
-                        ((selectedPackage?.Discount ??
-                          selectedPackage?.discountPercentage) *
-                          selectedPackage?.Price) /
-                          100
-                      : selectedSlot.classId
-                      ? classData.groupPrice
-                      : classData.Price) - (discountType === "percentage"
-                          ? (discount *
+                    <strong>Voucher Discount:</strong>
+                    <p>
+                      {discountType === "percentage"
+                        ? (
+                            (discount *
                               (selectedPackage?.num_sessions
                                 ? selectedPackage.Price -
                                   ((selectedPackage?.Discount ??
@@ -1538,7 +1576,43 @@ END:VCALENDAR`.trim();
                                 ? classData.groupPrice
                                 : classData.Price)) /
                             100
-                          : discount)}
+                          ).toFixed(2)
+                        : discount}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex flex-row w-full justify-between">
+                  <p>
+                    <strong>Total:</strong>
+                  </p>
+                  <p>
+                    {(selectedPackage?.num_sessions
+                      ? selectedPackage.Price -
+                        (
+                          ((selectedPackage?.Discount ??
+                            selectedPackage?.discountPercentage) *
+                            selectedPackage?.Price) /
+                          100
+                        ).toFixed(2)
+                      : selectedSlot.classId
+                      ? classData.groupPrice
+                      : classData.Price) -
+                      (discountType === "percentage"
+                        ? (
+                            (discount *
+                              (selectedPackage?.num_sessions
+                                ? selectedPackage.Price -
+                                  ((selectedPackage?.Discount ??
+                                    selectedPackage?.discountPercentage) *
+                                    selectedPackage?.Price) /
+                                    100
+                                : selectedSlot.classId
+                                ? classData.groupPrice
+                                : classData.Price)) /
+                            100
+                          ).toFixed(2)
+                        : discount)}
                   </p>
                 </div>
               </div>
@@ -1727,11 +1801,13 @@ END:VCALENDAR`.trim();
                   ? classData.groupPrice * numberOfGroupMembers
                   : classData.Price) -
                 (discountType === "percentage"
-                  ? ((selectedSlot.classId
-                      ? classData.groupPrice * numberOfGroupMembers
-                      : classData.Price) *
-                      discount) /
-                    100
+                  ? (
+                      ((selectedSlot.classId
+                        ? classData.groupPrice * numberOfGroupMembers
+                        : classData.Price) *
+                        discount) /
+                      100
+                    ).toFixed(2)
                   : discount)
               }
               discountType={discountType}
@@ -1861,9 +1937,11 @@ const CheckoutForm = ({
     ? classData.groupPrice
     : classData.Price;
 
-  const offerDiscount = discountType === "percentage"? discount*packagePrice/100:discount;
+  const offerDiscount =
+    discountType === "percentage"
+      ? ((discount * packagePrice) / 100).toFixed(2)
+      : discount;
   packagePrice = packagePrice - offerDiscount;
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
