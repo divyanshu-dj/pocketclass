@@ -27,6 +27,7 @@ const MyClass = () => {
   const [myClass, setMyClass] = useState([]);
   const [classDetails, setClassDetails] = useState({});
   const [bookings, setBookings] = useState([]);
+  const [bookingsByMe, setBookingsByMe] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [user, loading] = useAuthState(auth);
 
@@ -113,8 +114,31 @@ const MyClass = () => {
             ...docSnap.data(),
             id: docSnap.id,
           }));
-          console.log("temp", temp);
           setBookings(temp);
+        } catch (error) {
+          console.error("Error fetching bookings:", error);
+        }
+      }
+    };
+
+    fetchBookings();
+  }, [id, userData]);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (id && userData?.category === "instructor") {
+        try {
+          const q = query(
+            collection(db, "Bookings"),
+            where("student_id", "==", id)
+          );
+          const querySnapshot = await getDocs(q); 
+          const temp = querySnapshot.docs.map((docSnap) => ({
+            ...docSnap.data(),
+            id: docSnap.id,
+          }));
+          console.log("temp", temp);
+          setBookingsByMe(temp);
         } catch (error) {
           console.error("Error fetching bookings:", error);
         }
@@ -181,6 +205,7 @@ const MyClass = () => {
         <InstructorClasses
           classes={myClass}
           bookings={bookings}
+          bookingsByMe={bookingsByMe}
           reviews={reviews}
         />
       )}
