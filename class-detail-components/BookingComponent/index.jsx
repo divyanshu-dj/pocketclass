@@ -1748,6 +1748,8 @@ END:VCALENDAR`.trim();
               selectedSlot={selectedSlot}
               selectedPackage={selectedPackage}
               classId={classId}
+              voucher={voucher}
+              voucherVerified={voucherVerified}
             />
           </Elements>
         </div>
@@ -1810,6 +1812,8 @@ const CheckoutForm = ({
   classId,
   discountType,
   discount,
+  voucher,
+  voucherVerified,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -2144,7 +2148,7 @@ END:VCALENDAR`.trim();
       }
       // In the handleSubmit function of CheckoutForm, after successful payment:
       if (voucherVerified) {
-        const vouchersRef = collection(db, "Vouchers");
+        const vouchersRef = collection(db, "vouchers");
         const q = query(vouchersRef, where("code", "==", voucher));
         const querySnapshot = await getDocs(q);
 
