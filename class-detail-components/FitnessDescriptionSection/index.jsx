@@ -29,13 +29,13 @@ function FitnessDescriptionSection({ classAbout }) {
         </div>
       ) : (
         <>
-          <p className="text-2xl font-semibold text-[#261f22] font-dm-sans">
+          <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22]">
             Class Description:
           </p>
 
           <p
             ref={textRef}
-            className={`whitespace-pre-wrap text-base text-[#261f22] mt-2 leading-5 font-dm-sans ${
+            className={`[font-family:'DM_Sans',sans-serif] whitespace-pre-wrap text-base font-medium text-left leading-6 text-[#261f22] mt-2 ${
               isReadMore ? 'line-clamp-3' : ''
             }`}
           >
