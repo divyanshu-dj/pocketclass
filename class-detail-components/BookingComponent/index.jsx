@@ -58,16 +58,6 @@ export default function index({
     generalAvailability: [],
     adjustedAvailability: [],
   });
-<<<<<<< Updated upstream
-=======
-  const [voucher, setVoucher] = useState("");
-  const [voucherVerified, setVoucherVerified] = useState(false);
-  const [discount, setDiscount] = useState(null);
-  const [discountType, setDiscountType] = useState("percentage");
-  const [error, setError] = useState(null);
-  const [calendarEvents, setCalendarEvents] = useState([]);
-  const [instructorData, setInstructorData] = useState(null);
->>>>>>> Stashed changes
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookLoading, setBookLoading] = useState(false);
   const [displayConfirmation, setDisplayConfirmation] = useState(false);
@@ -94,111 +84,6 @@ export default function index({
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
 
-<<<<<<< Updated upstream
-=======
-  const hasCalendarConflict = (slotStart, slotEnd) => {
-    const start = moment(slotStart, "YYYY-MM-DD HH:mm");
-    const end = moment(slotEnd, "YYYY-MM-DD HH:mm");
-
-    const filteredCalender = calendarEvents?.filter((event) => {
-      if (event.extendedProperties?.private?.classId === classId) {
-        return false;
-      }
-
-      const eventStart = moment.parseZone(event.start.dateTime);
-      const eventEnd = moment.parseZone(event.end.dateTime);
-      const eventStartLocal = moment.tz(eventStart, event.start.timeZone).tz(timeZone).format("YYYY-MM-DD HH:mm");
-      const eventEndLocal = moment.tz(eventEnd, event.end.timeZone).tz(timeZone).format("YYYY-MM-DD HH:mm");
-      const startLocal = moment(start).format("YYYY-MM-DD HH:mm");
-      const endLocal = moment(end).format("YYYY-MM-DD HH:mm");
-      const hasOverlap =
-        (startLocal < eventEndLocal && endLocal > eventStartLocal) ||
-        (eventStartLocal < endLocal && eventEndLocal > startLocal);
-
-
-      return hasOverlap;
-    });
-
-    return filteredCalender?.length > 0;
-  };
-
-  useEffect(() => {
-    const fetchInstructorData = async () => {
-      if (!instructorId) {
-        console.error("Instructor ID is not provided");
-        return;
-      }
-      try {
-        const instructorDocRef = doc(db, "Users", instructorId);
-        const instructorDoc = await getDoc(instructorDocRef);
-        if (instructorDoc.exists()) {
-          const data = instructorDoc.data();
-          setInstructorData(data);
-          if (data.googleCalendar?.accessToken) {
-            const response = await fetch(
-              `/api/calendar/events?userId=${encodeURIComponent(instructorId)}`,
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (response.ok) {
-              const events = await response.json();
-              setCalendarEvents(events);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching instructor data:", error);
-      }
-    };
-
-    fetchInstructorData();
-  }, [instructorId]);
-
-  const handleVoucher = async () => {
-    try {
-      if (!voucher) {
-        setError("Please enter a voucher code");
-        return;
-      }
-
-      const vouchersRef = collection(db, "vouchers");
-      const q = query(vouchersRef, where("code", "==", voucher));
-
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        setError("Invalid voucher code");
-        return;
-      }
-
-      const voucherData = querySnapshot.docs[0].data();
-      const currentDate = new Date();
-
-      if (currentDate > voucherData.expiryDate?.toDate()) {
-        setError("Voucher has expired");
-        return;
-      }
-
-      if (voucherData.usageLimit <= 0) {
-        setError("Voucher usage limit reached");
-        return;
-      }
-
-      setDiscount(voucherData.discountValue);
-      setDiscountType(voucherData.discountType || "percentage");
-      setVoucherVerified(true);
-      setError(null);
-      toast.success("Voucher applied successfully!");
-    } catch (error) {
-      console.error("Error verifying voucher:", error);
-      setError("Error verifying voucher");
-    }
-  };
->>>>>>> Stashed changes
   useEffect(() => {
     const getPackages = async () => {
       if (!user || !user.uid || !classId) return;
@@ -480,23 +365,21 @@ export default function index({
   useEffect(() => {
     const calculateRemainingGroupedSlots = (selectSlot) => {
       const filteredBookings = bookedSlots.filter(
-        (booking) =>
-          booking.startTime === selectSlot.startTime &&
-          booking.date === selectSlot.date
-      );
+          (booking) =>
+            booking.startTime === selectSlot.startTime &&
+            booking.date === selectSlot.date
+        );
 
-      const bookingSizes = filteredBookings.map(
-        (booking) => booking.groupSize || 1
-      );
+        const bookingSizes = filteredBookings.map(
+          (booking) => booking.groupSize || 1
+        );
 
-      const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
-      const remainingSlots = Math.max(
-        (classData?.groupSize || 0) - totalBooked,
-        0
-      );
-      console.log(remainingSlots);
-      return remainingSlots;
-    };
+        const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
+        const remainingSlots = Math.max((classData?.groupSize || 0) - totalBooked, 0);
+        console.log(remainingSlots)
+        return remainingSlots;
+      };
+  
 
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
@@ -599,19 +482,6 @@ export default function index({
             moment.utc(booked.startTime, "HH:mm").isSame(slotStart)
         );
 
-        const slotStartDateTime = moment(
-          `${dateStr} ${slotStart.format("HH:mm")}`,
-          "YYYY-MM-DD HH:mm"
-        );
-        const slotEndDateTime = moment(
-          `${dateStr} ${nextSlot.format("HH:mm")}`,
-          "YYYY-MM-DD HH:mm"
-        );
-
-        const hasConflict = hasCalendarConflict(
-          slotStartDateTime,
-          slotEndDateTime
-        );
         const isBooked = bookingsForSlot.length > 0;
         const groupBooked = bookingsForSlot.filter(
           (b) => b.classId && b.classId === classId
@@ -621,13 +491,12 @@ export default function index({
           .reduce((a, b) => a + b, 0);
 
         slots.push({
-          startTime: slotStart.format("HH:mm"),
-          endTime: nextSlot.format("HH:mm"),
-          date: dateStr,
-          classId: classId,
-          isBooked: isBooked || hasConflict,
-          hasConflict: hasConflict,
-        });
+            startTime: slotStart.format("HH:mm"),
+            endTime: nextSlot.format("HH:mm"),
+            date: dateStr,
+            classId: classId,
+            isBooked: isBooked
+          });
 
         slotStart.add(appointmentDuration, "minutes");
       }
@@ -640,14 +509,7 @@ export default function index({
       schedule.adjustedAvailability.length
     )
       generateSlots();
-  }, [
-    selectedDate,
-    schedule,
-    appointmentDuration,
-    bookedSlots,
-    mode,
-    calendarEvents,
-  ]);
+  }, [selectedDate, schedule, appointmentDuration, bookedSlots, mode]);
 
   const handleSlotClick = (date, slot) => {
     setSelectedSlot({ date, ...slot });
@@ -1308,21 +1170,19 @@ END:VCALENDAR`.trim();
                 const baseClasses = "p-3 border rounded";
                 const selectedClasses = "bg-[#E73F2B] text-white";
                 const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
-                const disabledClasses =
-                  "bg-gray-300 text-gray-500 cursor-not-allowed";
+                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
 
                 return (
                   <button
                     key={i}
                     disabled={slot?.isBooked}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${
-                      slot?.isBooked
-                        ? disabledClasses
-                        : isSelected
+                    className={`${baseClasses} ${slot?.isBooked
+                      ? disabledClasses
+                      : isSelected
                         ? selectedClasses
                         : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                    }`}
+                      }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1343,21 +1203,19 @@ END:VCALENDAR`.trim();
                 const baseClasses = "p-3 border rounded";
                 const selectedClasses = "bg-[#E73F2B] text-white";
                 const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
-                const disabledClasses =
-                  "bg-gray-300 text-gray-500 cursor-not-allowed";
+                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
 
                 return (
                   <button
                     key={i}
-                    disabled={slot.emptyClasses < 1}
+                    disabled={slot.emptyClasses<1}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${
-                      (slot.emptyClasses < 1 || slot?.hasConflict)
-                        ? disabledClasses
-                        : isSelected
+                    className={`${baseClasses} ${slot.emptyClasses<1
+                      ? disabledClasses
+                      : isSelected
                         ? selectedClasses
                         : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                    }`}
+                      }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1515,30 +1373,6 @@ END:VCALENDAR`.trim();
                   </p>
                 </div>
 
-<<<<<<< Updated upstream
-=======
-                {voucherVerified && (
-                  <div className="flex flex-row w-full justify-between">
-                    <strong>Voucher Discount:</strong>
-                    <p>
-                      {discountType === "percentage"
-                        ? (discount *
-                            (selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                                ((selectedPackage?.Discount ??
-                                  selectedPackage?.discountPercentage) *
-                                  selectedPackage?.Price) /
-                                  100
-                              : selectedSlot.classId
-                              ? classData.groupPrice
-                              : classData.Price)) /
-                          100
-                        : discount}
-                    </p>
-                  </div>
-                )}
-
->>>>>>> Stashed changes
                 <div className="flex flex-row w-full justify-between">
                   <p>
                     <strong>Total:</strong>
@@ -1551,26 +1385,8 @@ END:VCALENDAR`.trim();
                         selectedPackage?.Price) /
                       100
                       : selectedSlot.classId
-<<<<<<< Updated upstream
                         ? classData.groupPrice
                         : classData.Price}
-=======
-                      ? classData.groupPrice
-                      : classData.Price) -
-                      (discountType === "percentage"
-                        ? (discount *
-                            (selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                                ((selectedPackage?.Discount ??
-                                  selectedPackage?.discountPercentage) *
-                                  selectedPackage?.Price) /
-                                  100
-                              : selectedSlot.classId
-                              ? classData.groupPrice
-                              : classData.Price)) /
-                          100
-                        : discount)}
->>>>>>> Stashed changes
                   </p>
                 </div>
               </div>
@@ -1769,8 +1585,6 @@ END:VCALENDAR`.trim();
               selectedSlot={selectedSlot}
               selectedPackage={selectedPackage}
               classId={classId}
-              voucher={voucher}
-              voucherVerified={voucherVerified}
             />
           </Elements>
         </div>
@@ -1831,13 +1645,6 @@ const CheckoutForm = ({
   price,
   selectedPackage,
   classId,
-<<<<<<< Updated upstream
-=======
-  discountType,
-  discount,
-  voucher,
-  voucherVerified,
->>>>>>> Stashed changes
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -1882,17 +1689,8 @@ const CheckoutForm = ({
       selectedPackage?.Price) /
     100
     : selectedSlot.classId
-<<<<<<< Updated upstream
       ? classData.groupPrice
       : classData.Price;
-=======
-    ? classData.groupPrice
-    : classData.Price;
-
-  const offerDiscount =
-    discountType === "percentage" ? (discount * packagePrice) / 100 : discount;
-  packagePrice = packagePrice - offerDiscount;
->>>>>>> Stashed changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -2152,35 +1950,6 @@ END:VCALENDAR`.trim();
         ]
       );
 
-      // Send create-event request to Google Calendar API
-      const calendarResponse = await fetch("/api/calendar/create-event", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          booking: {
-            title: classData.Name,
-            class: classId,
-            start: startDateTime,
-            end: endDateTime,
-            location: location,
-            meetingLink: meetingLink,
-            userEmails: [
-              user?.email,
-              ...(mode === "Group" ? groupEmails : []),
-            ],
-            timeZone: timeZone ? timeZone : "America/Toronto",
-          },
-          timeZone: timeZone ? timeZone : "America/Toronto",
-          userId: bookingData.instructor_id,
-        }),
-      });
-      console.log("Calendar Response:", calendarResponse);
-      if (!calendarResponse.ok) {
-        const errorText = await calendarResponse.text();
-        console.error("Error creating calendar event:", errorText);
-      }
       if (selectedPackage?.num_sessions) {
         const docRef = await addDoc(collection(db, "Packages"), {
           payment_intent_id: paymentIntent.id,
@@ -2192,22 +1961,6 @@ END:VCALENDAR`.trim();
           classes_left: parseInt(selectedPackage?.num_sessions, 10) - (numberOfGroupMembers ? numberOfGroupMembers : 1),
         });
       }
-<<<<<<< Updated upstream
-=======
-      // In the handleSubmit function of CheckoutForm, after successful payment:
-      if (voucherVerified) {
-        const vouchersRef = collection(db, "vouchers");
-        const q = query(vouchersRef, where("code", "==", voucher));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const voucherDoc = querySnapshot.docs[0];
-          await updateDoc(voucherDoc.ref, {
-            usageLimit: increment(-1),
-          });
-        }
-      }
->>>>>>> Stashed changes
 
       setStripeOptions(null);
       setLoading(false);
