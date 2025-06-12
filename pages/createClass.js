@@ -117,10 +117,7 @@ export default function CreateClass() {
       !form.SubCategory ||
       !form.Price ||
       !form.Pricing ||
-      !form.About ||
-      !form.Experience ||
-      !form.Description ||
-      !form.FunFact
+      !form.Description
     ) {
       toast.error("Please fill all fields");
       return;
@@ -746,7 +743,7 @@ export default function CreateClass() {
             </DndContext>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Experience</label>
+                <label className="text-lg font-bold">Experience (Optional)</label>
                 <textarea
                   required
                   name="experience"
@@ -759,14 +756,11 @@ export default function CreateClass() {
                     setForm({ ...form, Experience: e.target.value })}
                   }
                 />
-                {formik.touched.experience && formik.errors.experience && (
-                  <div className="text-red-500 text-sm">{formik.errors.experience}</div>
-                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">About</label>
+                <label className="text-lg font-bold">About (Optional)</label>
                 <textarea
                   required
                   name="about"
@@ -778,14 +772,11 @@ export default function CreateClass() {
                     formik.handleChange(e);
                     setForm({ ...form, About: e.target.value })}}
                 />
-                {formik.touched.about && formik.errors.about && (
-                  <div className="text-red-500 text-sm">{formik.errors.about}</div>
-                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Fun Fact</label>
+                <label className="text-lg font-bold">Fun Fact (Optional)</label>
                 <textarea
                   required
                   name="funfact"
@@ -798,9 +789,6 @@ export default function CreateClass() {
                     setForm({ ...form, FunFact: e.target.value })}
                   }
                 />
-                {formik.touched.funfact && formik.errors.funfact && (
-                  <div className="text-red-500 text-sm">{formik.errors.funfact}</div>
-                )}
               </div>
             </div>
 
