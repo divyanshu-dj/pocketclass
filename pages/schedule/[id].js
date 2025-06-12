@@ -787,6 +787,7 @@ export default function Schedule() {
                         </svg>
                     </div>
                 </div>
+                <h2>{classes.Name}</h2>
 
                 <div>
                     <select
@@ -1584,47 +1585,50 @@ export default function Schedule() {
                             className="w-full border rounded p-2"
                         />
                     </div>
-
-                    <button
-                        onClick={() =>
-                            saveSchedule(db, user, generalAvailability, adjustedAvailability)
-                        }
-                        disabled={scheduleLoading}
-                        className={` px-4 py-2 bg-logo-red text-white rounded-md hover:bg-red-600`}
-                    >
-                        {scheduleLoading ? "Saving..." : "Save Schedule"}
-                    </button>
                 </div>
                 <div className="flex-grow p-4">
-                    <BigCalendar
-                        selectable
-                        timeslots={2}
-                        timeStep={30}
-                        defaultView={view}
-                        localizer={localizer}
-                        events={
-                            temporaryEvent
-                                ? [...events.filter(e => !e.isVacation), temporaryEvent]
-                                : events.filter(e => !e.isVacation)
-                        }
-                        startAccessor="start"
-                        endAccessor="end"
-                        style={{ height: "calc(100vh - 150px)" }}
-                        formats={customFormats}
-                        eventPropGetter={(event) => ({
-                            style: {
-                                backgroundColor: event.color,
-                                fontSize: '12px'
-                            },
-                        })}
-                        views={['month', 'week', 'day']}
-                        onView={(view) => setCurrentView(view)}
-                        components={{ toolbar: CustomToolbar }}
-                        onSelectSlot={handleSlotSelect}
-                        scrollToTime={new Date(1970, 1, 1, 8, 0, 0)}
-                        tooltipAccessor="tooltip"
-                        onSelectEvent={handleEventClick} // Event click handler
-                    />
+                    <div className="overflow-auto">
+                        <BigCalendar
+                            selectable
+                            timeslots={2}
+                            timeStep={30}
+                            defaultView={view}
+                            localizer={localizer}
+                            events={
+                                temporaryEvent
+                                    ? [...events.filter(e => !e.isVacation), temporaryEvent]
+                                    : events.filter(e => !e.isVacation)
+                            }
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: "calc(100vh - 150px)" }}
+                            formats={customFormats}
+                            eventPropGetter={(event) => ({
+                                style: {
+                                    backgroundColor: event.color,
+                                    fontSize: '12px'
+                                },
+                            })}
+                            views={['month', 'week', 'day']}
+                            onView={(view) => setCurrentView(view)}
+                            components={{ toolbar: CustomToolbar }}
+                            onSelectSlot={handleSlotSelect}
+                            scrollToTime={new Date(1970, 1, 1, 8, 0, 0)}
+                            tooltipAccessor="tooltip"
+                            onSelectEvent={handleEventClick} // Event click handler
+                        />
+                        <div className='w-full flex justify-end'>
+                            <button
+                                onClick={() =>
+                                    saveSchedule(db, user, generalAvailability, adjustedAvailability)
+                                }
+                                disabled={scheduleLoading}
+                                className={` px-4 py-2 bg-logo-red text-white mt-4 mb-2 scheduleButton absolute rounded-md hover:bg-red-600`}
+                            >
+                                {scheduleLoading ? "Saving..." : "Save Schedule"}
+                            </button>
+                        </div>
+                    </div>
                     {showPopup && selectedSlot && (
                         <div
                             className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-10 z-50 flex items-center justify-center"

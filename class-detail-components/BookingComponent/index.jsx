@@ -412,6 +412,24 @@ export default function index({
 
   // Generate slots
   useEffect(() => {
+    const calculateRemainingGroupedSlots = (selectSlot) => {
+      const filteredBookings = bookedSlots.filter(
+          (booking) =>
+            booking.startTime === selectSlot.startTime &&
+            booking.date === selectSlot.date
+        );
+
+        const bookingSizes = filteredBookings.map(
+          (booking) => booking.groupSize || 1
+        );
+
+        const totalBooked = bookingSizes.reduce((a, b) => a + b, 0);
+        const remainingSlots = Math.max((classData?.groupSize || 0) - totalBooked, 0);
+        console.log(remainingSlots)
+        return remainingSlots;
+      };
+  
+
     const generateSlots = () => {
       const { generalAvailability, adjustedAvailability } = schedule;
       if (!selectedDate) return;
@@ -491,7 +509,9 @@ export default function index({
 
       groupSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
       individualSlots.sort((a, b) => a.startTime.localeCompare(b.startTime));
-
+      groupSlots.forEach((s) => {
+        s.emptyClasses = calculateRemainingGroupedSlots(s);
+      });
       setGroupedSlots(groupSlots);
       setIndividualSlots(individualSlots);
     };
@@ -518,22 +538,14 @@ export default function index({
         const groupBookedSize = groupBooked
           .map((b) => (b.groupSize ? b.groupSize : 1))
           .reduce((a, b) => a + b, 0);
-        if (
-          classId &&
-          bookingsForSlot[0]?.classId &&
-          !(bookingsForSlot[0]?.classId === classId)
-        ) {
-        } else if (
-          !isBooked ||
-          (classId && groupBookedSize < classData.groupSize)
-        ) {
-          slots.push({
+
+        slots.push({
             startTime: slotStart.format("HH:mm"),
             endTime: nextSlot.format("HH:mm"),
             date: dateStr,
             classId: classId,
+            isBooked: isBooked
           });
-        }
 
         slotStart.add(appointmentDuration, "minutes");
       }
@@ -1232,42 +1244,66 @@ END:VCALENDAR`.trim();
                 Individual Classes (1-on-1s)
               </div>
             )}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-              {individualSlots.map((slot, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSlotClick(slot.date, slot)}
-                  className={`p-3 border rounded cursor-pointer ${
-                    selectedSlot?.startTime === slot.startTime &&
-                    selectedSlot?.date === slot.date
-                      ? "bg-[#E73F2B] text-white"
-                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
-                  }`}
-                >
-                  {slot.startTime} - {slot.endTime}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              {individualSlots.map((slot, i) => {
+                const isSelected =
+                  selectedSlot?.startTime === slot.startTime &&
+                  selectedSlot?.date === slot.date;
+
+                const baseClasses = "p-3 border rounded";
+                const selectedClasses = "bg-[#E73F2B] text-white";
+                const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
+                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
+
+                return (
+                  <button
+                    key={i}
+                    disabled={slot?.isBooked}
+                    onClick={() => handleSlotClick(slot.date, slot)}
+                    className={`${baseClasses} ${slot?.isBooked
+                      ? disabledClasses
+                      : isSelected
+                        ? selectedClasses
+                        : `bg-gray-100 cursor-pointer ${hoverClasses}`
+                      }`}
+                  >
+                    {slot.startTime} - {slot.endTime}
+                  </button>
+                );
+              })}
             </div>
             {groupedSlots.length > 0 && (
               <div className="text-gray-700 font-semibold pb-3 rounded">
                 Grouped Class (Max. Num. of Students: {classData.groupSize})
               </div>
             )}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {groupedSlots.map((slot, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSlotClick(slot.date, slot)}
-                  className={`p-3 border rounded cursor-pointer ${
-                    selectedSlot?.startTime === slot.startTime &&
-                    selectedSlot?.date === slot.date
-                      ? "bg-[#E73F2B] text-white"
-                      : "bg-gray-100 hover:bg-[#E73F2B] hover:text-white"
-                  }`}
-                >
-                  {slot.startTime} - {slot.endTime}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              {groupedSlots.map((slot, i) => {
+                const isSelected =
+                  selectedSlot?.startTime === slot.startTime &&
+                  selectedSlot?.date === slot.date;
+
+                const baseClasses = "p-3 border rounded";
+                const selectedClasses = "bg-[#E73F2B] text-white";
+                const hoverClasses = "hover:bg-[#E73F2B] hover:text-white";
+                const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
+
+                return (
+                  <button
+                    key={i}
+                    disabled={slot.emptyClasses<1}
+                    onClick={() => handleSlotClick(slot.date, slot)}
+                    className={`${baseClasses} ${slot.emptyClasses<1
+                      ? disabledClasses
+                      : isSelected
+                        ? selectedClasses
+                        : `bg-gray-100 cursor-pointer ${hoverClasses}`
+                      }`}
+                  >
+                    {slot.startTime} - {slot.endTime}
+                  </button>
+                );
+              })}
             </div>
             {groupedSlots.length == 0 && individualSlots.length == 0 && (
               <div className="flex flex-col items-center">
