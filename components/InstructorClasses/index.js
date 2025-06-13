@@ -56,7 +56,7 @@ const InstructorClasses = ({ classes, bookings, bookingsByMe, reviews }) => {
 
   const groupedBookingsByMe = bookingsByMe.reduce((acc, appointment) => {
     const existing = acc.find(
-      (group) => group.startTime === appointment.startTime
+      (group) => group.startTime >= appointment.startTime
     );
     if (existing) {
       existing.bookingId.push(appointment.id);
@@ -110,7 +110,7 @@ const InstructorClasses = ({ classes, bookings, bookingsByMe, reviews }) => {
       >
         <Tabs.TabPane tab="Bookings" key="Bookings" />
         <Tabs.TabPane tab="Classes" key="Classes" />
-        <Tabs.TabPane tab="Bookings By Me" key="bookingsByMe" />
+        <Tabs.TabPane tab="Upcoming Bookings" key="bookingsByMe" />
       </Tabs>
 
       <div className="max-w-[1450px] mx-auto mb-4">
