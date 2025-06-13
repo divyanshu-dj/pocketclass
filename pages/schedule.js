@@ -806,15 +806,24 @@ export default function Schedule() {
           {userData &&
           userData.googleCalendar &&
           userData.googleCalendar.accessToken ? (
-            <div className="mb-4 border-green-500 text-green-500">Google Calendar Connected!</div>
+            <div className="flex items-center mb-4 px-4 py-2 border border-green-500 text-green-600 bg-green-50 rounded-md space-x-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v15c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 17H5V10h14v10zm0-12H5V5h14v3z" />
+              </svg>
+              <span className="font-medium">Google Calendar Connected!</span>
+            </div>
           ) : (
             <a
               href="/api/googleCalendar"
-              className="hidden lg:block bg-blue-500 text-white px-4 py-2 rounded-md my-4"
+              className="hidden lg:inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md my-4 shadow transition duration-200 w-full"
             >
-              Connect Google Calendar
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v15c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 17H5V10h14v10zm0-12H5V5h14v3z" />
+              </svg>
+              <span className="font-medium">Connect Google Calendar</span>
             </a>
           )}
+
           <h2 className="text-2xl font-bold text-gray-700 mb-3">
             Appointment Duration
           </h2>
