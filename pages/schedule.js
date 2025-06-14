@@ -815,12 +815,10 @@ export default function Schedule() {
           ) : (
             <a
               href="/api/googleCalendar"
-              className="hidden lg:inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md my-4 shadow transition duration-200 w-full"
+              className="hidden lg:inline-flex items-center space-x-2 border-gray-400 border text-gray-600 px-4 py-2 rounded-md my-4 shadow transition duration-200 hover:border-blue-600"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v15c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 17H5V10h14v10zm0-12H5V5h14v3z" />
-              </svg>
-              <span className="font-medium">Connect Google Calendar</span>
+              <img className="w-5 h-5" src="/Google_Calendar_icon.svg" alt="Google Icon" />
+              <span className="font-medium">Connect to <b>Google Calendar</b></span>
             </a>
           )}
 

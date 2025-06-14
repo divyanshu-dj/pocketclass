@@ -91,7 +91,6 @@ export default function index({
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
 
-
   const hasCalendarConflict = (slotStart, slotEnd) => {
     const start = moment(slotStart, "YYYY-MM-DD HH:mm");
     const end = moment(slotEnd, "YYYY-MM-DD HH:mm");
@@ -103,14 +102,19 @@ export default function index({
 
       const eventStart = moment.parseZone(event.start.dateTime);
       const eventEnd = moment.parseZone(event.end.dateTime);
-      const eventStartLocal = moment.tz(eventStart, event.start.timeZone).tz(timeZone).format("YYYY-MM-DD HH:mm");
-      const eventEndLocal = moment.tz(eventEnd, event.end.timeZone).tz(timeZone).format("YYYY-MM-DD HH:mm");
+      const eventStartLocal = moment
+        .tz(eventStart, event.start.timeZone)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm");
+      const eventEndLocal = moment
+        .tz(eventEnd, event.end.timeZone)
+        .tz(timeZone)
+        .format("YYYY-MM-DD HH:mm");
       const startLocal = moment(start).format("YYYY-MM-DD HH:mm");
       const endLocal = moment(end).format("YYYY-MM-DD HH:mm");
       const hasOverlap =
         (startLocal < eventEndLocal && endLocal > eventStartLocal) ||
         (eventStartLocal < endLocal && eventEndLocal > startLocal);
-
 
       return hasOverlap;
     });
@@ -1102,10 +1106,11 @@ END:VCALENDAR`.trim();
           clearInterval(interval);
           setStripeOptions(null);
           toast.error("Booking session expired. Please try again.");
+          setStripeLoading(false);
         }
         return 0;
-      }, 1000);
-    });
+      });
+    }, 1000); 
 
     const bookingData = {
       student_id: studentId,
@@ -1385,7 +1390,7 @@ END:VCALENDAR`.trim();
                     disabled={slot.emptyClasses < 1}
                     onClick={() => handleSlotClick(slot.date, slot)}
                     className={`${baseClasses} ${
-                      (slot.emptyClasses < 1 || slot?.hasConflict)
+                      slot.emptyClasses < 1 || slot?.hasConflict
                         ? disabledClasses
                         : isSelected
                         ? selectedClasses
@@ -1573,7 +1578,8 @@ END:VCALENDAR`.trim();
                           {discountType === "percentage"
                             ? `${discount}%`
                             : `$${discount}`}
-                        </strong>{" "} off
+                        </strong>{" "}
+                        off
                       </p>
                     </div>
                   </div>
@@ -2310,10 +2316,7 @@ END:VCALENDAR`.trim();
             end: endDateTime,
             location: location,
             meetingLink: meetingLink,
-            userEmails: [
-              user?.email,
-              ...(mode === "Group" ? groupEmails : []),
-            ],
+            userEmails: [user?.email, ...(mode === "Group" ? groupEmails : [])],
             timeZone: timeZone ? timeZone : "America/Toronto",
           },
           timeZone: timeZone ? timeZone : "America/Toronto",

@@ -1,7 +1,7 @@
 export default function handler(req, res) {
   try {
     const client_id = process.env.CLIENT_ID;
-    const redirect_uri = "http://localhost:3000/api/calendarCallback";
+    const redirect_uri = "https://www.pocketclass.ca/api/calendarCallback";
     const scope = encodeURIComponent(
       "https://www.googleapis.com/auth/calendar"
     );
