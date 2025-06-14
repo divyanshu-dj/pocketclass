@@ -1016,10 +1016,11 @@ END:VCALENDAR`.trim();
           clearInterval(interval);
           setStripeOptions(null);
           toast.error("Booking session expired. Please try again.");
+          setStripeLoading(false);
         }
         return 0;
-      }, 1000);
-    });
+      });
+    }, 1000); 
 
     const bookingData = {
       student_id: studentId,
