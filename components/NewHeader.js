@@ -352,7 +352,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
                     )}
 
                     {showDropDown && (
-                      <div className="dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 z-50">
+                      <div className="dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 z-55">
                         <ul>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
@@ -468,13 +468,12 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
         </div>
 
         {/*NavBar Search Part*/}
-        <div className={`${user ? 'translate-y-[-10px]' : ''} transition duration-500`}>
-          <TeacherSearch
+        <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
             expandMenu={() => setIsMenuShrunk(false)}
-          />
-        </div>
+            user={user}
+        />
       </div>
     </>
   );
