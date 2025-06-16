@@ -1,7 +1,9 @@
 export default function handler(req, res) {
   try {
     const client_id = process.env.CLIENT_ID;
-    const redirect_uri = "https://www.pocketclass.ca/api/calendarCallback";
+    const redirect_uri =
+      "https://pocketclass-git-features-g-678fca-andrew-lius-projects-661c4054.vercel.app/api/calendarCallback";
+    // const redirect_uri = "https://www.pocketclass.ca/api/calendarCallback";
     const scope = encodeURIComponent(
       "https://www.googleapis.com/auth/calendar"
     );
