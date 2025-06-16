@@ -257,7 +257,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
           </div>
         )}
 
-      <div className={`flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full z-50 transition-all duration-500 ${isMenuShrunk ? 'h-[90px] md:h-[100px]': (`${isMenuSmall ? 'h-auto md:h-[100px]' : 'h-auto'}`)}`}>
+      <div className={`flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full z-50 transition-all duration-500 ${isMenuShrunk ? 'h-[90px] dm2:h-[100px]': (`${isMenuSmall ? 'h-auto dm2:h-[100px]' : 'h-auto'}`)}`}>
         {/*NavBar Top Part*/}
         <div className="top-0 max-md:pt-4 max-md:pb-3 py-6 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing">
           <Link className="cursor-pointer" href="/">
@@ -269,7 +269,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
 
           {/* Category Buttons */}
              <div className="hidden md:block">
-               <div className={`transition duration-500 ${isMenuShrunk || isMenuSmall ? '-translate-y-[200%]' : ''}`}>
+               <div className={`transition duration-500 ${isMenuShrunk || isMenuSmall ? '-translate-y-[600%]' : ''}`}>
                  <div className="flex space-x-2.5 items-center">
                    {categoryData.map((category) => (
                        <div key={category.name}>
@@ -468,11 +468,13 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
         </div>
 
         {/*NavBar Search Part*/}
-        <TeacherSearch
+        <div className={`${user ? 'translate-y-[-10px]' : ''} transition duration-500`}>
+          <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
             expandMenu={() => setIsMenuShrunk(false)}
-        />
+          />
+        </div>
       </div>
     </>
   );

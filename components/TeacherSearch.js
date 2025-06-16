@@ -232,9 +232,9 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu }) => {
   };
 
   return (
-    <div className={`menu-search-bar relative z-50 w-full transition-all duration-500 mx-auto max-md:px-3 ${
+    <div className={`menu-search-bar relative z-50 w-full transition-all duration-500 mx-auto max-dm2:px-3 ${
       isShrunk ? 'max-w-[230px] h-[50px] translate-y-[-75px]' : 
-      `${isMenuSmall ? 'max-w-[400px] h-[54px] md:translate-y-[-75px]' : 'max-md:h-[54px] max-w-[650px]'}`
+      `${isMenuSmall ? 'max-w-[400px] h-[54px] dm2:translate-y-[-75px]' : 'max-dm2:h-[54px] max-w-[650px]'}`
     }`}>
       <div className="relative h-full" ref={dropdownRef}>
         <div className="absolute top-0 left-0 w-full h-full">
@@ -245,7 +245,7 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu }) => {
         <div ref={containerRef} className="search-bar-wrapper transition-all">
           {!isShrunk && (
             <div
-              className={`active-bg ${isMenuSmall ? 'h-[52px]' : 'h-[52px] md:h-[62px]'}`}
+              className={`active-bg ${isMenuSmall ? 'h-[52px]' : 'h-[52px] dm2:h-[62px]'}`}
               style={{
                 left: activeStyle.left,
                 width: activeStyle.width,
