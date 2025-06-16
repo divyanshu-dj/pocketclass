@@ -257,9 +257,9 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
           </div>
         )}
 
-      <div className={`flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full z-50 transition-all duration-500 ${isMenuShrunk ? 'h-[90px] dm2:h-[100px]': (`${isMenuSmall ? 'h-auto dm2:h-[100px]' : 'h-auto'}`)}`}>
+      <div className={`flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-500 ${isMenuShrunk ? 'h-[90px] dm2:h-[100px]': (`${isMenuSmall ? 'h-auto dm2:h-[100px]' : 'h-auto'}`)}`}>
         {/*NavBar Top Part*/}
-        <div className="top-0 max-md:pt-4 max-md:pb-3 py-6 z-40 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing">
+        <div className="top-0 max-md:pt-4 max-md:pb-3 py-6 dm2:z-50 z-[900] box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing">
           <Link className="cursor-pointer" href="/">
             <img
               src="/assets/image_5c0480a2.png"
@@ -337,7 +337,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
                   {user && <Notifications user={user} />}
 
                   <div
-                    className="relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer z-[50]"
+                    className="relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer dm2:z-50 z-[900]"
                     onClick={toggleDropDown}
                   >
                     <MenuIcon className="h-6 cursor-pointer ml-1" />
@@ -352,7 +352,7 @@ const NewHeader = ({ isHome = true, activeCategory, handleCategorySelection }) =
                     )}
 
                     {showDropDown && (
-                      <div className="dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 z-55">
+                      <div className="dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 z-[700]">
                         <ul>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
