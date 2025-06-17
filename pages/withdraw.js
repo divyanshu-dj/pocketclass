@@ -1,4 +1,25 @@
 import React, { useEffect, useFetch } from "react";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 import PaymentSelect from "./../components/PaymentSelect";
 import dynamic from "next/dynamic";
@@ -49,6 +70,18 @@ function Balance({ }) {
   const [currencySelected, setCurrencySelected] = React.useState("cad");
   const [pendingAmount, setPendingAmount] = React.useState(0);
   const [bookingsData, setBookingsData] = React.useState(null);
+  const [chartData, setChartData] = React.useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Funds Transferred',
+        data: [],
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }
+    ]
+  });
+
   const fetchEverthing = async () => {
     toast.loading("Loading Balance and Details...");
     //get account from the firebase
@@ -248,6 +281,26 @@ function Balance({ }) {
     setFuturePayments(totalFuturePayments / 100);
     setBookingsData(bookingsData);
     setPendingPayments(totalPendingAmount / 100);
+
+    // Update chart data when bookings data is processed
+    if (bookingsData) {
+      const sortedBookings = [...bookingsData].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+      const labels = sortedBookings.map(booking => moment(booking.startTime).format('MMM DD'));
+      const data = sortedBookings.map(booking => booking.pendingAmount / 100);
+
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: 'Funds Transferred',
+            data,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }
+        ]
+      });
+    }
+
     Promise.all([getBalanceObject, banks, payouts, getHistory]).finally(() => {
       toast.dismiss();
     });
@@ -352,9 +405,33 @@ function Balance({ }) {
 
               <div className="p-6 pt-2">
                 <form action="">
-                  <div className="space-y-4 md:space-y-0 md:space-x-4 ">
-                    <div className="flex flex-row gap-4 flex-wrap justify-between  bg-white p-6 ">
-                      <div className="flex-grow bg-gray-100 p-4 py-3 rounded-lg">
+                  <div className="flex flex-col gap-4 items-center md:flex-row">
+                    {/* Chart Section - Takes 2/3 of the space */}
+                    <div className="w-full md:w-2/3 bg-white p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Funds Transfer History</h3>
+                      <div className="h-[300px]">
+                        <Line 
+                          data={chartData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: {
+                                position: 'top',
+                              },
+                              title: {
+                                display: true,
+                                text: 'Funds Transferred Over Time'
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Funds Section - Takes 1/3 of the space */}
+                    <div className="w-full md:w-1/3 flex flex-col gap-4">
+                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
                         <p className="text-sm font-semibold mb-1 text-gray-700">
                           Pending Funds
                         </p>
@@ -362,7 +439,7 @@ function Balance({ }) {
                           {"$" + futurePayments}
                         </h3>
                       </div>
-                      <div className="flex-grow bg-gray-100 p-4 py-3 rounded-lg">
+                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
                         <p className="text-sm font-semibold mb-1 text-gray-700">
                           Available Funds
                         </p>
@@ -370,7 +447,7 @@ function Balance({ }) {
                           {"$" + pendingPayments}
                         </h3>
                       </div>
-                      <div className="flex-grow bg-gray-100 p-4 py-3 rounded-lg">
+                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
                         <p className="text-sm font-semibold mb-1 text-gray-700">
                           Sent to Stripe
                         </p>
@@ -379,14 +456,15 @@ function Balance({ }) {
                         </h3>
                       </div>
                     </div>
-                    {/* A Notification saying "Incoming Payments" will be processed at End of Day */}
-                    <div className="bg-logo-red text-white px-4 py-2 rounded-lg">
-                      <div className="flex items-center text-base">
-                        <InformationCircleIcon className="h-5 w-5 mr-2" />
-                        <p>
-                          Available Funds will be sent to Stripe at the end of the day(12 AM UTC).
-                        </p>
-                      </div>
+                  </div>
+
+                  {/* Notification Section */}
+                  <div className="mt-4 bg-logo-red text-white px-4 py-2 rounded-lg">
+                    <div className="flex items-center text-base">
+                      <InformationCircleIcon className="h-5 w-5 mr-2" />
+                      <p>
+                        Available Funds will be sent to Stripe at the end of the day(12 AM UTC).
+                      </p>
                     </div>
                   </div>
                 </form>
