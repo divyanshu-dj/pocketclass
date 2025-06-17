@@ -433,6 +433,14 @@ function Balance({ }) {
                     <div className="w-full md:w-1/3 flex flex-col gap-4">
                       <div className="bg-gray-100 p-4 py-3 rounded-lg">
                         <p className="text-sm font-semibold mb-1 text-gray-700">
+                          Total Funds
+                        </p>
+                        <h3 className="text-2xl font-bold text-blue-500">
+                          {"$" + (futurePayments + pendingPayments + accountBalance)}
+                        </h3>
+                      </div>
+                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
+                        <p className="text-sm font-semibold mb-1 text-gray-700">
                           Pending Funds
                         </p>
                         <h3 className="text-2xl font-bold text-gray-500">
