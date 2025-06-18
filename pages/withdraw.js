@@ -10,6 +10,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 ChartJS.register(
   CategoryScale,
@@ -70,6 +73,8 @@ function Balance({ }) {
   const [currencySelected, setCurrencySelected] = React.useState("cad");
   const [pendingAmount, setPendingAmount] = React.useState(0);
   const [bookingsData, setBookingsData] = React.useState(null);
+  const [currentMonthEarnings, setCurrentMonthEarnings] = React.useState(0);
+  const [previousMonthEarnings, setPreviousMonthEarnings] = React.useState(0);
   const [chartData, setChartData] = React.useState({
     labels: [],
     datasets: [
@@ -282,6 +287,22 @@ function Balance({ }) {
     setBookingsData(bookingsData);
     setPendingPayments(totalPendingAmount / 100);
 
+    // Calculate monthly earnings
+    const now = moment();
+    const thirtyDaysAgo = moment().subtract(30, 'days');
+    const sixtyDaysAgo = moment().subtract(60, 'days');
+
+    const currentMonthTotal = bookingsData
+      .filter(booking => moment(booking.startTime).isBetween(thirtyDaysAgo, now))
+      .reduce((sum, booking) => sum + (booking.pendingAmount || 0), 0);
+
+    const previousMonthTotal = bookingsData
+      .filter(booking => moment(booking.startTime).isBetween(sixtyDaysAgo, thirtyDaysAgo))
+      .reduce((sum, booking) => sum + (booking.pendingAmount || 0), 0);
+
+    setCurrentMonthEarnings(currentMonthTotal / 100);
+    setPreviousMonthEarnings(previousMonthTotal / 100);
+
     // Update chart data when bookings data is processed
     if (bookingsData) {
       const sortedBookings = [...bookingsData].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
@@ -363,6 +384,64 @@ function Balance({ }) {
     }
   };
 
+  const exportToXLSX = () => {
+    const data = bookingsData.map(booking => ({
+      Date: moment(booking.startTime).format("DD-MM-YY / hh:mm A"),
+      Amount: `$${(booking.pendingAmount / 100).toFixed(2)}`,
+      Type: moment(booking.startTime).format("YY DD MM") === moment().format("YY DD MM") && !booking.isTransfered
+        ? "Available"
+        : booking.isTransfered
+          ? "Sent to Stripe"
+          : "Pending"
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+    XLSX.writeFile(wb, "transactions.xlsx");
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text("Transaction History", 14, 15);
+    
+    // Add date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${moment().format("DD-MM-YYYY HH:mm")}`, 14, 22);
+
+    const data = bookingsData.map(booking => [
+      moment(booking.startTime).format("DD-MM-YY / hh:mm A"),
+      `$${(booking.pendingAmount / 100).toFixed(2)}`,
+      moment(booking.startTime).format("YY DD MM") === moment().format("YY DD MM") && !booking.isTransfered
+        ? "Available"
+        : booking.isTransfered
+          ? "Sent to Stripe"
+          : "Pending"
+    ]);
+
+    doc.autoTable({
+      head: [['Date', 'Amount', 'Type']],
+      body: data,
+      startY: 30,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold',
+      },
+    });
+
+    doc.save("transactions.pdf");
+  };
+
   return (
     <>
       <div className="mx-auto">
@@ -441,18 +520,27 @@ function Balance({ }) {
                       </div>
                       <div className="bg-gray-100 p-4 py-3 rounded-lg">
                         <p className="text-sm font-semibold mb-1 text-gray-700">
+                          Earnings This Month
+                        </p>
+                        <h3 className="text-2xl font-bold text-green-500">
+                          {"$" + currentMonthEarnings.toFixed(2)}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {previousMonthEarnings > 0 ? (
+                            <span className={currentMonthEarnings >= previousMonthEarnings ? "text-green-500" : "text-red-500"}>
+                              {((currentMonthEarnings - previousMonthEarnings) / previousMonthEarnings * 100).toFixed(1)}% vs last month
+                            </span>
+                          ) : (
+                            <span className="text-gray-500"></span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
+                        <p className="text-sm font-semibold mb-1 text-gray-700">
                           Pending Funds
                         </p>
                         <h3 className="text-2xl font-bold text-gray-500">
                           {"$" + futurePayments}
-                        </h3>
-                      </div>
-                      <div className="bg-gray-100 p-4 py-3 rounded-lg">
-                        <p className="text-sm font-semibold mb-1 text-gray-700">
-                          Available Funds
-                        </p>
-                        <h3 className="text-2xl font-bold text-green-500">
-                          {"$" + pendingPayments}
                         </h3>
                       </div>
                       <div className="bg-gray-100 p-4 py-3 rounded-lg">
@@ -482,9 +570,54 @@ function Balance({ }) {
           <div className="col-lg-6">
             <div className="card">
               <div className="card-header">
-                <h4 className="text-3xl font-extrabold text-center py-5">
-                  My Balance
-                </h4>
+                <div className="flex justify-between items-center">
+                  <h4 className="text-3xl font-extrabold text-center py-5">
+                    My Balance
+                  </h4>
+                  <div className="relative">
+                    <button
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
+                      onClick={() => setIsOpen(!isOpen)}
+                    >
+                      Export
+                      <svg
+                        className="w-4 h-4 ml-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {isOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            exportToXLSX();
+                            setIsOpen(false);
+                          }}
+                        >
+                          Export to XLSX
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            exportToPDF();
+                            setIsOpen(false);
+                          }}
+                        >
+                          Export to PDF
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="card-body">
                 {!bookingsData ? (
