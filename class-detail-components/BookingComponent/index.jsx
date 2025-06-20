@@ -52,7 +52,7 @@ export default function index({
   const router = useRouter();
   const { id } = router.query;
   const [timer, setTimer] = useState(null);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(true);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [schedule, setSchedule] = useState({
