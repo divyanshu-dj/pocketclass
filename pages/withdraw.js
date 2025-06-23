@@ -563,6 +563,15 @@ function Balance({ }) {
                       </p>
                     </div>
                   </div>
+                  {/* Notification: In some cases, it may take 7-10 days for your payments to be transferred after a class concludes. This delay is due to Stripe's standard payment processing timelines. */}
+                  <div className="mt-4 bg-logo-red text-white px-4 py-2 rounded-lg">
+                    <div className="flex items-center text-base">
+                      <InformationCircleIcon className="h-5 w-5 mr-2" />
+                      <p>
+                        In some cases, it may take 7-10 days for your payments to be transferred after a class concludes. This delay is due to Stripe's standard payment processing timelines.
+                      </p>
+                    </div>
+                  </div>
                 </form>
               </div>
             </div>

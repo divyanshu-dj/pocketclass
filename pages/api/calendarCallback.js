@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const code = req.query.code;
-  const redirect_uri = 'https://pocketclass-git-features-g-678fca-andrew-lius-projects-661c4054.vercel.app/api/calendarCallback';
+  const redirect_uri = 'https://www.pocketclass.ca/api/calendarCallback';
 
   try {
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
