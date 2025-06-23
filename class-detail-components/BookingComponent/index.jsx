@@ -6,6 +6,7 @@ import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { auth, db } from "../../firebaseConfig";
+import LoginModal from './LoginModal'
 import {
   doc,
   getDoc,
@@ -53,6 +54,8 @@ export default function index({
   const { id } = router.query;
   const [timer, setTimer] = useState(null);
   const [agreeToTerms, setAgreeToTerms] = useState(true);
+  const [showLogin,setShowLogin] = useState(false);
+  const [showBooking,setShowBooking] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [schedule, setSchedule] = useState({
@@ -459,6 +462,12 @@ export default function index({
 
     fetchData();
   }, [instructorId, classId]);
+
+  useEffect(() => {
+    if(showBooking){
+      document.getElementById("book-now-button").click();
+    }
+  },[showBooking])
 
   const calculateRemainingGroupedClassSlots = () => {
     const selected = moment
@@ -1024,6 +1033,7 @@ END:VCALENDAR`.trim();
     setBookLoading(false);
   };
   const initializeStripe = async () => {
+    setShowBooking(false);
     const now = moment.utc();
     if (selectedSlot.classId) {
       for (let i = 0; i < groupEmails.length; i++) {
@@ -1043,7 +1053,7 @@ END:VCALENDAR`.trim();
       }
     }
     if (!user && !userLoading) {
-      toast.error("Please login to book a slot.");
+      setShowLogin(true);
       return;
     }
 
@@ -1720,6 +1730,7 @@ END:VCALENDAR`.trim();
                   )}
                 </div>
                 <button
+                  id="book-now-button"
                   onClick={() => {
                     if (selectedSlot.classId) {
                       if (!user) {
@@ -1874,6 +1885,7 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} setShowBooking={setShowBooking}/>}
       {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -1912,6 +1924,7 @@ END:VCALENDAR`.trim();
               classId={classId}
               voucher={voucher}
               voucherVerified={voucherVerified}
+              agreeToTerms={agreeToTerms}
             />
           </Elements>
         </div>
@@ -1976,6 +1989,7 @@ const CheckoutForm = ({
   discount,
   voucher,
   voucherVerified,
+  agreeToTerms
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
