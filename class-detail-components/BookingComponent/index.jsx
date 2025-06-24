@@ -1888,7 +1888,7 @@ END:VCALENDAR`.trim();
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} setShowBooking={setShowBooking}/>}
       {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50">
           <Elements stripe={stripePromise} options={stripeOptions}>
             <CheckoutForm
               bookingRef={stripeOptions.bookingRef}
@@ -1935,7 +1935,7 @@ END:VCALENDAR`.trim();
 
 const CheckoutSkeleton = () => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center min-h-screen  bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center min-h-screen  bg-black bg-opacity-50">
       <div className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto animate-pulse">
         {/* Go Back Button Skeleton */}
         <div className="flex flex-row justify-end text-gray-300 mb-2">
