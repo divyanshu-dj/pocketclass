@@ -62,8 +62,8 @@ export default function Schedule() {
         }))
     );
     const [adjustedAvailability, setAdjustedAvailability] = useState([]);
-    const [loaded,setLoaded] = useState(false)
-    const [saveStatus,setSaveStatus] = useState('')
+    const [loaded, setLoaded] = useState(false)
+    const [saveStatus, setSaveStatus] = useState('')
     const [selectedDate, setSelectedDate] = useState(null);
     const [view, setView] = useState("week");
     const [scheduleLoading, setScheduleLoading] = useState(false);
@@ -185,11 +185,28 @@ export default function Schedule() {
         if (user) fetchBookedSlots();
     }, [user]);
 
-    useEffect(()=>{
-        if(loaded===true){
-        saveSchedule(db,user,generalAvailability,adjustedAvailability)
+    useEffect(() => {
+        if (
+            loaded === true &&
+            generalAvailability &&
+            adjustedAvailability &&
+            selectedTimeZone &&
+            typeof appointmentDuration === "number" &&
+            typeof minDays === "number" &&
+            typeof maxDays === "number" &&
+            id
+        ) {
+            saveSchedule(db, user, generalAvailability, adjustedAvailability);
         }
-    },[generalAvailability,adjustedAvailability,loaded])
+    }, [
+        generalAvailability,
+        adjustedAvailability,
+        loaded,
+        appointmentDuration,
+        selectedTimeZone,
+        minDays,
+        maxDays,
+    ]);
 
     const addVacation = () => {
         if (!vacationStartDate || !vacationEndDate) {
@@ -260,36 +277,10 @@ export default function Schedule() {
                 minDays,
                 maxDays,
             };
-
-            // 1. Save full schedule to Schedule/id
-            await setDoc(doc(db, "Schedule", id), data, { merge: true });
-            const adjustedEmptySlotDates = new Set(
-                adjustedAvailability
-                    .filter(
-                        (entry) =>
-                            Array.isArray(entry.slots) && entry.slots.length === 0
-                    )
-                    .map((entry) => entry.date)
-            );
-
-            const filteredVacations = vacationAvailability.filter(
-                (entry) =>
-                    Array.isArray(entry.slots) &&
-                    (
-                        entry.slots.length !== 0 ||  // keep if not empty
-                        adjustedEmptySlotDates.has(entry.date)  // OR keep if adjustedAvailability says it's empty
-                    )
-            );
-            // 4. Save to Schedule/user.uid
-            if (filteredVacations.length > 0) {
-                await setDoc(
-                    doc(db, "Schedule", user.uid),
-                    {
-                        adjustedAvailability: filteredVacations,
-                    },
-                    { merge: true }
-                );
+            if (!id) {
+                return
             }
+            await setDoc(doc(db, "Schedule", id), data, { merge: true });
 
             // toast.success("Schedule saved successfully");
             setScheduleLoading(false);
@@ -705,6 +696,7 @@ export default function Schedule() {
 
         // ✅ Set all generated events except vacation ones
         setEvents(newEvents);
+        setLoaded(true)
     };
 
 
