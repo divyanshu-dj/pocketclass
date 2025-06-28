@@ -277,7 +277,7 @@ function FitnessClassDetailsSection({
                 onClick={()=>{
                   router.push(`/instructor?class=${classId}&creator=${classCreatorData.userUid}`);
                 }}
-                className="w-20 h-20 md:h-[122px] md:w-[124px] max-w-[initial] object-cover rounded-full block box-border shrink-0"
+                className="cursor-pointer w-20 h-20 md:h-[122px] md:w-[124px] max-w-[initial] object-cover rounded-full block box-border shrink-0"
               />
             )}
 
@@ -287,7 +287,7 @@ function FitnessClassDetailsSection({
                   <div className="h-8 bg-gray-200 rounded w-48"></div>
                 </div>
               ) : (
-                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0" onClick={()=>{
+                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0 cursor-pointer" onClick={()=>{
                   router.push(`/instructor?class=${classId}&creator=${classCreatorData.userUid}`);
                 }}>
                   {`${classCreatorData.firstName} ${classCreatorData.lastName}`}
