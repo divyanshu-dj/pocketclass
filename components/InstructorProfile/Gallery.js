@@ -81,7 +81,7 @@ export default function MyGallery({ profileImage, coverImages = [] }) {
       <h2 className="text-2xl font-bold mb-4">My Gallery</h2>
 
       {/* Grid layout for image + 2x2 */}
-      <div className="grid sm:grid-cols-3 grid-cols-1 gap-4">
+      <div className="grid dm2:grid-cols-3 grid-cols-1 gap-4">
         {/* Profile image - fixed height */}
         <div
           onClick={() => openModal(0)}
