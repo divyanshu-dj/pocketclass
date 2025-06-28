@@ -22,6 +22,7 @@ import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
 import FAQAccordion from "../FAQAccordion";
 import Link from 'next/link';
+import {useRouter} from 'next/router';
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -34,6 +35,7 @@ function FitnessClassDetailsSection({
   classId,
   userId,
 }) {
+  const router = useRouter()
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(true);
   const [classData, setClassData] = useState(null);
@@ -272,6 +274,9 @@ function FitnessClassDetailsSection({
             ) : (
               <img
                 src={classCreatorData.profileImage}
+                onClick={()=>{
+                  router.push(`/instructor?class=${classId}&creator=${classCreatorData.userUid}`);
+                }}
                 className="w-20 h-20 md:h-[122px] md:w-[124px] max-w-[initial] object-cover rounded-full block box-border shrink-0"
               />
             )}
@@ -282,7 +287,9 @@ function FitnessClassDetailsSection({
                   <div className="h-8 bg-gray-200 rounded w-48"></div>
                 </div>
               ) : (
-                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0">
+                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0" onClick={()=>{
+                  router.push(`/instructor?class=${classId}&creator=${classCreatorData.userUid}`);
+                }}>
                   {`${classCreatorData.firstName} ${classCreatorData.lastName}`}
                 </p>
               )}
