@@ -52,8 +52,8 @@ export default function UpdateClass() {
     const [loadingInstructor, setLoadingInstructor] = useState(true);
 
     const router = useRouter();
-    const { class:classId } = router.query;
-    const { creator:id } = router.query;
+    const { class: classId } = router.query;
+    const { creator: id } = router.query;
 
     const openChat = async () => {
         if (!user) return toast.warning("Please login to chat");
@@ -193,14 +193,6 @@ export default function UpdateClass() {
         fetchInstructor();
     }, [id]);
 
-    if (userLoading || !user) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <Image src="/Rolling-1s-200px.svg" width={60} height={60} alt="Loading" />
-            </div>
-        );
-    }
-
     return (
         <div>
             <Head>
@@ -231,11 +223,11 @@ export default function UpdateClass() {
 
             {loadingInstructor ? (
                 <div className="max-w-6xl mx-auto px-4 animate-pulse h-20 bg-gray-200 rounded my-6" />
-            ) : (
+            ) : instructor?.profileDescription ? (
                 <div className="max-w-6xl mx-auto px-4 mt-6">
                     <InstructorBio classData={instructor} />
                 </div>
-            )}
+            ) : null}
 
             {loadingClasses ? (
                 <div className="max-w-6xl mx-auto px-4 animate-pulse h-40 bg-gray-200 rounded my-6" />
@@ -271,12 +263,12 @@ export default function UpdateClass() {
                             />
                         ))}
                     </div>
-                ) : (
+                ) : reviews.length > 0 ? (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Full Reviews</h2>
                         <ReviewCard reviewsToShown={reviews} />
                     </div>
-                )}
+                ) : null}
             </div>
 
             <div className="relative -top-10 z-0">
