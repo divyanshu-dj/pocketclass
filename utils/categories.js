@@ -3,6 +3,7 @@ export const categories = [
     name: "Sport",
     imagePath: "/assets/sport.png",
     videoPath: "/assets/sport_icons.mp4",
+    jsonPath: "/assets/Sports.json",
     subCategories: [
       {
         name: "Golf",
@@ -66,6 +67,7 @@ export const categories = [
     name: "Music",
     imagePath: "/assets/music.png",
     videoPath: "/assets/music_icons.mp4",
+    jsonPath: "/assets/Music.json",
     subCategories: [
       {
         name: "Piano",
@@ -109,6 +111,7 @@ export const categories = [
     name: "Art",
     imagePath: "/assets/art.png",
     videoPath: "/assets/painting_icon.mp4",
+    jsonPath: "/assets/Paint.json",
     subCategories: [
       {
         name: "Dance",

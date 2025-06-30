@@ -18,7 +18,12 @@ import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
-import { Tag } from "antd";
+import dynamic from "next/dynamic";
+
+const Player = dynamic(
+  () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
+  { ssr: false }
+);
 
 const NewHeader = ({
   isHome = true,
@@ -26,6 +31,7 @@ const NewHeader = ({
   handleCategorySelection,
 }) => {
   const [user, loading] = useAuthState(auth);
+  const playerRefs = useRef([]);
   const [signOut] = useSignOut(auth);
   const [userData, setUserData] = useState(null);
   const [showDropDown, setDropDown] = useState(false);
@@ -39,40 +45,17 @@ const NewHeader = ({
   const [scheduleCreated, setScheduleCreated] = useState(true);
   const videoRefs = useRef([]);
 
-  
-
-  useEffect(() => {
-    // Play all videos on initial load
-    videoRefs.current.forEach((videoEl) => {
-      if (videoEl) {
-        videoEl.playbackRate = 2;
-        const playPromise = videoEl.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.warn("Initial video autoplay was prevented:", error);
-          });
-        }
-      }
-    });
-  }, []);
-
   const [activeKey, setActiveKey] = useState("sport");
 
   const handleCategoryClick = (category, index) => {
     setActiveKey(category);
     handleCategorySelection(category);
-    videoRefs.current.forEach((videoEl, i) => {
-      if (videoEl && i !== index) {
-        videoEl.pause();
-        videoEl.currentTime = 0;
-      }
-    });
-    const videoEl = videoRefs.current[index];
-    if (videoEl) {
-      videoEl.currentTime = 0;
-      videoEl.play();
-    }
+
+    const player = playerRefs.current[index];
+    console.log("Player:", player);
+    player.play();
   };
+
   useEffect(() => {
     const getData = async () => {
       const userId = user?.uid;
@@ -315,15 +298,19 @@ const NewHeader = ({
                       onClick={() =>
                         handleCategoryClick(category.name.toLowerCase(), index)
                       }
-                      className="flex flex-col items-center justify-center gap-2 relative cursor-pointer bg-transparent border-none p-2"
+                      className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                     >
-                      <video
-                        ref={(el) => (videoRefs.current[index] = el)}
-                        src={category.videoPath}
-                        className="w-8 h-8 object-contain"
-                        muted
-                        playsInline
-                        preload="auto"
+                      <Player
+                        id={`player-${index}`}
+                        lottieRef={(el) => (playerRefs.current[index] = el)}
+                        autoplay
+                        loop={false}
+                        src={category.jsonPath}
+                        style={{
+                          height: "30px",
+                          width: "30px",
+                          marginBottom: "4px",
+                        }}
                       />
                       <span
                         className={`text-xs font-medium transition-colors ${
