@@ -67,47 +67,42 @@ function MusicianProfileCard1({ instructor }) {
       </div>
       {/* Section 2 */}
       <div className="flex items-center justify-between gap-2 w-full flex-nowrap overflow-hidden">
-  {/* Rating Section */}
-  <div className="flex items-center flex-shrink-0">
-    <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
-    <div className="ml-[3px] flex items-center whitespace-nowrap">
-      <p className="text-base font-bold text-[#261f22]">{rating.toFixed(1)}</p>
-      <p className="text-base font-normal text-[#261f22] ml-1.5">
-        {`${reviews} ${reviews === 1 || reviews === 0 ? "review" : "reviews"}`}
-      </p>
-    </div>
-  </div>
+        {/* Rating Section */}
+        <div className="flex items-center flex-shrink-0">
+          <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
+          <div className="ml-[3px] flex items-center whitespace-nowrap">
+            <p className="text-base font-bold text-[#261f22]">{rating.toFixed(1)}</p>
+          </div>
+        </div>
 
-  {/* Taught by + Name + Image */}
-  <div className="flex items-center gap-1 flex-nowrap overflow-hidden text-ellipsis">
-    <p className="whitespace-nowrap overflow-hidden mr-1 text-ellipsis max-w-[250px] text-base">
-      Taught by{" "}
-      {(() => {
-        const name = instructor?.instructorName || "instructor";
-        const [first] = name.trim().split(/\s+/);
-        return first;
-      })()}
-    </p>
-    {instructor?.instructorImage ? (
-      <img
-        src={instructor.instructorImage}
-        alt="Instructor"
-        className="w-[30px] h-[30px] rounded-full object-cover flex-shrink-0"
-      />
-    ) : (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-[30px] h-[30px] rounded-full flex-shrink-0 text-[#888]"
-        fill="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
-      </svg>
-    )}
-  </div>
-</div>
-
-
+        {/* Taught by + Name + Image */}
+        <div className="flex items-center gap-1 flex-nowrap overflow-hidden text-ellipsis">
+          <p className="whitespace-nowrap overflow-hidden mr-1 text-ellipsis max-w-[250px] text-base">
+            Taught by{" "}
+            {(() => {
+              const name = instructor?.instructorName || "instructor";
+              const [first] = name.trim().split(/\s+/);
+              return first;
+            })()}
+          </p>
+          {instructor?.instructorImage ? (
+            <img
+              src={instructor.instructorImage}
+              alt="Instructor"
+              className="w-[30px] h-[30px] rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-[30px] h-[30px] rounded-full flex-shrink-0 text-[#888]"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
+            </svg>
+          )}
+        </div>
+      </div>
       {/* <div className="flex justify-start items-center flex-row mt-4">
         <Button className="bg-[#261f22] [font-family:Inter,sans-serif] text-sm font-semibold text-[white] min-w-[220px] h-[45px] w-[220px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none]">
           Book Session
