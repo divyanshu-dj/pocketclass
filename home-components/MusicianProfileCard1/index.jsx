@@ -3,9 +3,11 @@ import SvgIcon1 from "./icons/SvgIcon1";
 import SvgIcon2 from "./icons/SvgIcon2";
 import SvgIcon3 from "./icons/SvgIcon3";
 import { categories } from "../../utils/categories";
+import { toast } from "react-toastify";
 
-function MusicianProfileCard1({ instructor }) {
-  console.log(instructor);
+function MusicianProfileCard1({ instructor, router }) {
+  // const router = useRouter();
+  // console.log(instructor);
   // Default values if data is missing
   const fullName = `${instructor?.name?.split(" ").slice(0, 4).join(" ") || "N/A"
     }`.trim();
@@ -76,7 +78,15 @@ function MusicianProfileCard1({ instructor }) {
         </div>
 
         {/* Taught by + Name + Image */}
-        <div className="flex items-center gap-1 flex-nowrap overflow-hidden text-ellipsis">
+        <div onClick={(e) => {
+          e.stopPropagation();
+          if(!instructor?.id && !instructor?.classCreator){
+            toast.error("Instructor profile not available");
+            return;
+          }
+          router.push(`/instructor?class=${instructor?.id}&creator=${instructor?.classCreator}`);
+          // console.log("Instructor profile clicked");
+        }} className="flex items-center gap-1 flex-nowrap hover:bg-gray-200 py-1 px-2 rounded-md overflow-hidden text-ellipsis">
           <p className="whitespace-nowrap overflow-hidden mr-1 text-ellipsis max-w-[250px] text-base">
             Taught by{" "}
             {(() => {
