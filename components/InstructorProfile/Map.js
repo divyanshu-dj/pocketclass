@@ -143,7 +143,7 @@ export default function LocationMap({ locations = [], classes = [] }) {
                   {selectedClass.Description}
                 </p>
                 <p className="text-sm font-medium text-green-600 mt-1">
-                  {selectedClass.Price || "Free"}
+                  {selectedClass.Price || ""} {"CAD"}
                 </p>
                 <p className="text-xs text-gray-500">
                   Category: {selectedClass.Category || "N/A"}
