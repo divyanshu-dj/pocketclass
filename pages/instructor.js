@@ -249,7 +249,7 @@ export default function UpdateClass() {
             ) : locations.length > 0 ? (
                 <div className="max-w-6xl mx-auto px-4 mt-6">
                     <h2 className="text-2xl font-bold mb-4">My Locations</h2>
-                    <LocationMap locations={locations} />
+                    <LocationMap locations={locations} classes={classes} />
                 </div>
             ) : null}
 
