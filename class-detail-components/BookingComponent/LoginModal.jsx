@@ -194,7 +194,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
           <button onClick={() => { step === "role" ? setStep("login") : onClose(); }} className="absolute left-0 text-red-600 hover:text-red-700">
             <FiChevronLeft className="text-xl" />
           </button>
-          <h2 className="text-sm text-gray-500 text-center">Log in or sign up</h2>
+          <h2 className="text-sm text-gray-500 text-center">Log in using your credentials or enter your details to create a new account</h2>
         </div>
 
         <div className="relative w-full h-full overflow-hidden">
