@@ -9,6 +9,7 @@ import {
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { addDoc } from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
 import {
   doc,
@@ -22,10 +23,12 @@ import {
 } from "firebase/firestore";
 import { toast } from "react-toastify";
 
-export default function LoginModal({ onClose, setShowBooking }) {
+export default function LoginModal({ onClose, grouped, setDisplayConfirmation, setShowBooking }) {
   const modalRef = useRef();
   const [step, setStep] = useState("login");
   const [role, setRole] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,6 +36,7 @@ export default function LoginModal({ onClose, setShowBooking }) {
   const [googleUserData, setGoogleUserData] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isEmail, setIsEmail] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -47,15 +51,20 @@ export default function LoginModal({ onClose, setShowBooking }) {
   const handleGoogleSignIn = async () => {
     setErrorMessage("");
     setIsLoading(true);
+    setIsEmail(false)
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const user = result.user;
 
-      const userSnap = await getDoc(doc(db, "Users", user.uid));
-      if (userSnap.exists()) {
+      const q = query(collection(db, "Users"), where("email", "==", user.email));
+      const userSnap = await getDocs(q);
+      if (!userSnap.empty) {
         setShowBooking(true);
+        if (grouped) {
+          setDisplayConfirmation(true);
+        }
         onClose();
         return;
       }
@@ -76,13 +85,15 @@ export default function LoginModal({ onClose, setShowBooking }) {
     e.preventDefault();
     setErrorMessage("");
     setIsLoading(true);
+    setIsEmail(true)
 
     try {
       const q = query(collection(db, "Users"), where("email", "==", email));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        toast.error("No user exists with this email");
+        toast.error("Please enter you details to sign up");
+        setStep('role')
         return;
       }
 
@@ -90,7 +101,10 @@ export default function LoginModal({ onClose, setShowBooking }) {
 
       setIsLoggedIn(true);
       setShowBooking(true);
-      // toast.success("Login successful");
+      if (grouped) {
+        setDisplayConfirmation(true);
+      }
+      // toast.success("Signup successful");
       onClose();
     } catch (err) {
       console.error("Login Error:", err);
@@ -104,9 +118,81 @@ export default function LoginModal({ onClose, setShowBooking }) {
     }
   };
 
+  const handleEmailLogin1 = async (email, password) => {
+    // e.preventDefault();
+    setErrorMessage("");
+    setIsLoading(true);
+    setIsEmail(true)
+
+    try {
+      const q = query(collection(db, "Users"), where("email", "==", email));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        toast.error("Please enter you details to sign up");
+        setStep('role')
+        return;
+      }
+
+      await signInWithEmailAndPassword(auth, email, password);
+
+      setIsLoggedIn(true);
+      setShowBooking(true);
+      if (grouped) {
+        setDisplayConfirmation(true);
+      }
+      // toast.success("Signup successful");
+      onClose();
+    } catch (err) {
+      console.error("Login Error:", err);
+      if (err.code === "auth/wrong-password") {
+        toast.error("Invalid password");
+      } else {
+        toast.error("Login failed");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSave = async () => {
+    if (!role || !firstName || !lastName || !email || !password) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Save the user info (without auth.currentUser or UID)
+      await addDoc(collection(db, "Users"), {
+        email,
+        category: role,
+        firstName,
+        lastName,
+        photoURL: "", // can be left blank
+        createdAt: serverTimestamp(),
+      });
+
+      setShowBooking(true);
+      await handleEmailLogin1(email, password);
+      // onClose();
+    } catch (err) {
+      console.error("Error saving user:", err);
+      toast.error("Failed to save user data.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   const handleRoleSubmit = async () => {
+    if (isEmail) {
+      handleEmailSave()
+      // console.log("Please enter your first and last name");
+      return;
+    }
     if (!role || !googleUserData || !pendingGoogleCredential) {
-      setErrorMessage("Please select a role.");
+      toast.error("Please select a role.");
       return;
     }
 
@@ -145,7 +231,7 @@ export default function LoginModal({ onClose, setShowBooking }) {
       >
         {/* Header */}
         <div className="relative flex items-center justify-center mb-4">
-          <button onClick={onClose} className="absolute left-0 text-red-600 hover:text-red-700">
+          <button onClick={() => { step === "role" ? setStep("login") : onClose() }} className="absolute left-0 text-red-600 hover:text-red-700">
             <FiChevronLeft className="text-xl" />
           </button>
           <h2 className="text-sm text-gray-500 text-center">Log in or sign up</h2>
@@ -210,30 +296,54 @@ export default function LoginModal({ onClose, setShowBooking }) {
 
             {/* Role Selection */}
             <div className="w-1/2 pl-4">
-              <h1 className="text-2xl font-semibold text-center mb-6">I am a...</h1>
+              <h1 className="text-2xl font-semibold text-center mb-6">I am...</h1>
               <div className="space-y-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="student"
-                    checked={role === "student"}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="accent-red-600 focus:ring-0 focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  />
-                  <span>Student</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="teacher"
-                    checked={role === "teacher"}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="accent-red-600 focus:ring-0 focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  />
-                  <span>Teacher</span>
-                </label>
+                {isEmail && (
+                  <div className="mb-2 space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        name="firstName"
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Enter your first name"
+                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ml-[2px]"
+                      />
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        name="lastName"
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Enter your last name"
+                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ml-[2px]"
+                      />
+                    </label>
+                  </div>
+                )}
+                <div className={`${isEmail ? "flex space-x-4" : " space-y-4"}`}>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="student"
+                      checked={role === "student"}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="accent-red-600 focus:ring-0 focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                    />
+                    <span>Student</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="teacher"
+                      checked={role === "teacher"}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="accent-red-600 focus:ring-0 focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                    />
+                    <span>Teacher</span>
+                  </label>
+                </div>
                 <button
                   onClick={handleRoleSubmit}
                   disabled={isLoading}

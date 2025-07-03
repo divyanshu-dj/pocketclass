@@ -94,6 +94,7 @@ export default function index({
   const [maxDays, setMaxDays] = useState(30);
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
+  const [grouped,setGrouped] = useState(false);
 
   const hasCalendarConflict = (slotStart, slotEnd) => {
     const start = moment(slotStart, "YYYY-MM-DD HH:mm");
@@ -1734,7 +1735,9 @@ END:VCALENDAR`.trim();
                   onClick={() => {
                     if (selectedSlot.classId) {
                       if (!user) {
-                        setGroupEmails([""]);
+                        setShowLogin(true);
+                        setGrouped(true)
+                        return
                       } else {
                         setGroupEmails([user.email]);
                       }
@@ -1885,7 +1888,7 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} setShowBooking={setShowBooking}/>}
+      {showLogin && <LoginModal setGroupEmails={setGroupEmails} setNumberOfGroupMembers={setNumberOfGroupMembers} setDisplayConfirmation={setDisplayConfirmation} grouped={grouped} onClose={() => setShowLogin(false)} setShowBooking={setShowBooking}/>}
       {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50">
