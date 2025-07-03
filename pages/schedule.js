@@ -898,7 +898,7 @@ export default function Schedule() {
               </div>
               ) : (
                 <a
-                  href="/api/mindbody-auth"
+                  href="mindbody-init"
                   className="hidden lg:inline-flex items-center space-x-2 border-gray-400 border text-gray-600 px-4 py-2 rounded-md my-4 shadow transition duration-200 hover:border-blue-600"
                   title="Connect your Mindbody account to automatically sync bookings to and update Pocketclass when times are blocked on Mindbody"
                 >
