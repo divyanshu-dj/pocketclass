@@ -1,6 +1,7 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { FiChevronLeft } from "react-icons/fi";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   GoogleAuthProvider,
@@ -8,20 +9,18 @@ import {
   signInWithCredential,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { addDoc } from "firebase/firestore";
-import { auth, db } from "../../firebaseConfig";
 import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
   collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+  serverTimestamp,
 } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { auth, db } from "../../firebaseConfig";
 
 export default function LoginModal({ onClose, grouped, setDisplayConfirmation, setShowBooking }) {
   const modalRef = useRef();
@@ -31,12 +30,11 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
   const [lastName, setLastName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState(null);
   const [googleUserData, setGoogleUserData] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isEmail, setIsEmail] = useState(false)
+  const [isEmail, setIsEmail] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -51,7 +49,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
   const handleGoogleSignIn = async () => {
     setErrorMessage("");
     setIsLoading(true);
-    setIsEmail(false)
+    setIsEmail(false);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
@@ -60,11 +58,10 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
 
       const q = query(collection(db, "Users"), where("email", "==", user.email));
       const userSnap = await getDocs(q);
+
       if (!userSnap.empty) {
         setShowBooking(true);
-        if (grouped) {
-          setDisplayConfirmation(true);
-        }
+        if (grouped) setDisplayConfirmation(true);
         onClose();
         return;
       }
@@ -85,67 +82,26 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
     e.preventDefault();
     setErrorMessage("");
     setIsLoading(true);
-    setIsEmail(true)
+    setIsEmail(true);
 
     try {
       const q = query(collection(db, "Users"), where("email", "==", email));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        toast.error("Please enter you details to sign up");
-        setStep('role')
+        setStep("role");
         return;
       }
 
       await signInWithEmailAndPassword(auth, email, password);
-
-      setIsLoggedIn(true);
       setShowBooking(true);
-      if (grouped) {
-        setDisplayConfirmation(true);
-      }
-      // toast.success("Signup successful");
+      if (grouped) setDisplayConfirmation(true);
       onClose();
     } catch (err) {
       console.error("Login Error:", err);
-      if (err.code === "auth/wrong-password") {
-        toast.error("Invalid password");
-      } else {
-        toast.error("Login failed");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEmailLogin1 = async (email, password) => {
-    // e.preventDefault();
-    setErrorMessage("");
-    setIsLoading(true);
-    setIsEmail(true)
-
-    try {
-      const q = query(collection(db, "Users"), where("email", "==", email));
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-        toast.error("Please enter you details to sign up");
-        setStep('role')
-        return;
-      }
-
-      await signInWithEmailAndPassword(auth, email, password);
-
-      setIsLoggedIn(true);
-      setShowBooking(true);
-      if (grouped) {
-        setDisplayConfirmation(true);
-      }
-      // toast.success("Signup successful");
-      onClose();
-    } catch (err) {
-      console.error("Login Error:", err);
-      if (err.code === "auth/wrong-password") {
+      if (err.code === "auth/user-not-found") {
+        setStep("role");
+      } else if (err.code === "auth/wrong-password") {
         toast.error("Invalid password");
       } else {
         toast.error("Login failed");
@@ -163,8 +119,10 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
 
     setIsLoading(true);
     try {
-      // Save the user info (without auth.currentUser or UID)
-      await addDoc(collection(db, "Users"), {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "Users", user.uid), {
         email,
         category: role,
         firstName,
@@ -173,9 +131,11 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
         createdAt: serverTimestamp(),
       });
 
+      await signInWithEmailAndPassword(auth, email, password);
+
       setShowBooking(true);
-      await handleEmailLogin1(email, password);
-      // onClose();
+      if (grouped) setDisplayConfirmation(true);
+      onClose();
     } catch (err) {
       console.error("Error saving user:", err);
       toast.error("Failed to save user data.");
@@ -187,8 +147,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
 
   const handleRoleSubmit = async () => {
     if (isEmail) {
-      handleEmailSave()
-      // console.log("Please enter your first and last name");
+      await handleEmailSave();
       return;
     }
     if (!role || !googleUserData || !pendingGoogleCredential) {
@@ -198,25 +157,26 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
 
     setIsLoading(true);
     try {
-      const { uid, email, displayName, photoURL } = googleUserData;
-      const [firstName, ...lastParts] = displayName?.split(" ") || [];
-      const lastName = lastParts.join(" ");
+      const { uid, email, displayName, photoURL } = googleUserData || {};
+      const [first, ...rest] = displayName?.split(" ") || [];
+      const last = rest.join(" ");
 
       await setDoc(doc(db, "Users", uid), {
         email,
         category: role,
-        firstName: firstName || "",
-        lastName: lastName || "",
+        firstName: first || "",
+        lastName: last || "",
         photoURL: photoURL || "",
         createdAt: serverTimestamp(),
       });
 
       await signInWithCredential(auth, pendingGoogleCredential);
       setShowBooking(true);
+      if (grouped) setDisplayConfirmation(true);
       onClose();
     } catch (err) {
       console.error("Failed to save user:", err);
-      setErrorMessage("Something went wrong.");
+      toast.error("Something went wrong.");
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +191,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
       >
         {/* Header */}
         <div className="relative flex items-center justify-center mb-4">
-          <button onClick={() => { step === "role" ? setStep("login") : onClose() }} className="absolute left-0 text-red-600 hover:text-red-700">
+          <button onClick={() => { step === "role" ? setStep("login") : onClose(); }} className="absolute left-0 text-red-600 hover:text-red-700">
             <FiChevronLeft className="text-xl" />
           </button>
           <h2 className="text-sm text-gray-500 text-center">Log in or sign up</h2>
@@ -306,7 +266,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
                         name="firstName"
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="Enter your first name"
-                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ml-[2px]"
+                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red mr-[1px]"
                       />
                     </label>
                     <label className="flex items-center space-x-2">
@@ -315,7 +275,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
                         name="lastName"
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Enter your last name"
-                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ml-[2px]"
+                        className="w-full border-2 border-gray-100 rounded-xl p-4 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red mr-[1px]"
                       />
                     </label>
                   </div>
