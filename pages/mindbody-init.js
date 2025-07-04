@@ -21,6 +21,18 @@ export default function MindbodyInit() {
     if (!userLoading && !user) {
       router.push("/login?redirect=mindbody-init");
     }
+    if (user && !userLoading) {
+      const fetchUserData = async () => {
+        const userDoc = await getDoc(doc(db, "Users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.mindbodySite) {
+            router.push(`/api/mindbody-auth?siteId=${encodeURIComponent(userData.mindbodySite)}`);
+          }
+        }
+      }
+      fetchUserData();
+    }
   }, [user, userLoading, router]);
 
   const handleSiteIdSubmit = async (e) => {

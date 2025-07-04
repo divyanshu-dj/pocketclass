@@ -25,20 +25,11 @@ export default function MindbodySuccess() {
 
   useEffect(() => {
     const processMindbodyIntegration = async () => {
-      if (!user || !router.query.access_token) return;
+      if (!user) return;
       try {
-        // Step 1: Store Mindbody tokens
-        setCurrentStep("Storing Mindbody credentials...");
+        // Step 1: Gather Mindbody token
+        setCurrentStep("Connecting to Mindbody...");
         const userRef = doc(db, "Users", user.uid);
-        await updateDoc(userRef, {
-          mindbody: {
-            accessToken: router.query.access_token,
-            refreshToken: router.query.refresh_token,
-            expiresIn: parseInt(router.query.expires_in) || 3600,
-            tokenType: router.query.token_type || "Bearer",
-            updatedAt: new Date().toISOString(),
-          },
-        });
         // Get Mindbody site id from user profile
         const userDoc = await getDoc(userRef);
         if (!userDoc.exists()) {
@@ -48,12 +39,17 @@ export default function MindbodySuccess() {
         console.log("Mindbody site ID:", mindbodySiteId);
         // Step 2: Fetch and store Mindbody classes
         setCurrentStep("Fetching classes from Mindbody...");
+        const authToken = userDoc.data().mindbody.accessToken;
+        const refreshtoken = userDoc.data().mindbody.refreshToken;
+        if (!authToken) {
+          throw new Error("Mindbody access token not found in user profile");
+        }
         const classesResponse = await fetch("/api/mindbody/classes", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${router.query.access_token}`,
-            refreshtoken: router.query.refresh_token || "",
-            SiteId: mindbodySiteId || "-9", // Default to -99 if not set
+            Authorization: `Bearer ${authToken}`,
+            refreshtoken: refreshtoken || "",
+            SiteId: mindbodySiteId || "-9", // Default to -9 if not set
             userid: user.uid, // Pass user ID for token refresh
           },
         });
@@ -176,7 +172,7 @@ export default function MindbodySuccess() {
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-4">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Mindbody Integration
+          Mindbody Class Import
         </h2>
 
         {error ? (

@@ -309,8 +309,7 @@ const NewHeader = ({
                         loop={false}
                         src={category.jsonPath}
                         style={{
-                          height: "30px",
-                          width: "30px",
+                          height: "42px",
                           marginBottom: "4px",
                         }}
                       />
