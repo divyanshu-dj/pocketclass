@@ -177,8 +177,8 @@ function RecentlyViewedSection({
   }
 
   return (
-    <div className="bg-[#fdebeb] box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
-      <div className="flex justify-between items-center">
+    <div className="mt-6 box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
+      <div className="">
         <div>
           {!activeFilter && (
             <p className="section-heading !text-left">Recently Viewed</p>
@@ -187,30 +187,32 @@ function RecentlyViewedSection({
             Continue exploring where you left off
           </p>
         </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={scrollLeft}
-            className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <button 
-            onClick={scrollRight}
-            className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
       </div>
-      <div>
+      <div className="relative">
+        {/* Left scroll arrow */}
+        <button 
+          onClick={scrollLeft}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        
+        {/* Right scroll arrow */}
+        <button 
+          onClick={scrollRight}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        
         <div 
           ref={scrollContainerRef}
           id="classes-recent" 
-          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex"
+          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex px-12"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading
