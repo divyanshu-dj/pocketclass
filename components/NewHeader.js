@@ -275,9 +275,11 @@ const NewHeader = ({
         }`}
       >
         {/*NavBar Top Part*/}
-        <div className={`${
-                      router.pathname==='/' ? "z-[9000]" : "dm2:z-50 z-[9000]"
-        }relative top-0 max-md:pt-4 max-md:pb-3 py-6  box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}>
+        <div
+          className={`${
+            router.pathname === "/" ? "z-[9000]" : "dm2:z-50 z-[9000]"
+          }relative top-0 max-md:pt-4 max-md:pb-3 py-6  box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
+        >
           <Link className="left-section cursor-pointer" href="/">
             <img
               src="/assets/image_5c0480a2.png"
@@ -308,10 +310,7 @@ const NewHeader = ({
                         autoplay
                         loop={false}
                         src={category.jsonPath}
-                        style={{
-                          height: "42px",
-                          marginBottom: "4px",
-                        }}
+                        className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
                       />
                       <span
                         className={`text-xs font-medium transition-colors ${
@@ -370,7 +369,7 @@ const NewHeader = ({
 
                   <div
                     className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
-                      router.pathname==='/' ? "z-[990]" : "dm2:z-50 z-[900]"
+                      router.pathname === "/" ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
                   >
@@ -386,8 +385,13 @@ const NewHeader = ({
                     )}
 
                     {showDropDown && (
-                      <div className={`dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 ${
-                      router.pathname==='/' ? "z-[990]" : "dm2:z-50 z-[900]"}`}>
+                      <div
+                        className={`dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 ${
+                          router.pathname === "/"
+                            ? "z-[990]"
+                            : "dm2:z-50 z-[900]"
+                        }`}
+                      >
                         <ul>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/profile/${user.uid}`}>Profile</Link>

@@ -376,7 +376,7 @@ function RecommendedClassesSection({
 
   // Always show recommendations section
   return (
-    <div className="mb-6 box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
+    <div className="box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
       <div className="">
         <div>
           {!activeFilter && (

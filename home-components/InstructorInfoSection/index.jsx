@@ -7,9 +7,9 @@ function InstructorInfoSection({ activeFilter }) {
   return (
     <div>
       <TopInstructorsSectionWithButton activeFilter={activeFilter} />
+      <ExtracurricularInfoBlock />
       <RecentlyViewedSection activeFilter={activeFilter} />
       <RecommendedClassesSection activeFilter={activeFilter} />
-      <ExtracurricularInfoBlock />
     </div>
   );
 }
