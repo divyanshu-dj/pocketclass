@@ -380,7 +380,7 @@ function RecommendedClassesSection({
       <div className="">
         <div>
           {!activeFilter && (
-            <p className="section-heading !text-left">Recommended For You</p>
+            <p className="section-heading !text-left">Recommended</p>
           )}
           <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-[#261f22] mt-4 m-0 p-0">
             {displayedClasses.length > 0 && !loading 
