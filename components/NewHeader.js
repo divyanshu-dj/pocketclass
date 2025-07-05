@@ -513,16 +513,7 @@ const NewHeader = ({
             )}
           </div>
         </div>
-
-        {/*NavBar Search Part*/}
-        <TeacherSearch
-          isShrunk={isMenuShrunk}
-          isMenuSmall={isMenuSmall}
-          expandMenu={() => setIsMenuShrunk(false)}
-          user={user}
-        />
-      </div>
-      <div className="flex w-full justify-center mb-6 md:hidden">
+        <div className="flex w-full justify-center mb-6 md:hidden">
             <div
               className={`transition duration-500 ${
                 isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
@@ -564,6 +555,15 @@ const NewHeader = ({
               </div>
             </div>
           </div>
+        {/*NavBar Search Part*/}
+        <TeacherSearch
+          isShrunk={isMenuShrunk}
+          isMenuSmall={isMenuSmall}
+          expandMenu={() => setIsMenuShrunk(false)}
+          user={user}
+        />
+      </div>
+      
     </>
   );
 };
