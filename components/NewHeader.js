@@ -522,6 +522,48 @@ const NewHeader = ({
           user={user}
         />
       </div>
+      <div className="flex w-full justify-center mb-6 md:hidden">
+            <div
+              className={`transition duration-500 ${
+                isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
+              }`}
+            >
+              <div className="flex space-x-2.5 items-center">
+                {categoryData.map((category, index) => (
+                  <div key={category.name}>
+                    <button
+                      key={category.name}
+                      onClick={() =>
+                        handleCategoryClick(category.name.toLowerCase(), index)
+                      }
+                      className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                    >
+                      <Player
+                        id={`player-${index}`}
+                        lottieRef={(el) => (playerRefs.current[index] = el)}
+                        autoplay
+                        loop={false}
+                        src={category.jsonPath}
+                        className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
+                      />
+                      <span
+                        className={`text-xs font-medium transition-colors ${
+                          activeKey === category.name.toLowerCase()
+                            ? "text-black"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {category.name}
+                      </span>
+                      {activeKey === category.name.toLowerCase() && (
+                        <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
     </>
   );
 };
