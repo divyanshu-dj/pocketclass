@@ -57,9 +57,9 @@ function SuperInstructorCard({
     }
   };
   return (
-    <div className="z-10 relative h-full w-full overflow-hidden rounded-2xl">
+    <div className="-z-0 relative h-full w-full overflow-hidden rounded-2xl">
       <div
-        className="box-border flex justify-start items-stretch flex-row grow-0 shrink-0 basis-auto top-0 left-0 z-0 rounded-2xl bg-cover absolute w-full h-full blur-sm brightness-70 bg-no-repeat bg-center"
+        className="box-border flex justify-start items-stretch flex-row grow-0 shrink-0 basis-auto top-0 left-0 -z-10 rounded-2xl bg-cover absolute w-full h-full blur-sm brightness-70 bg-no-repeat bg-center"
         style={{
           backgroundImage: !instructorImg
             ? "url('https://s3-alpha-sig.figma.com/img/0a4e/e6d8/04f1b8bc98ca9140f475bc83c632e5c6?Expires=1732492800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=SfAp96~SAW71bK5RsMaHR94JrlWn4y2lSq4S04HFSW07iiQJ5oUMcwNnELdYWkYjOfWBZ9bEFcvW950C-PhcgDmW~s12XGrEaUtIZd5gLo5L2-9lYO-YVQqha6XUZxwLVwPnEaySbyZW~BY89p2z-EfTAtMpbEf6FpO7fAX-RNIge2H4bgL9Kq4BBPPBU~E5Aj-G6bVSznIbwxtjiIfBWESPoedzrpVM1sD4t9m6uNbWWIbhc24ysqRbEvRYvhKbJ615L78etjqmNcwY5NO-YVC5CO~l71Fob43W2sQC4WojfZjGMslkcx6BNWY1kyl6UkJFRyCkh6tu8L2lE~Va~A__')"
@@ -67,7 +67,7 @@ function SuperInstructorCard({
         }}
       ></div>
       <div
-        className="box-border flex justify-start h-full w-full items-stretch flex-row grow-0 shrink-0 basis-auto pt-4 pb-[172px] px-4 bg-contain bg-no-repeat relative bg-center z-9"
+        className="box-border flex justify-start h-full w-full items-stretch flex-row grow-0 shrink-0 basis-auto pt-4 pb-[172px] px-4 bg-contain bg-no-repeat relative bg-center -z-1"
         style={{
           backgroundImage: !instructorImg
             ? "url('https://s3-alpha-sig.figma.com/img/0a4e/e6d8/04f1b8bc98ca9140f475bc83c632e5c6?Expires=1732492800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=SfAp96~SAW71bK5RsMaHR94JrlWn4y2lSq4S04HFSW07iiQJ5oUMcwNnELdYWkYjOfWBZ9bEFcvW950C-PhcgDmW~s12XGrEaUtIZd5gLo5L2-9lYO-YVQqha6XUZxwLVwPnEaySbyZW~BY89p2z-EfTAtMpbEf6FpO7fAX-RNIge2H4bgL9Kq4BBPPBU~E5Aj-G6bVSznIbwxtjiIfBWESPoedzrpVM1sD4t9m6uNbWWIbhc24ysqRbEvRYvhKbJ615L78etjqmNcwY5NO-YVC5CO~l71Fob43W2sQC4WojfZjGMslkcx6BNWY1kyl6UkJFRyCkh6tu8L2lE~Va~A__')"

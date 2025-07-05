@@ -62,8 +62,9 @@ function MusicianProfileCard1({ instructor, router }) {
       </div>
 
       {/* Bottom Section: Instructor Info Full Width + Right Aligned */}
-      <div className="mt-2 px-[15px] w-full flex px-2 py-1 hover:bg-gray-200 text-[#7d797a] hover:text-[#261f22] rounded-xl justify-end items-center gap-2">
-        <p className="truncate text-base font-bold">
+      <div className="mt-2 w-full text-[#7d797a] hover:text-[#261f22] justify-end items-center flex">
+        <div className="hover:bg-gray-200 px-[15px] flex px-2 py-1 rounded-xl w-fit h-fit justify-end items-center gap-2">
+          <p className="truncate text-base font-bold">
           By{" "}
           {(() => {
             const name = instructor?.instructorName || "instructor";
@@ -87,6 +88,7 @@ function MusicianProfileCard1({ instructor, router }) {
             <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
           </svg>
         )}
+        </div>
       </div>
     </div>
   );
