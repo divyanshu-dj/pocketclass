@@ -39,7 +39,7 @@ function InstructorSection({ classId, instructor, loading }) {
 
   return (
     <Link href={`/classes/id=${classId}`} className="box-border cursor-pointer h-full w-full">
-      <div className="w-full h-full bg-white box-border flex flex-col justify-between rounded-2xl pb-2 overflow-hidden">
+      <div className="w-full h-full bg-white box-border flex flex-col justify-between rounded-2xl pb-2">
         {/* Top Section - grows to fit content */}
         <div className="flex-grow mb-2">
           <div className="box-border">
@@ -64,15 +64,15 @@ function InstructorSection({ classId, instructor, loading }) {
               e.stopPropagation();
               router.push(`/instructor?class=${classId}&creator=${instructor.classCreator}`);
             }} 
-            className="transition duration-300 ease-in-out flex justify-end flex-1 min-w-0"
+            className="transition duration-300 ease-in-out flex items-center flex-shrink min-w-0"
           >
-            <div className="cursor-pointer flex items-center gap-1 px-1 py-1 text-[#7d797a] hover:text-[#000] hover:bg-gray-200 rounded-xl w-full overflow-hidden">
-              <p className="text-base font-bold truncate flex-1 min-w-0">
+            <div className="cursor-pointer flex items-center gap-1 px-1 py-1 text-[#7d797a] hover:text-[#000] hover:bg-gray-200 rounded-xl overflow-hidden">
+              <p className="text-base font-bold truncate ">
                 By{" "}
                 {(() => {
                   const name = instructor?.instructorName || "instructor";
                   const [first] = name.trim().split(/\s+/);
-                  return "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM";
+                  return first;
                 })()}
               </p>
               {instructor?.instructorImage ? (
