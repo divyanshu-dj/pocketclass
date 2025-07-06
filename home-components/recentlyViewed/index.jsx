@@ -183,9 +183,6 @@ function RecentlyViewedSection({
           {!activeFilter && (
             <p className="section-heading !text-left">Recently Viewed</p>
           )}
-          <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-[#261f22] mt-4 m-0 p-0">
-            Continue exploring where you left off
-          </p>
         </div>
       </div>
       <div className="relative">
