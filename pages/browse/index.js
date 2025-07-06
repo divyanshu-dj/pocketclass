@@ -306,6 +306,7 @@ export default function Results() {
                     " " +
                     instructorDoc.data().lastName
                   : "N/A";
+                classData.instructorImage = instructorDoc.data().profileImage;
               }
             }
 
@@ -611,11 +612,11 @@ export default function Results() {
             {loading ? (
               <p className="text-center text-gray-500">Loading...</p>
             ) : (
-              <div className="flex flex-row flex-wrap gap-4">
+              <div className="flex box-border flex-row flex-wrap gap-4">
                 {filteredClasses.map((classItem) => (
                   <div
                     key={classItem.id}
-                    className="w-full md:w-[48%] border border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
+                    className="w-full flex-1 flex-grow box-border border z-0 min-w-[305px] md:w-[48%] border-gray-300 transition-all duration-300 hover:border-logo-red rounded-2xl"
                     onMouseEnter={() => {
                       if (
                         !(

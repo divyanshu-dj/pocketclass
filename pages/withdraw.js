@@ -9,10 +9,10 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import * as XLSX from 'xlsx';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+} from "chart.js";
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 ChartJS.register(
   CategoryScale,
@@ -47,7 +47,7 @@ const WithdrawTransaction = dynamic(
 );
 import moment from "moment";
 import NewHeader from "../components/NewHeader";
-function Balance({ }) {
+function Balance({}) {
   const [myBalance, setMyBalance] = React.useState(0);
   const [accountBalance, setAccountBalance] = React.useState(0);
   const [withdrawn, setWithdrawn] = React.useState(0);
@@ -79,12 +79,12 @@ function Balance({ }) {
     labels: [],
     datasets: [
       {
-        label: 'Funds Transferred',
+        label: "Funds Transferred",
         data: [],
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
-      }
-    ]
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.1,
+      },
+    ],
   });
 
   const fetchEverthing = async () => {
@@ -114,8 +114,11 @@ function Balance({ }) {
 
     let validCurrencies = await account.json();
     if (!Array.isArray(validCurrencies)) {
-      console.error("Expected an array of currencies, but got:", validCurrencies);
-      validCurrencies = ['$'];
+      console.error(
+        "Expected an array of currencies, but got:",
+        validCurrencies
+      );
+      validCurrencies = ["$"];
     }
     setPaymentDetails({ ...paymentDetails, accountNumber: accountNumber });
     // console.log(accountNumber);
@@ -150,7 +153,10 @@ function Balance({ }) {
     }).then((res) => {
       res.json().then((payoutsReceived) => {
         if (!Array.isArray(payoutsReceived)) {
-          console.error("API error:", payoutsReceived.error || "Unexpected response");
+          console.error(
+            "API error:",
+            payoutsReceived.error || "Unexpected response"
+          );
           return; // Or handle error in UI
         }
         let payoutsReceivedObj = payoutsReceived.map((payout) => {
@@ -184,14 +190,20 @@ function Balance({ }) {
     });
     getBalanceObject.then((res) => {
       res.json().then((balanceObj) => {
-        if (Array.isArray(balanceObj.available) && balanceObj.available.length > 0) {
+        if (
+          Array.isArray(balanceObj.available) &&
+          balanceObj.available.length > 0
+        ) {
           setAccountBalance(balanceObj.available[0].amount / 100);
         } else {
           // Handle case where available is not an array or is empty
           setAccountBalance(0); // or some default value
         }
 
-        if (Array.isArray(balanceObj.pending) && balanceObj.pending.length > 0) {
+        if (
+          Array.isArray(balanceObj.pending) &&
+          balanceObj.pending.length > 0
+        ) {
           setPendingAmount(balanceObj.pending[0].amount / 100);
         } else {
           // Handle case where pending is not an array or is empty
@@ -211,9 +223,9 @@ function Balance({ }) {
       res.json().then((bankAccountsReceived) => {
         let finalItems = Array.isArray(bankAccountsReceived.data)
           ? bankAccountsReceived.data.map((item) => ({
-            ...item,
-            checked: item.checked ? item.checked : false,
-          }))
+              ...item,
+              checked: item.checked ? item.checked : false,
+            }))
           : [];
       });
     });
@@ -262,21 +274,27 @@ function Balance({ }) {
     console.log(pendingPaymentsData);
     let totalPendingAmount = 0;
     let totalFuturePayments = 0;
+    setAccountBalance(0);
     bookingsData.forEach((booking) => {
       let pendingPayment = pendingPaymentsData?.find(
-        (paymentIntent) => paymentIntent?.paymentIntent.id === booking.paymentIntentId
+        (paymentIntent) =>
+          paymentIntent?.paymentIntent.id === booking.paymentIntentId
       );
 
       pendingPayment = pendingPayment?.paymentIntent;
 
-
       if (pendingPayment) {
         booking.pendingAmount = pendingPayment.amount;
-        if (moment.utc(booking.startTime).format("YY DD MM") === (moment.utc().format("YY DD MM")) && !booking.isTransfered) {
+        if (
+          moment.utc(booking.startTime).format("YY DD MM") ===
+            moment.utc().format("YY DD MM") &&
+          !booking.isTransfered
+        ) {
           totalPendingAmount += pendingPayment.amount;
-        }
-        else if (!booking.isTransfered) {
+        } else if (!booking.isTransfered) {
           totalFuturePayments += pendingPayment.amount;
+        } else if (booking.isTransfered) {
+          setAccountBalance((prev) => prev + pendingPayment.amount / 100);
         }
       }
     });
@@ -289,15 +307,19 @@ function Balance({ }) {
 
     // Calculate monthly earnings
     const now = moment();
-    const thirtyDaysAgo = moment().subtract(30, 'days');
-    const sixtyDaysAgo = moment().subtract(60, 'days');
+    const thirtyDaysAgo = moment().subtract(30, "days");
+    const sixtyDaysAgo = moment().subtract(60, "days");
 
     const currentMonthTotal = bookingsData
-      .filter(booking => moment(booking.startTime).isBetween(thirtyDaysAgo, now))
+      .filter((booking) =>
+        moment(booking.startTime).isBetween(thirtyDaysAgo, now)
+      )
       .reduce((sum, booking) => sum + (booking.pendingAmount || 0), 0);
 
     const previousMonthTotal = bookingsData
-      .filter(booking => moment(booking.startTime).isBetween(sixtyDaysAgo, thirtyDaysAgo))
+      .filter((booking) =>
+        moment(booking.startTime).isBetween(sixtyDaysAgo, thirtyDaysAgo)
+      )
       .reduce((sum, booking) => sum + (booking.pendingAmount || 0), 0);
 
     setCurrentMonthEarnings(currentMonthTotal / 100);
@@ -305,20 +327,24 @@ function Balance({ }) {
 
     // Update chart data when bookings data is processed
     if (bookingsData) {
-      const sortedBookings = [...bookingsData].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-      const labels = sortedBookings.map(booking => moment(booking.startTime).format('MMM DD'));
-      const data = sortedBookings.map(booking => booking.pendingAmount / 100);
+      const sortedBookings = [...bookingsData].sort(
+        (a, b) => new Date(a.startTime) - new Date(b.startTime)
+      );
+      const labels = sortedBookings.map((booking) =>
+        moment(booking.startTime).format("MMM DD")
+      );
+      const data = sortedBookings.map((booking) => booking.pendingAmount / 100);
 
       setChartData({
         labels,
         datasets: [
           {
-            label: 'Funds Transferred',
+            label: "Funds Transferred",
             data,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-          }
-        ]
+            borderColor: "rgb(75, 192, 192)",
+            tension: 0.1,
+          },
+        ],
       });
     }
 
@@ -385,14 +411,16 @@ function Balance({ }) {
   };
 
   const exportToXLSX = () => {
-    const data = bookingsData.map(booking => ({
+    const data = bookingsData.map((booking) => ({
       Date: moment(booking.startTime).format("DD-MM-YY / hh:mm A"),
       Amount: `$${(booking.pendingAmount / 100).toFixed(2)}`,
-      Type: moment(booking.startTime).format("YY DD MM") === moment().format("YY DD MM") && !booking.isTransfered
-        ? "Available"
-        : booking.isTransfered
+      Type:
+        moment(booking.startTime).format("YY DD MM") ===
+          moment().format("YY DD MM") && !booking.isTransfered
+          ? "Available"
+          : booking.isTransfered
           ? "Sent to Stripe"
-          : "Pending"
+          : "Pending",
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -403,30 +431,31 @@ function Balance({ }) {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    
+
     // Add title
     doc.setFontSize(16);
     doc.text("Transaction History", 14, 15);
-    
+
     // Add date
     doc.setFontSize(10);
     doc.text(`Generated on: ${moment().format("DD-MM-YYYY HH:mm")}`, 14, 22);
 
-    const data = bookingsData.map(booking => [
+    const data = bookingsData.map((booking) => [
       moment(booking.startTime).format("DD-MM-YY / hh:mm A"),
       `$${(booking.pendingAmount / 100).toFixed(2)}`,
-      moment(booking.startTime).format("YY DD MM") === moment().format("YY DD MM") && !booking.isTransfered
+      moment(booking.startTime).format("YY DD MM") ===
+        moment().format("YY DD MM") && !booking.isTransfered
         ? "Available"
         : booking.isTransfered
-          ? "Sent to Stripe"
-          : "Pending"
+        ? "Sent to Stripe"
+        : "Pending",
     ]);
 
     doc.autoTable({
-      head: [['Date', 'Amount', 'Type']],
+      head: [["Date", "Amount", "Type"]],
       body: data,
       startY: 30,
-      theme: 'grid',
+      theme: "grid",
       styles: {
         fontSize: 8,
         cellPadding: 2,
@@ -435,7 +464,7 @@ function Balance({ }) {
         fillColor: [41, 128, 185],
         textColor: 255,
         fontSize: 10,
-        fontStyle: 'bold',
+        fontStyle: "bold",
       },
     });
 
@@ -487,22 +516,24 @@ function Balance({ }) {
                   <div className="flex flex-col gap-4 items-center md:flex-row">
                     {/* Chart Section - Takes 2/3 of the space */}
                     <div className="w-full md:w-2/3 bg-white p-4 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-4">Funds Transfer History</h3>
+                      <h3 className="text-lg font-semibold mb-4">
+                        Funds Transfer History
+                      </h3>
                       <div className="h-[300px]">
-                        <Line 
+                        <Line
                           data={chartData}
                           options={{
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
                               legend: {
-                                position: 'top',
+                                position: "top",
                               },
                               title: {
                                 display: true,
-                                text: 'Funds Transferred Over Time'
-                              }
-                            }
+                                text: "Funds Transferred Over Time",
+                              },
+                            },
                           }}
                         />
                       </div>
@@ -515,7 +546,8 @@ function Balance({ }) {
                           Total Funds
                         </p>
                         <h3 className="text-2xl font-bold text-blue-500">
-                          {"$" + (futurePayments + pendingPayments + accountBalance)}
+                          {"$" +
+                            (futurePayments + pendingPayments + accountBalance)}
                         </h3>
                       </div>
                       <div className="bg-gray-100 p-4 py-3 rounded-lg">
@@ -527,8 +559,20 @@ function Balance({ }) {
                         </h3>
                         <p className="text-sm text-gray-600">
                           {previousMonthEarnings > 0 ? (
-                            <span className={currentMonthEarnings >= previousMonthEarnings ? "text-green-500" : "text-red-500"}>
-                              {((currentMonthEarnings - previousMonthEarnings) / previousMonthEarnings * 100).toFixed(1)}% vs last month
+                            <span
+                              className={
+                                currentMonthEarnings >= previousMonthEarnings
+                                  ? "text-green-500"
+                                  : "text-red-500"
+                              }
+                            >
+                              {(
+                                ((currentMonthEarnings -
+                                  previousMonthEarnings) /
+                                  previousMonthEarnings) *
+                                100
+                              ).toFixed(1)}
+                              % vs last month
                             </span>
                           ) : (
                             <span className="text-gray-500"></span>
@@ -559,7 +603,8 @@ function Balance({ }) {
                     <div className="flex items-center text-base">
                       <InformationCircleIcon className="h-5 w-5 mr-2" />
                       <p>
-                        Available Funds will be sent to Stripe at the end of the day(12 AM UTC).
+                        Available Funds will be sent to Stripe at the end of the
+                        day(12 AM UTC).
                       </p>
                     </div>
                   </div>
@@ -568,7 +613,9 @@ function Balance({ }) {
                     <div className="flex items-center text-base">
                       <InformationCircleIcon className="h-5 w-5 mr-2" />
                       <p>
-                        In some cases, it may take 7-10 days for your payments to be transferred after a class concludes. This delay is due to Stripe's standard payment processing timelines.
+                        In some cases, it may take 7-10 days for your payments
+                        to be transferred after a class concludes. This delay is
+                        due to Stripe's standard payment processing timelines.
                       </p>
                     </div>
                   </div>
@@ -657,21 +704,35 @@ function Balance({ }) {
                         {bookingsData.map((transaction, index) => (
                           <tr
                             key={index}
-                            className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                              } hover:bg-gray-100`}
+                            className={`${
+                              index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                            } hover:bg-gray-100`}
                           >
                             <td className="px-4 py-2 text-sm text-nowrap text-gray-800 border border-gray-200">
-                              {moment(transaction.startTime).format("DD-MM-YY / hh:mm A")}
+                              {moment(transaction.startTime).format(
+                                "DD-MM-YY / hh:mm A"
+                              )}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-800 border border-gray-200">
                               ${(transaction.pendingAmount / 100).toFixed(2)}
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-800 border border-gray-200 capitalize">
-                              {moment(transaction.startTime).format("YY DD MM") === moment().format("YY DD MM") && !transaction.isTransfered
-                                ? <div className="bg-green-400 text-white p-2 rounded-lg w-max">Available</div>
-                                : transaction.isTransfered
-                                  ? <div className="bg-blue-400 text-white p-2 rounded-lg w-max">Sent to Stripe</div>
-                                  : <div className="bg-red-400 text-white p-2 rounded-lg w-max">Pending</div>}
+                              {moment(transaction.startTime).format(
+                                "YY DD MM"
+                              ) === moment().format("YY DD MM") &&
+                              !transaction.isTransfered ? (
+                                <div className="bg-green-400 text-white p-2 rounded-lg w-max">
+                                  Available
+                                </div>
+                              ) : transaction.isTransfered ? (
+                                <div className="bg-blue-400 text-white p-2 rounded-lg w-max">
+                                  Sent to Stripe
+                                </div>
+                              ) : (
+                                <div className="bg-red-400 text-white p-2 rounded-lg w-max">
+                                  Pending
+                                </div>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -679,9 +740,10 @@ function Balance({ }) {
                     </table>
                   </div>
                 )}
-                {!bookingsData || !bookingsData.length > 0 && (
+                {!bookingsData ||
+                  (!bookingsData.length > 0 && (
                     <div className="text-center">No Transactions</div>
-                  )}
+                  ))}
               </div>
             </div>
           </div>
