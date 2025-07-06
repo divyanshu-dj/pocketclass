@@ -82,7 +82,7 @@ function SuperInstructorCard({
               </Button>
             )}
           </div>
-          <div className="border backdrop-blur-[5.75px] bg-[rgba(81,76,78,0.50)] box-border flex justify-center items-center flex-col w-10 h-10 rounded-[20px] border-solid border-[white]">
+          <div className="box-border flex justify-center items-center flex-col w-10 h-10 rounded-[20px]">
             {isLoading ? (
               <Skeleton
                 variant="circular"
