@@ -52,8 +52,11 @@ const NewHeader = ({
     handleCategorySelection(category);
 
     const player = playerRefs.current[index];
-    console.log("Player:", player);
-    player.play();
+    const playerMob = playerRefs.current[index + 3];
+    if (player) player.stop();
+    if (playerMob) playerMob.stop();
+    if (player) player.play();
+    if (playerMob) playerMob.play();
   };
 
   useEffect(() => {
@@ -280,15 +283,16 @@ const NewHeader = ({
             router.pathname === "/" ? "z-[9000]" : "dm2:z-50 z-[9000]"
           }relative top-0 max-md:pt-4 max-md:pb-3 py-6  box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
         >
+          <div className="flex items-center justify-start flex-[1]">
           <Link className="left-section cursor-pointer" href="/">
             <img
               src="/assets/image_5c0480a2.png"
               className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
             />
           </Link>
-
+          </div>
           {/* Category Buttons */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex justify-center flex-[2]">
             <div
               className={`transition duration-500 ${
                 isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
@@ -305,8 +309,8 @@ const NewHeader = ({
                       className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                     >
                       <Player
-                        id={`player-${index}`}
-                        lottieRef={(el) => (playerRefs.current[index] = el)}
+                        id={`player-${index}-mob`}
+                        lottieRef={(el) => (playerRefs.current[index+3] = el)}
                         autoplay
                         loop={false}
                         src={category.jsonPath}
@@ -331,7 +335,7 @@ const NewHeader = ({
             </div>
           </div>
 
-          <div className="flex justify-start items-center flex-row gap-4">
+          <div className="flex justify-end items-center flex-row gap-4 flex-[1]">
             {!loading ? (
               user ? (
                 <div className="flex items-center gap-4">
@@ -349,7 +353,7 @@ const NewHeader = ({
                       ) : (
                         <p
                           onClick={() => router.push("/createClass")}
-                          className="text-sm lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150"
+                          className="text-sm whitespace-nowrap lg:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150"
                         >
                           Create Class
                         </p>
