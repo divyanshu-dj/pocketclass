@@ -49,27 +49,27 @@ function RecentlyViewedSection({
         const recentlyViewedClasses =
           JSON.parse(localStorage.getItem("recentlyViewedClasses")) || [];
         if (user && user.uid) {
-            // If user is logged in, fetch their recently viewed classes from Firestore
-            const userViewedClassesRef = firestoreDoc(
-                db,
-                "Users",
-                user.uid
-            );
-            const userViewedClassesDoc = await getDoc(userViewedClassesRef);
-            if (userViewedClassesDoc.exists()) {
-                const userViewedClassesData = userViewedClassesDoc.data();
-                if (userViewedClassesData.recentlyViewedClasses) {
-                    // If user has recently viewed classes which does not exist in localStorage, add them to the list
-                    const userRecentlyViewed = userViewedClassesData.recentlyViewedClasses;
-                    userRecentlyViewed.forEach(item => {
-                        if (!recentlyViewedClasses.some(rc => rc.id === item.id)) {
-                            recentlyViewedClasses.push(item);
-                        }
-                    });
+          // If user is logged in, fetch their recently viewed classes from Firestore
+          const userViewedClassesRef = firestoreDoc(
+            db,
+            "Users",
+            user.uid
+          );
+          const userViewedClassesDoc = await getDoc(userViewedClassesRef);
+          if (userViewedClassesDoc.exists()) {
+            const userViewedClassesData = userViewedClassesDoc.data();
+            if (userViewedClassesData.recentlyViewedClasses) {
+              // If user has recently viewed classes which does not exist in localStorage, add them to the list
+              const userRecentlyViewed = userViewedClassesData.recentlyViewedClasses;
+              userRecentlyViewed.forEach(item => {
+                if (!recentlyViewedClasses.some(rc => rc.id === item.id)) {
+                  recentlyViewedClasses.push(item);
                 }
+              });
             }
+          }
         }
-        
+
         if (recentlyViewedClasses.length === 0) {
           setClasses([]);
           return;
@@ -89,7 +89,7 @@ function RecentlyViewedSection({
             try {
               const classRef = firestoreDoc(db, "classes", classId);
               const classDoc = await getDoc(classRef);
-              
+
               if (!classDoc.exists()) {
                 return null;
               }
@@ -121,14 +121,14 @@ function RecentlyViewedSection({
               const avgRating =
                 classReviews.length > 0
                   ? classReviews.reduce(
-                      (acc, rev) =>
-                        acc +
-                        (rev.qualityRating +
-                          rev.recommendRating +
-                          rev.safetyRating) /
-                          3,
-                      0
-                    ) / classReviews.length
+                    (acc, rev) =>
+                      acc +
+                      (rev.qualityRating +
+                        rev.recommendRating +
+                        rev.safetyRating) /
+                      3,
+                    0
+                  ) / classReviews.length
                   : 0;
 
               classData.averageRating = avgRating;
@@ -187,45 +187,49 @@ function RecentlyViewedSection({
       </div>
       <div className="relative">
         {/* Left scroll arrow */}
-        <button 
+        <button
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
+
         {/* Right scroll arrow */}
-        <button 
+        <button
           onClick={scrollRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
-        <div 
+
+        <div
           ref={scrollContainerRef}
-          id="classes-recent" 
+          id="classes-recent"
           className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex px-12"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading
             ? Array(4)
-                .fill(null)
-                .map((_, index) => (
+              .fill(null)
+              .map((_, index) => (
+                <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
                   <InstructorSection key={index} loading={true} />
-                ))
+                </div>
+              ))
             : displayedClasses.map((classItem) => (
+              <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
                 <InstructorSection
                   key={classItem.id}
                   classId={classItem.id}
                   instructor={classItem}
                   loading={false}
                 />
-              ))}
+              </div>
+            ))}
         </div>
       </div>
     </div>
