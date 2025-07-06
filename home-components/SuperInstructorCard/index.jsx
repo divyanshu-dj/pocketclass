@@ -74,7 +74,7 @@ function SuperInstructorCard({
             : `url(${instructorImg})`,
         }}
       >
-        <div className="box-border flex justify-between items-center w-full pt-0">
+        <div className="box-border absolute flex justify-between items-center w-full left-0 px-2">
           <div className="w-[55.15%] grow-0 shrink-0 basis-auto box-border pb-3.5">
             {superInstructor && (
               <Button className="bg-[white] [font-family:'DM_Sans',sans-serif] text-sm font-bold text-[#261f22] min-w-[135px] h-[26px] w-[135px] cursor-pointer block box-border rounded-[100px] border-[none]">

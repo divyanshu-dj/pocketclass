@@ -17,7 +17,7 @@ function MusicianProfileCard1({ instructor, router }) {
   };
 
   return (
-    <div className="flex flex-col justify-between w-full px-[15px] py-4 bg-white rounded-lg">
+    <div className="flex z-[0] flex-col justify-between rounded-2xl w-full px-[15px] py-4 pb-0 bg-white rounded-lg">
       {/* Top Info Section */}
       <div>
         <div className="flex justify-between items-start gap-2 w-full">
@@ -62,34 +62,7 @@ function MusicianProfileCard1({ instructor, router }) {
       </div>
 
       {/* Bottom Section: Instructor Info Full Width + Right Aligned */}
-      <div className="mt-2 w-full text-[#7d797a] hover:text-[#261f22] justify-end items-center flex">
-        <div className="hover:bg-gray-200 px-[15px] flex px-2 py-1 rounded-xl w-fit h-fit justify-end items-center gap-2">
-          <p className="truncate text-base font-bold">
-          By{" "}
-          {(() => {
-            const name = instructor?.instructorName || "instructor";
-            const [first] = name.trim().split(/\s+/);
-            return first;
-          })()}
-        </p>
-        {instructor?.instructorImage ? (
-          <img
-            src={instructor.instructorImage}
-            alt="Instructor"
-            className="w-[30px] h-[30px] rounded-full object-cover flex-shrink-0"
-          />
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-[30px] h-[30px] rounded-full flex-shrink-0 text-[#888]"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
-          </svg>
-        )}
-        </div>
-      </div>
+      
     </div>
   );
 }
