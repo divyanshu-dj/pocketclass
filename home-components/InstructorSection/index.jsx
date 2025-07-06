@@ -51,7 +51,11 @@ function InstructorSection({ classId, instructor, loading }) {
       </div>
 
       {/* Bottom Section - "By" */}
-      <div className="transition duration-300 ease-in-out flex justify-end px-2">
+      <div onClick={(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        router.push(`/instructor?class=${classId}&creator=${instructor.classCreator}`);
+      }} className="transition duration-300 ease-in-out flex justify-end px-2">
         <div className="cursor-pointer flex items-center gap-1 px-3 py-1 text-[#7d797a] hover:text-[#000] hover:bg-gray-200 rounded-xl max-w-full overflow-hidden">
           <p className="text-base font-bold truncate max-w-full">
             By{" "}
