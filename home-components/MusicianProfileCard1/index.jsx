@@ -55,14 +55,10 @@ function MusicianProfileCard1({ instructor, router }) {
         </div>
 
         {/* Rating */}
-        <div className="flex items-center gap-2 mt-2">
-          <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
-          <p className="text-base font-bold text-[#261f22]">{rating?.toFixed(1)}</p>
-        </div>
       </div>
 
       {/* Bottom Section: Instructor Info Full Width + Right Aligned */}
-      
+
     </div>
   );
 }
