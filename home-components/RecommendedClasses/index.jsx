@@ -52,10 +52,10 @@ function RecommendedClassesSection({
         // Get user's recently viewed classes for recommendation analysis
         const recentlyViewedClasses =
           JSON.parse(localStorage.getItem("recentlyViewedClasses")) || [];
-        
+
         let userRecentlyViewed = [];
         let userBookedClasses = [];
-        
+
         if (user && user.uid) {
           // Get user's recently viewed classes from Firestore
           const userViewedClassesRef = firestoreDoc(db, "Users", user.uid);
@@ -86,16 +86,16 @@ function RecommendedClassesSection({
           setDisplayRec(false);
           return;
         }
-        
+
         const viewedClassIds = allViewedClasses.map(item => typeof item === 'string' ? item : item.id);
         const bookedClassIds = userBookedClasses.map(booking => booking.classId);
-        
+
         // Get categories and subcategories from viewed and booked classes
         const viewedCategories = new Set();
         const viewedSubCategories = new Set();
         const bookedCategories = new Set();
         const bookedSubCategories = new Set();
-        
+
         // Analyze viewed classes
         if (viewedClassIds.length > 0) {
           const viewedClassesData = await Promise.all(
@@ -186,12 +186,14 @@ function RecommendedClassesSection({
               const instructorDoc = await getDoc(instructorRef);
               if (instructorDoc.exists()) {
                 classData.name = classData.Name || "N/A";
-                classData.profileImage = classData.Images?.[0] || "N/A";
+                classData.instructorImage = instructorDoc.data().profileImage;
+                classData.profileImage = classData.Images?.[0];
                 classData.category = classData.Category || "N/A";
-                classData.instructorName = instructorDoc.data().name || "N/A";
+                classData.instructorName = instructorDoc.data().firstName;
                 classData.instructorData = instructorDoc.data();
               }
             }
+            console.log("classData", classData);
 
             // Calculate average rating for this class
             const classReviews = reviews.filter(
@@ -200,14 +202,14 @@ function RecommendedClassesSection({
             const avgRating =
               classReviews.length > 0
                 ? classReviews.reduce(
-                    (acc, rev) =>
-                      acc +
-                      (rev.qualityRating +
-                        rev.recommendRating +
-                        rev.safetyRating) /
-                        3,
-                    0
-                  ) / classReviews.length
+                  (acc, rev) =>
+                    acc +
+                    (rev.qualityRating +
+                      rev.recommendRating +
+                      rev.safetyRating) /
+                    3,
+                  0
+                ) / classReviews.length
                 : 0;
 
             classData.averageRating = avgRating;
@@ -241,7 +243,7 @@ function RecommendedClassesSection({
             }
 
             // 2. Behavioral Signals (View-Based) - Weight: 0.2
-            const viewFrequency = allViewedClasses.filter(viewed => 
+            const viewFrequency = allViewedClasses.filter(viewed =>
               (typeof viewed === 'string' ? viewed : viewed.id) === classData.id
             ).length;
             viewingBehavior = Math.min(viewFrequency * 2, 10);
@@ -254,34 +256,34 @@ function RecommendedClassesSection({
             if (bookedSubCategories.has(classData.SubCategory) || viewedSubCategories.has(classData.SubCategory)) {
               subcategoryMatch = 10; // High weight for subcategory match
             }
-            if (bookedCategories.has(classData.Category) || bookedCategories.has(classData.Type) || 
-                viewedCategories.has(classData.Category) || viewedCategories.has(classData.Type)) {
+            if (bookedCategories.has(classData.Category) || bookedCategories.has(classData.Type) ||
+              viewedCategories.has(classData.Category) || viewedCategories.has(classData.Type)) {
               categoryMatch = 6; // Lower weight for category match
             }
-            
+
             contentMatch = subcategoryMatch + categoryMatch;
 
             // 4. Class Quality & Popularity - Weight: 0.15
             let qualityScore = 0;
-            
+
             // Instructor rating
             const instructorRating = classData.instructorData?.rating || 0;
             qualityScore += instructorRating * 1.5;
-            
+
             // Class rating
             qualityScore += avgRating * 1.5;
-            
+
             // Review count (social proof)
             qualityScore += Math.min(classReviews.length * 0.3, 3);
-            
+
             // Booking count (popularity)
             qualityScore += Math.min(classBookings.length * 0.2, 2);
-            
+
             // TopRated bonus
             if (classData.TopRated) {
               qualityScore += 3;
             }
-            
+
             classQuality = Math.min(qualityScore, 10);
 
             // 5. Location Score - Weight: 0.15
@@ -292,10 +294,10 @@ function RecommendedClassesSection({
               const R = 6371; // Earth's radius in km
               const dLat = (classData.latitude - userLocation.lat) * Math.PI / 180;
               const dLon = (classData.longitude - userLocation.lng) * Math.PI / 180;
-              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                        Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(classData.latitude * Math.PI / 180) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(classData.latitude * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
               const distance = R * c;
 
               // Scoring: closer = higher score
@@ -309,11 +311,11 @@ function RecommendedClassesSection({
             }
 
             // Final recommendation score with weights
-            const recommendationScore = 
-              0.3 * bookingSimilarity + 
-              0.2 * viewingBehavior + 
-              0.2 * contentMatch + 
-              0.15 * classQuality + 
+            const recommendationScore =
+              0.3 * bookingSimilarity +
+              0.2 * viewingBehavior +
+              0.2 * contentMatch +
+              0.15 * classQuality +
               0.15 * locationProximity;
 
             classData.recommendationScore = recommendationScore;
@@ -374,6 +376,8 @@ function RecommendedClassesSection({
     return null;
   }
 
+  console.log(displayedClasses)
+
   // Always show recommendations section
   return (
     <div className="box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
@@ -386,45 +390,49 @@ function RecommendedClassesSection({
       </div>
       <div className="relative">
         {/* Left scroll arrow */}
-        <button 
+        <button
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
+
         {/* Right scroll arrow */}
-        <button 
+        <button
           onClick={scrollRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
-        <div 
+
+        <div
           ref={scrollContainerRef}
-          id="classes-recommended" 
+          id="classes-recommended"
           className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex px-12"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading
             ? Array(4)
-                .fill(null)
-                .map((_, index) => (
+              .fill(null)
+              .map((_, index) => (
+                <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
                   <InstructorSection key={index} loading={true} />
-                ))
+                </div>
+              ))
             : displayedClasses.map((classItem) => (
+              <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
                 <InstructorSection
                   key={classItem.id}
                   classId={classItem.id}
                   instructor={classItem}
                   loading={false}
                 />
-              ))}
+              </div>
+            ))}
         </div>
       </div>
     </div>
