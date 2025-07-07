@@ -205,7 +205,7 @@ export default function UpdateClass() {
             {loadingInstructor ? (
                 <div className="max-w-6xl mx-auto px-4 animate-pulse h-40 bg-gray-200 rounded-lg my-4" />
             ) : (
-                <InstructorImage instructorData={instructor} onMessageClick={openChat} />
+                <InstructorImage user={user} instructorData={instructor} onMessageClick={openChat} />
             )}
 
             {loadingClasses ? (

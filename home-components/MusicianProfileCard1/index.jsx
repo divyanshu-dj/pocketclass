@@ -17,7 +17,7 @@ function MusicianProfileCard1({ instructor, router }) {
   };
 
   return (
-    <div className="flex z-[0] flex-col justify-between rounded-2xl w-full px-[15px] py-4 pb-0 bg-white rounded-lg">
+    <div className="flex z-[0] cursor-default flex-col justify-between rounded-2xl w-full px-[15px] py-4 pb-0 bg-white rounded-lg">
       {/* Top Info Section */}
       <div>
         <div className="flex justify-between items-start gap-2 w-full">
