@@ -71,7 +71,7 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
       setPendingGoogleCredential(credential);
       setStep("role");
     } catch (err) {
-      setErrorMessage("Google sign-in failed.");
+      toast.error("Google sign-in failed.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -249,9 +249,6 @@ export default function LoginModal({ onClose, grouped, setDisplayConfirmation, s
                 {isLoading ? "Signing in..." : "Continue with Google"}
               </button>
 
-              {errorMessage && (
-                <p className="text-sm text-red-600 text-center mt-4">{errorMessage}</p>
-              )}
             </div>
 
             {/* Role Selection */}
