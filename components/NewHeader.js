@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
 import dynamic from "next/dynamic";
+import { faL } from "@fortawesome/free-solid-svg-icons";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
@@ -142,6 +143,7 @@ const NewHeader = ({
 
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isMenuShrunk, setIsMenuShrunk] = useState(false);
+  const [hideIcons, setHideIcons] = useState(false);
   const [isMenuSmall, setMenuSmall] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
@@ -167,6 +169,26 @@ const NewHeader = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, [isSearchExpanded]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+      if (window.scrollY > 25) {
+        setHideIcons(true);
+      } else if (window.scrollY <= 25) {
+        setHideIcons(false);
+      }
+    };
+
+    if (router.pathname === "/")
+      window.addEventListener("scroll", handleScroll);
+    else {
+      setHideIcons(false);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -517,7 +539,7 @@ const NewHeader = ({
             )}
           </div>
         </div>
-        <div className="flex w-full justify-center mb-6 md:hidden">
+        <div className={`flex w-full justify-center mb-6 md:hidden ${hideIcons ? "hidden" : ""}`}>
             <div
               className={`transition duration-500 ${
                 isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
