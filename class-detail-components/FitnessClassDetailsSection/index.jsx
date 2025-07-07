@@ -354,13 +354,11 @@ function FitnessClassDetailsSection({
           />
         </div>
         <div className="hidden xl:block w-full max-w-[320px]">
-          <div className="sticky top-[90px] bg-white shadow-md rounded-2xl px-6 py-6">
-            <DynamicButtonSection
-              classId={classId}
-              classData={classData}
-              instructorId={classCreatorData?.userUid}
-            />
-          </div>
+          <DynamicButtonSection
+            classId={classId}
+            classData={classData}
+            instructorId={classCreatorData?.userUid}
+          />
         </div>
       </div>
     </div>

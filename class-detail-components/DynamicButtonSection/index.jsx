@@ -11,7 +11,7 @@ import { db, auth } from "../../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import ClassLocationMap from "../../components/ClassLocationMap";
 import Login from "../BookingComponent/LoginModal"
 
@@ -29,7 +29,6 @@ function DynamicButtonSection({
 
   useEffect(() => {
     if (showBooking) {
-      toast.info("Redirecting to message page");
       document.getElementById("message-button").click();
     }
   }, [showBooking])
@@ -37,8 +36,6 @@ function DynamicButtonSection({
   const handleChatButton = async () => {
     if (!user) {
       setShowLogin(true);
-      console.log("PLease Login to chat")
-      toast.warning("Please login to chat with instructor");
       return;
     }
 
@@ -98,53 +95,42 @@ function DynamicButtonSection({
   };
 
   return (
-    <div className="flex justify-center items-stretch flex-col grow-0 shrink-0 basis-auto">
-      <Button
-        style={below ? { margin: "auto", width: "60%" } : {}}
-        onClick={() =>
-          scrollToBookings()
-        }
-        className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105"
-      >
-        <span className="[font-family:Inter,sans-serif] text-base font-semibold">
-          Booking schedule
-        </span>
-      </Button>
-      <Button
-        id="message-button"
-        style={below ? { margin: "auto", width: "60%", marginTop: "1rem" } : {}}
-        onClick={handleChatButton}
-        className="mb-[1rem] mt-2 bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-2 border-solid border-[#261f22] transition-all duration-300 ease-in-out hover:bg-[#f8f8f8] hover:shadow-md hover:scale-105"
-      >
-        Send message
-      </Button>
-
+    <div>
       {showLogin && <Login setGroupEmails={[]} setNumberOfGroupMembers={0} grouped={grouped} onClose={() => setShowLogin(false)} setShowBooking={setShowBooking} />}
+      <div className="sticky top-[90px] bg-white shadow-md rounded-2xl px-6 py-6">
+        <div className="flex justify-center items-stretch flex-col grow-0 shrink-0 basis-auto">
+          <Button
+            style={below ? { margin: "auto", width: "60%" } : {}}
+            onClick={() =>
+              scrollToBookings()
+            }
+            className="bg-[#261f22] [font-family:Inter,sans-serif] text-base font-semibold text-[white] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-[none] transition-all duration-300 ease-in-out hover:bg-[#3d3438] hover:shadow-lg hover:scale-105"
+          >
+            <span className="[font-family:Inter,sans-serif] text-base font-semibold">
+              Booking schedule
+            </span>
+          </Button>
+          <Button
+            id="message-button"
+            style={below ? { margin: "auto", width: "60%", marginTop: "1rem" } : {}}
+            onClick={handleChatButton}
+            className="mb-[1rem] mt-2 bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-2 border-solid border-[#261f22] transition-all duration-300 ease-in-out hover:bg-[#f8f8f8] hover:shadow-md hover:scale-105"
+          >
+            Send message
+          </Button>
 
-      {classData && (
-        <div className="mb-8">
-          {/* <h3 className="text-lg font-bold mb-4">Location</h3> */}
-          <ClassLocationMap
-            longitude={classData.longitude}
-            latitude={classData.latitude}
-            address={classData.Address}
-          />
+          {classData && (
+            <div className="mb-8">
+              {/* <h3 className="text-lg font-bold mb-4">Location</h3> */}
+              <ClassLocationMap
+                longitude={classData.longitude}
+                latitude={classData.latitude}
+                address={classData.Address}
+              />
+            </div>
+          )}
         </div>
-      )}
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        toastClassName="!z-[20050]"
-        bodyClassName="text-sm"
-      />
+      </div>
     </div>
   );
 }
