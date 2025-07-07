@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
 import dynamic from "next/dynamic";
+import { faL } from "@fortawesome/free-solid-svg-icons";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
@@ -46,6 +47,29 @@ const NewHeader = ({
   const videoRefs = useRef([]);
 
   const [activeKey, setActiveKey] = useState("sport");
+  const navbarRef = useRef(null);
+  
+  // State for menu shrinking and responsive behavior
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isMenuShrunk, setIsMenuShrunk] = useState(false);
+  const [hideIcons, setHideIcons] = useState(false);
+  const [isMenuSmall, setMenuSmall] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
+  // Set navbar height as CSS custom property for child components
+  useEffect(() => {
+    const updateNavbarHeight = () => {
+      if (navbarRef.current) {
+        const height = navbarRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--navbar-height', `${height}px`);
+      }
+    };
+
+    updateNavbarHeight();
+    window.addEventListener('resize', updateNavbarHeight);
+    
+    return () => window.removeEventListener('resize', updateNavbarHeight);
+  }, [isMenuShrunk, isMenuSmall]);
 
   const handleCategoryClick = (category, index) => {
     setActiveKey(category);
@@ -140,11 +164,6 @@ const NewHeader = ({
     user && getData();
   }, [user]);
 
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [isMenuShrunk, setIsMenuShrunk] = useState(false);
-  const [isMenuSmall, setMenuSmall] = useState(false);
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.innerWidth < 768) return;
@@ -167,6 +186,26 @@ const NewHeader = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, [isSearchExpanded]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+      if (window.scrollY > 25) {
+        setHideIcons(true);
+      } else if (window.scrollY <= 25) {
+        setHideIcons(false);
+      }
+    };
+
+    if (router.pathname === "/")
+      window.addEventListener("scroll", handleScroll);
+    else {
+      setHideIcons(false);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -276,6 +315,7 @@ const NewHeader = ({
             ? "h-[90px] dm2:h-[100px]"
             : `${isMenuSmall ? "h-auto dm2:h-[100px]" : "h-auto"}`
         }`}
+        ref={navbarRef}
       >
         {/*NavBar Top Part*/}
         <div
@@ -284,12 +324,12 @@ const NewHeader = ({
           }relative top-0 max-md:pt-4 max-md:pb-3 py-6  box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
         >
           <div className="flex items-center justify-start flex-[1]">
-          <Link className="left-section cursor-pointer" href="/">
-            <img
-              src="/assets/image_5c0480a2.png"
-              className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
-            />
-          </Link>
+            <Link className="left-section cursor-pointer" href="/">
+              <img
+                src="/assets/image_5c0480a2.png"
+                className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
+              />
+            </Link>
           </div>
           {/* Category Buttons */}
           <div className="hidden md:flex justify-center flex-[2]">
@@ -310,7 +350,7 @@ const NewHeader = ({
                     >
                       <Player
                         id={`player-${index}-mob`}
-                        lottieRef={(el) => (playerRefs.current[index+3] = el)}
+                        lottieRef={(el) => (playerRefs.current[index + 3] = el)}
                         autoplay
                         loop={false}
                         src={category.jsonPath}
@@ -517,57 +557,63 @@ const NewHeader = ({
             )}
           </div>
         </div>
-        <div className="flex w-full justify-center mb-6 md:hidden">
-            <div
-              className={`transition duration-500 ${
-                isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
-              }`}
-            >
-              <div className="flex space-x-2.5 items-center">
-                {categoryData.map((category, index) => (
-                  <div key={category.name}>
-                    <button
-                      key={category.name}
-                      onClick={() =>
-                        handleCategoryClick(category.name.toLowerCase(), index)
-                      }
-                      className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+        <div
+        style={{
+          display: router.pathname !== "/" ? "none" : "",
+        }}
+          className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center mb-6 md:hidden flex ${
+            hideIcons ? "max-h-0 -translate-y-[600%]" : "max-h-[200px] translate-y-0"
+          }`}
+        >
+          <div>
+            <div className="flex space-x-2.5 items-center">
+              {categoryData.map((category, index) => (
+                <div key={category.name}>
+                  <button
+                    key={category.name}
+                    onClick={() =>
+                      handleCategoryClick(category.name.toLowerCase(), index)
+                    }
+                    className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                  >
+                    <Player
+                      id={`player-${index}`}
+                      lottieRef={(el) => (playerRefs.current[index] = el)}
+                      autoplay
+                      loop={false}
+                      src={category.jsonPath}
+                      className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
+                    />
+                    <span
+                      className={`text-xs font-medium transition-colors ${
+                        activeKey === category.name.toLowerCase()
+                          ? "text-black"
+                          : "text-gray-500"
+                      }`}
                     >
-                      <Player
-                        id={`player-${index}`}
-                        lottieRef={(el) => (playerRefs.current[index] = el)}
-                        autoplay
-                        loop={false}
-                        src={category.jsonPath}
-                        className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
-                      />
-                      <span
-                        className={`text-xs font-medium transition-colors ${
-                          activeKey === category.name.toLowerCase()
-                            ? "text-black"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {category.name}
-                      </span>
-                      {activeKey === category.name.toLowerCase() && (
-                        <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      {category.name}
+                    </span>
+                    {activeKey === category.name.toLowerCase() && (
+                      <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                    )}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
         {/*NavBar Search Part*/}
-        <TeacherSearch
-          isShrunk={isMenuShrunk}
-          isMenuSmall={isMenuSmall}
-          expandMenu={() => setIsMenuShrunk(false)}
-          user={user}
-        />
+        <div className={`${(isMenuShrunk || (isMenuSmall && 
+          window.innerWidth > 800
+        )) ? 'flex items-center justify-center h-full absolute inset-0' : 'relative'}`}>
+          <TeacherSearch
+            isShrunk={isMenuShrunk}
+            isMenuSmall={isMenuSmall}
+            expandMenu={() => setIsMenuShrunk(false)}
+            user={user}
+          />
+        </div>
       </div>
-      
     </>
   );
 };
