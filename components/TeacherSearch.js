@@ -232,10 +232,12 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
   };
 
   return (
-    <div className={`menu-search-bar z-[100] relative w-full transition-all duration-500 mx-auto max-dm2:px-3 ${isShrunk ? 'max-w-[230px] h-[50px] translate-y-[-92px] lg:translate-y-[-75px]' :
-          `${isMenuSmall ? 'max-w-[400px] h-[54px] dm2:translate-y-[-75px]' : 'max-dm2:h-[54px] max-w-[650px]'}`
-        }`}>
-      <div className={`${user ? 'dm2:translate-y-[-20px] translate-y-[0px]' : ''}  transition duration-500`}>
+    <div 
+      className={`menu-search-bar z-[100] transition-all duration-500 mx-auto max-dm2:px-3 ${isShrunk ? 'max-w-[230px] h-[50px]' :
+          `${isMenuSmall ? 'max-w-[400px] h-[54px]' : 'max-dm2:h-[54px] max-w-[650px]'}`
+        }`}
+    >
+      <div className="transition duration-500 h-full">
         <div className="relative h-full" ref={dropdownRef}>
           <div className="absolute top-0 left-0 w-full h-full">
             <div className={`search-wrap-bg active-search ${isShrunk ? 'hidden' : 'block'}`}></div>
