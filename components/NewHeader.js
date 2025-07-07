@@ -558,6 +558,9 @@ const NewHeader = ({
           </div>
         </div>
         <div
+        style={{
+          display: router.pathname !== "/" ? "none" : "",
+        }}
           className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center mb-6 md:hidden flex ${
             hideIcons ? "max-h-0 -translate-y-[600%]" : "max-h-[200px] translate-y-0"
           }`}
@@ -600,7 +603,9 @@ const NewHeader = ({
           </div>
         </div>
         {/*NavBar Search Part*/}
-        <div className={`${isMenuShrunk ? 'flex items-center justify-center h-full absolute inset-0' : 'relative'}`}>
+        <div className={`${(isMenuShrunk || (isMenuSmall && 
+          window.innerWidth > 800
+        )) ? 'flex items-center justify-center h-full absolute inset-0' : 'relative'}`}>
           <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
