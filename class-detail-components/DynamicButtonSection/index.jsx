@@ -10,8 +10,10 @@ import {
 import { db, auth } from "../../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import ClassLocationMap from "../../components/ClassLocationMap";
+import Login from "../BookingComponent/LoginModal"
 
 function DynamicButtonSection({
   classId,
@@ -21,9 +23,21 @@ function DynamicButtonSection({
 }) {
   const [user] = useAuthState(auth);
   const router = useRouter();
+  const [showLogin, setShowLogin] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
+  const [grouped, setGrouped] = useState(false);
+
+  useEffect(() => {
+    if (showBooking) {
+      toast.info("Redirecting to message page");
+      document.getElementById("message-button").click();
+    }
+  }, [showBooking])
 
   const handleChatButton = async () => {
     if (!user) {
+      setShowLogin(true);
+      console.log("PLease Login to chat")
       toast.warning("Please login to chat with instructor");
       return;
     }
@@ -97,12 +111,15 @@ function DynamicButtonSection({
         </span>
       </Button>
       <Button
+        id="message-button"
         style={below ? { margin: "auto", width: "60%", marginTop: "1rem" } : {}}
         onClick={handleChatButton}
         className="mb-[1rem] mt-2 bg-transparent [font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] w-full h-[45px] cursor-pointer block box-border grow-0 shrink-0 basis-auto rounded-[100px] border-2 border-solid border-[#261f22] transition-all duration-300 ease-in-out hover:bg-[#f8f8f8] hover:shadow-md hover:scale-105"
       >
         Send message
       </Button>
+
+      {showLogin && <Login setGroupEmails={[]} setNumberOfGroupMembers={0} grouped={grouped} onClose={() => setShowLogin(false)} setShowBooking={setShowBooking} />}
 
       {classData && (
         <div className="mb-8">
@@ -114,6 +131,20 @@ function DynamicButtonSection({
           />
         </div>
       )}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastClassName="!z-[20050]"
+        bodyClassName="text-sm"
+      />
     </div>
   );
 }

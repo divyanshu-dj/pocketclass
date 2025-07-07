@@ -53,7 +53,7 @@ function InstructorSection({ classId, instructor, loading }) {
         </div>
 
         {/* Bottom Section - fixed at bottom */}
-        <div className="flex items-center gap-2 justify-between px-[15px] mt-auto w-full">
+        <div className="flex items-center cursor-default gap-2 justify-between px-[15px] mt-auto w-full">
           <div className="flex items-center gap-1 flex-shrink-0">
             <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
             <p className="text-base font-bold text-[#261f22]">{rating?.toFixed(1)}</p>

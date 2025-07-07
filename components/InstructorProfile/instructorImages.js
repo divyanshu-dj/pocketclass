@@ -2,8 +2,31 @@
 
 import React from "react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import Login from "../../class-detail-components/BookingComponent/LoginModal"
 
-export default function InstructorImage({ instructorData, onMessageClick }) {
+export default function InstructorImage({ user, instructorData, onMessageClick }) {
+  const [showLogin, setShowLogin] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
+  const [grouped, setGrouped] = useState(false);
+  useEffect(() => {
+    if (showBooking) {
+      toast.info("Redirecting to message page");
+      document.getElementById("message-button").click();
+    }
+  }, [showBooking])
+
+  const handleChatButton = async () => {
+    if (!user) {
+      setShowLogin(true);
+      console.log("PLease Login to chat")
+      toast.warning("Please login to chat with instructor");
+      return;
+    }
+    onMessageClick();
+  }
+
   return (
     <>
       <div className="relative w-full mx-auto">
@@ -46,6 +69,8 @@ export default function InstructorImage({ instructorData, onMessageClick }) {
         </div>
       </div>
 
+      {showLogin && <Login setGroupEmails={[]} setNumberOfGroupMembers={0} grouped={grouped} onClose={() => setShowLogin(false)} setShowBooking={setShowBooking} />}
+
       <div className="mt-16 text-center">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
           {instructorData?.firstName || "Instructor"}{" "}
@@ -56,6 +81,7 @@ export default function InstructorImage({ instructorData, onMessageClick }) {
       {/* Message Button */}
       <div className="relative w-full max-w-5xl mx-auto">
         <button
+          id="message-button"
           className="absolute right-4 -top-5 md:-top-16 md:right-8 z-10 
                bg-[#303030] text-white px-4 py-2 md:px-6 md:py-3 rounded 
                text-sm md:text-base font-medium shadow-lg 
@@ -63,7 +89,7 @@ export default function InstructorImage({ instructorData, onMessageClick }) {
                transition-all duration-300
                md:flex md:items-center 
                hidden md:inline-flex"
-          onClick={onMessageClick}
+          onClick={handleChatButton}
         >
           Message {instructorData?.firstName || ""}{" "}
           {instructorData?.lastName || ""}
@@ -90,6 +116,20 @@ export default function InstructorImage({ instructorData, onMessageClick }) {
             ></path>
           </svg>
         </button>
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          toastClassName="!z-[20050]"
+          bodyClassName="text-sm"
+        />
       </div>
     </>
   );
