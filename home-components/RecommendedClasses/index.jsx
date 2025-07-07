@@ -193,7 +193,6 @@ function RecommendedClassesSection({
                 classData.instructorData = instructorDoc.data();
               }
             }
-            console.log("classData", classData);
 
             // Calculate average rating for this class
             const classReviews = reviews.filter(
@@ -376,7 +375,6 @@ function RecommendedClassesSection({
     return null;
   }
 
-  console.log(displayedClasses)
 
   // Always show recommendations section
   return (
