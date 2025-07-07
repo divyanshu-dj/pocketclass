@@ -106,7 +106,6 @@ function RecentlyViewedSection({
                   classData.classCreator
                 );
                 const instructorDoc = await getDoc(instructorRef);
-                console.log(instructorDoc.data());
                 if (instructorDoc.exists()) {
                   classData.name = classData.Name || "N/A";
                   classData.profileImage = classData.Images?.[0] || "N/A";
