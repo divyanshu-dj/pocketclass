@@ -1324,6 +1324,11 @@ END:VCALENDAR`.trim();
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         price: finalPrice,
+        uEmail: user?.email,
+        uName: user?.displayName || user?.email,
+        uid: user?.uid,
+        classId: classId,
+        insId: instructorId,
       }),
     });
 
@@ -1331,9 +1336,11 @@ END:VCALENDAR`.trim();
 
     if (data?.clientSecret) {
       setStripeLoading(false);
-
+      console.log("Stripe session created successfully:", data);
       setStripeOptions({
         clientSecret: data.clientSecret,
+        customer: data.customerId,
+        customerSessionClientSecret: data.customerSessionSecret,
         bookingRef: bookingRef.id,
         appearance: {
           theme: "stripe",
@@ -2178,6 +2185,35 @@ const CheckoutForm = ({
     });
 
     if (!error && paymentIntent && paymentIntent?.status === "succeeded") {
+      const paymentMethodId = paymentIntent.payment_method;
+      // If payment Method ID exists, updatePaymentMethodId
+      if (paymentMethodId) {
+        try {
+          await fetch("/api/updatePaymentMethod", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user?.uid,
+              paymentMethodId: paymentMethodId,
+            }),
+          });
+        } catch (error) {
+          console.error("Error updating payment method:", error);
+        }
+      }
+
+      const customerId = paymentIntent.customer;
+      // Check if user already has stripeCustomerId
+      if (customerId) {
+        // Update user document with stripeCustomerId
+        const userDocRef = doc(db, "Users", user.uid);
+        await updateDoc(userDocRef, {
+          stripeCustomerId: customerId,
+        });
+      }
+      // Proceed with booking confirmation
       const bookingDocRef = doc(db, "Bookings", bookingRef);
 
       const bookingSnapshot = await getDoc(bookingDocRef);

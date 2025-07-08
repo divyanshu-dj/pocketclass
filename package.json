@@ -70,7 +70,7 @@
     "react-tooltip": "^5.28.0",
     "reactstrap": "^9.2.2",
     "sharp": "^0.33.4",
-    "stripe": "^13.10.0",
+    "stripe": "^18.3.0",
     "swiper": "^8.4.5",
     "tailwind-scrollbar-hide": "^1.1.7",
     "uuid": "^9.0.1",
