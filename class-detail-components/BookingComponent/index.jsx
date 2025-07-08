@@ -1335,6 +1335,10 @@ END:VCALENDAR`.trim();
       setStripeOptions({
         clientSecret: data.clientSecret,
         bookingRef: bookingRef.id,
+        appearance: {
+          theme: "stripe",
+        },
+        loader: "auto",
       });
     }
     setStripeLoading(false);
@@ -2539,7 +2543,12 @@ END:VCALENDAR`.trim();
         </div>
       </div>
       <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement />
+      <PaymentElement options={
+        {
+          layout: "tabs",
+          paymentMethodOrder: ["card", "link"],
+        }
+      }/>
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
