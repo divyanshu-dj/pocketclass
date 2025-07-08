@@ -455,7 +455,7 @@ const NewHeader = ({
                                 category === "instructor" ? "none" : "block",
                             }}
                           >
-                            <Link href={`/myPackages`}>My Packages</Link>
+                            <Link href={`/wallet`}>Wallet</Link>
                           </li>
                           {category !== "instructor" && (
                             <>
