@@ -332,7 +332,7 @@ export default function wallet() {
                       Buy a gift card
                     </h3>
                     <p className="text-gray-600 text-lg mb-6 max-w-md">
-                      Treat someone special to a Fresha gift card, valid at all
+                      Treat someone special to a Pocketclass gift card, valid at all
                       verified venues
                     </p>
 
