@@ -2328,7 +2328,7 @@ END:VCALENDAR`.trim();
             body: JSON.stringify({
               classId: mindBodyClassID,
               firstName: user?.displayName?.split(" ")[0] || user?.email,
-              lastName: user?.displayName?.split(" ")[1] || "User",
+              lastName: "(Pocketclass)",
             }),
           });
           console.log("Mindbody class booked successfully");
