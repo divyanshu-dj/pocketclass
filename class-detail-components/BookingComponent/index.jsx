@@ -6,7 +6,7 @@ import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { auth, db } from "../../firebaseConfig";
-import LoginModal from './LoginModal'
+import LoginModal from "./LoginModal";
 import {
   doc,
   getDoc,
@@ -54,8 +54,8 @@ export default function index({
   const { id } = router.query;
   const [timer, setTimer] = useState(null);
   const [agreeToTerms, setAgreeToTerms] = useState(true);
-  const [showLogin,setShowLogin] = useState(false);
-  const [showBooking,setShowBooking] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [schedule, setSchedule] = useState({
@@ -95,7 +95,8 @@ export default function index({
   const [maxDays, setMaxDays] = useState(30);
   const [packages, setPackages] = useState([]);
   const [packageClasses, setPackageClasses] = useState();
-  const [grouped,setGrouped] = useState(false);
+  const [grouped, setGrouped] = useState(false);
+  const [giftCardValue, setGiftcardValue] = useState(0);
 
   const hasCalendarConflict = (slotStart, slotEnd) => {
     const start = moment(slotStart, "YYYY-MM-DD HH:mm");
@@ -255,6 +256,31 @@ export default function index({
     };
 
     getPackages();
+  }, [user, classId]);
+
+  // Get Giftcards useEffect
+  useEffect(() => {
+    const getGiftcards = async () => {
+      if (!user || !user.uid || !classId) return;
+      try {
+        const giftcardsRef = collection(db, "giftCards");
+        const q = query(giftcardsRef, where("claimedBy", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        let totalGiftcardValue = 0;
+        const giftcards = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          totalGiftcardValue += data.available || 0;
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
+        setGiftcardValue(totalGiftcardValue);
+      } catch (error) {
+        console.error("Error fetching giftcards:", error);
+      }
+    };
+    getGiftcards();
   }, [user, classId]);
 
   const hasSlots = (date, schedule, bookedSlots, appointmentDuration) => {
@@ -558,10 +584,10 @@ export default function index({
   }, [mindbodySchedule, classId, selectedDate]);
 
   useEffect(() => {
-    if(showBooking){
+    if (showBooking) {
       document.getElementById("book-now-button").click();
     }
-  },[showBooking])
+  }, [showBooking]);
 
   const calculateRemainingGroupedClassSlots = () => {
     const selected = moment
@@ -577,7 +603,9 @@ export default function index({
       booking.groupSize ? booking.groupSize : 1
     );
     const remainingSlots =
-      classData.groupSize - bookingSizes.reduce((a, b) => a + b, 0) - midBodyBooked;
+      classData.groupSize -
+      bookingSizes.reduce((a, b) => a + b, 0) -
+      midBodyBooked;
 
     return remainingSlots;
   };
@@ -980,12 +1008,13 @@ export default function index({
       status: "Confirmed",
       meetingLink: meetingLink ? meetingLink : "",
       paymentStatus: "Paid",
-      paymentMethod: "Package",
+      paymentMethod: selectedPackage === "Credits" ? "Package" : selectedPackage == "GiftCard" ? "Giftcard" : "Stripe",
       timeZone: timeZone ? timeZone : "America/Toronto",
     });
 
-    const recipientEmails = `${user?.email}, ${instructorData.email}, ${mode === "Group" ? groupEmails.join(",") : ""
-      }`;
+    const recipientEmails = `${user?.email}, ${instructorData.email}, ${
+      mode === "Group" ? groupEmails.join(",") : ""
+    }`;
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
@@ -999,8 +1028,9 @@ X-LIC-LOCATION:${timeZone || "America/Toronto"}
 DTSTART;TZID=${timeZone || "America/Toronto"}:${formatDateTime(startDateTime)}
 DTEND;TZID=${timeZone || "America/Toronto"}:${formatDateTime(endDateTime)}
 LOCATION:${location}
-ORGANIZER;CN=${instructorData.firstName} ${instructorData.lastName
-      }:MAILTO:${organizer}
+ORGANIZER;CN=${instructorData.firstName} ${
+      instructorData.lastName
+    }:MAILTO:${organizer}
 STATUS:CONFIRMED
 ${meetingLink ? `X-GOOGLE-CONFERENCE:${meetingLink}` : ""}
 END:VEVENT
@@ -1016,8 +1046,9 @@ END:VCALENDAR`.trim();
     const htmlContent = `
       <div>
 
-      ${meetingLink
-        ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
+      ${
+        meetingLink
+          ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
               <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
                 Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${instructorData.lastName}</strong>.
               </p>
@@ -1029,13 +1060,14 @@ END:VCALENDAR`.trim();
                 <li style="font-size: 14px; color: #5f5f5f; margin-bottom: 5px;">Student: ${user?.email}</li>
               </ul>
             </div>`
-        : ""
+          : ""
       }
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
-        <p>We are excited to confirm a new booking for the class <strong>${classData.Name
-      }</strong>!</p>
+        <p>We are excited to confirm a new booking for the class <strong>${
+          classData.Name
+        }</strong>!</p>
         <h3>Booking Details:</h3>
         <table style="width: 100%; border-collapse: collapse;" border="1">
           <tr>
@@ -1056,21 +1088,24 @@ END:VCALENDAR`.trim();
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Time Zone:</strong></td>
-            <td style="padding: 8px;">${timeZone ? timeZone : "America/Toronto"
-      }</td>
+            <td style="padding: 8px;">${
+              timeZone ? timeZone : "America/Toronto"
+            }</td>
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price
-      }</td>
+            <td style="padding: 8px;">${
+              mode === "Group" ? classData.groupPrice : classData.Price
+            }</td>
           </tr>
-          ${meetingLink
-        ? `<tr>
+          ${
+            meetingLink
+              ? `<tr>
             <td style="padding: 8px;"><strong>Meeting Link:</strong></td>
             <td style="padding: 8px;"><a href="${meetingLink}">${meetingLink}</a></td>
           </tr>`
-        : ""
-      }
+              : ""
+          }
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
         <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
@@ -1105,19 +1140,6 @@ END:VCALENDAR`.trim();
       ]
     );
 
-    if (selectedPackage?.num_sessions) {
-      const docRef = await addDoc(collection(db, "Packages"), {
-        payment_intent_id: paymentIntent.id,
-        class_id: classId,
-        user_id: user?.uid,
-        num_sessions: selectedPackage?.num_sessions,
-        packagePrice,
-        price_per_session: packagePrice / selectedPackage?.num_sessions,
-        classes_left:
-          parseInt(selectedPackage?.num_sessions, 10) -
-          (numberOfGroupMembers ? numberOfGroupMembers : 1),
-      });
-    }
 
     setStripeOptions(null);
     toast.success("Booking confirmed!");
@@ -1150,87 +1172,6 @@ END:VCALENDAR`.trim();
       setShowLogin(true);
       return;
     }
-
-    if (packageClasses > 0 && selectedPackage === "Credits") {
-      setBookLoading(true);
-      const packagesRef = collection(db, "Packages");
-      const q = query(
-        packagesRef,
-        where("class_id", "==", classId),
-        where("user_id", "==", user.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      const packageClasses = querySnapshot.docs.length;
-      let pricePerSession = querySnapshot.docs[0].data().price_per_session;
-      let payment_intent_id = querySnapshot.docs[0].data().payment_intent_id;
-      let isPackage = false;
-      let classDeduct = 1;
-      if (packageClasses > 0) {
-        for (const doc of querySnapshot.docs) {
-          const data = doc.data();
-          if (data.classes_left > 0) {
-            if (selectedSlot.classId) {
-              classDeduct = groupEmails.length;
-              if (groupEmails.length > data.classes_left) {
-                continue;
-              }
-            }
-            await updateDoc(doc.ref, {
-              classes_left: data.classes_left - classDeduct,
-            });
-            pricePerSession = data.price_per_session;
-            payment_intent_id = data.payment_intent_id;
-            isPackage = true;
-            break;
-          }
-        }
-      }
-      if (isPackage) {
-        setPackageClasses((prev) => prev - classDeduct);
-        handleSubmit(pricePerSession, payment_intent_id);
-        return;
-      }
-    }
-    setDisplayConfirmation(false);
-    setStripeLoading(true);
-    const expiry = now.clone().add(5, "minutes").toISOString();
-    setTimer(300);
-
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev > 0) return prev - 1;
-        else {
-          clearInterval(interval);
-          setStripeOptions(null);
-          toast.error("Booking session expired. Please try again.");
-          setStripeLoading(false);
-        }
-        return 0;
-      });
-    }, 1000);
-
-    const bookingData = {
-      isAgreedToTerms: agreeToTerms,
-      student_id: studentId,
-      instructor_id: instructorId,
-      class_id: classId,
-      student_name: studentName,
-      startTime: moment
-        .utc(
-          `${selectedSlot.date} ${selectedSlot.startTime}`,
-          "YYYY-MM-DD HH:mm"
-        )
-        .toISOString(),
-      endTime: moment
-        .utc(`${selectedSlot.date} ${selectedSlot.endTime}`, "YYYY-MM-DD HH:mm")
-        .toISOString(),
-      status: "Pending",
-      groupEmails: groupEmails,
-      groupSize: numberOfGroupMembers,
-      expiry,
-      mode: selectedSlot.classId ? "group" : "individual",
-      createdAt: serverTimestamp(),
-    };
 
     const bookingsRef = collection(db, "Bookings");
     const slotQuery = query(
@@ -1292,23 +1233,63 @@ END:VCALENDAR`.trim();
       }
     }
 
-    const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
+    if (packageClasses > 0 && selectedPackage === "Credits") {
+      setBookLoading(true);
+      const packagesRef = collection(db, "Packages");
+      const q = query(
+        packagesRef,
+        where("class_id", "==", classId),
+        where("user_id", "==", user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const packageClasses = querySnapshot.docs.length;
+      let pricePerSession = querySnapshot.docs[0].data().price_per_session;
+      let payment_intent_id = querySnapshot.docs[0].data().payment_intent_id;
+      let isPackage = false;
+      let classDeduct = 1;
+      if (packageClasses > 0) {
+        for (const doc of querySnapshot.docs) {
+          const data = doc.data();
+          if (data.classes_left > 0) {
+            if (selectedSlot.classId) {
+              classDeduct = groupEmails.length;
+              if (groupEmails.length > data.classes_left) {
+                continue;
+              }
+            }
+            await updateDoc(doc.ref, {
+              classes_left: data.classes_left - classDeduct,
+            });
+            pricePerSession = data.price_per_session;
+            payment_intent_id = data.payment_intent_id;
+            isPackage = true;
+            break;
+          }
+        }
+      }
+      if (isPackage) {
+        setPackageClasses((prev) => prev - classDeduct);
+        handleSubmit(pricePerSession, payment_intent_id);
+        return;
+      }
+    }
+    setDisplayConfirmation(false);
     const packagePrice = selectedPackage?.num_sessions
       ? selectedPackage?.Price -
-      ((selectedPackage?.Discount
-        ? selectedPackage.Discount
-        : selectedPackage?.discountPercentage) *
-        selectedPackage?.Price) /
-      100
+        ((selectedPackage?.Discount
+          ? selectedPackage.Discount
+          : selectedPackage?.discountPercentage) *
+          selectedPackage?.Price) /
+          100
       : selectedSlot.classId
-        ? classData.groupPrice
-        : classData.Price;
+      ? classData.groupPrice
+      : classData.Price;
 
     const actualPrice = selectedPackage?.num_sessions
       ? packagePrice
       : isGroup
-        ? classData.groupPrice * numberOfGroupMembers
-        : classData.Price;
+      ? classData.groupPrice * numberOfGroupMembers
+      : classData.Price;
 
     let finalPrice = actualPrice;
 
@@ -1318,6 +1299,120 @@ END:VCALENDAR`.trim();
     } else if (discountType === "Fixed") {
       finalPrice -= discount;
     }
+
+    const stripeFee = finalPrice * 0.029 + 0.8;
+    const priceWithoutFee = finalPrice;
+    finalPrice += stripeFee;
+    finalPrice = finalPrice.toFixed(2);
+
+    if (selectedPackage == "GiftCard") {
+      setBookLoading(true);
+      const giftcardsRef = collection(db, "giftCards");
+      const q = query(giftcardsRef, where("claimedBy", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      let totalGiftcardValue = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        totalGiftcardValue += data.available;
+      });
+      if (totalGiftcardValue < finalPrice) {
+        toast.error(
+          "You do not have enough gift card balance to book this class."
+        );
+        setBookLoading(false);
+      } else {
+        // Reduce the gift cards value frim giftcard with highest value
+        const sortedDocs = querySnapshot.docs.sort(
+          (a, b) => b.data().available - a.data().available
+        );
+        let remainingPrice = finalPrice;
+        for (const doc of sortedDocs) {
+          const data = doc.data();
+          if (remainingPrice <= 0) break;
+          const available = data.available;
+          const giftcardRef = doc.ref;
+          if (available >= remainingPrice) {
+            // If the gift card has enough balance to cover the remaining price
+            await updateDoc(giftcardRef, {
+              available: available - remainingPrice,
+            });
+            remainingPrice = 0;
+          } else {
+            // If the gift card does not have enough balance, use it all and continue
+            await updateDoc(giftcardRef, {
+              available: 0,
+            });
+            remainingPrice -= available;
+          }
+        }
+        if (remainingPrice > 0) {
+          toast.error(
+            "You do not have enough gift card balance to book this class."
+          );
+          // Refund back the gift cards
+          for (const doc of sortedDocs) {
+            const data = doc.data();
+            const giftcardRef = doc.ref;
+            await updateDoc(giftcardRef, {
+              available: data.available + (finalPrice - remainingPrice),
+            });
+          }
+          setBookLoading(false);
+          return;
+        }
+        const giftcradPaymentIntent =
+          querySnapshot.docs[0].data().payment_intent_id || "GiftCard-NoIntent";
+        handleSubmit(priceWithoutFee, giftcradPaymentIntent);
+      }
+      return;
+    }
+    setStripeLoading(true);
+    const expiry = now.clone().add(5, "minutes").toISOString();
+    setTimer(300);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev > 0) return prev - 1;
+        else {
+          clearInterval(interval);
+          setStripeOptions(null);
+          toast.error("Booking session expired. Please try again.");
+          setStripeLoading(false);
+        }
+        return 0;
+      });
+    }, 1000);
+
+    const bookingDataPrice =
+      selectedPackage && selectedPackage.num_sessions
+        ? priceWithoutFee / selectedPackage.num_sessions
+        : priceWithoutFee;
+
+    const bookingData = {
+      isAgreedToTerms: agreeToTerms,
+      student_id: studentId,
+      instructor_id: instructorId,
+      class_id: classId,
+      student_name: studentName,
+      startTime: moment
+        .utc(
+          `${selectedSlot.date} ${selectedSlot.startTime}`,
+          "YYYY-MM-DD HH:mm"
+        )
+        .toISOString(),
+      endTime: moment
+        .utc(`${selectedSlot.date} ${selectedSlot.endTime}`, "YYYY-MM-DD HH:mm")
+        .toISOString(),
+      status: "Pending",
+      groupEmails: groupEmails,
+      groupSize: numberOfGroupMembers,
+      expiry,
+      mode: selectedSlot.classId ? "group" : "individual",
+      createdAt: serverTimestamp(),
+      price: bookingDataPrice,
+    };
+
+    const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
 
     const response = await fetch("/api/create-stripe-session", {
       method: "POST",
@@ -1463,12 +1558,13 @@ END:VCALENDAR`.trim();
                     key={i}
                     disabled={slot?.isBooked}
                     onClick={() => handleSlotClick(slot.date, slot)}
-                    className={`${baseClasses} ${slot?.isBooked
+                    className={`${baseClasses} ${
+                      slot?.isBooked
                         ? disabledClasses
                         : isSelected
-                          ? selectedClasses
-                          : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                      }`}
+                        ? selectedClasses
+                        : `bg-gray-100 cursor-pointer ${hoverClasses}`
+                    }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1501,9 +1597,9 @@ END:VCALENDAR`.trim();
                       slot.emptyClasses < 1 || slot?.hasConflict
                         ? disabledClasses
                         : isSelected
-                          ? selectedClasses
-                          : `bg-gray-100 cursor-pointer ${hoverClasses}`
-                      }`}
+                        ? selectedClasses
+                        : `bg-gray-100 cursor-pointer ${hoverClasses}`
+                    }`}
                   >
                     {slot.startTime} - {slot.endTime}
                   </button>
@@ -1571,8 +1667,9 @@ END:VCALENDAR`.trim();
             <div className="flex flex-col justify-start gap-3 items-center overflow-x-auto mb-3 md:flex-row">
               <button
                 onClick={() => setSelectedPackage(null)}
-                className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${selectedPackage === null && "border-logo-red bg-logo-red/5"
-                  }`}
+                className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${
+                  selectedPackage === null && "border-logo-red bg-logo-red/5"
+                }`}
               >
                 Single Lesson
                 <div className="font-normal">
@@ -1588,14 +1685,30 @@ END:VCALENDAR`.trim();
               {packageClasses > 0 && (
                 <button
                   onClick={() => setSelectedPackage("Credits")}
-                  className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${selectedPackage === "Credits" &&
+                  className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${
+                    selectedPackage === "Credits" &&
                     "border-logo-red bg-logo-red/5"
-                    }`}
+                  }`}
                 >
                   Credits
                   <div className="font-normal">
                     {/* Price per session */}
                     <p>Credits Left: {packageClasses}</p>
+                  </div>
+                </button>
+              )}
+              {giftCardValue > 0 && (
+                <button
+                  onClick={() => setSelectedPackage("GiftCard")}
+                  className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${
+                    selectedPackage === "GiftCard" &&
+                    "border-logo-red bg-logo-red/5"
+                  }`}
+                >
+                  Gift Card
+                  <div className="font-normal">
+                    {/* Price per session */}
+                    <p>${giftCardValue.toFixed(2)} left</p>
                   </div>
                 </button>
               )}
@@ -1605,8 +1718,9 @@ END:VCALENDAR`.trim();
                 classPackages.map((pkg, i) => (
                   <button
                     onClick={() => setSelectedPackage(pkg)}
-                    className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${selectedPackage === pkg && "border-logo-red bg-logo-red/5"
-                      }`}
+                    className={`bg-white min-w-max flex-grow font-bold w-full md:w-max px-6 py-2 border border-gray-300 hover:border-logo-red hover:bg-logo-red/5 text-black rounded ${
+                      selectedPackage === pkg && "border-logo-red bg-logo-red/5"
+                    }`}
                   >
                     {pkg.num_sessions ? pkg.num_sessions : "0"} Lesson Package
                     <div className="font-normal">
@@ -1616,7 +1730,7 @@ END:VCALENDAR`.trim();
                             (pkg.Discount
                               ? pkg.Discount
                               : pkg.discountPercentage)) /
-                          100) /
+                            100) /
                           (pkg.num_sessions ? pkg.num_sessions : 1)}{" "}
                         / lesson
                       </p>
@@ -1728,13 +1842,12 @@ END:VCALENDAR`.trim();
                     </strong>
                   </p>
                   <p>
+                    $
                     {selectedPackage?.Price
                       ? selectedPackage.Price
                       : selectedSlot.classId
-                        ? selectedSlot.classId
-                          ? classData.groupPrice
-                          : classData.Price
-                        : classData.Price}
+                      ? classData.groupPrice
+                      : classData.Price}
                   </p>
                 </div>
 
@@ -1743,14 +1856,15 @@ END:VCALENDAR`.trim();
                     <strong>Package Discount:</strong>
                   </p>
                   <p>
+                    -$
                     {selectedPackage?.num_sessions
                       ? ((selectedPackage?.Discount
-                        ? selectedPackage.Discount
-                        : selectedPackage?.discountPercentage) *
-                        (selectedPackage?.Price
-                          ? selectedPackage.Price
-                          : classData.Price)) /
-                      100
+                          ? selectedPackage.Discount
+                          : selectedPackage?.discountPercentage) *
+                          (selectedPackage?.Price
+                            ? selectedPackage.Price
+                            : classData.Price)) /
+                        100
                       : 0}
                   </p>
                 </div>
@@ -1759,66 +1873,181 @@ END:VCALENDAR`.trim();
                   <div className="flex flex-row w-full justify-between">
                     <strong>Voucher Discount:</strong>
                     <p>
+                      -$
                       {discountType === "percentage"
                         ? (
-                          (discount *
-                            (selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                              ((selectedPackage?.Discount ??
-                                selectedPackage?.discountPercentage) *
-                                selectedPackage?.Price) /
-                              100
-                              : selectedSlot.classId
+                            (discount *
+                              (selectedPackage?.num_sessions
+                                ? selectedPackage.Price -
+                                  ((selectedPackage?.Discount ??
+                                    selectedPackage?.discountPercentage) *
+                                    selectedPackage?.Price) /
+                                    100
+                                : selectedSlot.classId
                                 ? classData.groupPrice
                                 : classData.Price)) /
-                          100
-                        ).toFixed(2)
+                            100
+                          ).toFixed(2)
                         : discount}
                     </p>
                   </div>
                 )}
 
+                {/* Add Subtotal */}
+                <div className="flex flex-row w-full justify-between border-t pt-2 mt-2">
+                  <p>
+                    <strong>Subtotal:</strong>
+                  </p>
+                  <p>
+                    $
+                    {(() => {
+                      const basePrice = selectedPackage?.num_sessions
+                        ? selectedPackage.Price -
+                          (
+                            ((selectedPackage?.Discount ??
+                              selectedPackage?.discountPercentage) *
+                              selectedPackage?.Price) /
+                            100
+                          ).toFixed(2)
+                        : selectedSlot.classId
+                        ? classData.groupPrice
+                        : classData.Price;
+
+                      const voucherDiscount = voucherVerified
+                        ? discountType === "percentage"
+                          ? ((discount * basePrice) / 100).toFixed(2)
+                          : discount
+                        : 0;
+
+                      return (basePrice - voucherDiscount).toFixed(2);
+                    })()}
+                  </p>
+                </div>
+
+                {/* Add Processing Fee */}
                 <div className="flex flex-row w-full justify-between">
+                  <div className="flex items-center gap-2">
+                    <p>
+                      <strong>Processing Fee:</strong>
+                    </p>
+                    <a
+                      href="https://stripe.com/en-ca/pricing"
+                      target="_blank"
+                      className="relative group"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-gray-500 cursor-help"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                        <div className="text-center">
+                          <div className="font-semibold mb-1">
+                            Fee Breakdown:
+                          </div>
+                          <div>2.9% - Stripe Variable Fee</div>
+                          <div>$0.30 - Stripe Fixed Fee</div>
+                          <div>$0.50 - Platform Fee</div>
+                        </div>
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    </a>
+                  </div>
+                  <p>
+                    $
+                    {(() => {
+                      const basePrice = selectedPackage?.num_sessions
+                        ? selectedPackage.Price -
+                          (
+                            ((selectedPackage?.Discount ??
+                              selectedPackage?.discountPercentage) *
+                              selectedPackage?.Price) /
+                            100
+                          ).toFixed(2)
+                        : selectedSlot.classId
+                        ? classData.groupPrice
+                        : classData.Price;
+
+                      const voucherDiscount = voucherVerified
+                        ? discountType === "percentage"
+                          ? ((discount * basePrice) / 100).toFixed(2)
+                          : discount
+                        : 0;
+
+                      const subtotal = basePrice - voucherDiscount;
+                      const processingFee = (subtotal * 0.029 + 0.8).toFixed(2);
+
+                      return processingFee;
+                    })()}
+                  </p>
+                </div>
+
+                {/* Update Total to include processing fee */}
+                <div className="flex flex-row w-full justify-between border-t pt-2 mt-2 font-bold text-lg">
                   <p>
                     <strong>Total:</strong>
                   </p>
                   <p>
-                    {(selectedPackage?.num_sessions
-                      ? selectedPackage.Price -
-                      (
-                        ((selectedPackage?.Discount ??
-                          selectedPackage?.discountPercentage) *
-                          selectedPackage?.Price) /
-                        100
-                      ).toFixed(2)
-                      : selectedSlot.classId
+                    $
+                    {(() => {
+                      const basePrice = selectedPackage?.num_sessions
+                        ? selectedPackage.Price -
+                          (
+                            ((selectedPackage?.Discount ??
+                              selectedPackage?.discountPercentage) *
+                              selectedPackage?.Price) /
+                            100
+                          ).toFixed(2)
+                        : selectedSlot.classId
                         ? classData.groupPrice
-                        : classData.Price) -
-                      (discountType === "percentage"
-                        ? (
-                          (discount *
-                            (selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                              ((selectedPackage?.Discount ??
-                                selectedPackage?.discountPercentage) *
-                                selectedPackage?.Price) /
-                              100
-                              : selectedSlot.classId
-                                ? classData.groupPrice
-                                : classData.Price)) /
-                          100
-                        ).toFixed(2)
-                        : discount)}
+                        : classData.Price;
+
+                      const voucherDiscount = voucherVerified
+                        ? discountType === "percentage"
+                          ? ((discount * basePrice) / 100).toFixed(2)
+                          : discount
+                        : 0;
+
+                      const subtotal = basePrice - voucherDiscount;
+                      const processingFee = subtotal * 0.029 + 0.8;
+                      const total = subtotal + processingFee;
+
+                      return total.toFixed(2);
+                    })()}
                   </p>
                 </div>
+
                 <div>
                   <label className="flex items-center gap-2 mt-2">
-                    <input type="checkbox" checked={agreeToTerms} onChange={(e) => setAgreeToTerms(e.target.checked)} className="form-checkbox appearance-none accent-red-600 focus:ring-0 focus:outline-none rounded-full" />
-                    <span>I agree to the <a href="/community/termsandconditions" className="text-red-600 underline">Terms of Service</a></span>
+                    <input
+                      type="checkbox"
+                      checked={agreeToTerms}
+                      onChange={(e) => setAgreeToTerms(e.target.checked)}
+                      className="form-checkbox appearance-none accent-red-600 focus:ring-0 focus:outline-none rounded-full"
+                    />
+                    <span>
+                      I agree to the{" "}
+                      <a
+                        href="/community/termsandconditions"
+                        className="text-red-600 underline"
+                      >
+                        Terms of Service
+                      </a>
+                    </span>
                   </label>
                 </div>
               </div>
-              <div className="md:h-[6rem] md:w-[1px] h-[1px] w-full  bg-slate-500" />
+              {/* Rest of your existing code... */}
+              <div className="md:h-[12rem] md:w-[1px] h-[1px] w-full  bg-slate-500" />
               <div className="flex flex-grow flex-col gap-3">
                 <div className="flex flex-col">
                   <p>
@@ -1840,8 +2069,8 @@ END:VCALENDAR`.trim();
                     if (selectedSlot.classId) {
                       if (!user) {
                         setShowLogin(true);
-                        setGrouped(true)
-                        return
+                        setGrouped(true);
+                        return;
                       } else {
                         setGroupEmails([user.email]);
                       }
@@ -1852,8 +2081,11 @@ END:VCALENDAR`.trim();
                     }
                   }}
                   disabled={bookLoading || !agreeToTerms}
-                  className={`${agreeToTerms ? "bg-[#E73F2B] cursor-pointer" : "bg-[#f5b2aa] cursor-not-allowed"
-                    } text-white max-[450px]:w-full p-2 rounded transition-colors duration-200`}
+                  className={`${
+                    agreeToTerms
+                      ? "bg-[#E73F2B] cursor-pointer"
+                      : "bg-[#f5b2aa] cursor-not-allowed"
+                  } text-white max-[450px]:w-full p-2 rounded transition-colors duration-200`}
                 >
                   {bookLoading ? "Loading..." : "Book Now"}
                 </button>
@@ -1882,15 +2114,17 @@ END:VCALENDAR`.trim();
               <div>
                 <div className="flex flex-row gap-3 flex-wrap items-center mt-4">
                   <div
-                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${isSelfBooking && "bg-logo-red text-white"
-                      }`}
+                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${
+                      isSelfBooking && "bg-logo-red text-white"
+                    }`}
                     onClick={() => setIsSelfBooking(true)}
                   >
                     Book for Self
                   </div>
                   <div
-                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${!isSelfBooking && "bg-logo-red text-white"
-                      }`}
+                    className={`p-2 px-4 text-logo-red border border-1 border-logo-red rounded cursor-pointer hover:bg-logo-red hover:text-white ${
+                      !isSelfBooking && "bg-logo-red text-white"
+                    }`}
                     onClick={() => setIsSelfBooking(false)}
                   >
                     Book for someone else
@@ -1992,7 +2226,16 @@ END:VCALENDAR`.trim();
         </div>
       )}
       {/* Centered Stripe Checkout */}
-      {showLogin && <LoginModal setGroupEmails={setGroupEmails} setNumberOfGroupMembers={setNumberOfGroupMembers} setDisplayConfirmation={setDisplayConfirmation} grouped={grouped} onClose={() => setShowLogin(false)} setShowBooking={setShowBooking}/>}
+      {showLogin && (
+        <LoginModal
+          setGroupEmails={setGroupEmails}
+          setNumberOfGroupMembers={setNumberOfGroupMembers}
+          setDisplayConfirmation={setDisplayConfirmation}
+          grouped={grouped}
+          onClose={() => setShowLogin(false)}
+          setShowBooking={setShowBooking}
+        />
+      )}
       {stripeLoading && <CheckoutSkeleton />}
       {stripeOptions && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50">
@@ -2001,20 +2244,33 @@ END:VCALENDAR`.trim();
               bookingRef={stripeOptions.bookingRef}
               setStripeOptions={setStripeOptions}
               timer={timer}
-              price={
-                (selectedSlot.classId
+              price={(() => {
+                // Calculate base price (including package discount if applicable)
+                let basePrice = selectedPackage?.num_sessions
+                  ? selectedPackage.Price -
+                    ((selectedPackage?.Discount ??
+                      selectedPackage?.discountPercentage) *
+                      selectedPackage?.Price) /
+                      100
+                  : selectedSlot.classId
                   ? classData.groupPrice * numberOfGroupMembers
-                  : classData.Price) -
-                (discountType === "percentage"
-                  ? (
-                    ((selectedSlot.classId
-                      ? classData.groupPrice * numberOfGroupMembers
-                      : classData.Price) *
-                      discount) /
-                    100
-                  ).toFixed(2)
-                  : discount)
-              }
+                  : classData.Price;
+
+                // Apply voucher discount if verified
+                const voucherDiscount = voucherVerified
+                  ? discountType === "percentage"
+                    ? (basePrice * discount) / 100
+                    : parseFloat(discount)
+                  : 0;
+
+                const subtotal = basePrice - voucherDiscount;
+
+                // Add processing fee (2.9% + $0.80)
+                const processingFee = subtotal * 0.029 + 0.8;
+                const total = subtotal + processingFee;
+
+                return parseFloat(total.toFixed(2));
+              })()}
               discountType={discountType}
               discount={discount}
               startTime={selectedSlot.startTime}
@@ -2100,7 +2356,7 @@ const CheckoutForm = ({
   discount,
   voucher,
   voucherVerified,
-  agreeToTerms
+  agreeToTerms,
 }) => {
   const stripe = useStripe();
   const [user, userLoading] = useAuthState(auth);
@@ -2139,14 +2395,14 @@ const CheckoutForm = ({
   };
   let packagePrice = selectedPackage?.num_sessions
     ? selectedPackage?.Price -
-    ((selectedPackage?.Discount
-      ? selectedPackage.Discount
-      : selectedPackage?.discountPercentage) *
-      selectedPackage?.Price) /
-    100
+      ((selectedPackage?.Discount
+        ? selectedPackage.Discount
+        : selectedPackage?.discountPercentage) *
+        selectedPackage?.Price) /
+        100
     : selectedSlot.classId
-      ? classData.groupPrice
-      : classData.Price;
+    ? classData.groupPrice
+    : classData.Price;
 
   const offerDiscount =
     discountType === "percentage"
@@ -2161,8 +2417,8 @@ const CheckoutForm = ({
       toast.error("Stripe is not loaded yet.");
       return;
     }
-    if(!agreeToTerms){
-      toast.error("Please agree to the Terms of Service")
+    if (!agreeToTerms) {
+      toast.error("Please agree to the Terms of Service");
     }
 
     // if (!user?.displayName || !user?.email) {
@@ -2319,15 +2575,12 @@ const CheckoutForm = ({
         paymentIntentId: paymentIntent.id,
         meetingLink: meetingLink ? meetingLink : "",
         paymentStatus: "Paid",
-        price: selectedPackage?.num_sessions
-          ? (packagePrice / selectedPackage?.num_sessions) *
-          numberOfGroupMembers
-          : price,
         timeZone: timeZone ? timeZone : "America/Toronto",
       });
 
-      const recipientEmails = `${user?.email}, ${instructorData.email}, ${mode === "Group" ? groupEmails.join(",") : ""
-        }`;
+      const recipientEmails = `${user?.email}, ${instructorData.email}, ${
+        mode === "Group" ? groupEmails.join(",") : ""
+      }`;
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Pocketclass//NONSGML v1.0//EN
@@ -2341,8 +2594,9 @@ X-LIC-LOCATION:${timeZone || "America/Toronto"}
 DTSTART;TZID=${timeZone || "America/Toronto"}:${formatDateTime(startDateTime)}
 DTEND;TZID=${timeZone || "America/Toronto"}:${formatDateTime(endDateTime)}
 LOCATION:${location}
-ORGANIZER;CN=${instructorData.firstName} ${instructorData.lastName
-        }:MAILTO:${organizer}
+ORGANIZER;CN=${instructorData.firstName} ${
+        instructorData.lastName
+      }:MAILTO:${organizer}
 STATUS:CONFIRMED
 ${meetingLink ? `X-GOOGLE-CONFERENCE:${meetingLink}` : ""}
 END:VEVENT
@@ -2373,10 +2627,11 @@ END:VCALENDAR`.trim();
             const errorData = await resp.json();
             console.error("Error booking Mindbody class:", errorData);
             toast.error(
-              `Failed to book Mindbody class: ${errorData.Message || "Unknown error"}`
+              `Failed to book Mindbody class: ${
+                errorData.Message || "Unknown error"
+              }`
             );
-          }
-          else{
+          } else {
             const data = await resp.json();
             console.log("Mindbody class booked successfully:", data);
           }
@@ -2395,7 +2650,8 @@ END:VCALENDAR`.trim();
       const htmlContent = `
       <div>
 
-      ${meetingLink
+      ${
+        meetingLink
           ? `<div style="margin-top: 20px; padding: 6px 34px; box-sizing: border-box; border: 1px solid #ddd; background-color: #ffffff; border-radius: 8px; display: inline-block; width: 100%;">
               <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
                 Join the meeting for your class <strong>${classData.Name}</strong> with <strong>${instructorData.firstName} ${instructorData.lastName}</strong>.
@@ -2409,11 +2665,12 @@ END:VCALENDAR`.trim();
               </ul>
             </div>`
           : ""
-        }
+      }
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h2 style="color: #E73F2B;">New Booking Confirmation</h2>
         <p>Hello,</p>
-        <p>We are excited to confirm a new booking for the class <strong>${classData.Name
+        <p>We are excited to confirm a new booking for the class <strong>${
+          classData.Name
         }</strong>!</p>
         <h3>Booking Details:</h3>
         <table style="width: 100%; border-collapse: collapse;" border="1">
@@ -2435,21 +2692,24 @@ END:VCALENDAR`.trim();
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Time Zone:</strong></td>
-            <td style="padding: 8px;">${timeZone ? timeZone : "America/Toronto"
-        }</td>
+            <td style="padding: 8px;">${
+              timeZone ? timeZone : "America/Toronto"
+            }</td>
           </tr>
           <tr>
             <td style="padding: 8px;"><strong>Price:</strong></td>
-            <td style="padding: 8px;">${mode === "Group" ? classData.groupPrice : classData.Price
-        }</td>
+            <td style="padding: 8px;">${
+              mode === "Group" ? classData.groupPrice : classData.Price
+            }</td>
           </tr>
-          ${meetingLink
-          ? `<tr>
+          ${
+            meetingLink
+              ? `<tr>
             <td style="padding: 8px;"><strong>Meeting Link:</strong></td>
             <td style="padding: 8px;"><a href="${meetingLink}">${meetingLink}</a></td>
           </tr>`
-          : ""
-        }
+              : ""
+          }
         </table>
         <p>Thank you for choosing <strong>Pocketclass</strong>!</p>
         <p style="color: #555;">Best Regards,<br>Pocketclass Team</p>
@@ -2579,12 +2839,12 @@ END:VCALENDAR`.trim();
         </div>
       </div>
       <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement options={
-        {
+      <PaymentElement
+        options={{
           layout: "tabs",
           paymentMethodOrder: ["card", "link"],
-        }
-      }/>
+        }}
+      />
       <button
         className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
         disabled={loading}
