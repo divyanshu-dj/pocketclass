@@ -3,11 +3,10 @@ import { db } from "../../firebaseConfig";
 import {
   addDoc,
   collection,
-  deleteDoc,
-  doc,
   getDoc,
   getDocs,
   updateDoc,
+  doc,
 } from "firebase/firestore";
 import moment from "moment";
 
@@ -17,13 +16,14 @@ export default async function (req, res) {
     const bookingsRef = collection(db, "Bookings");
     const bookingsSnapshot = await getDocs(bookingsRef);
     const bookings = [];
-    bookingsSnapshot.forEach((doc) => {
-      const booking = doc.data();
+
+    bookingsSnapshot.forEach((docSnap) => {
+      const booking = docSnap.data();
       if (
         moment.utc(booking.startTime).isBefore(moment.utc()) &&
         !booking.isTransfered
       ) {
-        bookings.push({ id: doc.id, ...booking });
+        bookings.push({ id: docSnap.id, ...booking });
       }
     });
 
@@ -31,37 +31,10 @@ export default async function (req, res) {
 
     for (const booking of bookings) {
       try {
-        const paymentIntent = await stripe.paymentIntents.retrieve(
-          booking.paymentIntentId
-        );
-        if (!paymentIntent) {
-          console.warn(
-            `No charges found for PaymentIntent ID: ${booking.paymentIntentId}`
-          );
-          results.push({
-            bookingId: booking.id,
-            status: "failed",
-            reason: "PaymentIntent not found",
-          });
-          continue;
-        }
-
-        let transferAmount = paymentIntent.amount * 1;
-        if (booking.paymentMethod === "Package"){
-          transferAmount = booking.price*100;
-        }
         const instructorId = booking.instructor_id;
-        const Instructor = await getDoc(doc(db, "Users", instructorId));
-        const instructor = Instructor.data();
-        if (!transferAmount || transferAmount <= 0) {
-          console.warn(`Invalid transfer amount for booking ID: ${booking.id}`);
-          results.push({
-            bookingId: booking.id,
-            status: "failed",
-            reason: "Invalid transfer amount",
-          });
-          continue;
-        }
+        const InstructorDoc = await getDoc(doc(db, "Users", instructorId));
+        const instructor = InstructorDoc.data();
+
         if (!instructor) {
           console.warn(`Instructor not found for ID: ${instructorId}`);
           results.push({
@@ -71,6 +44,7 @@ export default async function (req, res) {
           });
           continue;
         }
+
         if (!instructor.stripeAccountId) {
           console.warn(`Instructor has no Stripe account for ID: ${instructorId}`);
           results.push({
@@ -81,15 +55,51 @@ export default async function (req, res) {
           continue;
         }
 
-        const stripeAccountId = instructor.stripeAccountId;
+        // Determine transfer amount
+        let transferAmount = booking.price && booking.price > 0 ? booking.price * 100 : 0;
+
+        if (!transferAmount || transferAmount <= 0) {
+          console.warn(`Invalid transfer amount for booking ID: ${booking.id}`);
+          results.push({
+            bookingId: booking.id,
+            status: "failed",
+            reason: "Invalid transfer amount",
+          });
+          continue;
+        }
+
+        const metadata = {
+          bookingId: booking.id,
+          paymentMethod: booking.paymentMethod || "Stripe", // default to Stripe if undefined
+        };
+
+        // If it's a Stripe payment, retrieve and validate the PaymentIntent
+        if (booking.paymentMethod !== "Giftcard") {
+          const paymentIntent = await stripe.paymentIntents.retrieve(
+            booking.paymentIntentId
+          );
+
+          if (!paymentIntent) {
+            console.warn(
+              `No PaymentIntent found for ID: ${booking.paymentIntentId}`
+            );
+            results.push({
+              bookingId: booking.id,
+              status: "failed",
+              reason: "PaymentIntent not found",
+            });
+            continue;
+          }
+
+          metadata.paymentIntentId = booking.paymentIntentId;
+        }
+
+        // Perform transfer
         const transfer = await stripe.transfers.create({
           amount: transferAmount,
           currency: "cad",
-          destination: stripeAccountId,
-          metadata:{
-            bookingId: booking.id,
-            paymentIntentId: booking.paymentIntentId, // <-- reference the PaymentIntent
-          },
+          destination: instructor.stripeAccountId,
+          metadata,
         });
 
         await updateDoc(doc(db, "Bookings", booking.id), {
@@ -106,7 +116,10 @@ export default async function (req, res) {
 
         results.push({
           bookingId: booking.id,
+          price: booking.price,
+          transferId: transfer.id,
           status: "success",
+          booking: booking,
         });
       } catch (error) {
         console.error(`Error processing booking ID: ${booking.id}`, error);
