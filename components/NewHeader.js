@@ -334,8 +334,8 @@ const NewHeader = ({
           {/* Category Buttons */}
           <div className="hidden md:flex justify-center flex-[2]">
             <div
-              className={`transition duration-500 ${
-                isMenuShrunk || isMenuSmall ? "-translate-y-[600%]" : ""
+              className={`transition duration-300 ${
+                isMenuShrunk || isMenuSmall ? "opacity-0" : ""
               }`}
             >
               <div className="flex space-x-2.5 items-center">
@@ -346,10 +346,10 @@ const NewHeader = ({
                       onClick={() =>
                         handleCategoryClick(category.name.toLowerCase(), index)
                       }
-                      className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                      className="flex  max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                     >
                       <Player
-                        id={`player-${index}-mob`}
+                        id={`player-${index}`}
                         lottieRef={(el) => (playerRefs.current[index + 3] = el)}
                         autoplay
                         loop={false}
@@ -561,11 +561,10 @@ const NewHeader = ({
         style={{
           display: router.pathname !== "/" ? "none" : "",
         }}
-          className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center mb-6 md:hidden flex ${
-            hideIcons ? "max-h-0 -translate-y-[600%]" : "max-h-[200px] translate-y-0"
+          className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
+            hideIcons ? "mb-0 max-h-0 opacity-0" : " mb-3 max-h-[200px] opacity-100"
           }`}
         >
-          <div>
             <div className="flex space-x-2.5 items-center">
               {categoryData.map((category, index) => (
                 <div key={category.name}>
@@ -574,10 +573,10 @@ const NewHeader = ({
                     onClick={() =>
                       handleCategoryClick(category.name.toLowerCase(), index)
                     }
-                    className="flex flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                    className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                   >
                     <Player
-                      id={`player-${index}`}
+                      id={`player-${index}-mob`}
                       lottieRef={(el) => (playerRefs.current[index] = el)}
                       autoplay
                       loop={false}
@@ -600,7 +599,6 @@ const NewHeader = ({
                 </div>
               ))}
             </div>
-          </div>
         </div>
         {/*NavBar Search Part*/}
         <div className={`${(isMenuShrunk || (isMenuSmall && 
