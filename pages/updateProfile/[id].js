@@ -64,7 +64,7 @@ function UpdateProfile() {
       errors.profileDescription = "Description is required";
     if (
       !droppedFile?.name &&
-      (!userData?.images || userData.images.length === 0) &&
+      (!userData.profileImage) &&
       userData?.category == "instructor"
     )
       errors.droppedFile = "Image is required";
@@ -88,6 +88,7 @@ function UpdateProfile() {
 
   const onUpdateHandle = async (e) => {
     e.preventDefault();
+    console.log("Update Profile Form Submitted");
     const data = {
       firstName: e.target.firstName.value,
       lastName: e.target.lastName.value,
@@ -115,6 +116,10 @@ function UpdateProfile() {
       const uploadResult = await uploadBytes(fileRef, droppedFile);
       const imageURL = await getDownloadURL(uploadResult.ref);
       imageURI = imageURL; // Ensure only one image in the array
+    }
+
+    if (!imageURI){
+      imageURI = userData.profileImage || ""; // Use existing image if no new image is uploaded
     }
 
     await updateDoc(doc(db, "Users", id), {
@@ -328,13 +333,13 @@ function UpdateProfile() {
                   <label className="text-medium font-medium">Image</label>
                   <div
                     {...getRootProps({
-                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.images ? "border-red-500" : "border-gray-100"
+                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.droppedFile ? "border-red-500" : "border-gray-100"
                         }`,
                     })}
                     style={{
                       border: "solid",
                       borderStyle: "dashed",
-                      borderColor: formErrors.images ? "red" : `#d4d2d3`,
+                      borderColor: formErrors.droppedFile ? "red" : `#d4d2d3`,
                       borderRadius: "10px",
                     }}
                     className="border-dashed flex justify-center items-center py-2 border-3 border-gray-200 px-3 cursor-pointer"

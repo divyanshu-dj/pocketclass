@@ -395,7 +395,7 @@ function RecommendedClassesSection({
       <div className="">
         <div>
           {!activeFilter && (
-            <p className="section-heading !text-left">{currentClassData?"Similar":"Recommended"}</p>
+            <p className="section-heading !text-left">{currentClassData?"Similar Classes":"Recommended"}</p>
           )}
         </div>
       </div>
