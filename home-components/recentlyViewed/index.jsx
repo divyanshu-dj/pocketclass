@@ -210,8 +210,7 @@ function RecentlyViewedSection({
         <div
           ref={scrollContainerRef}
           id="classes-recent"
-          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex px-12"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto flex px-12"
         >
           {loading
             ? Array(4)
