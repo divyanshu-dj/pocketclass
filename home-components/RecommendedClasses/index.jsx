@@ -20,6 +20,8 @@ import { auth } from "../../firebaseConfig";
 function RecommendedClassesSection({
   activeFilter = null,
   onClassesLoad,
+  classId = null,
+  currentClassData = null,
 }) {
   const [classes, setClasses] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -224,6 +226,7 @@ function RecommendedClassesSection({
             let contentMatch = 0;
             let classQuality = 0;
             let locationProximity = 0;
+            let currentOpenClassSimilarity = 0;
 
             // 1. Collaborative Filtering (Booking Similarity) - Weight: 0.3
             if (userBookedClasses.length > 0) {
@@ -259,6 +262,16 @@ function RecommendedClassesSection({
               viewedCategories.has(classData.Category) || viewedCategories.has(classData.Type)) {
               categoryMatch = 6; // Lower weight for category match
             }
+
+            if (currentClassData && classData.SubCategory === currentClassData.SubCategory) {
+              subcategoryMatch += 20; // Boost for current class subcategory match
+            } 
+            if (currentClassData && classData.Category === currentClassData.Category) {
+              categoryMatch += 6; // Boost for current class category match
+            } else if (currentClassData && classData.Type === currentClassData.Type) {
+              categoryMatch += 6; // Boost for current class type match
+            }
+            
 
             contentMatch = subcategoryMatch + categoryMatch;
 
@@ -378,11 +391,11 @@ function RecommendedClassesSection({
 
   // Always show recommendations section
   return (
-    <div className="box-border flex justify-start items-stretch flex-col w-[100.00%] section-spacing py-8">
+    <div className={`box-border flex justify-start items-stretch flex-col w-[100.00%] py-8 ${currentClassData ? 'px-0' : 'section-spacing'}`}>
       <div className="">
         <div>
           {!activeFilter && (
-            <p className="section-heading !text-left">Recommended</p>
+            <p className="section-heading !text-left">{currentClassData?"Similar Classes":"Recommended"}</p>
           )}
         </div>
       </div>
@@ -410,8 +423,7 @@ function RecommendedClassesSection({
         <div
           ref={scrollContainerRef}
           id="classes-recommended"
-          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto scrollbar-hide flex px-12"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto flex px-12"
         >
           {loading
             ? Array(4)

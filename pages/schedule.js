@@ -26,6 +26,7 @@ import {
 } from "firebase/firestore";
 import Head from "next/head";
 import NewHeader from "../components/NewHeader";
+import VideoPlayer from "../components/VideoPlayer";
 
 const localizer = momentLocalizer(moment);
 
@@ -49,6 +50,7 @@ export default function Schedule() {
   const [appointmentDuration, setAppointmentDuration] = useState(30);
   const [currentView, setCurrentView] = useState("week");
   const [temporaryEvent, setTemporaryEvent] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [generalAvailability, setGeneralAvailability] = useState(
     [
       "Monday",
@@ -886,7 +888,9 @@ export default function Schedule() {
 
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">
-        
+          <div>
+            <button className="text-logo-red" onClick={() => setShowModal(true)}>Watch Guide</button>
+          </div>
 
           {/* Connect to Mind Body button */}
           { userData && userData.mindbody && userData.mindbody.accessToken ? (
@@ -2318,6 +2322,8 @@ export default function Schedule() {
           )}
         </div>
       </div>
+      <VideoPlayer isOpen={showModal} onClose={setShowModal} videoSrc={"/tutorials/Step3.mp4"} title={"Schedule Creation Tutorial"}/>
+
       <style>{`
         .popup {
           position: relative;

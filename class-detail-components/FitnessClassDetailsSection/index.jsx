@@ -17,12 +17,13 @@ import {
   collection,
 } from "firebase/firestore";
 import { AiFillHeart, AiOutlineHeart, AiOutlineMan } from "react-icons/ai";
-import {UserIcon} from '@heroicons/react/solid'
+import { UserIcon } from "@heroicons/react/solid";
 import { categories } from "../../utils/categories";
 import BookingComponent from "../BookingComponent";
 import FAQAccordion from "../FAQAccordion";
-import Link from 'next/link';
-import {useRouter} from 'next/router';
+import Link from "next/link";
+import { useRouter } from "next/router";
+import RecommendedClassesSection from "../../home-components/RecommendedClasses";
 
 function FitnessClassDetailsSection({
   timeSlotOptions,
@@ -35,7 +36,7 @@ function FitnessClassDetailsSection({
   classId,
   userId,
 }) {
-  const router = useRouter()
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(true);
   const [classData, setClassData] = useState(null);
@@ -136,9 +137,7 @@ function FitnessClassDetailsSection({
     };
   };
   return (
-    <div
-      className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing"
-    >
+    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing">
       <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
           <div className="grow-0 shrink-0 basis-auto animate-pulse">
@@ -189,7 +188,7 @@ function FitnessClassDetailsSection({
                       src={
                         getCategoryIcons(
                           classData?.Category,
-                          (classData?.SubCategory || classData?.Type)
+                          classData?.SubCategory || classData?.Type
                         ).subcategoryIcon
                       }
                       className="w-4 h-4 flex grow-0 shrink-0 basis-auto object-contain"
@@ -213,15 +212,38 @@ function FitnessClassDetailsSection({
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   <SvgIcon3 className="w-5 h-5 text-[#7d797a] flex grow-0 shrink-0 basis-auto" />
                   <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#7d797a] grow-0 shrink-0 basis-auto ml-[7px] m-0 p-0">
-                    ${classData?.groupPrice + "-" + classData?.Price|| "0"} per hour
+                    ${classData?.groupPrice + "-" + classData?.Price || "0"} per
+                    hour
                   </p>
                 </div>
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   {/* Boces to show if class in Online or In Person */}
-                  <p className={`[font-family:'DM_Sans',sans-serif] border border-[#7d797a] flex flex-row items-center justify-center ${classData?.Mode === "Online" ? "text-green-500" : "text-[#7d797a]"} px-3 rounded-lg text-sm text-[#7d797a] grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0`}>
+                  <p
+                    className={`[font-family:'DM_Sans',sans-serif] border border-[#7d797a] flex flex-row items-center justify-center ${
+                      classData?.Mode === "Online"
+                        ? "text-green-500"
+                        : "text-[#7d797a]"
+                    } px-3 rounded-lg text-sm text-[#7d797a] grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0`}
+                  >
                     {/* Man Icon for In_Person and a Dot for Online */}
-                    <span className={`mr-2 ${classData?.Mode === "Online"?"":"hidden"}`}><img className="w-4 h-4 flex grow-0 shrink-0 basis-auto object-contain" src="/assets/GreenDot.svg" alt="Green Dot" /></span>
-                    <span className={`mr-2 ${classData?.Mode === "Online"?"hidden":""}`}><UserIcon className="w-4 h-4 flex grow-0 shrink-0 basis-auto"/></span>
+                    <span
+                      className={`mr-2 ${
+                        classData?.Mode === "Online" ? "" : "hidden"
+                      }`}
+                    >
+                      <img
+                        className="w-4 h-4 flex grow-0 shrink-0 basis-auto object-contain"
+                        src="/assets/GreenDot.svg"
+                        alt="Green Dot"
+                      />
+                    </span>
+                    <span
+                      className={`mr-2 ${
+                        classData?.Mode === "Online" ? "hidden" : ""
+                      }`}
+                    >
+                      <UserIcon className="w-4 h-4 flex grow-0 shrink-0 basis-auto" />
+                    </span>
                     {classData?.Mode === "Online" ? "Online" : "In-Person"}
                   </p>
                 </div>
@@ -268,9 +290,14 @@ function FitnessClassDetailsSection({
       <div className="flex flex-col-reverse lg:flex-row gap-20 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
         <div className="grow-0 shrink basis-auto xl:max-w-[calc(100vw-500px)]">
           <EnhancedImageGallery images={classData?.Images || []} />
-          <div onClick={()=>{
-                  router.push(`/instructor?class=${classId}&creator=${classCreatorData.userUid}`);
-                }} className="cursor-pointer flex justify-start items-start gap-2 flex-col md:flex-row w-[100.00%] box-border mt-8">
+          <div
+            onClick={() => {
+              router.push(
+                `/instructor?class=${classId}&creator=${classCreatorData.userUid}`
+              );
+            }}
+            className="cursor-pointer flex justify-start items-start gap-2 flex-col md:flex-row w-[100.00%] box-border mt-8"
+          >
             {!classCreatorData?.profileImage ? (
               <div className="w-20 h-20 md:h-[122px] md:w-[124px] rounded-full bg-gray-200 animate-pulse" />
             ) : (
@@ -286,7 +313,7 @@ function FitnessClassDetailsSection({
                   <div className="h-8 bg-gray-200 rounded w-48"></div>
                 </div>
               ) : (
-                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0 cursor-pointer" >
+                <p className="[font-family:'DM_Sans',sans-serif] text-2xl font-bold text-[#261f22] m-0 p-0 cursor-pointer">
                   {`${classCreatorData.firstName} ${classCreatorData.lastName}`}
                 </p>
               )}
@@ -348,6 +375,12 @@ function FitnessClassDetailsSection({
             classData={classData}
             classCreatorData={classCreatorData}
           />
+          <div className="max-w-[952px]">
+            <RecommendedClassesSection
+              classId={classId}
+              currentClassData={classData}
+            />
+          </div>
           <FAQAccordion
             instructorId={classCreatorData?.userUid}
             classId={classId}

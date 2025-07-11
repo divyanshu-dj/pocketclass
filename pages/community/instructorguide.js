@@ -5,15 +5,97 @@ import Image from "next/image";
 import Link from "next/link";
 import LargeCard from "/components/LargeCard";
 import NewHeader from "../../components/NewHeader";
-import { useState } from "react";
-import { Skeleton } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import VideoPlayer from "../../components/VideoPlayer";
 
 export default function InstructorGuide() {
-  // Separate loading states for each video
-  const [isVideo1Loading, setIsVideo1Loading] = useState(true);
-  const [isVideo2Loading, setIsVideo2Loading] = useState(true);
-  const [isVideo3Loading, setIsVideo3Loading] = useState(true);
-  const [isVideo4Loading, setIsVideo4Loading] = useState(true);
+  // Video player states
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
+  const [videoThumbnails, setVideoThumbnails] = useState({});
+  const videoRefs = useRef({});
+  
+  const videos = [
+    {
+      id: 'step1',
+      title: 'Set Up Your Instructor Profile',
+      src: '/tutorials/Step1.mp4',
+      description: 'Learn how to create and optimize your instructor profile on PocketClass'
+    },
+    {
+      id: 'step2', 
+      title: 'Create Your Class',
+      src: '/tutorials/Step2.mp4',
+      description: 'Step-by-step guide to creating and publishing your first class'
+    },
+    {
+      id: 'step3',
+      title: 'Manage Your Schedule',
+      src: '/tutorials/Step3.mp4',
+      description: 'How to set your availability and manage your class schedule'
+    },
+    {
+      id: 'step4',
+      title: 'Receive Payments through Stripe',
+      src: '/tutorials/Step4.mp4', 
+      description: 'Learn how to set up secure payments and get paid through Stripe'
+    }
+  ];
+
+  // Generate video thumbnail from video element
+  const generateThumbnail = (videoElement, videoId) => {
+    if (!videoElement) return;
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    
+    const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+    setVideoThumbnails(prev => ({
+      ...prev,
+      [videoId]: thumbnailUrl
+    }));
+  };
+
+  // Handle video metadata load
+  const handleVideoLoad = (videoId) => {
+    const videoElement = videoRefs.current[videoId];
+    if (videoElement) {
+      // Seek to 2 seconds to get a more representative frame
+      videoElement.currentTime = 2;
+      videoElement.addEventListener('seeked', () => {
+        generateThumbnail(videoElement, videoId);
+      }, { once: true });
+    }
+  };
+
+  useEffect(() => {
+    // Load thumbnails for all videos
+    videos.forEach(video => {
+      if (video.src) {
+        const videoElement = videoRefs.current[video.id];
+        if (videoElement) {
+          videoElement.addEventListener('loadedmetadata', () => handleVideoLoad(video.id));
+        }
+      }
+    });
+  }, []);
+
+  const openVideo = (video) => {
+    if (video.src) {
+      setSelectedVideo(video);
+      setIsVideoPlayerOpen(true);
+    }
+  };
+
+  const closeVideo = () => {
+    setIsVideoPlayerOpen(false);
+    setSelectedVideo(null);
+  };
   return (
     <div>
       <Head>
@@ -63,99 +145,79 @@ export default function InstructorGuide() {
             schedule classes, and stand out to more students.
           </p>
 
-          {/* Responsive grid for Loom videos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* 1) Setting Up Your Instructor Profile on Pocket Class */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-[#E63F2B]">
-            Set Up Your Instructor Profile
-          </h3>
-          <div className="relative pb-[62.5%] h-0">
-            {/* MUI Skeleton shown while loading */}
-            {isVideo1Loading && (
-              <Skeleton
-                variant="rectangular"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            )}
-            <iframe
-              src="https://www.loom.com/embed/c3fabbfc10da474cb620895c3989efe8?sid=6812caa9-45fb-46fe-8ec8-ff33a1ee799c"
-              frameBorder="0"
-              allowFullScreen
-              mozallowfullscreen="true"
-              webkitallowfullscreen="true"
-              onLoad={() => setIsVideo1Loading(false)}
-              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-            />
+          {/* Responsive grid for video tutorials */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {videos.map((video) => (
+              <div key={video.id} className="space-y-2">
+                <h3 className="text-lg font-semibold text-[#E63F2B]">
+                  {video.title}
+                </h3>
+                <div className="relative">
+                  {video.src ? (
+                    <>
+                      {/* Hidden video element for thumbnail generation */}
+                      <video
+                        ref={el => videoRefs.current[video.id] = el}
+                        src={video.src}
+                        preload="metadata"
+                        className="hidden"
+                        muted
+                      />
+                      
+                      <div 
+                        className="relative pb-[62.5%] h-0 cursor-pointer group"
+                        onClick={() => openVideo(video)}
+                      >
+                        <div className="absolute top-0 left-0 w-full h-full rounded-md shadow-md overflow-hidden">
+                          {videoThumbnails[video.id] ? (
+                            // Show generated thumbnail
+                            <div className="relative w-full h-full">
+                              <img 
+                                src={videoThumbnails[video.id]} 
+                                alt={video.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Dark overlay for better text visibility */}
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
+                            </div>
+                          ) : (
+                            // Loading state with gradient
+                            <div className="w-full h-full bg-gradient-to-br from-[#E63F2B] to-[#FF6B5A] group-hover:from-[#D63426] group-hover:to-[#FF5A47] transition-all duration-300" />
+                          )}
+                          
+                          {/* Play button overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center text-white">
+                            <div className="text-center">
+                              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-3 mx-auto group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
+                                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <p className="text-sm font-medium drop-shadow-md">Click to watch</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="relative pb-[62.5%] h-0">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gray-100 rounded-md shadow-md flex items-center justify-center">
+                        <div className="text-gray-500 text-center">
+                          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-3 mx-auto">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <p className="text-sm">Video coming soon</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-600 mt-2">{video.description}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* 2) Creating Your Class on Pocket Class */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-[#E63F2B]">Create Your Class</h3>
-          <div className="relative pb-[62.5%] h-0">
-            {isVideo2Loading && (
-              <Skeleton
-                variant="rectangular"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            )}
-            <iframe
-              src="https://www.loom.com/embed/37d1dde5262648c99673f1573bee5b74?sid=b7865bc0-7f61-4390-b638-9c8e4f907797"
-              frameBorder="0"
-              allowFullScreen
-              mozallowfullscreen="true"
-              webkitallowfullscreen="true"
-              onLoad={() => setIsVideo2Loading(false)}
-              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-            />
-          </div>
-        </div>
-
-        {/* 3) Setting Up Your Instructor Profile (second video) */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-[#E63F2B]">Manage Your Schedule</h3>
-          <div className="relative pb-[62.5%] h-0">
-            {isVideo3Loading && (
-              <Skeleton
-                variant="rectangular"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            )}
-            <iframe
-              src="https://www.loom.com/embed/5b871e3e177c4671a5831f520c1e5af2?sid=649644d8-e89f-4fe8-9a2c-8c151a89f630"
-              frameBorder="0"
-              allowFullScreen
-              mozallowfullscreen="true"
-              webkitallowfullscreen="true"
-              onLoad={() => setIsVideo4Loading(false)}
-              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-            />
-          </div>
-        </div>
-
-        {/* 4) Receive Payments through Stripe */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-[#E63F2B]">Receive Payments through Stripe</h3>
-          <div className="relative pb-[62.5%] h-0">
-            {isVideo4Loading && (
-              <Skeleton
-                variant="rectangular"
-                className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-              />
-            )}
-            <iframe
-              src="https://www.loom.com/embed/1a47fb3707a748faad78a01548149615?sid=1f396490-118c-48f3-a8a6-0b28b3d355ee"
-              frameBorder="0"
-              allowFullScreen
-              mozallowfullscreen="true"
-              webkitallowfullscreen="true"
-              onLoad={() => setIsVideo4Loading(false)}
-              className="absolute top-0 left-0 w-full h-full rounded-md shadow-md"
-            />
-          </div>
-        </div>
-      </div>
         </section> 
 
           <h1 className="text-4xl font-semibold mt-10 mb-5">
@@ -323,6 +385,16 @@ export default function InstructorGuide() {
         </section>
       </main>
       <Footer />
+      
+      {/* Video Player Modal */}
+      {selectedVideo && (
+        <VideoPlayer
+          isOpen={isVideoPlayerOpen}
+          onClose={closeVideo}
+          videoSrc={selectedVideo.src}
+          title={selectedVideo.title}
+        />
+      )}
     </div>
   );
 }
