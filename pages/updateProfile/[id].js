@@ -359,6 +359,7 @@ function UpdateProfile() {
                     <PencilIcon className="w-5 h-5 text-white" />
                   </div>
                 </div>
+                <p className="text-gray-500 text-sm">Drop an image file or click on the edit icon to update your profile picture</p>
                 
                 {formErrors.droppedFile && (
                   <p className="text-red-500 text-sm mt-2">{formErrors.droppedFile}</p>
