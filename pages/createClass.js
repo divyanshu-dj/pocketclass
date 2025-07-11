@@ -51,6 +51,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import imageCompression from "browser-image-compression";
 import ToggleSwitch from "../components/toggle";
+import VideoPlayer from "../components/VideoPlayer";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -58,6 +59,7 @@ export default function CreateClass() {
   const [addressError, setAddressError] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [classLoading, setClassLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     Name: "",
     Category: "",
@@ -514,7 +516,7 @@ export default function CreateClass() {
         <div>
           <p className="text-center text-gray-500 pb-5 text-lg">
             {" "}
-            {formatDate()}{" "}
+            {formatDate()}.{" "} <button className="text-logo-red" onClick={() => setShowModal(true)}>Watch Guide</button>
           </p>
         </div>
 
@@ -987,6 +989,8 @@ export default function CreateClass() {
           </form>
         </div>
       </div>
+      <VideoPlayer isOpen={showModal} onClose={setShowModal} videoSrc={"/tutorials/Step2.mp4"} title={"Create Class Tutorial"}/>
+
       <Footer />
       <ToastContainer
         position="top-center"

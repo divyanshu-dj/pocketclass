@@ -99,13 +99,16 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
 
   // Memoize filtered search options
   const filteredSearchOptions = useMemo(() => {
-    return initialSearchOptions.filter((item) =>
-      // Also include items that have same category or subCategory as filtered classes
-      item.label.toLowerCase().includes(searchTerm.toLowerCase())
-      || (filteredClasses.length > 0 &&
-        filteredClasses.some((cls =>
-          cls.Category.toLowerCase() === item.label.toLowerCase() || cls.SubCategory?.toLowerCase() === item.label.toLowerCase() ))
-        )
+    return initialSearchOptions.filter(
+      (item) =>
+        // Also include items that have same category or subCategory as filtered classes
+        item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (filteredClasses.length > 0 &&
+          filteredClasses.some(
+            (cls) =>
+              cls.Category.toLowerCase() === item.label.toLowerCase() ||
+              cls.SubCategory?.toLowerCase() === item.label.toLowerCase()
+          ))
     );
   }, [searchTerm]);
 
@@ -160,6 +163,7 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
           ...doc.data(),
         }));
         setClasses(classesData);
+        setFilteredClasses(classesData); // Initialize filtered classes
       } catch (error) {
         console.error("Error fetching classes:", error);
       }
@@ -167,23 +171,132 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
     fetchClasses();
   }, []);
 
-  // On search term change, filter classes
+  const fuzzySearch = (searchTerm, text, threshold = 0.3) => {
+    if (!searchTerm || !text) return { score: 0, match: false };
+
+    const term = searchTerm.toLowerCase().trim();
+    const target = text.toLowerCase();
+
+    // Exact match gets highest score
+    if (target.includes(term)) {
+      return { score: 1, match: true };
+    }
+
+    // Calculate fuzzy score based on character matching and position
+    let score = 0;
+    let termIndex = 0;
+    let consecutiveMatches = 0;
+    let maxConsecutive = 0;
+
+    for (let i = 0; i < target.length && termIndex < term.length; i++) {
+      if (target[i] === term[termIndex]) {
+        score += 1;
+        termIndex++;
+        consecutiveMatches++;
+        maxConsecutive = Math.max(maxConsecutive, consecutiveMatches);
+      } else {
+        consecutiveMatches = 0;
+      }
+    }
+
+    // Normalize score and apply bonuses
+    let normalizedScore = termIndex / term.length;
+
+    // Bonus for consecutive character matches
+    if (maxConsecutive > 1) {
+      normalizedScore += (maxConsecutive / term.length) * 0.2;
+    }
+
+    // Bonus for starting with search term
+    if (target.startsWith(term.substring(0, Math.min(3, term.length)))) {
+      normalizedScore += 0.2;
+    }
+
+    // Penalty for very long targets with few matches
+    if (target.length > term.length * 3) {
+      normalizedScore *= 0.8;
+    }
+
+    return {
+      score: Math.min(normalizedScore, 1),
+      match: normalizedScore >= threshold,
+    };
+  };
+
+  // Replace the existing useEffect for filtering classes
   useEffect(() => {
     console.log("Filtering classes with search term:", searchTerm);
     console.log("Available classes:", classes);
-    if (searchTerm) {
-      const lowerCaseTerm = searchTerm.toLowerCase();
-      const filtered = classes.filter(
-        (cls) =>
-          cls.Name.toLowerCase().includes(lowerCaseTerm) ||
-          cls.Description.toLowerCase().includes(lowerCaseTerm) ||
-          cls.Category.toLowerCase().includes(lowerCaseTerm) ||
-          cls.SubCategory?.toLowerCase().includes(lowerCaseTerm)
+
+    if (searchTerm && searchTerm.trim().length > 0) {
+      const lowerCaseTerm = searchTerm.toLowerCase().trim();
+
+      // Score each class based on fuzzy matching
+      const scoredClasses = classes.map((cls) => {
+        const scores = [
+          fuzzySearch(lowerCaseTerm, cls.Name || "", 0.2),
+          fuzzySearch(lowerCaseTerm, cls.Description || "", 0.15),
+          fuzzySearch(lowerCaseTerm, cls.Category || "", 0.25),
+          fuzzySearch(lowerCaseTerm, cls.SubCategory || "", 0.25),
+        ];
+
+        // Calculate weighted score
+        const totalScore =
+          scores[0].score * 0.4 + // Name has highest weight
+          scores[1].score * 0.2 + // Description
+          scores[2].score * 0.2 + // Category
+          scores[3].score * 0.2; // SubCategory
+
+        const hasMatch = scores.some((s) => s.match);
+
+        return {
+          ...cls,
+          searchScore: totalScore,
+          hasMatch,
+        };
+      });
+
+      // Filter and sort by score
+      let filtered = scoredClasses
+        .filter((cls) => cls.hasMatch || cls.searchScore > 0.1) // Include even low scores
+        .sort((a, b) => b.searchScore - a.searchScore); // Sort by score descending
+
+      // Limit results based on score quality
+      const highQualityResults = filtered.filter(
+        (cls) => cls.searchScore > 0.5
       );
-      setFilteredClasses(filtered);
-      console.log("Filtered classes:", filtered);
+      const mediumQualityResults = filtered.filter(
+        (cls) => cls.searchScore > 0.3 && cls.searchScore <= 0.5
+      );
+      const lowQualityResults = filtered.filter(
+        (cls) => cls.searchScore <= 0.3
+      );
+
+      // Adaptive result limiting
+      let finalResults = [];
+      if (highQualityResults.length > 0) {
+        finalResults = [
+          ...highQualityResults,
+          ...mediumQualityResults.slice(0, 5),
+        ];
+      } else if (mediumQualityResults.length > 0) {
+        finalResults = mediumQualityResults.slice(0, 10);
+      } else if (lowQualityResults.length > 0) {
+        finalResults = lowQualityResults.slice(0, 5);
+      } else {
+        finalResults = []; // No results found
+      }
+
+      setFilteredClasses(finalResults);
+      console.log(
+        "Filtered classes with scores:",
+        finalResults.map((cls) => ({
+          name: cls.Name,
+          score: cls.searchScore.toFixed(2),
+        }))
+      );
     } else {
-      setFilteredClasses([]);
+      setFilteredClasses(classes); // Reset to all classes if no search term
     }
   }, [searchTerm, classes]);
 

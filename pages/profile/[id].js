@@ -26,10 +26,12 @@ import {
   DocumentTextIcon,
   TagIcon,
 } from "@heroicons/react/solid";
+import VideoPlayer from "../../components/VideoPlayer";
 
 export default function Profile() {
   const [user, loading, error] = useAuthState(auth);
   const [userData, setUserData] = useState();
+  const [showModal, setShowModal] = useState(false);
 
   const router = useRouter();
 
@@ -77,6 +79,9 @@ export default function Profile() {
           {/* Page Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900">Profile</h1>
+            <p className="text-gray-600 mt-2">
+              View and manage your profile information. <button className="text-logo-red" onClick={() => setShowModal(true)}>Watch Guide</button>
+              </p>
           </div>
 
           {/* Two Column Layout - Left narrower, Right wider */}
@@ -311,6 +316,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <VideoPlayer isOpen={showModal} onClose={setShowModal} videoSrc={"/tutorials/Step1.mp4"} title={"Profile Updation Tutorial"}/>
 
       <Footer />
     </>

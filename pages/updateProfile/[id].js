@@ -11,6 +11,17 @@ import NewHeader from "../../components/NewHeader";
 import { useDropzone } from "react-dropzone";
 import { CropperRef, Cropper, CircleStencil } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css'
+import { 
+  PencilIcon, 
+  UserIcon, 
+  PhoneIcon, 
+  CakeIcon, 
+  UserGroupIcon, 
+  DocumentTextIcon,
+  PhotographIcon,
+  SaveIcon,
+  CloudUploadIcon
+} from "@heroicons/react/solid";
 
 function UpdateProfile() {
   const [userData, setUserData] = useState();
@@ -19,6 +30,8 @@ function UpdateProfile() {
   const [droppedFile, setDroppedFile] = useState(null);
   const cropperRef = React.useRef(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
 
   const router = useRouter();
   const { id } = router.query;
@@ -35,11 +48,52 @@ function UpdateProfile() {
     }
   }, [id]);
 
+  // Handle page-wide drag events
+  useEffect(() => {
+    const handleDragEnter = (e) => {
+      e.preventDefault();
+      setDragCounter(prev => prev + 1);
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        setIsDragActive(true);
+      }
+    };
+
+    const handleDragLeave = (e) => {
+      e.preventDefault();
+      setDragCounter(prev => prev - 1);
+      if (dragCounter <= 1) {
+        setIsDragActive(false);
+      }
+    };
+
+    const handleDragOver = (e) => {
+      e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+      e.preventDefault();
+      setIsDragActive(false);
+      setDragCounter(0);
+    };
+
+    // Add event listeners to document
+    document.addEventListener('dragenter', handleDragEnter);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleDrop);
+
+    return () => {
+      document.removeEventListener('dragenter', handleDragEnter);
+      document.removeEventListener('dragleave', handleDragLeave);
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [dragCounter]);
+
   useEffect(() => {
     if (droppedFile && showCropper && cropperRef.current) {
       setTimeout(() => {
         cropperRef.current.refresh?.();
-
         const canvas = cropperRef.current.getCanvas?.();
         if (canvas && canvas.focus) {
           canvas.focus();
@@ -77,11 +131,21 @@ function UpdateProfile() {
     );
     if (imageFile) {
       setDroppedFile(imageFile);
-      setShowCropper(true); // Show the cropper when a file is dropped
+      setShowCropper(true);
     }
+    setIsDragActive(false);
+    setDragCounter(0);
   };
 
   const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: "image/*",
+    noClick: true, // Disable click on the full page dropzone
+    noKeyboard: true, // Disable keyboard events
+  });
+
+  // Separate dropzone for click functionality
+  const { getRootProps: getClickableRootProps, getInputProps: getClickableInputProps } = useDropzone({
     onDrop,
     accept: "image/*",
   });
@@ -115,11 +179,11 @@ function UpdateProfile() {
       );
       const uploadResult = await uploadBytes(fileRef, droppedFile);
       const imageURL = await getDownloadURL(uploadResult.ref);
-      imageURI = imageURL; // Ensure only one image in the array
+      imageURI = imageURL;
     }
 
     if (!imageURI){
-      imageURI = userData.profileImage || ""; // Use existing image if no new image is uploaded
+      imageURI = userData.profileImage || "";
     }
 
     await updateDoc(doc(db, "Users", id), {
@@ -135,6 +199,7 @@ function UpdateProfile() {
     setLoading(false);
     router.push(`/profile/${id}`);
   };
+
   if (!id || !userData) {
     return (
       <section className="flex justify-center items-center min-h-[100vh]">
@@ -150,20 +215,16 @@ function UpdateProfile() {
   }
 
   const onCancel = () => {
-    setDroppedFile(null); // Reset the dropped image state to null
+    setDroppedFile(null);
   };
 
   const onSave = () => {
     if (cropperRef.current) {
-      // Get the coordinates and canvas from the Cropper instance
       const coordinates = cropperRef.current.getCoordinates();
       const canvas = cropperRef.current.getCanvas();
-
-      // Get the base64 image data URL of the cropped canvas
       const croppedImageDataURL = canvas?.toDataURL();
 
       if (croppedImageDataURL) {
-        // Create a Blob from the data URL to make it a file object
         const byteString = atob(croppedImageDataURL.split(',')[1]);
         const arrayBuffer = new ArrayBuffer(byteString.length);
         const uintArray = new Uint8Array(arrayBuffer);
@@ -175,14 +236,12 @@ function UpdateProfile() {
         const blob = new Blob([uintArray], { type: 'image/jpeg' });
         const file = new File([blob], droppedFile.name, { type: 'image/jpeg' });
 
-        // Now update the droppedFile state with the new file
         setShowCropper(false);
         setDroppedFile(file);
-
-        // Optionally log the cropped file
       }
-    } // Close the cropper after saving
+    }
   };
+
   return (
     <>
       <Head>
@@ -193,10 +252,25 @@ function UpdateProfile() {
 
       <NewHeader />
 
+      {/* Full Page Drop Overlay - Only shows when dragging */}
+      {isDragActive && (
+        <div 
+          {...getRootProps()}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] backdrop-blur-sm"
+        >
+          <input {...getInputProps()} />
+          <div className="bg-white rounded-3xl p-12 text-center shadow-2xl border-4 border-dashed border-logo-red">
+            <CloudUploadIcon className="w-20 h-20 text-logo-red mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Drop your image here</h3>
+            <p className="text-gray-600">Release to upload your profile image</p>
+          </div>
+        </div>
+      )}
+
+      {/* Image Cropper Modal */}
       {droppedFile && showCropper && (
-        <div className="w-full fixed h-full fixed top-0 left-0 bg-transparent md:bg-[rgba(0,0,0,0.6)] overflow-hidden flex justify-center items-center z-[10001]">
-          <div className="w-fit h-fit px-4 py-4 h-[600px] bg-white rounded-xl" tabIndex={0}
-            onFocus={() => console.log('Wrapper focused')}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-[10001]">
+          <div className="bg-white rounded-2xl shadow-2xl p-6" tabIndex={0}>
             <Cropper
               src={droppedFile ? URL.createObjectURL(droppedFile) : null}
               className={'cropper'}
@@ -208,7 +282,6 @@ function UpdateProfile() {
               maxHeight={1200}
               stencilComponent={CircleStencil}
               onReady={() => {
-                // Defer focus until layout is complete and element is visible
                 const tryFocus = () => {
                   const canvas = cropperRef.current?.getCanvas?.();
                   if (canvas && typeof canvas.focus === "function") {
@@ -219,7 +292,6 @@ function UpdateProfile() {
                   }
                 };
 
-                // Ensure layout is painted — fire after 2 frames
                 requestAnimationFrame(() => {
                   requestAnimationFrame(() => {
                     tryFocus();
@@ -227,14 +299,14 @@ function UpdateProfile() {
                 });
               }}
             />
-            <div className="flex justify-start mt-4 mb-2">
+            <div className="flex justify-center gap-3 mt-6">
               <button
-                className="border-2 border-red-500 text-red-500 px-2 min-w-[70px] py-2 w-[12vw] rounded mr-2"
+                className="px-6 py-2 border-2 border-logo-red text-logo-red rounded-lg hover:bg-logo-red hover:text-white transition-colors duration-200 font-medium"
                 onClick={onCancel}>
                 Cancel
               </button>
               <button
-                className="bg-red-500 text-white py-2 w-[12vw] min-w-[70px] rounded"
+                className="px-6 py-2 bg-logo-red text-white rounded-lg hover:bg-logo-red/90 transition-colors duration-200 font-medium"
                 onClick={onSave}>
                 Save
               </button>
@@ -250,140 +322,219 @@ function UpdateProfile() {
         </div>
       )}
 
-      <div className="px-10 rounded-3xl flex flex-col justify-center items-center mt-10">
-        <div className="registrationContainer lg:w-[50%] sm:w-[100%]">
-          <h1 className="text-5xl font-semibold text-center">Update Profile</h1>
+      {/* Main Content */}
+      <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div className="max-w-5xl mx-auto">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900">Update Profile</h1>
+            <p className="text-gray-600 mt-2">Update your personal information and settings</p>
+          </div>
 
-          <div className="mt-8">
-            <form onSubmit={onUpdateHandle}>
-              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
-                <div>
-                  <label className="text-medium font-medium">First Name</label>
-                  <input
-                    defaultValue={userData?.firstName}
-                    name="firstName"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.firstName
-                      ? "border-red-500"
-                      : "border-gray-100"
-                      }`}
-                    placeholder="Enter your First name"
-                  />
+          {/* Form Container */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <form onSubmit={onUpdateHandle} className="space-y-8">
+              
+              {/* Profile Image Section */}
+              <div className="text-center pb-8 border-b border-gray-100">
+                <div className="relative inline-block mb-6">
+                  {userData.profileImage || droppedFile ? (
+                    <img
+                      src={droppedFile ? URL.createObjectURL(droppedFile) : userData.profileImage}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-100"
+                      alt="Profile"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 rounded-full bg-logo-red flex items-center justify-center border-4 border-gray-100">
+                      <span className="text-white text-2xl font-bold">
+                        {userData.firstName?.charAt(0) || "U"}
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    {...getClickableRootProps()}
+                    className="absolute bottom-0 right-0 w-10 h-10 bg-logo-red rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-logo-red/90 transition-colors duration-200"
+                  >
+                    <input {...getClickableInputProps()} />
+                    <PencilIcon className="w-5 h-5 text-white" />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-medium font-medium">Last Name</label>
-                  <input
-                    defaultValue={userData?.lastName}
-                    name="lastName"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.lastName ? "border-red-500" : "border-gray-100"
+                
+                {formErrors.droppedFile && (
+                  <p className="text-red-500 text-sm mt-2">{formErrors.droppedFile}</p>
+                )}
+              </div>
+
+              {/* Personal Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                  <UserIcon className="w-5 h-5 text-logo-red mr-2" />
+                  Personal Information
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name
+                    </label>
+                    <input
+                      defaultValue={userData?.firstName}
+                      name="firstName"
+                      className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 ${
+                        formErrors.firstName ? "border-red-500" : "border-gray-200"
                       }`}
-                    placeholder="Enter your Last Name"
-                  />
+                      placeholder="Enter your first name"
+                    />
+                    {formErrors.firstName && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.firstName}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      defaultValue={userData?.lastName}
+                      name="lastName"
+                      className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 ${
+                        formErrors.lastName ? "border-red-500" : "border-gray-200"
+                      }`}
+                      placeholder="Enter your last name"
+                    />
+                    {formErrors.lastName && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.lastName}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <CakeIcon className="w-4 h-4 text-gray-500 mr-1" />
+                      Date of Birth
+                    </label>
+                    <input
+                      defaultValue={userData?.dob}
+                      name="dob"
+                      type="date"
+                      className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 ${
+                        formErrors.dob ? "border-red-500" : "border-gray-200"
+                      }`}
+                    />
+                    {formErrors.dob && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.dob}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <UserGroupIcon className="w-4 h-4 text-gray-500 mr-1" />
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 ${
+                        formErrors.gender ? "border-red-500" : "border-gray-200"
+                      }`}
+                      defaultValue={userData?.gender}
+                    >
+                      <option value="" hidden>
+                        {userData?.gender || "Select Gender"}
+                      </option>
+                      <option value="woman">Woman</option>
+                      <option value="man">Man</option>
+                      <option value="non-binary">Non-binary</option>
+                      <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                    {formErrors.gender && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.gender}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
+              {/* Contact Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                  <PhoneIcon className="w-5 h-5 text-logo-red mr-2" />
+                  Contact Information
+                </h3>
+                
                 <div>
-                  <label className="text-medium font-medium">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
                   </label>
                   <input
                     defaultValue={userData?.phoneNumber}
                     name="phoneNumber"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.phoneNumber
-                      ? "border-red-500"
-                      : "border-gray-100"
-                      }`}
-                    placeholder="Enter your Phone Number"
-                  />
-                </div>
-                <div>
-                  <label className="text-medium font-medium">
-                    Date of Birth
-                  </label>
-                  <input
-                    defaultValue={userData?.dob}
-                    name="dob"
-                    type="date"
-                    className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.dob ? "border-red-500" : "border-gray-100"
-                      }`}
-                    placeholder="Enter your Date of Birth"
-                  />
-                </div>
-              </div>
-
-              <div className="grid lg:grid-cols-2 lg:gap-2 sm:grid-cols-1">
-                <div>
-                  <label className="text-medium font-medium">Gender</label>
-                  <select
-                    name="gender"
-                    className={`w-full border-2 text-sm rounded-xl p-3 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.gender ? "border-red-500" : "border-gray-100"
-                      }`}
-                    defaultValue={userData?.gender}
-                  >
-                    <option value="" hidden>
-                      {userData?.gender || "Select Gender"}
-                    </option>
-                    <option value="woman">Woman</option>
-                    <option value="man">Man</option>
-                    <option value="non-binary">Non-binary</option>
-                    <option value="prefer-not-to-say">Prefer not to say</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-medium font-medium">Image</label>
-                  <div
-                    {...getRootProps({
-                      className: `w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.droppedFile ? "border-red-500" : "border-gray-100"
-                        }`,
-                    })}
-                    style={{
-                      border: "solid",
-                      borderStyle: "dashed",
-                      borderColor: formErrors.droppedFile ? "red" : `#d4d2d3`,
-                      borderRadius: "10px",
-                    }}
-                    className="border-dashed flex justify-center items-center py-2 border-3 border-gray-200 px-3 cursor-pointer"
-                  >
-                    <input {...getInputProps()} />
-                    {droppedFile ? (
-                      <p className="text-center">{droppedFile.name}</p>
-                    ) : (
-                      <p>Drag & drop or select an Image</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="text-medium font-medium">Description</label>
-                <textarea
-                  defaultValue={userData?.profileDescription}
-                  name="profileDescription"
-                  className={`w-full border-2 text-sm rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red ${formErrors.profileDescription
-                    ? "border-red-500"
-                    : "border-gray-100"
+                    className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 ${
+                      formErrors.phoneNumber ? "border-red-500" : "border-gray-200"
                     }`}
-                  placeholder="Enter a profile description"
-                />
+                    placeholder="Enter your phone number"
+                  />
+                  {formErrors.phoneNumber && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.phoneNumber}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="col-span-12 mt-10">
-                {!loading ? (
-                  <button
-                    type="submit"
-                    className="w-full py-4 bg-logo-red rounded-xl text-white font-bold text-lg"
-                  >
-                    Update
-                  </button>
-                ) : (
+              {/* About Me */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                  <DocumentTextIcon className="w-5 h-5 text-logo-red mr-2" />
+                  About Me
+                </h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Description
+                  </label>
+                  <textarea
+                    defaultValue={userData?.profileDescription}
+                    name="profileDescription"
+                    rows={4}
+                    className={`w-full border-2 rounded-xl p-3 bg-white focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red transition-colors duration-200 resize-none ${
+                      formErrors.profileDescription ? "border-red-500" : "border-gray-200"
+                    }`}
+                    placeholder="Tell others about yourself, your interests, and what makes you unique..."
+                  />
+                  {formErrors.profileDescription && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.profileDescription}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-6 border-t border-gray-100">
+                <div className="flex gap-4 justify-end">
                   <button
                     type="button"
-                    disabled
-                    className="w-full py-4 bg-logo-red rounded-xl text-white font-bold text-lg opacity-50"
+                    onClick={() => router.back()}
+                    className="px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200 font-medium"
                   >
-                    Updating...
+                    Cancel
                   </button>
-                )}
+                  
+                  {!loading ? (
+                    <button
+                      type="submit"
+                      className="px-8 py-3 bg-logo-red text-white rounded-xl hover:bg-logo-red/90 transition-colors duration-200 font-medium flex items-center"
+                    >
+                      <SaveIcon className="w-5 h-5 mr-2" />
+                      Update Profile
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="px-8 py-3 bg-logo-red/50 text-white rounded-xl font-medium flex items-center cursor-not-allowed"
+                    >
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Updating...
+                    </button>
+                  )}
+                </div>
               </div>
+
             </form>
           </div>
         </div>

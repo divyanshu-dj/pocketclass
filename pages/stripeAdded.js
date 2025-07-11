@@ -4,6 +4,7 @@ import { auth, db } from "../firebaseConfig";
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 const StripeAdded = () => {
   const [user] = useAuthState(auth);
@@ -43,7 +44,10 @@ const StripeAdded = () => {
         const responseData = await response.json();
         const payoutsEnabled = responseData.payouts_enabled;
         if (!payoutsEnabled) {
-          router.push("/addStripe");
+          toast.error(
+            "Your Stripe setup failed. Please try again."
+          );
+          router.push("/");
           return;
         }
 
