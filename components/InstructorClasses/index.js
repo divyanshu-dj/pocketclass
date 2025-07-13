@@ -13,7 +13,7 @@ const InstructorClasses = ({
   reviews,
   userData,
 }) => {
-  const [selectedStatus, setSelectedStatus] = React.useState("Bookings");
+  const [selectedStatus, setSelectedStatus] = React.useState("Classes");
   const router = useRouter();
   const { bookingId, mode } = router.query;
   const now = new Date();
@@ -163,149 +163,7 @@ const InstructorClasses = ({
   };
   return (
     <div>
-      <Tabs
-        style={{ maxWidth: "1450px", width: "100%", margin: "auto" }}
-        activeKey={selectedStatus}
-        onChange={handleTabChange}
-        className="flex justify-center mb-8"
-      >
-        <Tabs.TabPane tab="Upcoming Bookings" key="Bookings" />
-        <Tabs.TabPane tab="Previous Bookings" key="CompletedBookings" />
-        <Tabs.TabPane tab="Classes" key="Classes" />
-        <Tabs.TabPane tab="Bookings By Me" key="bookingsByMe" />
-      </Tabs>
-
       <div className="max-w-[1450px] mx-auto mb-4">
-        {selectedStatus === "Bookings" && groupedAppointments.length !== 0 ? (
-          groupedAppointments.map((appointment) => {
-            const classData = classes.find(
-              (c) => c.id === appointment.class_id
-            );
-            return classData ? (
-              <InstructorCard
-                key={appointment.id}
-                appointmentId={appointment.bookingId}
-                id={classData.id}
-                type={
-                  classData.SubCategory ? classData.SubCategory : classData.Type
-                }
-                latitude={classData.latitude}
-                name={classData.Name}
-                images={classData.Images}
-                description={classData.Description}
-                longitude={classData.longitude}
-                reviews={reviews}
-                address={classData.Address}
-                price={classData.Price}
-                category={classData.category}
-                status={appointment.status}
-                start={appointment.startTime}
-                end={appointment.endTime}
-                classCreator={classData.classCreator}
-                studentId={appointment.studentId}
-                student_name={appointment.student_name}
-                paymentIntentId={appointment.paymentIntentId}
-                isBooking={true}
-                payment={appointment.payment}
-                isMindbody={classData.mindbodyId ? true : false}
-              />
-            ) : null;
-          })
-        ) : (
-          <p className="text-center text-xl w-full text-logo-red">
-            {selectedStatus === "Bookings" ? "No Classes Found" : ""}
-          </p>
-        )}
-
-        {selectedStatus === "CompletedBookings" &&
-        groupedAppointmentsAfter.length !== 0 ? (
-          groupedAppointmentsAfter.map((appointment) => {
-            const classData = classes.find(
-              (c) => c.id === appointment.class_id
-            );
-            return classData ? (
-              <InstructorCard
-                key={appointment.id}
-                appointmentId={appointment.bookingId}
-                id={classData.id}
-                type={
-                  classData.SubCategory ? classData.SubCategory : classData.Type
-                }
-                latitude={classData.latitude}
-                name={classData.Name}
-                images={classData.Images}
-                description={classData.Description}
-                longitude={classData.longitude}
-                reviews={reviews}
-                address={classData.Address}
-                price={classData.Price}
-                category={classData.category}
-                status={appointment.status}
-                start={appointment.startTime}
-                end={appointment.endTime}
-                classCreator={classData.classCreator}
-                studentId={appointment.studentId}
-                student_name={appointment.student_name}
-                paymentIntentId={appointment.paymentIntentId}
-                isBooking={true}
-                payment={appointment.payment}
-              />
-            ) : null;
-          })
-        ) : (
-          <p className="text-center text-xl w-full text-logo-red">
-            {selectedStatus === "CompletedBookings" ? "No Classes Found" : ""}
-          </p>
-        )}
-
-        {selectedStatus === "bookingsByMe" &&
-        groupedBookingsByMe.length !== 0 ? (
-          groupedBookingsByMe.map((appointment) => {
-            const classData = classes.find(
-              (c) => c.id === appointment.class_id
-            );
-            return classData ? (
-              <StudentCard
-                key={appointment.id}
-                appointmentId={appointment.bookingId[0]}
-                id={classData.id}
-                type={
-                  classData.SubCategory ? classData.SubCategory : classData.Type
-                }
-                latitude={classData.latitude}
-                name={classData.Name}
-                images={classData.Images}
-                description={classData.Description}
-                longitude={classData.longitude}
-                reviews={reviews}
-                address={classData.Address}
-                price={classData.Price}
-                category={classData.category}
-                status={appointment.status}
-                start={appointment.startTime}
-                end={appointment.endTime}
-                classCreator={classData.classCreator}
-                studentId={appointment.studentId}
-                paymentMethod={appointment.paymentMethod}
-                studentName={appointment.student_name}
-                paymentIntentId={appointment.paymentIntentId}
-                timezone={appointment.timezone || "America/Toronto"}
-                rescheduleBooking={
-                  bookingId === appointment.id && mode === "reschedule"
-                }
-                cancelBooking={
-                  bookingId === appointment.id && mode === "cancel"
-                }
-              />
-            ) : null;
-          })
-        ) : (
-          <p className="text-center text-xl w-full text-logo-red">
-            {selectedStatus === "bookingsByMe" ? "No Classes Found" : ""}
-          </p>
-        )}
-
-        {/* For Selected Status Classes display classes */}
         {selectedStatus === "Classes" && classes.length !== 0 ? (
           // Add a import classes button before the classes
           <div>

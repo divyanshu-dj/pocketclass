@@ -17,7 +17,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { Tabs } from "antd";
 import NewHeader from "../../components/NewHeader";
 import StudentClasses from "../../components/StudentClasses";
-import InstructorCard from "../../components/InstructorClasses/InstructorCard";
 import InstructorClasses from "../../components/InstructorClasses";
 
 const MyClass = () => {

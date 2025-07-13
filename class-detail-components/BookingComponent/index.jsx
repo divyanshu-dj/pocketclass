@@ -858,7 +858,101 @@ export default function index({
       price: price,
       paymentIntentId: payment_intent_id,
       createdAt: serverTimestamp(),
+      packageDiscount: parseFloat(selectedPackage?.num_sessions
+        ? ((selectedPackage?.Discount
+            ? selectedPackage.Discount
+            : selectedPackage?.discountPercentage) *
+            (selectedPackage?.Price
+              ? selectedPackage.Price
+              : classData.Price)) /
+          100
+        : 0),
+      voucherDiscount:parseFloat(
+        discountType === "percentage"
+          ? (
+              (discount *
+                (selectedPackage?.num_sessions
+                  ? selectedPackage.Price -
+                    ((selectedPackage?.Discount ??
+                      selectedPackage?.discountPercentage) *
+                      selectedPackage?.Price) /
+                      100
+                  : selectedSlot.classId
+                  ? classData.groupPrice
+                  : classData.Price)) /
+              100
+            ).toFixed(2)
+          : discount),
+      subTotal: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            ((selectedPackage?.Discount ??
+              selectedPackage?.discountPercentage) *
+              selectedPackage.Price) /
+              100
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? (discount * basePrice) / 100
+            : discount
+          : 0;
+
+        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+      })(),
+      processingFee: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            (
+              ((selectedPackage?.Discount ??
+                selectedPackage?.discountPercentage) *
+                selectedPackage?.Price) /
+              100
+            ).toFixed(2)
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? ((discount * basePrice) / 100).toFixed(2)
+            : discount
+          : 0;
+
+        const subtotal = basePrice - voucherDiscount;
+        const processingFee = (subtotal * 0.029 + 0.8).toFixed(2);
+
+        return parseFloat(processingFee);
+      })(),
+      total: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            (
+              ((selectedPackage?.Discount ??
+                selectedPackage?.discountPercentage) *
+                selectedPackage?.Price) /
+              100
+            ).toFixed(2)
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? ((discount * basePrice) / 100).toFixed(2)
+            : discount
+          : 0;
+
+        const subtotal = basePrice - voucherDiscount;
+        const processingFee = subtotal * 0.029 + 0.8;
+        const total = subtotal + processingFee;
+
+        return parseFloat(total.toFixed(2));
+      })(),
     };
+    console.log(bookingData)
 
     const bookingsRef = collection(db, "Bookings");
     const slotQuery = query(
@@ -1008,7 +1102,12 @@ export default function index({
       status: "Confirmed",
       meetingLink: meetingLink ? meetingLink : "",
       paymentStatus: "Paid",
-      paymentMethod: selectedPackage === "Credits" ? "Package" : selectedPackage == "GiftCard" ? "Giftcard" : "Stripe",
+      paymentMethod:
+        selectedPackage === "Credits"
+          ? "Package"
+          : selectedPackage == "GiftCard"
+          ? "Giftcard"
+          : "Stripe",
       timeZone: timeZone ? timeZone : "America/Toronto",
     });
 
@@ -1139,7 +1238,6 @@ END:VCALENDAR`.trim();
         },
       ]
     );
-
 
     setStripeOptions(null);
     toast.success("Booking confirmed!");
@@ -1410,7 +1508,102 @@ END:VCALENDAR`.trim();
       mode: selectedSlot.classId ? "group" : "individual",
       createdAt: serverTimestamp(),
       price: bookingDataPrice,
+      packageDiscount: parseFloat(selectedPackage?.num_sessions
+        ? ((selectedPackage?.Discount
+            ? selectedPackage.Discount
+            : selectedPackage?.discountPercentage) *
+            (selectedPackage?.Price
+              ? selectedPackage.Price
+              : classData.Price)) /
+          100
+        : 0),
+      voucherDiscount:
+        parseFloat(discountType === "percentage"
+          ? (
+              (discount *
+                (selectedPackage?.num_sessions
+                  ? selectedPackage.Price -
+                    ((selectedPackage?.Discount ??
+                      selectedPackage?.discountPercentage) *
+                      selectedPackage?.Price) /
+                      100
+                  : selectedSlot.classId
+                  ? classData.groupPrice
+                  : classData.Price)) /
+              100
+            ).toFixed(2)
+          : discount),
+      subTotal: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            ((selectedPackage?.Discount ??
+              selectedPackage?.discountPercentage) *
+              selectedPackage.Price) /
+              100
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? (discount * basePrice) / 100
+            : discount
+          : 0;
+
+        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+      })(),
+      processingFee: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            (
+              ((selectedPackage?.Discount ??
+                selectedPackage?.discountPercentage) *
+                selectedPackage?.Price) /
+              100
+            ).toFixed(2)
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? ((discount * basePrice) / 100).toFixed(2)
+            : discount
+          : 0;
+
+        const subtotal = basePrice - voucherDiscount;
+        const processingFee = (subtotal * 0.029 + 0.8).toFixed(2);
+
+        return parseFloat(processingFee);
+      })(),
+      total: (() => {
+        const basePrice = selectedPackage?.num_sessions
+          ? selectedPackage.Price -
+            (
+              ((selectedPackage?.Discount ??
+                selectedPackage?.discountPercentage) *
+                selectedPackage?.Price) /
+              100
+            ).toFixed(2)
+          : selectedSlot.classId
+          ? classData.groupPrice
+          : classData.Price;
+
+        const voucherDiscount = voucherVerified
+          ? discountType === "percentage"
+            ? ((discount * basePrice) / 100).toFixed(2)
+            : discount
+          : 0;
+
+        const subtotal = basePrice - voucherDiscount;
+        const processingFee = subtotal * 0.029 + 0.8;
+        const total = subtotal + processingFee;
+
+        return parseFloat(total.toFixed(2));
+      })(),
     };
+
+    console.log(bookingData)
 
     const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
 
