@@ -49,6 +49,32 @@ const parsePrice = (price) => {
     return 0;
 };
 
+const isClientActive = (client) => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    // Check if client was added in the past 30 days
+    const clientAddedDate = new Date(client.startTime || client.createdAt?.toDate?.() || 0);
+    if (clientAddedDate >= thirtyDaysAgo) {
+        return true;
+    }
+    
+    // Check if client has any bookings in the past 30 days
+    if (client.allBookings && Array.isArray(client.allBookings)) {
+        const hasRecentBooking = client.allBookings.some(booking => {
+            const bookingDate = new Date(booking.startTime);
+            return bookingDate >= thirtyDaysAgo;
+        });
+        if (hasRecentBooking) {
+            return true;
+        }
+    }
+    
+    // For external clients without allBookings, check if they have recent activity
+    // Since external clients don't have detailed booking history, we only check creation date
+    return false;
+};
+
 const getClientEmail = (client) => {
     return client.groupEmails?.[0] || client.studentDetails?.email || client.email || null;
 };
@@ -816,11 +842,13 @@ function MyStudents() {
                                                         <span className="text-lg font-semibold text-gray-900">
                                                             CA$ {(client.totalSales || 0).toFixed(2)}
                                                         </span>
-                                                        {client.totalSales > 0 && (
-                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                                Paying
-                                                            </span>
-                                                        )}
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                            isClientActive(client) 
+                                                                ? 'bg-green-100 text-green-700' 
+                                                                : 'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                            {isClientActive(client) ? 'Active' : 'Non Active'}
+                                                        </span>
                                                     </div>
                                                 </div>
                                                 
@@ -851,11 +879,13 @@ function MyStudents() {
                                                                 <div className="font-semibold text-gray-900 text-sm sm:text-base">
                                                                     CA$ {(client.totalSales || 0).toFixed(2)}
                                                                 </div>
-                                                                {client.totalSales > 0 && (
-                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mt-1">
-                                                                        Paying
-                                                                    </span>
-                                                                )}
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                                                                    isClientActive(client) 
+                                                                        ? 'bg-green-100 text-green-700' 
+                                                                        : 'bg-gray-100 text-gray-600'
+                                                                }`}>
+                                                                    {isClientActive(client) ? 'Active' : 'Non Active'}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
