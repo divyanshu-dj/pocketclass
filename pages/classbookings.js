@@ -31,10 +31,22 @@ const MyClass = () => {
 
   const { id } = router.query;
 
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push("/");
+    }
+    if (user && user.uid !== id) {
+      router.push(`/classbookings?id=${user.uid}`);
+    }
+  }, [user, loading]);
+
   const getUserInfo = async (id) => {
     const docRef = doc(db, "Users", id);
     const data = await getDoc(docRef);
     setUserData(data.data());
+    if (data.data().category !== "instructor") {
+      router.push(`/mybooking?id=${data.data().id}`);
+    }
   };
 
   const getAppointments = async (userId) => {
@@ -122,7 +134,7 @@ const MyClass = () => {
     const grouped = {};
     appointments.forEach((appt) => {
       const startTime = new Date(appt.startTime);
-      if (startTime < now) return;
+      // if (startTime < now) return;
       const key = `${appt.class_id}_${appt.startTime}`;
       if (!grouped[key]) {
         grouped[key] = {
@@ -214,7 +226,7 @@ const MyClass = () => {
 
       <NewHeader />
 
-      <div className="flex space-x-4 border-b mb-4">
+      <div className="flex space-x-4 border-b mt-2 mb-4">
         <button
           className={`py-2 px-4 ${
             activeTab === "student"
@@ -223,7 +235,7 @@ const MyClass = () => {
           }`}
           onClick={() => setActiveTab("student")}
         >
-          My Bookings
+          Class Bookings
         </button>
         <button
           className={`py-2 px-4 ${
@@ -233,7 +245,7 @@ const MyClass = () => {
           }`}
           onClick={() => setActiveTab("all")}
         >
-          All Bookings
+          All Class Bookings
         </button>
       </div>
 
@@ -308,10 +320,12 @@ const MyClass = () => {
                           {moment(appt.endTime).diff(
                             moment(appt.startTime),
                             "minutes"
-                          )} min
+                          )}{" "}
+                          min
                         </td>
                         <td className="px-4 py-2">
-                          CA${appt.price ? Number(appt.price).toFixed(2) : "0.00"}
+                          CA$
+                          {appt.price ? Number(appt.price).toFixed(2) : "0.00"}
                         </td>
                       </tr>
                     );

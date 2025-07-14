@@ -48,7 +48,7 @@ const NewHeader = ({
 
   const [activeKey, setActiveKey] = useState("sport");
   const navbarRef = useRef(null);
-  
+
   // State for menu shrinking and responsive behavior
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isMenuShrunk, setIsMenuShrunk] = useState(false);
@@ -61,14 +61,17 @@ const NewHeader = ({
     const updateNavbarHeight = () => {
       if (navbarRef.current) {
         const height = navbarRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--navbar-height', `${height}px`);
+        document.documentElement.style.setProperty(
+          "--navbar-height",
+          `${height}px`
+        );
       }
     };
 
     updateNavbarHeight();
-    window.addEventListener('resize', updateNavbarHeight);
-    
-    return () => window.removeEventListener('resize', updateNavbarHeight);
+    window.addEventListener("resize", updateNavbarHeight);
+
+    return () => window.removeEventListener("resize", updateNavbarHeight);
   }, [isMenuShrunk, isMenuSmall]);
 
   const handleCategoryClick = (category, index) => {
@@ -441,11 +444,8 @@ const NewHeader = ({
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
                           </li>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <Link href={`/mybooking?id=${user.uid}`}>My Booking</Link>
-                          </li>
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <Link href={`/myClass/${user.uid}`}>
-                              My Classes
+                            <Link href={`/mybooking?id=${user.uid}`}>
+                              My Booking
                             </Link>
                           </li>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -473,6 +473,11 @@ const NewHeader = ({
                           )}
                           {category === "instructor" && (
                             <>
+                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                <Link href={`/myClass/${user.uid}`}>
+                                  My Classes
+                                </Link>
+                              </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                   <a href={`/myStudents/${user.uid}`}>
@@ -568,52 +573,58 @@ const NewHeader = ({
           </div>
         </div>
         <div
-        style={{
-          display: router.pathname !== "/" ? "none" : "",
-        }}
+          style={{
+            display: router.pathname !== "/" ? "none" : "",
+          }}
           className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
-            hideIcons ? "mb-0 max-h-0 opacity-0" : " mb-3 max-h-[200px] opacity-100"
+            hideIcons
+              ? "mb-0 max-h-0 opacity-0"
+              : " mb-3 max-h-[200px] opacity-100"
           }`}
         >
-            <div className="flex space-x-2.5 items-center">
-              {categoryData.map((category, index) => (
-                <div key={category.name}>
-                  <button
-                    key={category.name}
-                    onClick={() =>
-                      handleCategoryClick(category.name.toLowerCase(), index)
-                    }
-                    className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+          <div className="flex space-x-2.5 items-center">
+            {categoryData.map((category, index) => (
+              <div key={category.name}>
+                <button
+                  key={category.name}
+                  onClick={() =>
+                    handleCategoryClick(category.name.toLowerCase(), index)
+                  }
+                  className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                >
+                  <Player
+                    id={`player-${index}-mob`}
+                    lottieRef={(el) => (playerRefs.current[index] = el)}
+                    autoplay
+                    loop={false}
+                    src={category.jsonPath}
+                    className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
+                  />
+                  <span
+                    className={`text-xs font-medium transition-colors ${
+                      activeKey === category.name.toLowerCase()
+                        ? "text-black"
+                        : "text-gray-500"
+                    }`}
                   >
-                    <Player
-                      id={`player-${index}-mob`}
-                      lottieRef={(el) => (playerRefs.current[index] = el)}
-                      autoplay
-                      loop={false}
-                      src={category.jsonPath}
-                      className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
-                    />
-                    <span
-                      className={`text-xs font-medium transition-colors ${
-                        activeKey === category.name.toLowerCase()
-                          ? "text-black"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {category.name}
-                    </span>
-                    {activeKey === category.name.toLowerCase() && (
-                      <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
+                    {category.name}
+                  </span>
+                  {activeKey === category.name.toLowerCase() && (
+                    <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
         {/*NavBar Search Part*/}
-        <div className={`${(isMenuShrunk || (isMenuSmall && 
-          window.innerWidth > 800
-        )) ? 'flex items-center justify-center h-full absolute inset-0' : 'relative'}`}>
+        <div
+          className={`${
+            isMenuShrunk || (isMenuSmall && window.innerWidth > 800)
+              ? "flex items-center justify-center h-full absolute inset-0"
+              : "relative"
+          }`}
+        >
           <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}

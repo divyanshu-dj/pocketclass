@@ -270,7 +270,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
             isLoading || appointments.length > 0 ? "lg:w-1/2" : "lg:w-full"
           } flex-shrink-0`}
         >
-          <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+          <h1 className="text-2xl font-bold mb-4">My Bookings</h1>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             Upcoming
             <span className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 text-sm">

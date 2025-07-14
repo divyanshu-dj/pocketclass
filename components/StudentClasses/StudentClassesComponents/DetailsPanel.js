@@ -9,6 +9,7 @@ import {
   FaRegCalendarAlt,
   FaRegCommentDots,
   FaTimesCircle,
+  FaSchool
 } from "react-icons/fa";
 import {
   collection,
@@ -497,6 +498,12 @@ const renderDetails = ({
                     "Meeting link not available"
                   )
                 }
+              />
+              <ActionItem
+                icon={<FaSchool className="text-lg" />}
+                title="Go to Class"
+                subtitle="Redirect to class page."
+                onClick={handleBookAgain}
               />
             </div>
           </div>
