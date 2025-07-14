@@ -56,25 +56,7 @@ const ActionMenu = ({
                   setOpen(false);
                 }}
               >
-                Message Instructor
-              </button>
-              <button
-                onClick={() => {
-                  onRescheduleClick?.();
-                  setOpen(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-              >
-                Reschedule
-              </button>
-              <button
-                onClick={() => {
-                  onCancelClick?.();
-                  setOpen(false);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
-              >
-                Cancel
+                Message Students
               </button>
             </>
           ) : (
@@ -129,26 +111,79 @@ const ClassCard = ({
   };
 
   const handleMessageInstructor = async () => {
-    const goToChat = (cid, chid) => {
-      router.push({ pathname: "/chat", query: { cid, chid } });
-    };
+    const allEmails = appointment.all_emails || [];
+    const uniqueEmails = [...new Set(allEmails)];
+    const studentIds = [];
+
+    for (const email of uniqueEmails) {
+      const userQuery = query(
+        collection(db, "Users"),
+        where("email", "==", email)
+      );
+      const userSnap = await getDocs(userQuery);
+      if (!userSnap.empty) {
+        studentIds.push(userSnap.docs[0].id);
+      }
+    }
+
+    if (studentIds.length === 0) {
+      toast.error("No matching student accounts found.");
+      return;
+    }
+
     const chatRoomRef = collection(db, "chatrooms");
-    const q = query(
-      chatRoomRef,
-      where("student", "==", studentId),
-      where("instructor", "==", classData.classCreator),
-      where("class", "==", classData.id)
-    );
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      goToChat(classData.classCreator, snapshot.docs[0].id);
-    } else {
+
+    if (studentIds.length === 1) {
+      const q = query(
+        chatRoomRef,
+        where("student", "==", studentIds[0]),
+        where("instructor", "==", classData.classCreator),
+        where("class", "==", classData.id)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        router.push({
+          pathname: "/chat",
+          query: { cid: classData.classCreator, chid: snapshot.docs[0].id },
+        });
+        return;
+      }
+
       const newChat = await addDoc(chatRoomRef, {
-        student: studentId,
+        student: studentIds[0],
         instructor: classData.classCreator,
         class: classData.id,
       });
-      goToChat(classData.classCreator, newChat.id);
+      router.push({
+        pathname: "/chat",
+        query: { cid: classData.classCreator, chid: newChat.id },
+      });
+    } else {
+      const q = query(
+        chatRoomRef,
+        where("instructor", "==", classData.classCreator),
+        where("class", "==", classData.id),
+        where("startTime", "==", appointment.startTime)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        router.push({
+          pathname: "/chat",
+          query: { cid: classData.classCreator, chid: snapshot.docs[0].id },
+        });
+        return;
+      }
+
+      const newChat = await addDoc(chatRoomRef, {
+        instructor: classData.classCreator,
+        class: classData.id,
+        startTime: appointment.startTime,
+        studentIds,
+      });
+      router.push({
+        pathname: "/chat",
+        query: { cid: classData.classCreator, chid: newChat.id },
+      });
     }
   };
 
@@ -289,10 +324,7 @@ const ClassCard = ({
           <div className="flex-1 p-4">
             <h3 className="text-lg justify-between flex font-semibold">
               {classData.Name}{" "}
-              <div
-                className=" z-20"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className=" z-20" onClick={(e) => e.stopPropagation()}>
                 <ActionMenu
                   type={type}
                   onRescheduleClick={handleReschedule}
