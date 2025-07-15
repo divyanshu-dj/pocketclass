@@ -217,48 +217,50 @@ const MyClass = () => {
   }
 
   return (
-    <div className="myClassesContainer mx-auto px-4 max-w-7xl">
-      <Head>
-        <title>Class Bookings</title>
-        <meta name="description" content="My Class Dashboard" />
-        <link rel="icon" href="/pc_favicon.ico" />
-      </Head>
-
+    <>
       <NewHeader />
+      <div className="myClassesContainer mx-auto px-4 max-w-7xl">
+        <Head>
+          <title>Class Bookings</title>
+          <meta name="description" content="My Class Dashboard" />
+          <link rel="icon" href="/pc_favicon.ico" />
+        </Head>
 
-      <div className="flex space-x-4 border-b mt-2 mb-4">
-        <button
-          className={`py-2 px-4 ${
-            activeTab === "student"
-              ? "border-b-2 border-black font-semibold"
-              : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("student")}
-        >
-          Class Bookings
-        </button>
-        <button
-          className={`py-2 px-4 ${
-            activeTab === "all"
-              ? "border-b-2 border-black font-semibold"
-              : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("all")}
-        >
-          All Class Bookings
-        </button>
+        <div className="flex space-x-4 border-b mt-2 mb-4">
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "student"
+                ? "border-b-2 border-black font-semibold"
+                : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("student")}
+          >
+            Class Bookings
+          </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "all"
+                ? "border-b-2 border-black font-semibold"
+                : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("all")}
+          >
+            All Class Bookings
+          </button>
+        </div>
       </div>
-
       {activeTab === "student" ? (
-        <StudentClasses
-          appointments={groupedAppointments}
-          classDetails={classDetails}
-          reviews={reviews}
-          isLoading={isLoading}
-        />
+        <div className="myClassesContainer overflow-hidden mx-auto">
+          <StudentClasses
+            appointments={groupedAppointments}
+            classDetails={classDetails}
+            reviews={reviews}
+            isLoading={isLoading}
+          />
+        </div>
       ) : (
         <>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 mx-auto max-w-7xl">
             <input
               type="text"
               placeholder="Search by Ref # or Client name"
@@ -274,7 +276,7 @@ const MyClass = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto bg-white rounded-xl shadow-md mb-8">
+          <div className="overflow-x-auto bg-white rounded-xl shadow-md mb-8 mx-auto max-w-7xl">
             <table className="min-w-full text-sm text-gray-700">
               <thead className="bg-gray-100">
                 <tr>
@@ -335,7 +337,7 @@ const MyClass = () => {
           </div>
         </>
       )}
-    </div>
+    </>
   );
 };
 

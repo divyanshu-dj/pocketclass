@@ -180,7 +180,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
         >
           {/* Booking List Panel */}
           <div className="w-[100vw] h-[100vh] overflow-hidden bg-white flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 pl-0 py-6">
+            <div className="flex-1 overflow-y-auto px-4 py-6">
               <h1 className="text-2xl font-bold mb-4">Class Bookings</h1>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 Upcoming
