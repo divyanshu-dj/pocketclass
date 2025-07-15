@@ -84,6 +84,13 @@ const NewHeader = ({
   };
 
   useEffect(() => {
+    const cachedImage = localStorage.getItem("profileImage");
+    if (cachedImage) {
+      setUserData((prev) => ({ ...prev, profileImage: cachedImage }));
+    }
+  }, []);
+
+  useEffect(() => {
     const getData = async () => {
       const userId = user?.uid;
       const docRef = doc(db, "Schedule", userId);
@@ -138,6 +145,12 @@ const NewHeader = ({
         ...docData,
         profileImage: docData?.profileImage || user?.photoURL,
       };
+
+      const imageUrl = docData?.profileImage || user?.photoURL;
+
+      if (imageUrl) {
+        localStorage.setItem("profileImage", imageUrl);
+      }
 
       setUserData(updatedData);
       setCategory(updatedData?.category);
@@ -517,7 +530,10 @@ const NewHeader = ({
                           <hr className="my-2" />
                           <li
                             className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 cursor-pointer"
-                            onClick={() => signOut()}
+                            onClick={() => {
+                              signOut();
+                              localStorage.removeItem("profileImage");
+                            }}
                           >
                             Logout
                           </li>
