@@ -132,27 +132,34 @@ const NewHeader = ({
     const getData = async () => {
       const docRef = doc(db, "Users", user?.uid);
       const data = await getDoc(docRef);
-      setUserData(data?.data());
-      setCategory(data?.data()?.category);
-      if (
-        data?.data() &&
-        data?.data().firstName &&
-        data?.data().lastName &&
-        data?.data().email &&
-        data?.data().gender &&
-        data?.data().dob &&
-        data?.data().phoneNumber &&
-        data?.data().profileImage &&
-        data?.data().profileDescription
-      ) {
-        setProfileCompleted(true);
-      } else {
-        setProfileCompleted(false);
-      }
+      const docData = data.data();
+
+      const updatedData = {
+        ...docData,
+        profileImage: docData?.profileImage || user?.photoURL,
+      };
+
+      setUserData(updatedData);
+      setCategory(updatedData?.category);
+
+      // Check for profile completeness
+      const isComplete =
+        docData?.firstName &&
+        docData?.lastName &&
+        docData?.email &&
+        docData?.gender &&
+        docData?.dob &&
+        docData?.phoneNumber &&
+        (docData?.profileImage || user?.photoURL) &&
+        docData?.profileDescription;
+
+      setProfileCompleted(!!isComplete);
+
+      // Stripe setup check
       if (
         window.location.pathname === "/" &&
-        data?.data()?.category === "instructor" &&
-        !data?.data()?.payment_enabled
+        docData?.category === "instructor" &&
+        !docData?.payment_enabled
       ) {
         toast.error("Please setup stripe to start earning");
         setStripeIntegration(false);
@@ -161,7 +168,7 @@ const NewHeader = ({
       }
     };
 
-    user && getData();
+    if (user?.uid) getData();
   }, [user]);
 
   useEffect(() => {
@@ -418,14 +425,14 @@ const NewHeader = ({
                     onClick={toggleDropDown}
                   >
                     <MenuIcon className="h-6 cursor-pointer ml-1" />
-                    {user?.photoURL || userData?.profileImage ? (
+                    {userData?.profileImage ? (
                       <img
-                        src={userData?.profileImage || user?.photoURL}
+                        src={userData?.profileImage}
                         className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12"
                         alt="User"
                       />
                     ) : (
-                      <UserCircleIcon className="h-6 cursor-pointer" />
+                      <UserCircleIcon className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12" />
                     )}
 
                     {showDropDown && (
