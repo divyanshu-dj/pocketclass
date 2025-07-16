@@ -369,7 +369,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
           {/* Category Buttons */}
           <div className="hidden md:flex justify-center flex-[2]">
             <div
-              className={`transition duration-300 ${
+              className={`${
                 isMenuShrunk || isMenuSmall ? "opacity-0" : ""
               }`}
             >
@@ -600,7 +600,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         {/* Mobile Category Buttons - Only shown on homepage */}
         {isHome && (
           <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
+            className={`ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
               hideIcons
                 ? "mb-0 max-h-0 opacity-0"
                 : "mb-3 max-h-[200px] opacity-100"
