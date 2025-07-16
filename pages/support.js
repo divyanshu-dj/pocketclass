@@ -265,9 +265,6 @@ export default function Support() {
 				<link rel="icon" href="/pc_favicon.ico" />
 			</Head>
 
-			{/* header */}
-			<NewHeader />
-
 			{/* application container */}
 			<div className="bg-white flex-1 flex flex-col p-2 md:p-12">
 				<h1 className="capitalize text-logo-red text-2xl md:text-4xl font-medium">

@@ -225,8 +225,6 @@ const MyClass = () => {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
 
-      <NewHeader />
-
       <h1 className="text-center text-4xl font-bold py-[50px]">My Classes</h1>
 
       {userData?.category === "instructor" && (

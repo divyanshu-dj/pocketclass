@@ -7,6 +7,7 @@ import ProgressBar from "@badrap/bar-of-progress";
 import Router from "next/router";
 import Script from "next/script";
 import { ToastContainer } from "react-toastify";
+import NewHeader from "../components/NewHeader";
 
 const progress = new ProgressBar({
   size: 4,
@@ -40,6 +41,7 @@ function MyApp({ Component, pageProps }) {
           gtag('config', 'G-HLDMXN1VRR');
         `}
       </Script>
+      <NewHeader />
       <Component {...pageProps} />
       <ToastContainer
         position="top-center"

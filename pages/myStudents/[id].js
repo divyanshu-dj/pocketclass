@@ -600,7 +600,6 @@ function MyStudents() {
                 <meta name="description" content="Manage your clients and students" />
                 <link rel="icon" href="/pc_favicon.ico" />
             </Head>
-            <NewHeader />
             
             <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
                 {/* Header Section */}

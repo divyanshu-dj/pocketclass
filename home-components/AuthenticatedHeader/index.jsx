@@ -9,7 +9,6 @@ function AuthenticatedHeader() {
 
   return (
     <div className="bg-[white] box-border max-w-[1440px] mx-auto sticky top-0">
-      <NewHeader activeCategory={activeCategoryFilter} handleCategorySelection={setCategoryFilter} />
       <MusicClassroomLayout activeCategory={activeCategoryFilter} />
     </div>
   );
