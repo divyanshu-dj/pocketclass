@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useRouter } from "next/router";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { auth, db } from "../../firebaseConfig";
 import {
   doc,
@@ -183,6 +183,11 @@ export default function index({
     }
     setDaysWithNoSlots(daysToCheck);
   }, [schedule, bookedSlots, appointmentDuration, classData]);
+
+  useEffect(()=>{
+    console.log(selectedDate)
+    console.log(selectedSlot)
+  },[selectedDate,selectedSlot])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -667,7 +672,7 @@ export default function index({
 
     const now = moment().tz(timeZone).add(24, "hours");
     const bookingStartDate = moment.utc(
-      `${bookingData.startTime}`,
+      `${selectedSlot}`,
       "YYYY-MM-DD HH:mm"
     );
 
@@ -1018,7 +1023,10 @@ END:VCALENDAR`.trim();
   };
 
   return (
-    <div className="relative flex flex-col my-6 mb-10" id="booking">
+    <div
+      className="relative flex flex-col z-[1000000000000000000000000000000000000] my-6 mb-10"
+      id="booking"
+    >
       <div className="flex flex-wrap-reverse gap-2 flex-row items-center justify-between mb-4">
         <div className="text-2xl font-bold text-[#E73F2B]">
           Reschedule Schedule
@@ -1295,6 +1303,18 @@ END:VCALENDAR`.trim();
           </div>
         </div>
       )}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastClassName="relative z-[1000000000000000000000000000000000001]" // Tailwind override
+      />
     </div>
   );
 }

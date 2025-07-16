@@ -17,68 +17,182 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { Tabs } from "antd";
 import NewHeader from "../../components/NewHeader";
 import StudentClasses from "../../components/StudentClasses";
-import InstructorCard from "../../components/InstructorClasses/InstructorCard";
 import InstructorClasses from "../../components/InstructorClasses";
 
 const MyClass = () => {
   const router = useRouter();
-  const [userData, setUserData] = useState();
+  const { id } = router.query;
+
+  const [user, loading] = useAuthState(auth);
+  const [userData, setUserData] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [myClass, setMyClass] = useState([]);
   const [classDetails, setClassDetails] = useState({});
   const [bookings, setBookings] = useState([]);
   const [bookingsByMe, setBookingsByMe] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [user, loading] = useAuthState(auth);
+  const [isLoading, setIsLoading] = useState(true); // ✅ Main loading flag
 
-  const { id } = router.query;
-  const [selectedStatus, setSelectedStatus] = useState("All");
-
-  const getUserInfo = async (id) => {
-    const docRef = doc(db, "Users", id);
-    const data = await getDoc(docRef);
-    setUserData(data.data());
+  const getUserInfo = async (uid) => {
+    try {
+      const docSnap = await getDoc(doc(db, "Users", uid));
+      if (docSnap.exists()) setUserData(docSnap.data());
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    }
   };
 
-  const getAppointments = async (userId) => {
-    const q = query(
-      collection(db, "Bookings"),
-      where("student_id", "==", userId)
-    );
-    const querySnapshot = await getDocs(q);
-    let appointmentsData = querySnapshot.docs.map((docSnap) => ({
-      ...docSnap.data(),
-      id: docSnap.id,
-    }));
-    // Filter appointments to remove ones that are pending
-    appointmentsData = appointmentsData.filter((a) => a.status !== "Pending");
-    setAppointments(appointmentsData);
-    fetchClassDetails(appointmentsData);
-  };
+  const fetchInstructorNames = async (appointments) => {
+    const uniqueInstructorIds = [
+      ...new Set(appointments.map((a) => a.instructor_id)),
+    ];
 
-  const fetchClassDetails = async (appointments) => {
-    let classData = {};
+    const instructorMap = {};
     await Promise.all(
-      appointments.map(async (appointment) => {
-        const classDoc = await getDoc(doc(db, "classes", appointment.class_id));
-        if (classDoc.exists()) {
-          classData[appointment.class_id] = {
-            ...classDoc.data(),
-            id: appointment.class_id,
-          };
+      uniqueInstructorIds.map(async (instructorId) => {
+        try {
+          const docSnap = await getDoc(doc(db, "Users", instructorId));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            instructorMap[instructorId] =
+              data.firstName && data.lastName
+                ? `${data.firstName} ${data.lastName}`
+                : data.firstName || "Instructor";
+          }
+        } catch (err) {
+          console.error("Failed to fetch instructor", instructorId);
         }
       })
     );
-    setClassDetails(classData);
+
+    return instructorMap;
+  };
+
+  const groupAppointments = (appointments) => {
+    const grouped = {};
+    appointments.forEach((appt) => {
+      const key = `${appt.class_id}_${appt.startTime}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          ...appt,
+          student_names: [appt.student_name],
+          groupEmails: [...(appt.groupEmails || [])],
+        };
+      } else {
+        grouped[key].student_names.push(appt.student_name);
+        grouped[key].groupEmails.push(...(appt.groupEmails || []));
+      }
+    });
+    return Object.values(grouped);
+  };
+
+  const getAppointments = async (userId) => {
+    try {
+      setIsLoading(true); // ✅ Start loading
+      const q = query(
+        collection(db, "Bookings"),
+        where("student_id", "==", userId)
+      );
+      const snapshot = await getDocs(q);
+
+      let appts = snapshot.docs
+        .map((doc) => ({ ...doc.data(), id: doc.id }))
+        .filter((a) => a.status !== "Pending");
+
+      const filtered = [];
+      await Promise.all(
+        appts.map(async (a) => {
+          const classSnap = await getDoc(doc(db, "classes", a.class_id));
+          if (classSnap.exists()) filtered.push(a);
+        })
+      );
+
+      const instructorMap = await fetchInstructorNames(filtered);
+
+      const appointmentsWithNames = filtered.map((a) => ({
+        ...a,
+        student_name: instructorMap[a.instructor_id] || "Instructor",
+      }));
+
+      const grouped = groupAppointments(appointmentsWithNames);
+      setAppointments(grouped);
+      await fetchClassDetails(grouped);
+    } catch (error) {
+      console.error("Error getting appointments:", error);
+    } finally {
+      setIsLoading(false); // ✅ Done loading
+    }
+  };
+
+  const fetchClassDetails = async (appointments) => {
+    const newClassDetails = { ...classDetails };
+    const alreadyFetched = new Set(Object.keys(classDetails));
+
+    await Promise.all(
+      appointments.map(async (appt) => {
+        const cid = appt.class_id;
+        if (!alreadyFetched.has(cid)) {
+          const classSnap = await getDoc(doc(db, "classes", cid));
+          if (classSnap.exists()) {
+            newClassDetails[cid] = { ...classSnap.data(), id: cid };
+            alreadyFetched.add(cid);
+          }
+        }
+      })
+    );
+
+    setClassDetails(newClassDetails);
   };
 
   const getClass = async (q) => {
-    const querySnapshot = await getDocs(q);
-    let temp = querySnapshot.docs.map((docSnap) => ({
-      ...docSnap.data(),
-      id: docSnap.id,
-    }));
-    setMyClass(temp);
+    try {
+      setIsLoading(true);
+      const querySnapshot = await getDocs(q);
+      let temp = querySnapshot.docs.map((docSnap) => ({
+        ...docSnap.data(),
+        id: docSnap.id,
+      }));
+      setMyClass(temp);
+      
+      // Also fetch bookings for instructors
+      if (userData?.category === "instructor") {
+        await fetchInstructorBookings(id);
+      }
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchInstructorBookings = async (instructorId) => {
+    try {
+      // Fetch bookings where instructor_id matches
+      const q1 = query(
+        collection(db, "Bookings"),
+        where("instructor_id", "==", instructorId)
+      );
+      const querySnapshot1 = await getDocs(q1);
+      const instructorBookings = querySnapshot1.docs.map((docSnap) => ({
+        ...docSnap.data(),
+        id: docSnap.id,
+      }));
+      setBookings(instructorBookings);
+
+      // Fetch bookings where student_id matches (instructor as student)
+      const q2 = query(
+        collection(db, "Bookings"),
+        where("student_id", "==", instructorId)
+      );
+      const querySnapshot2 = await getDocs(q2);
+      const studentBookings = querySnapshot2.docs.map((docSnap) => ({
+        ...docSnap.data(),
+        id: docSnap.id,
+      }));
+      setBookingsByMe(studentBookings);
+    } catch (error) {
+      console.error("Error fetching instructor bookings:", error);
+    }
   };
 
   useEffect(() => {
@@ -102,89 +216,13 @@ const MyClass = () => {
   }, [id, userData]);
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      if (id && userData?.category === "instructor") {
-        try {
-          const q = query(
-            collection(db, "Bookings"),
-            where("instructor_id", "==", id)
-          );
-          const querySnapshot = await getDocs(q); 
-          const temp = querySnapshot.docs.map((docSnap) => ({
-            ...docSnap.data(),
-            id: docSnap.id,
-          }));
-          setBookings(temp);
-        } catch (error) {
-          console.error("Error fetching bookings:", error);
-        }
-      }
-    };
-
-    fetchBookings();
-  }, [id, userData]);
-
-  useEffect(() => {
-  const fetchBookingsAndClasses = async () => {
-    if (id && userData?.category === "instructor") {
-      try {
-        const q = query(
-          collection(db, "Bookings"),
-          where("student_id", "==", id)
-        );
-        const querySnapshot = await getDocs(q);
-        const tempBookings = querySnapshot.docs.map((docSnap) => ({
-          ...docSnap.data(),
-          id: docSnap.id,
-        }));
-
-        setBookingsByMe(tempBookings);
-
-        // Now fetch class details from class_id
-        const uniqueClassIds = [
-          ...new Set(tempBookings.map((b) => b.class_id)),
-        ];
-
-        const classPromises = uniqueClassIds.map(async (classId) => {
-          const classRef = doc(db, "classes", classId);
-          const classSnap = await getDoc(classRef);
-          if (classSnap.exists()) {
-            return { id: classSnap.id, ...classSnap.data() };
-          }
-          return null;
-        });
-
-        const classesFromBookings = (await Promise.all(classPromises)).filter(
-          (cls) => cls !== null
-        );
-
-        // Merge with existing myClass, avoiding duplicates
-        setMyClass((prev) => {
-          const existingIds = new Set(prev.map((c) => c.id));
-          const newClasses = classesFromBookings.filter(
-            (cls) => !existingIds.has(cls.id)
-          );
-          return [...prev, ...newClasses];
-        });
-      } catch (error) {
-        console.error("Error fetching bookings or class details:", error);
-      }
+    if (!user && !loading) {
+      router.push("/");
     }
-  };
-
-  fetchBookingsAndClasses();
-}, [id, userData]);
-
-
-  useEffect(() => {
-    return onSnapshot(collection(db, "Reviews"), (snapshot) => {
-      setReviews(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    });
-  }, []);
-
-  const handleTabChange = (key) => {
-    setSelectedStatus(key);
-  };
+    if (user && user.uid !== id) {
+      router.push(`/myClass?id=${user.uid}`);
+    }
+  }, [user, loading]);
 
   if (!id || !userData || loading) {
     return (
@@ -204,44 +242,33 @@ const MyClass = () => {
     return null;
   }
 
-  const filteredAppointments = appointments.filter((appointment) => {
-    if (selectedStatus === "Active") return appointment.status === "pending";
-    if (selectedStatus === "Completed")
-      return appointment.status === "completed";
-    return true;
-  });
-
-  const filteredClasses = myClass.filter((classData) => {
-    if (selectedStatus === "Active") return classData.status === "pending";
-    if (selectedStatus === "Completed") return classData.status === "completed";
-    return true;
-  });
-
   return (
-    <div className="myClassesContainer mx-auto">
+    <div className="myClassesContainer overflow-hidden mx-auto">
       <Head>
-        <title>My Class</title>
-        <meta name="description" content="Generated by create next app" />
+        <title>My Classes</title>
+        <meta name="description" content="My Class Dashboard" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-
-      <h1 className="text-center text-4xl font-bold py-[50px]">My Classes</h1>
 
       {userData?.category === "instructor" && (
         <InstructorClasses
           classes={myClass}
+          setMyClass={setMyClass}
           bookings={bookings}
           bookingsByMe={bookingsByMe}
           reviews={reviews}
           userData={userData}
+          isLoading={isLoading} // ✅ Pass loading prop
         />
       )}
 
       {userData?.category === "student" && (
         <StudentClasses
           appointments={appointments}
+          setMyClass={setMyClass}
           classDetails={classDetails}
           reviews={reviews}
+          isLoading={isLoading} // ✅ Pass loading prop
         />
       )}
     </div>

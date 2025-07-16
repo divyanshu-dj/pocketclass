@@ -461,6 +461,9 @@ const NewHeader = ({
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
                           </li>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                            <Link href={`/mybooking?id=${user.uid}`}>My Booking</Link>
+                          </li>
+                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/myClass/${user.uid}`}>
                               My Classes
                             </Link>
@@ -494,6 +497,13 @@ const NewHeader = ({
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                   <a href={`/myStudents/${user.uid}`}>
                                     My Clients
+                                  </a>
+                                </p>
+                              </li>
+                              <li>
+                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <a href={`/classbookings?id=${user.uid}`}>
+                                    Class Bookings
                                   </a>
                                 </p>
                               </li>
