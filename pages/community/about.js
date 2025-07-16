@@ -19,7 +19,6 @@ export default function AboutUs() {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
       {/* header */}
-      <NewHeader />
 
       {/*body*/}
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">

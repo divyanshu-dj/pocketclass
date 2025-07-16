@@ -49,7 +49,6 @@ export default function PaymentSuccess() {
 
   return (
     <div className="flex overflow-hidden relative flex-col min-h-screen bg-white">
-      <NewHeader />
       <div className="flex relative flex-col items-center w-full">
         <div className="absolute opacity-30 pointer-events-none bg-[40px_40px] bg-[radial-gradient(circle,#FFE4E1_2px,transparent_2px)] size-full" />
         <BookingSuccess />

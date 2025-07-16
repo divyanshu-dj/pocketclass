@@ -212,8 +212,6 @@ const MyClass = () => {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
 
-      <NewHeader />
-
       <div className="flex space-x-4 border-b mb-4">
         <button
           className={`py-2 px-4 ${

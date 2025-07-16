@@ -30,8 +30,6 @@ export default function myPackages() {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
 
-      <NewHeader />
-
       <h1 className="text-center text-4xl font-bold py-[50px]">My Packages</h1>
       <div className="mx-4 flex flex-col gap-2">
         {packages.map((packageDetails, index) => (

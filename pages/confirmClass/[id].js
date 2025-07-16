@@ -55,7 +55,6 @@ export default function PaymentSuccess() {
         <meta name="Class Confirmation" content="Your class is live." />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <NewHeader />
       <div className="flex relative flex-col items-center w-full">
         <div className="absolute opacity-30 pointer-events-none bg-[40px_40px] bg-[radial-gradient(circle,#FFE4E1_2px,transparent_2px)] size-full" />
         <BookingSuccess />

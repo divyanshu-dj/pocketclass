@@ -250,8 +250,6 @@ function UpdateProfile() {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
 
-      <NewHeader />
-
       {/* Full Page Drop Overlay - Only shows when dragging */}
       {isDragActive && (
         <div 

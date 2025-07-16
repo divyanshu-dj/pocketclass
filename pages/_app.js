@@ -7,6 +7,9 @@ import ProgressBar from "@badrap/bar-of-progress";
 import Router from "next/router";
 import Script from "next/script";
 import { ToastContainer } from "react-toastify";
+import NewHeader from "../components/NewHeader";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 const progress = new ProgressBar({
   size: 4,
@@ -20,6 +23,11 @@ Router.events.on("routeChangeComplete", progress.finish);
 Router.events.on("routeChangeError", progress.finish);
 
 function MyApp({ Component, pageProps }) {
+  const router = useRouter()
+  useEffect(()=>{
+    console.log(router.pathname)
+    console.log
+  },[router.asPath])
   return (
     <>
       <link
@@ -40,6 +48,7 @@ function MyApp({ Component, pageProps }) {
           gtag('config', 'G-HLDMXN1VRR');
         `}
       </Script>
+      <NewHeader isHome={router.pathname==="/"} />
       <Component {...pageProps} />
       <ToastContainer
         position="top-center"

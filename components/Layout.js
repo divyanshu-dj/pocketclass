@@ -24,7 +24,6 @@ const Layout = ({
         <>
             {/* <PageHead headTitle={"Panoply"} /> */}
             <div id="main-wrapper" className={"pageClass"}>
-                {<NewHeader />}
                 {/*  */}
 
                 <div className="content-body" style={{ minHeight: height - 122 }}>
