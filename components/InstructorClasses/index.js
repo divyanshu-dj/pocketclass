@@ -154,6 +154,7 @@ const ClassDetailsPanel = ({
     );
   }
 
+  const router = useRouter();
   const classReviews = reviews.filter(
     (review) => review.class_id === selectedClass.id
   );
@@ -339,7 +340,7 @@ const ClassDetailsPanel = ({
           </button>
           
           <button
-            onClick={() => router.push(`/class/${selectedClass.id}`)}
+            onClick={() => router.push(`/classes/id=${selectedClass.id}`)}
             className="w-full flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">

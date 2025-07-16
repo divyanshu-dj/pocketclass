@@ -28,9 +28,51 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [clientBookings, setClientBookings] = useState([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   const router = useRouter();
   // Helper functions
+
+  useEffect(() => {
+    // Get Reviews for the selected client
+    const fetchReviews = async () => {
+      if (!selectedClient) return;
+      try {
+        console.log("Fetching reviews for client:", selectedClient);
+        const reviewsQuery = query(
+          collection(db, "Reviews"),
+          where("userId", "==", selectedClient.student_id)
+        );
+        // Filter revews which classId matches the classes booked by the client
+        const reviewsSnapshot = await getDocs(reviewsQuery);
+        const reviewsData = reviewsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        const filteredReviews = reviewsData
+          .filter((review) =>
+            selectedClient.allBookings?.some(
+              (booking) => (booking.classDetails?.id === review.classID && review.classID !== undefined)
+            )
+          )
+          .map((review) => {
+            const matchingBooking = selectedClient.allBookings.find(
+              (booking) => booking.classDetails?.id === review.classID
+            );
+            return {
+              ...review,
+              className: matchingBooking?.classDetails?.Name || "Unknown Class",
+            };
+          });
+        setReviews(filteredReviews);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+    if (selectedClient) {
+      fetchReviews();
+    }
+  }, [selectedClient]);
   const getClientName = (client) => {
     if (!client) return "Unknown Client";
 
@@ -104,7 +146,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
 
   const addNote = async () => {
     if (!newNote.trim()) return;
-    
+
     setIsSavingNote(true);
     try {
       const clientEmail = getClientEmail(selectedClient);
@@ -122,7 +164,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
       };
 
       const updatedNotes = [...notes, note];
-      
+
       const notesRef = doc(
         db,
         "client-notes",
@@ -153,7 +195,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
 
   const updateNote = async (noteId, newText) => {
     if (!newText.trim()) return;
-    
+
     setIsSavingNote(true);
     try {
       const clientEmail = getClientEmail(selectedClient);
@@ -162,12 +204,16 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
         return;
       }
 
-      const updatedNotes = notes.map(note => 
-        note.id === noteId 
-          ? { ...note, text: newText.trim(), updatedAt: new Date().toISOString() }
+      const updatedNotes = notes.map((note) =>
+        note.id === noteId
+          ? {
+              ...note,
+              text: newText.trim(),
+              updatedAt: new Date().toISOString(),
+            }
           : note
       );
-      
+
       const notesRef = doc(
         db,
         "client-notes",
@@ -206,8 +252,8 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
         return;
       }
 
-      const updatedNotes = notes.filter(note => note.id !== noteId);
-      
+      const updatedNotes = notes.filter((note) => note.id !== noteId);
+
       const notesRef = doc(
         db,
         "client-notes",
@@ -308,7 +354,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
   return (
     <div className="bg-white max-h-screen h-full flex flex-col lg:grid lg:grid-cols-5">
       {/* Left Panel - Client Information (Desktop) */}
-      <div className="hidden lg:block lg:col-span-2 border-r border-gray-200">
+      <div className="hidden lg:block lg:col-span-2 border-r border-gray-200 max-h-screen overflow-y-auto">
         {/* Mobile Header with back button (shown on mobile) */}
         <div className="border-b border-gray-200 p-4">
           <button
@@ -530,7 +576,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                       </p>
                     </div>
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <CurrencyDollarIcon className="w-4 h-4 text-green-600" />
+                      <CurrencyDollarIcon className="w-4 h-4 text-green-600" />
                     </div>
                   </div>
                 </div>
@@ -546,7 +592,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                       </p>
                     </div>
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <CalendarIcon className="w-4 h-4 text-blue-600" />
+                      <CalendarIcon className="w-4 h-4 text-blue-600" />
                     </div>
                   </div>
                 </div>
@@ -568,7 +614,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                       </p>
                     </div>
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <StarIcon className="w-4 h-4 text-purple-600" />
+                      <StarIcon className="w-4 h-4 text-purple-600" />
                     </div>
                   </div>
                 </div>
@@ -707,13 +753,15 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                   Client Notes
                 </h3>
                 <span className="text-sm text-gray-500">
-                  {notes.length} note{notes.length !== 1 ? 's' : ''}
+                  {notes.length} note{notes.length !== 1 ? "s" : ""}
                 </span>
               </div>
 
               {/* Add New Note */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Add New Note</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  Add New Note
+                </h4>
                 <div className="flex gap-3">
                   <textarea
                     value={newNote}
@@ -744,77 +792,115 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
               ) : notes.length > 0 ? (
                 <div className="space-y-4">
                   {notes
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .sort(
+                      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                    )
                     .map((note) => (
-                    <div key={note.id} className="bg-white border border-gray-200 rounded-lg p-4">
-                      {editingNoteId === note.id ? (
-                        // Edit Mode
-                        <div className="space-y-3">
-                          <textarea
-                            value={editingNoteText}
-                            onChange={(e) => setEditingNoteText(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-transparent resize-none"
-                            rows="3"
-                          />
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={cancelEditing}
-                              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => updateNote(note.id, editingNoteText)}
-                              disabled={!editingNoteText.trim() || isSavingNote}
-                              className="px-3 py-1.5 text-sm bg-[#E63F2B] text-white rounded-lg hover:bg-[#D63426] disabled:bg-gray-300 transition-colors"
-                            >
-                              {isSavingNote ? "Saving..." : "Save"}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        // View Mode
-                        <div>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <p className="text-gray-900 whitespace-pre-wrap">{note.text}</p>
-                            </div>
-                            <div className="flex items-center gap-1 ml-4">
+                      <div
+                        key={note.id}
+                        className="bg-white border border-gray-200 rounded-lg p-4"
+                      >
+                        {editingNoteId === note.id ? (
+                          // Edit Mode
+                          <div className="space-y-3">
+                            <textarea
+                              value={editingNoteText}
+                              onChange={(e) =>
+                                setEditingNoteText(e.target.value)
+                              }
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-transparent resize-none"
+                              rows="3"
+                            />
+                            <div className="flex justify-end gap-2">
                               <button
-                                onClick={() => startEditing(note)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                title="Edit note"
+                                onClick={cancelEditing}
+                                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
+                                Cancel
                               </button>
                               <button
-                                onClick={() => deleteNote(note.id)}
-                                disabled={isSavingNote}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                                title="Delete note"
+                                onClick={() =>
+                                  updateNote(note.id, editingNoteText)
+                                }
+                                disabled={
+                                  !editingNoteText.trim() || isSavingNote
+                                }
+                                className="px-3 py-1.5 text-sm bg-[#E63F2B] text-white rounded-lg hover:bg-[#D63426] disabled:bg-gray-300 transition-colors"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                {isSavingNote ? "Saving..." : "Save"}
                               </button>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>
-                              Created: {note.createdAt ? formatDate(note.createdAt) : "Unknown"}
-                            </span>
-                            {note.updatedAt && new Date(note.updatedAt).getTime() !== new Date(note.createdAt).getTime() && (
+                        ) : (
+                          // View Mode
+                          <div>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <p className="text-gray-900 whitespace-pre-wrap">
+                                  {note.text}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 ml-4">
+                                <button
+                                  onClick={() => startEditing(note)}
+                                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                  title="Edit note"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => deleteNote(note.id)}
+                                  disabled={isSavingNote}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                                  title="Delete note"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
                               <span>
-                                Updated: {formatDate(note.updatedAt)}
+                                Created:{" "}
+                                {note.createdAt
+                                  ? formatDate(note.createdAt)
+                                  : "Unknown"}
                               </span>
-                            )}
+                              {note.updatedAt &&
+                                new Date(note.updatedAt).getTime() !==
+                                  new Date(note.createdAt).getTime() && (
+                                  <span>
+                                    Updated: {formatDate(note.updatedAt)}
+                                  </span>
+                                )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -844,17 +930,64 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
             </div>
           )}
 
-          {activeTab === "reviews" && (
-            <div className="text-center py-8">
-              <StarIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">
-                No reviews available for this client
-              </p>
-              <p className="text-sm text-gray-400 mt-2">
-                Reviews will appear here when the client leaves feedback
-              </p>
-            </div>
-          )}
+          {activeTab === "reviews" &&
+            (reviews.length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Client Reviews
+                </h3>
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-600 mb-1">
+                          {review.className || "Class Review"}
+                        </p>
+                        <p className="text-gray-900">{review.review}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">
+                          {formatDate(review.createdAt.toDate().toISOString())}
+                        </p>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                            ((review.qualityRating + review.safetyRating + review.recommendRating)/3) >= 4
+                              ? "bg-green-100 text-green-800"
+                              : ((review.qualityRating + review.safetyRating + review.recommendRating)/3) === 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {(review.qualityRating + review.safetyRating + review.recommendRating)/3} Stars
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <svg
+                  className="w-12 h-12 mx-auto text-gray-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-gray-500">
+                  No reviews found for this client
+                </p>
+              </div>
+            ))}
         </div>
       </div>
     </div>

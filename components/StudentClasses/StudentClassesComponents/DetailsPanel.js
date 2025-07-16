@@ -104,6 +104,7 @@ const renderDetails = ({
         photo: studentData.photoURL || "",
         review: feedback.trim(),
         qualityRating: rating,
+				userId: studentId,
         recommendRating: rating,
         safetyRating: rating,
         createdAt: new Date(),
@@ -202,7 +203,7 @@ const renderDetails = ({
       await deleteDoc(bookingRef);
 
       if (reviewText.trim()) {
-        await addDoc(collection(db, "Reviews"), {
+        await addDoc(collection(db, "Refunds"), {
           studentId,
           classId: classData.id,
           instructorId: classData.classCreator,

@@ -240,7 +240,7 @@ const ClassCard = ({
       await deleteDoc(bookingRef);
 
       if (reviewText.trim()) {
-        await addDoc(collection(db, "Reviews"), {
+        await addDoc(collection(db, "Refunds"), {
           studentId,
           classId: classData.id,
           instructorId: classData.classCreator,
