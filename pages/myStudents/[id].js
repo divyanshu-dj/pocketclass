@@ -14,7 +14,7 @@ import {
 import { db, auth } from "../../firebaseConfig";
 import { toast } from "react-toastify";
 import Head from "next/head";
-import Tooltip from "../../components/tooltip";
+import Tooltip from "../../components/Tooltip";
 import {
   UserCircleIcon,
   SearchIcon,
