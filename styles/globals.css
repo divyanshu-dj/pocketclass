@@ -3,6 +3,10 @@
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Inconsolata:wght@200..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lilita+One&family=Oswald:wght@200..700&family=Outfit:wght@100..900&family=Quicksand:wght@300..700&family=Varela+Round&display=swap');
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   /* padding: 0;
