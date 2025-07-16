@@ -19,18 +19,14 @@ import { toast } from "react-toastify";
 import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
 import dynamic from "next/dynamic";
-import { faL } from "@fortawesome/free-solid-svg-icons";
+import MusicSelector from "../home-components/MusicSelector";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
   { ssr: false }
 );
 
-const NewHeader = ({
-  isHome = true,
-  activeCategory,
-  handleCategorySelection,
-}) => {
+const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [user, loading] = useAuthState(auth);
   const playerRefs = useRef([]);
   const [signOut] = useSignOut(auth);
@@ -44,36 +40,57 @@ const NewHeader = ({
   const [stripeIntegration, setStripeIntegration] = useState(true);
   const [classCreated, setClassCreated] = useState(true);
   const [scheduleCreated, setScheduleCreated] = useState(true);
-  const videoRefs = useRef([]);
 
   const [activeKey, setActiveKey] = useState("sport");
   const navbarRef = useRef(null);
-  
+
+  const isHome = router.pathname === "/";
+
   // State for menu shrinking and responsive behavior
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [isMenuShrunk, setIsMenuShrunk] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
-  const [isMenuSmall, setMenuSmall] = useState(false);
+  const [isMenuSmall, setMenuSmall] = useState(!isHome);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [screenWidth, setScreenWidth] = useState(0);
 
-  // Set navbar height as CSS custom property for child components
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Set initial screen width
+      setScreenWidth(window.innerWidth);
+
+      // Optional: Add resize listener
+      const handleResize = () => setScreenWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+
+      // Cleanup on unmount
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
+
+  // Set navbar height as CSS custom property
   useEffect(() => {
     const updateNavbarHeight = () => {
       if (navbarRef.current) {
         const height = navbarRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--navbar-height', `${height}px`);
+        document.documentElement.style.setProperty(
+          "--navbar-height",
+          `${height}px`
+        );
       }
     };
 
     updateNavbarHeight();
-    window.addEventListener('resize', updateNavbarHeight);
-    
-    return () => window.removeEventListener('resize', updateNavbarHeight);
-  }, [isMenuShrunk, isMenuSmall]);
+    window.addEventListener("resize", updateNavbarHeight);
+
+    return () => window.removeEventListener("resize", updateNavbarHeight);
+  }, [isMenuShrunk, isMenuSmall, isHome]);
 
   const handleCategoryClick = (category, index) => {
     setActiveKey(category);
-    handleCategorySelection(category);
+
+    if (handleCategorySelection) {
+      handleCategorySelection(category);
+    }
 
     const player = playerRefs.current[index];
     const playerMob = playerRefs.current[index + 3];
@@ -184,48 +201,45 @@ const NewHeader = ({
     if (user?.uid) getData();
   }, [user]);
 
+  // Scroll effects
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerWidth < 768) return;
-      setScrollPosition(window.scrollY);
-      if (window.scrollY > 5 && !isSearchExpanded) {
-        setIsMenuShrunk(true);
-      } else if (window.scrollY <= 5 && !isSearchExpanded) {
-        setIsMenuShrunk(false);
+      if (!isHome) return;
+
+      const scrollY = window.scrollY;
+
+      // Desktop scroll effects
+      if (window.innerWidth >= 768) {
+        if (scrollY > 5 && !isSearchExpanded) {
+          setIsMenuShrunk(true);
+        } else if (scrollY <= 5 && !isSearchExpanded) {
+          setIsMenuShrunk(false);
+        }
       }
-    };
 
-    if (router.pathname === "/")
-      window.addEventListener("scroll", handleScroll);
-    else {
-      setIsMenuShrunk(false);
-      setMenuSmall(true);
-    }
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isSearchExpanded]);
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollPosition(window.scrollY);
-      if (window.scrollY > 25) {
+      // Mobile scroll effects
+      if (scrollY > 25) {
         setHideIcons(true);
-      } else if (window.scrollY <= 25) {
+      } else if (scrollY <= 25) {
         setHideIcons(false);
       }
     };
 
-    if (router.pathname === "/")
+    if (isHome) {
       window.addEventListener("scroll", handleScroll);
-    else {
-      setHideIcons(false);
     }
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isSearchExpanded, isHome]);
+
+  // Reset states on route change
+  useEffect(() => {
+    setIsMenuShrunk(false);
+    setMenuSmall(!isHome);
+    setHideIcons(false);
+  }, [isHome]);
 
   return (
     <>
@@ -340,14 +354,15 @@ const NewHeader = ({
         {/*NavBar Top Part*/}
         <div
           className={`${
-            router.pathname === "/" ? "z-[9000]" : "dm2:z-50 z-[9000]"
-          }relative top-0 max-md:pt-4 max-md:pb-3 py-6  box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
+            isHome ? "z-[9000]" : "dm2:z-50 z-[9000]"
+          } relative top-0 max-md:pt-4 max-md:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
         >
           <div className="flex items-center justify-start flex-[1]">
             <Link className="left-section cursor-pointer" href="/">
               <img
                 src="/assets/image_5c0480a2.png"
                 className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
+                alt="Logo"
               />
             </Link>
           </div>
@@ -362,14 +377,12 @@ const NewHeader = ({
                 {categoryData.map((category, index) => (
                   <div key={category.name}>
                     <button
-                      key={category.name}
                       onClick={() =>
                         handleCategoryClick(category.name.toLowerCase(), index)
                       }
-                      className="flex  max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                      className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                     >
                       <Player
-                        id={`player-${index}`}
                         lottieRef={(el) => (playerRefs.current[index + 3] = el)}
                         autoplay
                         loop={false}
@@ -433,7 +446,7 @@ const NewHeader = ({
 
                   <div
                     className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
-                      router.pathname === "/" ? "z-[990]" : "dm2:z-50 z-[900]"
+                      isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
                   >
@@ -451,9 +464,7 @@ const NewHeader = ({
                     {showDropDown && (
                       <div
                         className={`dropDown bg-white absolute top-[130%] right-3 rounded-md shadow-2xl h-auto w-[200px] p-5 ${
-                          router.pathname === "/"
-                            ? "z-[990]"
-                            : "dm2:z-50 z-[900]"
+                          isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                         }`}
                       >
                         <ul>
@@ -461,11 +472,8 @@ const NewHeader = ({
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
                           </li>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <Link href={`/mybooking?id=${user.uid}`}>My Booking</Link>
-                          </li>
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <Link href={`/myClass/${user.uid}`}>
-                              My Classes
+                            <Link href={`/mybooking?id=${user.uid}`}>
+                              My Booking
                             </Link>
                           </li>
                           <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -495,31 +503,37 @@ const NewHeader = ({
                             <>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <a href={`/myStudents/${user.uid}`}>
+                                  <Link href={`/myStudents/${user.uid}`}>
                                     My Clients
-                                  </a>
+                                  </Link>
                                 </p>
+                              </li>
+
+                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                <Link href={`/myClass/${user.uid}`}>
+                                  My Classes
+                                </Link>
                               </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <a href={`/classbookings?id=${user.uid}`}>
+                                  <Link href={`/classbookings?id=${user.uid}`}>
                                     Class Bookings
-                                  </a>
+                                  </Link>
                                 </p>
                               </li>
                               <li>
                                 <p className="my-2 block dm1:hidden  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <a href={`/createClass`}>Create Class</a>
+                                  <Link href={`/createClass`}>Create Class</Link>
                                 </p>
                               </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <a href="/schedule">Manage Schedule</a>
+                                  <Link href="/schedule">Manage Schedule</Link>
                                 </p>
                               </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <a href="/withdraw">My Wallet</a>
+                                  <Link href="/withdraw">My Wallet</Link>
                                 </p>
                               </li>
                             </>
@@ -554,14 +568,6 @@ const NewHeader = ({
                 </div>
               ) : (
                 <>
-                  {/* <p className="text-sm hidden md:inline cursor-pointer hover:bg-gray-100 rounded-full space-x-2 p-3 hover:scale-105 active:scale-90 transition duration-150">
-                    <a
-                      target="_blank"
-                      href="https://gm81lvnyohz.typeform.com/to/IoLpsf9g"
-                    >
-                      Request a Class
-                    </a>
-                  </p> */}
                   <Link
                     className="cursor-pointer"
                     href={{
@@ -590,26 +596,26 @@ const NewHeader = ({
             )}
           </div>
         </div>
-        <div
-        style={{
-          display: router.pathname !== "/" ? "none" : "",
-        }}
-          className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
-            hideIcons ? "mb-0 max-h-0 opacity-0" : " mb-3 max-h-[200px] opacity-100"
-          }`}
-        >
+
+        {/* Mobile Category Buttons - Only shown on homepage */}
+        {isHome && (
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
+              hideIcons
+                ? "mb-0 max-h-0 opacity-0"
+                : "mb-3 max-h-[200px] opacity-100"
+            }`}
+          >
             <div className="flex space-x-2.5 items-center">
               {categoryData.map((category, index) => (
                 <div key={category.name}>
                   <button
-                    key={category.name}
                     onClick={() =>
                       handleCategoryClick(category.name.toLowerCase(), index)
                     }
                     className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
                   >
                     <Player
-                      id={`player-${index}-mob`}
                       lottieRef={(el) => (playerRefs.current[index] = el)}
                       autoplay
                       loop={false}
@@ -632,11 +638,17 @@ const NewHeader = ({
                 </div>
               ))}
             </div>
-        </div>
+          </div>
+        )}
+
         {/*NavBar Search Part*/}
-        <div className={`${(isMenuShrunk || (isMenuSmall && 
-          window.innerWidth > 800
-        )) ? 'flex items-center justify-center h-full absolute inset-0' : 'relative'}`}>
+        <div
+          className={`${
+            isMenuShrunk || (isMenuSmall && screenWidth > 800)
+              ? "flex items-center justify-center h-full absolute inset-0"
+              : "relative"
+          }`}
+        >
           <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
@@ -645,6 +657,7 @@ const NewHeader = ({
           />
         </div>
       </div>
+      {isHome&&(<MusicSelector selectedCategory={activeKey} />)}
     </>
   );
 };
