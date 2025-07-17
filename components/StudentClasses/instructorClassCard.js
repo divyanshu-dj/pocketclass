@@ -47,29 +47,17 @@ const ActionMenu = ({
       </button>
       {open && (
         <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-md z-0">
-          {type === "upcoming" ? (
-            <>
-              <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                onClick={() => {
-                  onMessageInstructor?.();
-                  setOpen(false);
-                }}
-              >
-                Message Students
-              </button>
-            </>
-          ) : (
+          <>
             <button
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
               onClick={() => {
-                onBookAgainClick?.();
+                onMessageInstructor?.();
                 setOpen(false);
               }}
-              className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
             >
-              Book Again
+              Message Students
             </button>
-          )}
+          </>
         </div>
       )}
     </div>

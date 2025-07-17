@@ -9,6 +9,7 @@ import {
   FaRegCalendarAlt,
   FaRegCommentDots,
   FaTimesCircle,
+  FaSchool
 } from "react-icons/fa";
 import {
   collection,
@@ -18,6 +19,7 @@ import {
   doc,
   getDoc,
   addDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import { useRouter } from "next/router";
@@ -37,6 +39,7 @@ const renderDetails = ({
   invoiceOpen,
   handleBackMobile,
   setRescheduleModal,
+  onCancelSuccess,
 }) => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -125,7 +128,8 @@ const renderDetails = ({
     setIsCancelling(true);
 
     try {
-      const now = moment().tz(selectedAppointment?.timeZone).add(24, "hours");
+      const timeZone = selectedAppointment?.timeZone || "America/Toronto";
+      const now = moment().tz(timeZone).add(24, "hours");
       const bookingStartDate = moment.utc(
         selectedAppointment.startTime,
         "YYYY-MM-DD HH:mm"
@@ -217,7 +221,7 @@ const renderDetails = ({
       onCancelSuccess(selectedAppointment.id);
     } catch (err) {
       console.error("Cancellation error:", err);
-      toast.error(err.message || "Cancellation failed.");
+      toast.error("Cancellation failed.");
     } finally {
       setIsCancelling(false);
       setShowCancelConfirm(false);
@@ -226,7 +230,10 @@ const renderDetails = ({
   };
 
   const handleReschedule = () => {
-    const now = moment().tz(selectedAppointmentt?.timeZone).add(24, "hours");
+    console.log(selectedAppointment);
+    const timeZone = selectedAppointment?.timeZone || "America/Toronto";
+
+    const now = moment().tz(timeZone).add(24, "hours");
     const bookingStartDate = moment.utc(
       selectedAppointment.startTime,
       "YYYY-MM-DD HH:mm"
@@ -498,6 +505,12 @@ const renderDetails = ({
                     "Meeting link not available"
                   )
                 }
+              />
+              <ActionItem
+                icon={<FaSchool className="text-lg" />}
+                title="Go to Class"
+                subtitle="Redirect to class page."
+                onClick={handleBookAgain}
               />
             </div>
           </div>

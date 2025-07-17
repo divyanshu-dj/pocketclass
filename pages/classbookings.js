@@ -31,10 +31,22 @@ const MyClass = () => {
 
   const { id } = router.query;
 
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push("/");
+    }
+    if (user && user.uid !== id) {
+      router.push(`/classbookings?id=${user.uid}`);
+    }
+  }, [user, loading]);
+
   const getUserInfo = async (id) => {
     const docRef = doc(db, "Users", id);
     const data = await getDoc(docRef);
     setUserData(data.data());
+    if (data.data().category !== "instructor") {
+      router.push(`/mybooking?id=${data.data().id}`);
+    }
   };
 
   const getAppointments = async (userId) => {
@@ -122,7 +134,7 @@ const MyClass = () => {
     const grouped = {};
     appointments.forEach((appt) => {
       const startTime = new Date(appt.startTime);
-      if (startTime < now) return;
+      // if (startTime < now) return;
       const key = `${appt.class_id}_${appt.startTime}`;
       if (!grouped[key]) {
         grouped[key] = {
@@ -234,17 +246,18 @@ const MyClass = () => {
           All Bookings
         </button>
       </div>
-
       {activeTab === "student" ? (
-        <StudentClasses
-          appointments={groupedAppointments}
-          classDetails={classDetails}
-          reviews={reviews}
-          isLoading={isLoading}
-        />
+        <div className="myClassesContainer overflow-hidden mx-auto">
+          <StudentClasses
+            appointments={groupedAppointments}
+            classDetails={classDetails}
+            reviews={reviews}
+            isLoading={isLoading}
+          />
+        </div>
       ) : (
         <>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 mx-auto max-w-7xl">
             <input
               type="text"
               placeholder="Search by Ref # or Client name"
@@ -260,7 +273,7 @@ const MyClass = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto bg-white rounded-xl shadow-md mb-8">
+          <div className="overflow-x-auto bg-white rounded-xl shadow-md mb-8 mx-auto max-w-7xl">
             <table className="min-w-full text-sm text-gray-700">
               <thead className="bg-gray-100">
                 <tr>
@@ -306,10 +319,12 @@ const MyClass = () => {
                           {moment(appt.endTime).diff(
                             moment(appt.startTime),
                             "minutes"
-                          )} min
+                          )}{" "}
+                          min
                         </td>
                         <td className="px-4 py-2">
-                          CA${appt.price ? Number(appt.price).toFixed(2) : "0.00"}
+                          CA$
+                          {appt.price ? Number(appt.price).toFixed(2) : "0.00"}
                         </td>
                       </tr>
                     );

@@ -44,6 +44,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [activeKey, setActiveKey] = useState("sport");
   const navbarRef = useRef(null);
 
+
   const isHome = router.pathname === "/";
 
   // State for menu shrinking and responsive behavior
@@ -501,18 +502,17 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                           )}
                           {category === "instructor" && (
                             <>
+                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                <Link href={`/myClass/${user.uid}`}>
+                                  My Classes
+                                </Link>
+                              </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                   <Link href={`/myStudents/${user.uid}`}>
                                     My Clients
                                   </Link>
                                 </p>
-                              </li>
-
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/myClass/${user.uid}`}>
-                                  My Classes
-                                </Link>
                               </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -596,7 +596,6 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
             )}
           </div>
         </div>
-
         {/* Mobile Category Buttons - Only shown on homepage */}
         {isHome && (
           <div

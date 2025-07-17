@@ -170,7 +170,9 @@ const MyClass = () => {
 
       <StudentClasses
         appointments={appointments}
+        setAppointments={setAppointments}
         classDetails={classDetails}
+        setClassDetails={setClassDetails}
         reviews={reviews}
         isLoading={isLoading} // ✅ Pass loading prop
       />

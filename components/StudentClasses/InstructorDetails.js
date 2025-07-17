@@ -20,6 +20,7 @@ import {
   FaClock,
   FaRegCalendarAlt,
   FaRegCommentDots,
+  FaSchool,
   FaTimesCircle,
 } from "react-icons/fa";
 
@@ -63,7 +64,10 @@ const RenderDetails = ({
     const studentIds = [];
 
     for (const email of uniqueEmails) {
-      const userQuery = query(collection(db, "Users"), where("email", "==", email));
+      const userQuery = query(
+        collection(db, "Users"),
+        where("email", "==", email)
+      );
       const userSnap = await getDocs(userQuery);
       if (!userSnap.empty) {
         studentIds.push(userSnap.docs[0].id);
@@ -86,7 +90,10 @@ const RenderDetails = ({
       );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
-        router.push({ pathname: "/chat", query: { cid: classData.classCreator, chid: snapshot.docs[0].id } });
+        router.push({
+          pathname: "/chat",
+          query: { cid: classData.classCreator, chid: snapshot.docs[0].id },
+        });
         return;
       }
 
@@ -95,7 +102,10 @@ const RenderDetails = ({
         instructor: classData.classCreator,
         class: classData.id,
       });
-      router.push({ pathname: "/chat", query: { cid: classData.classCreator, chid: newChat.id } });
+      router.push({
+        pathname: "/chat",
+        query: { cid: classData.classCreator, chid: newChat.id },
+      });
     } else {
       const q = query(
         chatRoomRef,
@@ -105,7 +115,10 @@ const RenderDetails = ({
       );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
-        router.push({ pathname: "/chat", query: { cid: classData.classCreator, chid: snapshot.docs[0].id } });
+        router.push({
+          pathname: "/chat",
+          query: { cid: classData.classCreator, chid: snapshot.docs[0].id },
+        });
         return;
       }
 
@@ -115,7 +128,10 @@ const RenderDetails = ({
         startTime: selectedAppointment.startTime,
         studentIds,
       });
-      router.push({ pathname: "/chat", query: { cid: classData.classCreator, chid: newChat.id } });
+      router.push({
+        pathname: "/chat",
+        query: { cid: classData.classCreator, chid: newChat.id },
+      });
     }
   };
 
@@ -129,10 +145,22 @@ const RenderDetails = ({
 
   return (
     <div className={`w-full z-40 ${ismobile ? "overflow-hidden" : ""}`}>
-      <div className={`h-full flex flex-col ${ismobile ? "" : "rounded-xl overflow-hidden shadow-md"}`}>
+      <div
+        className={`h-full flex flex-col ${
+          ismobile ? "" : "rounded-xl overflow-hidden shadow-md"
+        }`}
+      >
         <div className="relative h-64">
-          <img src={imageUrl} alt="Class" className="absolute inset-0 w-full h-full object-cover blur-sm scale-105" />
-          <img src={imageUrl} alt="Class" className="relative w-full h-full object-contain z-[2]" />
+          <img
+            src={imageUrl}
+            alt="Class"
+            className="absolute inset-0 w-full h-full object-cover blur-sm scale-105"
+          />
+          <img
+            src={imageUrl}
+            alt="Class"
+            className="relative w-full h-full object-contain z-[2]"
+          />
           <div className="absolute blur-sm inset-0 bg-black bg-opacity-25 z-[3]" />
           {ismobile && (
             <div className="absolute top-0 left-0 z-[4]">
@@ -140,8 +168,18 @@ const RenderDetails = ({
                 className="m-3 p-2 text-logo-red font-semibold text-sm rounded-full shadow-md flex items-center gap-2"
                 onClick={handleBackMobile}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
             </div>
@@ -151,7 +189,11 @@ const RenderDetails = ({
           </div>
         </div>
 
-        <div className={`flex-1 flex flex-col justify-between ${ismobile ? "px-4 pt-4" : "p-4"}`}>
+        <div
+          className={`flex-1 flex flex-col justify-between ${
+            ismobile ? "px-4 pt-4" : "p-4"
+          }`}
+        >
           <div>
             <p className="text-2xl mb-2">
               {moment(selectedAppointment.startTime)
@@ -170,21 +212,12 @@ const RenderDetails = ({
 
           <div className="bg-white border-t mt-6 pt-4">
             <div className="flex flex-col gap-3">
-              {isUpcoming ? (
-                <ActionItem
-                  icon={<FaRegCommentDots className="text-lg" />}
-                  title="Message Students"
-                  subtitle="Send updates"
-                  onClick={handleMessageInstructor}
-                />
-              ) : (
-                <ActionItem
-                  icon={<FaShoppingCart className="text-lg" />}
-                  title="Book again"
-                  subtitle="Book your next appointment"
-                  onClick={handleBookAgain}
-                />
-              )}
+              <ActionItem
+                icon={<FaRegCommentDots className="text-lg" />}
+                title="Message Students"
+                subtitle="Send updates"
+                onClick={handleMessageInstructor}
+              />
               <ActionItem
                 icon={
                   classData.Mode === "Offline" ? (
@@ -193,7 +226,11 @@ const RenderDetails = ({
                     <FaRegCommentDots className="text-lg" />
                   )
                 }
-                title={classData.Mode === "Offline" ? "Class Location" : "Online Meeting Link"}
+                title={
+                  classData.Mode === "Offline"
+                    ? "Class Location"
+                    : "Online Meeting Link"
+                }
                 subtitle={
                   classData.Mode === "Offline" ? (
                     classData.Address
@@ -210,6 +247,12 @@ const RenderDetails = ({
                     "Meeting link not available"
                   )
                 }
+              />
+              <ActionItem
+                icon={<FaSchool className="text-lg" />}
+                title="Go to Class"
+                subtitle="Redirect to class page."
+                onClick={handleBookAgain}
               />
             </div>
           </div>
