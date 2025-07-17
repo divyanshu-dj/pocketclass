@@ -58,7 +58,6 @@ function FitnessClassOverviewWidget({
   }, [classId]);
   return (
     <div className="bg-[white] box-border flex justify-start items-stretch flex-col pb-4">
-      <NewHeader isHome={false} />
       <FitnessClassDetailsSection
         timeSlotOptions={timeSlotOptions}
         reviewCountsArray1={reviewCountsArray1}

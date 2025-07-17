@@ -628,7 +628,6 @@ const InstructorClasses = ({
   if (isMobileOrTablet()) {
     return (
       <div className="w-[100vw] overflow-hidden">
-        <NewHeader />
         <div
           className="flex transition-transform duration-300 h-[100vh] overflow-hidden"
           style={{
@@ -725,7 +724,6 @@ const InstructorClasses = ({
   // Desktop View
   return (
     <div>
-      <NewHeader />
       <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 min-h-[75vh]">
         {/* Left Panel */}
         <div

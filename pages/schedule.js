@@ -884,7 +884,6 @@ export default function Schedule() {
         <meta name="description" content="Manage your Schedule" />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      <NewHeader />
 
       <div className="flex flex-grow flex-col lg:flex-row overflow-hidden bg-gray-50 text-black">
         <div className="overflow-auto p-4 border-r bg-white shadow-md">

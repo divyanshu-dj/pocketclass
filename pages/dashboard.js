@@ -316,7 +316,6 @@ export default function Dashboard() {
 			</Head>
 
 			{/* header */}
-			<NewHeader />
 
 			{/* application container */}
 			<div className="bg-white flex-1 flex flex-col p-2 md:p-12">

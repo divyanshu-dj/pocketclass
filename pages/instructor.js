@@ -200,8 +200,6 @@ export default function UpdateClass() {
                 <link rel="icon" href="/pc_favicon.ico" />
             </Head>
 
-            <NewHeader />
-
             {loadingInstructor ? (
                 <div className="max-w-6xl mx-auto px-4 animate-pulse h-40 bg-gray-200 rounded-lg my-4" />
             ) : (

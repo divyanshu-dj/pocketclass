@@ -81,7 +81,7 @@ const ClearSearchIcon = React.memo(({ classes, onClick }) => (
   </div>
 ));
 
-const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
+const TeacherSearch = ({ expandMenu, user }) => {
   const router = useRouter();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,6 +93,15 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
   const [dateRange, setDateRange] = useState([undefined, undefined]);
   const [selectedRange, setSelectedRange] = useState();
   const dropdownRef = useRef(null);
+  const [isShrunk, setIsShrunk] = useState(false);
+  const [isMenuSmall, setIsMenuSmall] = useState(true);
+
+  useEffect(() => {
+    const isHomePage =
+      router.pathname === "/" && Object.keys(router.query).length === 0;
+
+    setIsMenuSmall(!isHomePage);
+  }, [router.pathname, router.query]);
 
   const { containerRef, activeStyle, updateIndicator, resetActiveBG } =
     useActiveIndicator();
@@ -225,8 +234,6 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
 
   // Replace the existing useEffect for filtering classes
   useEffect(() => {
-    console.log("Filtering classes with search term:", searchTerm);
-    console.log("Available classes:", classes);
 
     if (searchTerm && searchTerm.trim().length > 0) {
       const lowerCaseTerm = searchTerm.toLowerCase().trim();
@@ -288,13 +295,6 @@ const TeacherSearch = ({ isShrunk, isMenuSmall, expandMenu, user }) => {
       }
 
       setFilteredClasses(finalResults);
-      console.log(
-        "Filtered classes with scores:",
-        finalResults.map((cls) => ({
-          name: cls.Name,
-          score: cls.searchScore.toFixed(2),
-        }))
-      );
     } else {
       setFilteredClasses(classes); // Reset to all classes if no search term
     }

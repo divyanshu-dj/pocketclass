@@ -651,7 +651,6 @@ const Chat = () => {
       </Head>
 
       {/* header */}
-      <NewHeader />
 
       {/* chat container */}
       <div className="flex-1 flex flex-col md:flex-row w-full overflow-hidden">
