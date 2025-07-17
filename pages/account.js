@@ -27,7 +27,7 @@ export default function Account() {
     return unSubscribeAuth;
   }, [user])
 
-  if (authState === 'login') return <div><  NewHeader /><Login setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
-  if (authState === 'register') return <div><NewHeader /><Register setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
+  if (authState === 'login') return <div><Login setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
+  if (authState === 'register') return <div><Register setAuthState={setAuthState} setUser={setUser} /><Footer /></div>
   if (user) return <Home user={user} setAuthState={setAuthState} setUser={setUser} />
 }

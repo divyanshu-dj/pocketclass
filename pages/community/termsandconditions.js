@@ -15,8 +15,6 @@ export default function TermsAndConditions() {
         />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-      {/* header */}
-      <NewHeader />
 
       {/* body */}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-5">

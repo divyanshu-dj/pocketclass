@@ -41,7 +41,6 @@ export default function Class() {
       </Head>
 
       {/* header */}
-      <NewHeader />
 
       {/* body */}
       <main className="max-w-7xl mx-auto px-1 py-8 sm:px-1">

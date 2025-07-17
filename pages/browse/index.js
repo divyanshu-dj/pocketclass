@@ -418,7 +418,6 @@ export default function Results() {
 
   return (
     <div className="md:overflow-hidden h-screen">
-      <NewHeader />
       <div className="flex flex-col md:flex-row md:overflow-hidden h-full">
         {/* Mobile view toggle for small screens */}
         <div className="md:hidden w-full flex z-50 fixed bottom-0 items-center justify-center my-2">

@@ -217,37 +217,34 @@ const MyClass = () => {
   }
 
   return (
-    <>
-      <NewHeader />
-      <div className="myClassesContainer mx-auto px-4 max-w-7xl">
-        <Head>
-          <title>Class Bookings</title>
-          <meta name="description" content="My Class Dashboard" />
-          <link rel="icon" href="/pc_favicon.ico" />
-        </Head>
+    <div className="myClassesContainer mx-auto px-4 max-w-7xl">
+      <Head>
+        <title>Class Bookings</title>
+        <meta name="description" content="My Class Dashboard" />
+        <link rel="icon" href="/pc_favicon.ico" />
+      </Head>
 
-        <div className="flex space-x-4 border-b mt-2 mb-4">
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "student"
-                ? "border-b-2 border-black font-semibold"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("student")}
-          >
-            Class Bookings
-          </button>
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "all"
-                ? "border-b-2 border-black font-semibold"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("all")}
-          >
-            All Class Bookings
-          </button>
-        </div>
+      <div className="flex space-x-4 border-b mb-4">
+        <button
+          className={`py-2 px-4 ${
+            activeTab === "student"
+              ? "border-b-2 border-black font-semibold"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("student")}
+        >
+          My Bookings
+        </button>
+        <button
+          className={`py-2 px-4 ${
+            activeTab === "all"
+              ? "border-b-2 border-black font-semibold"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("all")}
+        >
+          All Bookings
+        </button>
       </div>
       {activeTab === "student" ? (
         <div className="myClassesContainer overflow-hidden mx-auto">

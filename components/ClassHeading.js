@@ -90,6 +90,7 @@ const ClassHeading = ({
 			const docRef = addDoc(collection(db, "Reviews"), {
 				classID: id,
 				name: reviewerName,
+				userId: user?.uid,
 				photo: photo,
 				recommendRating: recommend,
 				qualityRating: quality,

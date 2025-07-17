@@ -71,7 +71,6 @@ export default function Profile() {
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
       {/* header */}
-      <NewHeader />
       {/* banner */}
 
       <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
