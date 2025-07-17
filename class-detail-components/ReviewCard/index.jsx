@@ -46,6 +46,7 @@ function ReviewCard({ classId }) {
       qualityRating,
       safetyRating,
       review: reviewText,
+      userId: user.uid,
       createdAt: Timestamp.now(),
     };
     try {

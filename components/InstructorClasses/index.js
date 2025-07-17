@@ -154,6 +154,7 @@ const ClassDetailsPanel = ({
     );
   }
 
+  const router = useRouter();
   const classReviews = reviews.filter(
     (review) => review.class_id === selectedClass.id
   );
@@ -305,7 +306,7 @@ const ClassDetailsPanel = ({
             </div>
             <div className="text-left">
               <p className="font-medium text-gray-900">Manage Schedule</p>
-              <p className="text-sm text-gray-500">Change the class schedule</p>
+              <p className="text-sm text-gray-500">Change the schedule for this specific class</p>
             </div>
           </button>
 
@@ -334,6 +335,33 @@ const ClassDetailsPanel = ({
               </p>
               <p className="text-sm text-gray-500 group-hover:text-red-500">
                 Permanently remove this class
+              </p>
+            </div>
+          </button>
+          
+          <button
+            onClick={() => router.push(`/classes/id=${selectedClass.id}`)}
+            className="w-full flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="text-left">
+              <p className="font-medium text-gray-900">Go to Class</p>
+              <p className="text-sm text-gray-500">
+                View this class on the public page
               </p>
             </div>
           </button>
@@ -614,16 +642,23 @@ const InstructorClasses = ({
             <div className="flex-1 overflow-y-auto px-4 py-6">
               <h1 className="text-2xl font-bold mb-4">My Classes</h1>
 
-              {userData?.mindbody?.accessToken && (
-                <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col gap-3 mb-4">
+                {userData?.mindbody?.accessToken && (
                   <button
                     onClick={() => router.push("/mindbody-import")}
-                    className="bg-logo-red text-white px-4 py-2 rounded-md hover:bg-logo-red-dark transition-colors"
+                    className="bg-logo-red text-white px-4 py-2 rounded-md hover:bg-logo-red-dark transition-colors w-fit"
                   >
                     Import Classes from Mindbody
                   </button>
-                </div>
-              )}
+                )}
+                
+                <button
+                  onClick={() => router.push("/createClass")}
+                  className="bg-logo-red text-white px-4 py-2 rounded-md hover:bg-logo-red-dark transition-colors w-fit"
+                >
+                  Create Class
+                </button>
+              </div>
 
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 Classes
@@ -696,10 +731,18 @@ const InstructorClasses = ({
             isLoading || classes.length > 0 ? "lg:w-1/2" : "lg:w-full"
           } flex-shrink-0`}
         >
-          <h1 className="text-2xl font-bold mb-4">My Classes</h1>
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold">My Classes</h1>
+            <button
+              onClick={() => router.push("/createClass")}
+              className="bg-logo-red text-white px-4 py-2 rounded-md hover:bg-logo-red-dark transition-colors"
+            >
+              Create Class
+            </button>
+          </div>
 
           {userData?.mindbody?.accessToken && (
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-4">
               <button
                 onClick={() => router.push("/mindbody-import")}
                 className="bg-logo-red text-white px-4 py-2 rounded-md hover:bg-logo-red-dark transition-colors"
