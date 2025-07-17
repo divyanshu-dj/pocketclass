@@ -514,12 +514,6 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                   </Link>
                                 </p>
                               </li>
-
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/myClass/${user.uid}`}>
-                                  My Classes
-                                </Link>
-                              </li>
                               <li>
                                 <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                   <Link href={`/classbookings?id=${user.uid}`}>

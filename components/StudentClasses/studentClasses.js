@@ -28,7 +28,7 @@ const RenderDetailsSkeleton = () => (
   </div>
 );
 
-const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
+const StudentClasses = ({ appointments, classDetails, setAppointments, setClassDetails,reviews, isLoading }) => {
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
@@ -49,6 +49,69 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
       document.body.style.overflow = "";
     };
   }, [invoiceOpen]);
+
+  const onCancelSuccess = (appointmentId) => {
+    setUpcomingAppointments((prevUpcoming) => {
+      const updatedUpcoming = prevUpcoming.filter(
+        (appt) => appt.id !== appointmentId
+      );
+
+      // Update selectedAppointment if needed
+      setSelectedAppointment((prevSelected) => {
+        if (prevSelected?.id === appointmentId) {
+          if (updatedUpcoming.length > 0) {
+            return updatedUpcoming[0];
+          } else if (pastAppointments?.length > 0) {
+            return pastAppointments[0];
+          } else {
+            return null;
+          }
+        }
+        return prevSelected;
+      });
+
+      return updatedUpcoming;
+    });
+
+    // Remove from general appointments list
+    setAppointments?.((prevAppointments) =>
+      prevAppointments.filter((appt) => appt.id !== appointmentId)
+    );
+
+    // Remove from classDetails.appointments if applicable
+    setClassDetails?.((prevDetails) => {
+      if (!prevDetails?.appointments) return prevDetails;
+      return {
+        ...prevDetails,
+        appointments: prevDetails.appointments.filter(
+          (appt) => appt.id !== appointmentId
+        ),
+      };
+    });
+  };
+
+  const updateAppointmentTime = (appointmentId, newStartTime, newEndTime) => {
+    console.log(appointmentId, newStartTime, newEndTime);
+    setUpcomingAppointments((prevAppointments) =>
+      prevAppointments.map((appointment) =>
+        appointment.id === appointmentId
+          ? {
+              ...appointment,
+              startTime: newStartTime,
+              endTime: newEndTime,
+            }
+          : appointment
+      )
+    );
+
+    setSelectedAppointment((prev) =>
+      prev && prev.id === appointmentId
+        ? { ...prev, startTime: newStartTime, endTime: newEndTime }
+        : prev
+    );
+    console.log(upcomingAppointments);
+    console.log(selectedAppointment);
+  };
 
   const EmptyStateCard = ({ type }) => {
     const label = type === "upcoming" ? "upcoming" : "past";
@@ -161,7 +224,6 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
           onClick={handleCardClick}
           rescheduleModal={rescheduleModal}
           setRescheduleModal={setRescheduleModal}
-          onCancelSuccess={() => {}}
         />
       </div>
     );
@@ -241,6 +303,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
                   ismobile={true}
                   handleBackMobile={handleBackMobile}
                   setRescheduleModal={setRescheduleModal}
+                  onCancelSuccess={onCancelSuccess}
                 />
               )}
             </div>
@@ -340,6 +403,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
                   ismobile={false}
                   handleBackMobile={handleBackMobile}
                   setRescheduleModal={setRescheduleModal}
+                  onCancelSuccess={onCancelSuccess}
                 />
                 <InvoiceModal
                   isOpen={invoiceOpen}
@@ -363,6 +427,8 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
                 classDetails[selectedAppointment?.class_id]?.classCreator
               }
               bookingId={selectedAppointment?.id}
+              updateAppointmentTime={updateAppointmentTime}
+              appointmentId={selectedAppointment?.id}
             />
             <button
               onClick={() => setRescheduleModal(false)}
