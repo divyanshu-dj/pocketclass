@@ -729,7 +729,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                     }`}
                     onClick={toggleDropDown}
                   >
-                    <MenuIcon className="h-6 cursor-pointer ml-1" />
+                    <MenuIcon className="h-6 cursor-pointer" />
 
                     {showDropDown && (
                       <div
@@ -745,11 +745,8 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                 query: { returnUrl: router.asPath },
                               }}
                             >
-                              Log in
+                              Login or Signup
                             </Link>
-                          </li>
-                          <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                            <Link href="/Register">Sign up</Link>
                           </li>
                           <hr className="my-2" />
                           <li className="my-2">
