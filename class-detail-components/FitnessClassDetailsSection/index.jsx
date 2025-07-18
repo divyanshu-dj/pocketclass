@@ -1,4 +1,5 @@
 import EnhancedImageGallery from "../EnhancedImageGallery";
+import Gallery from "../Gallery";
 import FitnessProfileSection from "../FitnessProfileSection";
 import FitnessScheduleMindfulnessDisplay from "../FitnessScheduleMindfulnessDisplay";
 import FitnessReviewSectionWidget from "../FitnessReviewSectionWidget";
@@ -6,7 +7,7 @@ import DynamicButtonSection from "../DynamicButtonSection";
 import SvgIcon1 from "./icons/SvgIcon1";
 import SvgIcon3 from "./icons/SvgIcon3";
 import SvgIcon5 from "./icons/SvgIcon5";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "../../firebaseConfig";
 import {
   doc,
@@ -42,6 +43,24 @@ function FitnessClassDetailsSection({
   const [classData, setClassData] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [classCreatorData, setClassCreatorData] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const instructorRef = useRef(null);
+  const bookingRef = useRef(null);
+  const reviewsRef = useRef(null);
+  const faqRef = useRef(null);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkWidth = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 500);
+      setIsTablet(width > 500 && width <= 1024);
+    };
+
+    checkWidth();
+    window.addEventListener("resize", checkWidth);
+    return () => window.removeEventListener("resize", checkWidth);
+  }, []);
 
   useEffect(() => {
     const getClassCreatorData = async () => {
@@ -138,6 +157,44 @@ function FitnessClassDetailsSection({
   };
   return (
     <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing">
+      {isTablet && (
+        <div className="fixed self-start z-30 bg-white border-b border-gray-200 py-3 px-4 w-full">
+          <div className="flex gap-6 justify-start overflow-x-auto max-w-full">
+            <button
+              onClick={() =>
+                instructorRef.current?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
+            >
+              Instructor
+            </button>
+            <button
+              onClick={() =>
+                bookingRef.current?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
+            >
+              Booking
+            </button>
+            <button
+              onClick={() =>
+                reviewsRef.current?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
+            >
+              Reviews
+            </button>
+            <button
+              onClick={() =>
+                faqRef.current?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
+            >
+              FAQ
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
           <div className="grow-0 shrink-0 basis-auto animate-pulse">
@@ -287,9 +344,15 @@ function FitnessClassDetailsSection({
           ) : null}
         </div>
       </div>
-      <div className="flex flex-col-reverse lg:flex-row gap-20 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
-        <div className="grow-0 shrink basis-auto xl:max-w-[calc(100vw-500px)]">
+      <div className="mt-10 w-full max-w-[1312px]">
+        {isMobile ? (
           <EnhancedImageGallery images={classData?.Images || []} />
+        ) : (
+          <Gallery coverImages={classData?.Images || []} />
+        )}
+      </div>
+      <div className="flex flex-col-reverse lg:flex-row gap-20 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
+        <div className="grow-0 shrink basis-auto xl:max-w-[calc(100vw)]">
           <div
             onClick={() => {
               router.push(
@@ -347,17 +410,21 @@ function FitnessClassDetailsSection({
               )}
             </div>
           </div>
-          <FitnessProfileSection
-            classId={classId}
-            instructorData={classCreatorData}
-            classData={classData}
-          />
-          <BookingComponent
-            classId={classId}
-            instructorId={classCreatorData?.userUid}
-            classData={classData}
-            classPackages={classData?.Packages}
-          />
+          <div ref={instructorRef}>
+            <FitnessProfileSection
+              classId={classId}
+              instructorData={classCreatorData}
+              classData={classData}
+            />
+          </div>
+          <div ref={bookingRef}>
+            <BookingComponent
+              classId={classId}
+              instructorId={classCreatorData?.userUid}
+              classData={classData}
+              classPackages={classData?.Packages}
+            />
+          </div>
           {/* <FitnessScheduleMindfulnessDisplay
             classData={classData}
             timeSlotOptions={timeSlotOptions}
@@ -368,23 +435,15 @@ function FitnessClassDetailsSection({
             reviewCountsArray={reviewCountsArray}
             classId={classId}
           /> */}
-          <FitnessReviewSectionWidget
-            classTitle={classData?.Name}
-            classId={classId}
-            reviewCountsArray1={reviewCountsArray1}
-            classData={classData}
-            classCreatorData={classCreatorData}
-          />
-          <div className="max-w-[952px]">
-            <RecommendedClassesSection
+          <div ref={reviewsRef}>
+            <FitnessReviewSectionWidget
+              classTitle={classData?.Name}
               classId={classId}
-              currentClassData={classData}
+              reviewCountsArray1={reviewCountsArray1}
+              classData={classData}
+              classCreatorData={classCreatorData}
             />
           </div>
-          <FAQAccordion
-            instructorId={classCreatorData?.userUid}
-            classId={classId}
-          />
         </div>
         <div className="hidden xl:block w-full max-w-[320px]">
           <DynamicButtonSection
@@ -393,6 +452,18 @@ function FitnessClassDetailsSection({
             instructorId={classCreatorData?.userUid}
           />
         </div>
+      </div>
+      <div className="mt-10 w-full max-w-[1312px]">
+        <div className="max-w-[952px]">
+          <RecommendedClassesSection
+            classId={classId}
+            currentClassData={classData}
+          />
+        </div>
+        <FAQAccordion
+          instructorId={classCreatorData?.userUid}
+          classId={classId}
+        />
       </div>
     </div>
   );
