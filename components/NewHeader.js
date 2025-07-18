@@ -59,6 +59,17 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
     setCurrentView(view);
     if (typeof window !== "undefined") {
       localStorage.setItem("userView", view);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('localStorageChange', { 
+        detail: { key: 'userView', value: view } 
+      }));
+
+      if (view === "instructor") {
+        router.push('/profile/' + user.uid);
+      }
+      if (view === "student") {
+        router.push("/");
+      }
     }
   };
 
@@ -234,7 +245,6 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
       // Stripe setup check
       if (
-        window.location.pathname === "/" &&
         data?.data()?.isInstructor &&
         !data?.data()?.payment_enabled
       ) {
@@ -487,7 +497,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         variant="outlined"
                         className={`${currentView === "student"
                           ? "hidden"
-                          : ""
+                          : "hidden md:block"
                         } text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("student")}
                       >
@@ -497,7 +507,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         variant="outlined"
                         className={`${currentView === "instructor"
                           ? "hidden"
-                          : ""
+                          : "hidden md:block"
                         }  text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("instructor")}
                       >
@@ -539,6 +549,32 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         }`}
                       >
                         <ul>
+                          {/* View toggle */}
+                          {userData?.isInstructor && (
+                            <div className="flex justify-between">
+                              <div className="flex items-center">
+                                <button
+                                  onClick={() => handleViewChange("student")}
+                                  className={`${currentView === "student"
+                                    ? "hidden"
+                                    : "block md:hidden"
+                                  }  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
+                                >
+                                  Go to Student View
+                                </button>
+                                <button
+                                  onClick={() => handleViewChange("instructor")}
+                                  className={`${currentView === "instructor"
+                                    ? "hidden"
+                                    : "block md:hidden"
+                                  }  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
+                                >
+                                  Go to Instructor View
+                                </button>
+                              </div>
+                              </div>
+                          )}
+
                           {/* Request/Create Class at top */}
                           {(!userData?.isInstructor ||
                             currentView === "student") &&
@@ -680,7 +716,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                 <>
                   {/* Become an Instructor Button for logged-out users */}
                   <Link href="/instructor-onboarding">
-                    <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                    <button className="hidden md:block  bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                       Become an Instructor
                     </button>
                   </Link>
