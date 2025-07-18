@@ -108,18 +108,18 @@ function UpdateProfile() {
     const errors = {};
     if (!data.firstName) errors.firstName = "First Name is required";
     if (!data.lastName) errors.lastName = "Last Name is required";
-    if (!data.gender && userData?.category == "instructor")
+    if (!data.gender && (userData?.isInstructor || router.query.onboarding))
       errors.gender = "Gender is required";
-    if (!data.phoneNumber && userData?.category == "instructor")
+    if (!data.phoneNumber && (userData?.isInstructor || router.query.onboarding))
       errors.phoneNumber = "Phone Number is required";
-    if (!data.dob && userData?.category == "instructor")
+    if (!data.dob && (userData?.isInstructor || router.query.onboarding))
       errors.dob = "Date of Birth is required";
-    if (!data.profileDescription && userData?.category == "instructor")
+    if (!data.profileDescription && (userData?.isInstructor || router.query.onboarding))
       errors.profileDescription = "Description is required";
     if (
       !droppedFile?.name &&
       (!userData.profileImage) &&
-      userData?.category == "instructor"
+      (userData?.isInstructor || router.query.onboarding)
     )
       errors.droppedFile = "Image is required";
     return errors;
@@ -186,18 +186,36 @@ function UpdateProfile() {
       imageURI = userData.profileImage || "";
     }
 
-    await updateDoc(doc(db, "Users", id), {
+    // Check if this is a complete profile update that should activate instructor status
+    const isProfileComplete = data.firstName && data.lastName && data.gender && 
+                             data.phoneNumber && data.dob && data.profileDescription && imageURI;
+    
+    const updateData = {
       ...data,
       profileImage: imageURI,
       updatedAt: serverTimestamp(),
-    });
+    };
+
+    // If profile is complete and user came from instructor onboarding, activate instructor status
+    if (isProfileComplete && (router.query.from === 'instructor-onboarding' || userData?.pendingInstructor)) {
+      updateData.isInstructor = true;
+      updateData.pendingInstructor = false;
+    }
+
+    await updateDoc(doc(db, "Users", id), updateData);
 
     toast.success("Profile updated successfully", {
       toastId: "success-toast",
     });
 
     setLoading(false);
-    router.push(`/profile/${id}`);
+    
+    // Redirect back to instructor onboarding if user came from there
+    if (router.query.from === 'instructor-onboarding') {
+      router.push('/instructor-onboarding');
+    } else {
+      router.push(`/profile/${id}`);
+    }
   };
 
   if (!id || !userData) {
