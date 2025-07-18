@@ -224,21 +224,21 @@ function FitnessClassDetailsSection({
             </div>
           </div>
         ) : (
-          <div className="grow-0 shrink-0 basis-auto  lg:max-w-[70%]">
+          <div className="grow-0 shrink-0 basis-auto w-full max-w-[1312px]">
             <p className="[font-family:'DM_Sans',sans-serif] text-3xl md:text-4xl lg:text-5xl font-bold lg:leading-[56px] text-[#261f22] m-0 p-0">
               {classData?.Name}
             </p>
-            <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-2 md:mt-4">
-              <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
-                <SvgIcon1 className="w-5 h-5 text-[#261f22] flex grow-0 shrink-0 basis-auto" />
-                <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#261f22] grow-0 shrink-0 basis-auto ml-[3px] m-0 p-0">
-                  {avgReview.toFixed(1)}
-                </p>
-                <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto ml-1.5 m-0 p-0">
-                  ({currentClassReview?.length || 0} reviews)
-                </p>
-              </div>
+            <div className="flex justify-between items-center flex-row flex-wrap md:flex-nowrap gap-5 md:gap-8 mt-2 md:mt-4">
               <div className="flex justify-start items-center flex-row flex-wrap md:flex-nowrap gap-[20px] md:gap-[35px] grow-0 shrink-0 basis-auto max-w-[100vw]">
+                <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
+                  <SvgIcon1 className="w-5 h-5 text-[#261f22] flex grow-0 shrink-0 basis-auto" />
+                  <p className="[font-family:'DM_Sans',sans-serif] text-base font-bold text-[#261f22] grow-0 shrink-0 basis-auto ml-[3px] m-0 p-0">
+                    {avgReview.toFixed(1)}
+                  </p>
+                  <p className="[font-family:'DM_Sans',sans-serif] text-base font-normal text-[#261f22] grow-0 shrink-0 basis-auto ml-1.5 m-0 p-0">
+                    ({currentClassReview?.length || 0} reviews)
+                  </p>
+                </div>
                 <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                   <div className="flex justify-start items-center flex-row grow-0 shrink-0 basis-auto">
                     <img
@@ -305,44 +305,28 @@ function FitnessClassDetailsSection({
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-start flex-row grow-0 shrink-0 basis-auto">
-          {userId ? (
-            isFavoriteLoading ? (
-              <div className="flex items-center animate-pulse">
-                <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
-                <div className="h-4 w-24 bg-gray-200 rounded ml-[7px]"></div>
-              </div>
-            ) : (
-              <div className="flex flex-col">
+              <div className="flex gap-4 items-center">
                 <div
                   onClick={toggleFavorite}
-                  className="cursor-pointer flex items-center"
+                  className="cursor-pointer flex w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center"
                 >
                   {isFavorite ? (
                     <AiFillHeart className="w-6 h-6 text-red-500" />
                   ) : (
                     <AiOutlineHeart className="w-6 h-6" />
                   )}
-                  <p className="[font-family:Inter,sans-serif] text-base font-semibold text-[#261f22] ml-[7px] m-0 p-0">
-                    {isFavorite ? "Remove Favorite" : "Add to Favorite"}
-                  </p>
                 </div>
-
                 {classCreatorData?.userUid === userId && (
                   <Link href={`/updateClass/${classId}`}>
-                    <button className="mt-2 text-base font-semibold text-red-600 border border-red-600 px-4 py-1 rounded hover:bg-red-600 hover:text-white transition">
+                    <button className="text-base font-semibold text-red-600 border border-red-600 px-4 py-1 rounded hover:bg-red-600 hover:text-white transition">
                       Edit
                     </button>
                   </Link>
                 )}
               </div>
-            )
-          ) : null}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
       <div className="mt-10 w-full max-w-[1312px]">
         {isMobile ? (
@@ -454,12 +438,10 @@ function FitnessClassDetailsSection({
         </div>
       </div>
       <div className="mt-10 w-full max-w-[1312px]">
-        <div className="max-w-[952px]">
-          <RecommendedClassesSection
-            classId={classId}
-            currentClassData={classData}
-          />
-        </div>
+        <RecommendedClassesSection
+          classId={classId}
+          currentClassData={classData}
+        />
         <FAQAccordion
           instructorId={classCreatorData?.userUid}
           classId={classId}
