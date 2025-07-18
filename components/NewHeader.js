@@ -636,6 +636,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                   <Link href={`/classbookings?id=${user.uid}`}>
                                     Class Bookings
                                   </Link>
+                                </p>
                                 </li>
                                 <li>
                                   <p className="my-2 block dm1:hidden  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
