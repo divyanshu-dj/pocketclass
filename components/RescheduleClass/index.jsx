@@ -37,6 +37,8 @@ export default function index({
   classId,
   bookingId,
   setRescheduleModal,
+  updateAppointmentTime,
+  appointmentId,
 }) {
   const router = useRouter();
   const [timer, setTimer] = useState(null);
@@ -184,10 +186,10 @@ export default function index({
     setDaysWithNoSlots(daysToCheck);
   }, [schedule, bookedSlots, appointmentDuration, classData]);
 
-  useEffect(()=>{
-    console.log(selectedDate)
-    console.log(selectedSlot)
-  },[selectedDate,selectedSlot])
+  useEffect(() => {
+    console.log(selectedDate);
+    console.log(selectedSlot);
+  }, [selectedDate, selectedSlot]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -671,10 +673,7 @@ export default function index({
     const classData = classSnapshot.data();
 
     const now = moment().tz(timeZone).add(24, "hours");
-    const bookingStartDate = moment.utc(
-      `${selectedSlot}`,
-      "YYYY-MM-DD HH:mm"
-    );
+    const bookingStartDate = moment.utc(`${selectedSlot}`, "YYYY-MM-DD HH:mm");
 
     if (bookingStartDate.isBefore(now)) {
       setRescheduleLoading(false);
@@ -1001,9 +1000,13 @@ END:VCALENDAR`.trim();
         },
       ]
     );
-    setRescheduleLoading(false);
+    console.log(startDateTime);
     toast.success("Booking rescheduled successfully");
-    setRescheduleModal(false);
+    setTimeout(() => {
+      setRescheduleLoading(false);
+      setRescheduleModal(false);
+    }, 1700);
+    updateAppointmentTime(appointmentId, startDateTime, endDateTime);
   };
 
   const handlePrev = () => {
@@ -1305,7 +1308,7 @@ END:VCALENDAR`.trim();
       )}
       <ToastContainer
         position="top-center"
-        autoClose={3000}
+        autoClose={1500}
         hideProgressBar={false}
         newestOnTop
         closeOnClick

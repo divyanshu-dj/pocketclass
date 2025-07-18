@@ -65,6 +65,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [activeKey, setActiveKey] = useState("sport");
   const navbarRef = useRef(null);
 
+
   const isHome = router.pathname === "/";
 
   // State for menu shrinking and responsive behavior
@@ -578,32 +579,27 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                               </li>
                             </>
                           )}
-
                           {/* Instructor View Items */}
                           {userData?.isInstructor &&
                             currentView === "instructor" && (
-                              <>
-                                <li>
-                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                    <Link href={`/myStudents/${user.uid}`}>
-                                      My Clients
-                                    </Link>
-                                  </p>
-                                </li>
-
-                                <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <Link href={`/myClass/${user.uid}`}>
-                                    My Classes
+                            <>
+                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                <Link href={`/myClass/${user.uid}`}>
+                                  My Classes
+                                </Link>
+                              </li>
+                              <li>
+                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/myStudents/${user.uid}`}>
+                                    My Clients
                                   </Link>
-                                </li>
-                                <li>
-                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                    <Link
-                                      href={`/classbookings?id=${user.uid}`}
-                                    >
-                                      Class Bookings
-                                    </Link>
-                                  </p>
+                                </p>
+                              </li>
+                              <li>
+                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/classbookings?id=${user.uid}`}>
+                                    Class Bookings
+                                  </Link>
                                 </li>
                                 <li>
                                   <p className="my-2 block dm1:hidden  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -770,7 +766,6 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
             )}
           </div>
         </div>
-
         {/* Mobile Category Buttons - Only shown on homepage */}
         {isHome && (
           <div

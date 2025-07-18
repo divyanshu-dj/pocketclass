@@ -180,8 +180,8 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
         >
           {/* Booking List Panel */}
           <div className="w-[100vw] h-[100vh] overflow-hidden bg-white flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 pl-0 py-6">
-              <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <h1 className="text-2xl font-bold mb-4">Class Bookings</h1>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 Upcoming
                 <span className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 text-sm">
@@ -199,6 +199,24 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
                 )
               ) : (
                 <EmptyStateCard type="upcoming" />
+              )}
+              <h2 className="text-xl font-semibold mt-6 mb-4 flex items-center gap-2">
+                Past
+                <span className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 text-sm">
+                  {pastAppointments.length}
+                </span>
+              </h2>
+              {isLoading ? (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : pastAppointments.length > 0 ? (
+                pastAppointments.map((appt) =>
+                  renderAppointmentCard(appt, "past")
+                )
+              ) : (
+                <EmptyStateCard type="past" />
               )}
             </div>
           </div>
@@ -249,7 +267,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
             isLoading || appointments.length > 0 ? "lg:w-1/2" : "lg:w-full"
           } flex-shrink-0`}
         >
-          <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+          <h1 className="text-2xl font-bold mb-4">Class Bookings</h1>
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             Upcoming
             <span className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 text-sm">
@@ -267,6 +285,22 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
             )
           ) : (
             <EmptyStateCard type="upcoming" />
+          )}
+          <h2 className="text-xl font-semibold mt-6 mb-4 flex items-center gap-2">
+            Past
+            <span className="w-6 h-6 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 text-sm">
+              {pastAppointments.length}
+            </span>
+          </h2>
+          {isLoading ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : pastAppointments.length > 0 ? (
+            pastAppointments.map((appt) => renderAppointmentCard(appt, "past"))
+          ) : (
+            <EmptyStateCard type="past" />
           )}
         </div>
 
@@ -287,6 +321,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
               isLoading ? "opacity-0" : "opacity-100"
             }`}
           >
+            {/* <div className="fixed right-4 top-[100px] h-[calc(100vh-120px)] overflow-y-auto w-[calc(50%-1rem)] hidden lg:block"> */}
             {selectedAppointment && (
               <>
                 <RenderDetails
@@ -313,6 +348,7 @@ const StudentClasses = ({ appointments, classDetails, reviews, isLoading }) => {
                 />
               </>
             )}
+          {/* </div> */}
           </div>
         </div>
       </div>
