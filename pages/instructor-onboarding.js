@@ -84,6 +84,31 @@ const InstructorOnboarding = () => {
     }
   }, [user, loading]);
 
+  // Check for completion after each step update
+  useEffect(() => {
+    if (userData?.isInstructor && Object.values(completionStatus).every(Boolean) && !loading && user) {
+      // All steps completed, redirect to profile with reload
+      setTimeout(() => {
+        window.location.href = `/profile/${user.uid}`;
+      }, 1000); // Small delay to show completion state
+    }
+  }, [completionStatus, userData, loading, user]);
+
+  // Refresh data when user returns to this page
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user && !loading) {
+        checkUserData();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user, loading]);
+
   const checkUserData = async () => {
     try {
       const docRef = doc(db, 'Users', user.uid);
@@ -106,6 +131,13 @@ const InstructorOnboarding = () => {
         await checkClassesAndSchedule(status);
         
         setCompletionStatus(status);
+        
+        // Check if user is instructor and all steps are completed
+        if (data.isInstructor && Object.values(status).every(Boolean)) {
+          // All steps completed, redirect to profile with reload
+          window.location.href = `/profile/${user.uid}`;
+          return;
+        }
         
         // Determine current step
         const firstIncompleteStep = steps.findIndex(step => !status[step.id]);
@@ -163,6 +195,12 @@ const InstructorOnboarding = () => {
     if (user) {
       if (step.id === 'profile') {
         router.push(`/updateProfile/${user.uid}?from=instructor-onboarding`);
+      } else if (step.id === 'class') {
+        router.push(`/createClass?from=instructor-onboarding`);
+      } else if (step.id === 'schedule') {
+        router.push(`/schedule?from=instructor-onboarding`);
+      } else if (step.id === 'stripe') {
+        router.push(`/addStripe?from=instructor-onboarding`);
       } else {
         router.push(step.path);
       }
@@ -180,9 +218,11 @@ const InstructorOnboarding = () => {
         
         toast.success('Welcome to PocketClass Instructors!');
         
-        // Refresh user data
+        // Refresh user data and check for completion
         await checkUserData();
-        
+
+        window.location.href = `/instructor-onboarding`;
+
       } catch (error) {
         console.error('Error updating instructor status:', error);
         toast.error('Failed to update instructor status');

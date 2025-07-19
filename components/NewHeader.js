@@ -207,8 +207,16 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
       // Set current view based on user's instructor status
       if (data?.data()?.isInstructor) {
         setCurrentView("instructor");
+        // Dipatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('localStorageChange', { 
+          detail: { key: 'userView', value: 'instructor' } 
+        }));
       } else {
         setCurrentView("student");
+        // Dipatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('localStorageChange', { 
+          detail: { key: 'userView', value: 'student' } 
+        }));
       }
 
       if (
