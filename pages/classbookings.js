@@ -36,7 +36,7 @@ const MyClass = () => {
       router.push("/");
     }
     if (user && user.uid !== id) {
-      router.push(`/classbookings?id=${user.uid}`);
+      router.push(`/mybooking?id=${user.uid}`);
     }
   }, [user, loading]);
 

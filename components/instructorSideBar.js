@@ -111,9 +111,9 @@ const InstructorSideBar = () => {
     },
     {
       name: 'Class Bookings',
-      href: `/classbookings?id=${user.uid}`,
+      href: `/mybooking?id=${user.uid}`,
       icon: BookOpenIcon,
-      active: router.pathname === '/classbookings'
+      active: router.pathname === '/mybooking'
     },
     {
       name: 'My Clients',
