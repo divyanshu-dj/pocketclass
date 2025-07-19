@@ -344,11 +344,11 @@ const InstructorOnboarding = () => {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 max-w-2xl mx-auto">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-white">10K+</div>
+                    <div className="text-2xl font-bold text-white">1000+</div>
                     <div className="text-white/80 text-sm">Active Students</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-white">$2M+</div>
+                    <div className="text-2xl font-bold text-white">$10K+</div>
                     <div className="text-white/80 text-sm">Earned by Instructors</div>
                   </div>
                   <div>
