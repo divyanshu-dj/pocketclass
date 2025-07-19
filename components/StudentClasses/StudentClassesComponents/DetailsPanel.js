@@ -217,6 +217,24 @@ const renderDetails = ({
         });
       }
 
+      try{
+        await fetch("/api/notifications/cancelled", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookingId: selectedAppointment.id,
+            studentId,
+            classId: classData.id,
+            instructorId: classData.classCreator,
+            refundAmount,
+            cancellationReason: refundReason || "Manual cancellation",
+          }),
+        });
+      }
+      catch (error) {
+        console.error("Error sending cancellation notification:", error);
+      }
+
       toast.success("Booking cancelled successfully.");
       onCancelSuccess(selectedAppointment.id);
     } catch (err) {
