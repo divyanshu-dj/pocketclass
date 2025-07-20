@@ -50,12 +50,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'User already has an active subscription' });
     }
 
-    // Create subscription with price id: price_1RmoIuB9dtkl1HtocYoFaAzA
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [
         {
-          price: 'price_1RmoIuB9dtkl1HtocYoFaAzA', 
+          price: 'price_1Rmz9bAx0xW0obEdrprA5Juk', 
         },
       ],
       payment_behavior: 'default_incomplete',
