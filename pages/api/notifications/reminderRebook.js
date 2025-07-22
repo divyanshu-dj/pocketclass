@@ -2,10 +2,13 @@ import {
   getUserData, 
   getClassData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
+  loadEmailTemplateWithAutomation,
+  sendEmailWithTracking,
   formatDateTime,
-  generateBookingLinks
+  generateBookingLinks,
+  // Add the new timing helpers
+  getAutomationTimeDelay,
+  calculateSendTime
 } from './notificationService';
 import { db } from '../../../firebaseConfig';
 import { collection, getDocs, query, where, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
@@ -27,6 +30,7 @@ export default async function handler(req, res) {
     console.log(`Found ${users.length} total users`);
 
     let emailsSent = 0;
+    let emailsScheduled = 0;
     const emailPromises = [];
 
     for (const user of users) {
@@ -93,6 +97,26 @@ export default async function handler(req, res) {
           continue; // Automation not enabled
         }
 
+        // Get custom timing for this automation (reminderRebook is premium)
+        const timeDelay = await getAutomationTimeDelay(
+          lastBooking.instructor_id, 
+          'bookingBoost', 
+          'reminderRebook'
+        );
+        
+        // Calculate when this reminder should be sent
+        // For rebook reminders, calculate from 21 days after the last class
+        const baseReminderTime = moment(lastBooking.startTime).add(21, 'days').toDate();
+        const sendTime = calculateSendTime(baseReminderTime, timeDelay);
+        const now = new Date();
+        
+        // If the send time is in the future, skip for now (will be processed by scheduler)
+        if (sendTime > now) {
+          console.log(`Rebook reminder for user ${user.id} scheduled for ${sendTime}`);
+          emailsScheduled++;
+          continue;
+        }
+
         // Format last class date
         const { date: lastClassDateFormatted } = formatDateTime(lastBooking.startTime);
 
@@ -105,26 +129,36 @@ export default async function handler(req, res) {
           studentLastName: user.lastName,
           instructorFirstName: instructorData.firstName,
           instructorLastName: instructorData.lastName,
-          daysSinceLastClass: daysSinceLastClass,
           lastClassName: classData.Name,
           lastClassDate: lastClassDateFormatted,
-          instructorProfileLink: `${process.env.NODE_ENV === 'production' ? 'https://www.pocketclass.ca' : 'http://localhost:3000'}/instructor/${instructorData.id}`,
+          daysSinceLastClass: daysSinceLastClass,
+          instructorLink: `${process.env.NODE_ENV === 'production' ? 'https://www.pocketclass.ca' : 'http://localhost:3000'}/instructor/${lastBooking.instructor_id}`,
           ...links
         };
 
-        // Load email template
-        const htmlContent = loadEmailTemplate('reminderRebook.html', templateData);
+        // Load email template with automation enhancements
+        const htmlContent = await loadEmailTemplateWithAutomation(
+          'reminderRebook.html', 
+          templateData,
+          lastBooking.instructor_id,
+          'bookingBoost',
+          'reminderRebook'
+        );
         
         if (!htmlContent) {
           console.error(`Failed to load template for user ${user.id}`);
           continue;
         }
 
-        // Send email
-        const emailPromise = sendEmail(
+        // Send email with tracking
+        const emailPromise = sendEmailWithTracking(
           user.email,
-          `Ready for Your Next Class? - ${instructorData.firstName} Misses You!`,
-          htmlContent
+          `Miss ${instructorData.firstName}? Time to Book Again!`,
+          htmlContent,
+          lastBooking.instructor_id,
+          'bookingBoost',
+          'reminderRebook',
+          'PocketClass'
         ).then(async (result) => {
           if (result.success) {
             // Mark reminder as sent
@@ -149,12 +183,13 @@ export default async function handler(req, res) {
     // Wait for all emails to be processed
     await Promise.all(emailPromises);
 
-    console.log(`Reminder to rebook process completed. Sent ${emailsSent} emails.`);
+    console.log(`Reminder to rebook process completed. Sent ${emailsSent} emails immediately, ${emailsScheduled} scheduled for later.`);
 
     return res.status(200).json({
       success: true,
-      message: `Sent ${emailsSent} reminder to rebook emails`,
+      message: `Sent ${emailsSent} reminder to rebook emails immediately, ${emailsScheduled} scheduled for later`,
       emailsSent,
+      emailsScheduled,
       totalUsersProcessed: users.length
     });
 

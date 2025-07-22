@@ -2,9 +2,8 @@ import {
   getUserData, 
   getClassData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
-  sendEmailToBookingRecipients,
+  loadEmailTemplateWithAutomation,
+  sendEmailToBookingRecipientsWithTracking,
   formatDateTime,
   generateBookingLinks
 } from './notificationService';
@@ -102,8 +101,14 @@ export default async function handler(req, res) {
       ...links
     };
 
-    // Load email template
-    const htmlContent = loadEmailTemplate('cancelled.html', templateData);
+    // Load email template (enhanced version, but free automations won't get coupon/message)
+    const htmlContent = await loadEmailTemplateWithAutomation(
+      'cancelled.html', 
+      templateData,
+      booking.instructor_id,
+      'classUpdates',
+      'cancelled'
+    );
     
     if (!htmlContent) {
       return res.status(500).json({ 
@@ -113,11 +118,15 @@ export default async function handler(req, res) {
     }
 
     // Send email to all booking recipients (student + group emails)
-    const emailResult = await sendEmailToBookingRecipients(
+    // This will track mail count for premium automations automatically
+    const emailResult = await sendEmailToBookingRecipientsWithTracking(
       booking,
       studentData,
       `Class Cancelled - ${classData.Name}`,
-      htmlContent
+      htmlContent,
+      booking.instructor_id,
+      'classUpdates',
+      'cancelled'
     );
 
     if (emailResult.success) {
@@ -126,7 +135,7 @@ export default async function handler(req, res) {
         cancellationEmailSent: true,
         cancellationEmailSentAt: new Date(),
         cancellationReason: cancellationReason,
-        refundAmount: refundAmount
+        refundAmount: refundAmount,
       });
 
       console.log(`Cancellation notification sent for booking ${bookingId}`);

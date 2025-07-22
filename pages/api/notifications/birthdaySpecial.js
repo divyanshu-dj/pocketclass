@@ -1,9 +1,12 @@
 import { 
   getUserData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
-  generateBookingLinks
+  loadEmailTemplateWithAutomation,
+  sendEmailWithTracking,
+  generateBookingLinks,
+  // Add the new timing helpers
+  getAutomationTimeDelay,
+  calculateSendTime
 } from './notificationService';
 import { db } from '../../../firebaseConfig';
 import { collection, getDocs, query, where, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
@@ -30,6 +33,7 @@ export default async function handler(req, res) {
     console.log(`Found ${users.length} total users`);
 
     let emailsSent = 0;
+    let emailsScheduled = 0;
     const emailPromises = [];
 
     for (const user of users) {
@@ -108,6 +112,26 @@ export default async function handler(req, res) {
           continue; // No instructor with birthday automation enabled
         }
 
+        // Get custom timing for this automation (birthdaySpecial is premium)
+        const timeDelay = await getAutomationTimeDelay(
+          instructorWithAutomation.id, 
+          'bookingBoost', 
+          'birthdaySpecial'
+        );
+        
+        // Calculate when this birthday email should be sent
+        // For birthdays, calculate from the start of their birthday (midnight)
+        const birthdayStart = moment().startOf('day').toDate();
+        const sendTime = calculateSendTime(birthdayStart, timeDelay);
+        const now = new Date();
+        
+        // If the send time is in the future, skip for now (will be processed by scheduler)
+        if (sendTime > now) {
+          console.log(`Birthday email for user ${user.id} scheduled for ${sendTime}`);
+          emailsScheduled++;
+          continue;
+        }
+
         // Generate booking links
         const links = generateBookingLinks(user.id, null);
 
@@ -121,19 +145,28 @@ export default async function handler(req, res) {
           ...links
         };
 
-        // Load email template
-        const htmlContent = loadEmailTemplate('birthdaySpecial.html', templateData);
+        // Load email template with automation enhancements
+        const htmlContent = await loadEmailTemplateWithAutomation(
+          'birthdaySpecial.html', 
+          templateData,
+          instructorWithAutomation.id,
+          'bookingBoost',
+          'birthdaySpecial'
+        );
         
         if (!htmlContent) {
           console.error(`Failed to load template for user ${user.id}`);
           continue;
         }
 
-        // Send email
-        const emailPromise = sendEmail(
+        // Send email with tracking
+        const emailPromise = sendEmailWithTracking(
           user.email,
           `🎉 Happy Birthday ${user.firstName}! Special Gift Inside`,
           htmlContent,
+          instructorWithAutomation.id,
+          'bookingBoost',
+          'birthdaySpecial',
           instructorWithAutomation.firstName ? 
             `${instructorWithAutomation.firstName} from PocketClass` : 
             "PocketClass"
@@ -162,12 +195,13 @@ export default async function handler(req, res) {
     // Wait for all emails to be processed
     await Promise.all(emailPromises);
 
-    console.log(`Birthday special process completed. Sent ${emailsSent} emails.`);
+    console.log(`Birthday special process completed. Sent ${emailsSent} emails immediately, ${emailsScheduled} scheduled for later.`);
 
     return res.status(200).json({
       success: true,
-      message: `Sent ${emailsSent} birthday special emails`,
+      message: `Sent ${emailsSent} birthday special emails immediately, ${emailsScheduled} scheduled for later`,
       emailsSent,
+      emailsScheduled,
       totalUsersProcessed: users.length
     });
 

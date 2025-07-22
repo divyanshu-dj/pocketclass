@@ -54,7 +54,7 @@ export default async function handler(req, res) {
       customer: customer.id,
       items: [
         {
-          price: 'price_1Rmz9bAx0xW0obEdrprA5Juk', 
+          price: 'price_1RmoIuB9dtkl1HtocYoFaAzA', 
         },
       ],
       payment_behavior: 'default_incomplete',

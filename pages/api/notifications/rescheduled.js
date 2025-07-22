@@ -2,9 +2,8 @@ import {
   getUserData, 
   getClassData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
-  sendEmailToBookingRecipients,
+  loadEmailTemplateWithAutomation,
+  sendEmailToBookingRecipientsWithTracking,
   formatDateTime,
   generateBookingLinks
 } from './notificationService';
@@ -101,8 +100,14 @@ export default async function handler(req, res) {
       ...links
     };
 
-    // Load email template
-    const htmlContent = loadEmailTemplate('rescheduled.html', templateData);
+    // Load email template (enhanced version, but free automations won't get coupon/message)
+    const htmlContent = await loadEmailTemplateWithAutomation(
+      'rescheduled.html', 
+      templateData,
+      booking.instructor_id,
+      'classUpdates',
+      'rescheduled'
+    );
     
     if (!htmlContent) {
       return res.status(500).json({ 
@@ -112,11 +117,15 @@ export default async function handler(req, res) {
     }
 
     // Send email to all booking recipients (student + group emails)
-    const emailResult = await sendEmailToBookingRecipients(
+    // This will track mail count for premium automations automatically
+    const emailResult = await sendEmailToBookingRecipientsWithTracking(
       booking,
       studentData,
       `Class Rescheduled - ${classData.Name}`,
-      htmlContent
+      htmlContent,
+      booking.instructor_id,
+      'classUpdates',
+      'rescheduled'
     );
 
     if (emailResult.success) {

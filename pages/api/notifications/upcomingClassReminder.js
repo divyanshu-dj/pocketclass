@@ -3,9 +3,12 @@ import {
   getClassData, 
   getBookingData,
   checkAutomationEnabled,
+  getAutomationTimeDelay,
+  convertTimeDelayToMs,
+  calculateSendTime,
   loadEmailTemplate,
   sendEmail,
-  sendEmailToBookingRecipients,
+  sendEmailToBookingRecipientsWithTracking,
   formatDateTime,
   generateBookingLinks
 } from './notificationService';
@@ -33,27 +36,49 @@ export default async function handler(req, res) {
 
     console.log(`Found ${bookings.length} confirmed bookings`);
 
-    // Filter bookings that need 24-hour reminders
-    const bookingsNeedingReminders = bookings.filter((booking) => {
-      const startTime = moment(booking.startTime).tz(booking.timezone || "America/Toronto", true);
-      const now = moment().tz(booking.timezone || "America/Toronto");
-      const reminderTime = moment().tz(booking.timezone || "America/Toronto").add(24, "hours");
-      
-      return (
-        booking.status === "Confirmed" &&
-        startTime.isSameOrBefore(reminderTime) &&
-        startTime.isAfter(now) &&
-        !booking.upcomingReminderSent
-      );
-    });
-
-    console.log(`Found ${bookingsNeedingReminders.length} bookings needing 24-hour reminders`);
-
     let emailsSent = 0;
     const emailPromises = [];
 
-    for (const booking of bookingsNeedingReminders) {
+    // Process each booking individually with custom timing
+    for (const booking of bookings) {
       try {
+        // Skip if already sent or not confirmed
+        if (booking.upcomingReminderSent || booking.status !== "Confirmed") {
+          continue;
+        }
+
+        // Get instructor's custom time delay for this automation
+        const timeDelay = await getAutomationTimeDelay(
+          booking.instructor_id,
+          'reminders',
+          'upcomingClass'
+        );
+
+        if (!timeDelay) {
+          console.log(`Automation not enabled for instructor ${booking.instructor_id}, skipping...`);
+          continue;
+        }
+
+        // Calculate when the reminder should be sent
+        const startTime = moment(booking.startTime).tz(booking.timezone || "America/Toronto", true);
+        const now = moment().tz(booking.timezone || "America/Toronto");
+        const delayMs = convertTimeDelayToMs(timeDelay);
+        const reminderTime = moment(startTime).subtract(delayMs, 'milliseconds');
+
+        // Check if it's time to send the reminder (within a 30-minute window)
+        const thirtyMinutesFromNow = moment(now).add(30, 'minutes');
+        const shouldSend = (
+          reminderTime.isBefore(thirtyMinutesFromNow) &&
+          reminderTime.isAfter(now.clone().subtract(30, 'minutes')) &&
+          startTime.isAfter(now)
+        );
+
+        if (!shouldSend) {
+          continue;
+        }
+
+        console.log(`Sending reminder for booking ${booking.id} with ${timeDelay} delay`);
+
         // Get student, instructor, and class data
         const [studentData, instructorData, classData] = await Promise.all([
           getUserData(booking.student_id),
@@ -63,18 +88,6 @@ export default async function handler(req, res) {
 
         if (!studentData || !instructorData || !classData) {
           console.log(`Missing data for booking ${booking.id}, skipping...`);
-          continue;
-        }
-
-        // Check if instructor has this automation enabled
-        const isAutomationEnabled = await checkAutomationEnabled(
-          booking.instructor_id, 
-          'reminders', 
-          'upcomingClass'
-        );
-
-        if (!isAutomationEnabled) {
-          console.log(`Automation not enabled for instructor ${booking.instructor_id}, skipping...`);
           continue;
         }
 
@@ -112,11 +125,14 @@ export default async function handler(req, res) {
         }
 
         // Send email to all booking recipients (student + group emails)
-        const emailPromise = sendEmailToBookingRecipients(
+        const emailPromise = sendEmailToBookingRecipientsWithTracking(
           booking,
           studentData,
           `Upcoming Class Reminder - ${classData.Name}`,
-          htmlContent
+          htmlContent,
+          booking.instructor_id,
+          'reminders',
+          'upcomingClass'
         ).then(async (result) => {
           if (result.success) {
             // Mark reminder as sent

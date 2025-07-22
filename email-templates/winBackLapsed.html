@@ -28,33 +28,30 @@
 
         <p>We understand that life gets busy, but we'd love to help you get back on track with your learning goals. Whether you want to pick up where you left off or try something completely new, we're here to support you!</p>
 
-        <div style="background: linear-gradient(135deg, #ff9a9e, #fecfef); padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
-            <h3 style="color: #721c24; margin: 0 0 15px 0;">🎁 Welcome Back Offer</h3>
-            <div style="background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0;">
-                <p style="margin: 0; color: #333; font-size: 20px; font-weight: bold;">30% OFF</p>
-                <p style="margin: 5px 0; color: #333; font-size: 16px;">Your comeback class</p>
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Use code: <strong style="color: #E63F2B;">COMEBACK30</strong></p>
-            </div>
-            <p style="color: #721c24; margin: 10px 0 0 0; font-size: 14px; opacity: 0.8;">Valid for the next 14 days only</p>
-        </div>
-
-        <div style="background-color: #e7f3ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #004085;">✨ What's New Since You've Been Away:</h4>
-            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #004085; font-size: 14px;">
-                <li>New instructors have joined in {{newInstructorCategories}}</li>
-                <li>{{newClassCount}}+ new class types added</li>
-                <li>Improved booking system for easier scheduling</li>
-                <li>New group class options available</li>
-            </ul>
-        </div>
-
         <p>{{favoriteInstructorName}} specifically asked about you recently, and they'd love to see you back in class! But if you're ready to try something new, we have some amazing new instructors who would be perfect for your next learning adventure.</p>
+
+        {{#hasPersonalMessage}}
+        <div style="background-color: #f0f8ff; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #007BFF;">
+            <h4 style="margin: 0 0 10px 0; color: #0056b3;">💌 Personal Message from {{favoriteInstructorFirstName}}:</h4>
+            <p style="margin: 0; color: #0056b3; font-style: italic;">"{{personalMessage}}"</p>
+        </div>
+        {{/hasPersonalMessage}}
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{comebackBookingLink}}" style="display: inline-block; background: linear-gradient(135deg, #E63F2B, #ff6b6b); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
                 🏃‍♀️ Book My Comeback Class
             </a>
         </div>
+
+        {{#hasCouponCode}}
+        <div style="background: linear-gradient(135deg, #ff9a9e, #fecfef); padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+            <h3 style="color: #721c24; margin: 0 0 15px 0;">🎁 Exclusive Welcome Back Offer</h3>
+            <div style="background-color: white; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <p style="margin: 5px 0; color: #333; font-size: 16px;">Your personal comeback coupon</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Use code: <strong style="color: #E63F2B;">{{couponCode}}</strong></p>
+            </div>
+        </div>
+        {{/hasCouponCode}}
 
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
             <p style="margin: 0; color: #856404; font-size: 14px; text-align: center;">

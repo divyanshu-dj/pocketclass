@@ -1,5 +1,5 @@
 import { db } from '../../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
@@ -89,14 +89,23 @@ export const getBookingData = async (bookingId) => {
   }
 };
 
+// Define which automations are free vs premium (matches frontend logic)
+const isFreeAutomation = (category, automationType) => {
+  // Only these two automations are free
+  return (
+    (category === 'reminders' && automationType === 'upcomingClass') || // 24 hours reminder
+    (category === 'classUpdates' && automationType === 'newBooking')    // New Booking notification
+  );
+};
+
 // Check if automation is enabled for instructor
 export const checkAutomationEnabled = async (instructorId, category, automationType) => {
   try {
     const instructorData = await getUserData(instructorId);
     if (!instructorData) return false;
     
-    // Check if instructor has premium for non-reminder automations
-    if (category !== 'reminders') {
+    // Check if this is a premium automation and user doesn't have premium access
+    if (!isFreeAutomation(category, automationType)) {
       const today = new Date();
       const premiumExpire = timestampToDate(instructorData.premiumExpire);
       
@@ -113,6 +122,119 @@ export const checkAutomationEnabled = async (instructorId, category, automationT
   }
 };
 
+// Get automation time delay for specific instructor and automation
+export const getAutomationTimeDelay = async (instructorId, category, automationType) => {
+  try {
+    const instructorData = await getUserData(instructorId);
+    if (!instructorData) return null;
+    
+    // Check if automation is enabled
+    const isEnabled = await checkAutomationEnabled(instructorId, category, automationType);
+    if (!isEnabled) return null;
+    
+    // Get custom time or fallback to default
+    const customTime = instructorData.automations?.[category]?.[automationType]?.customTime;
+    const timeDelay = instructorData.automations?.[category]?.[automationType]?.timeDelay;
+    
+    return customTime || timeDelay || getDefaultTimeDelay(category, automationType);
+  } catch (error) {
+    console.error('Error getting automation time delay:', error);
+    return null;
+  }
+};
+
+// Convert time delay string to milliseconds
+export const convertTimeDelayToMs = (timeDelay) => {
+  const timeMap = {
+    'immediate': 0,
+    '15min': 15 * 60 * 1000,
+    '30min': 30 * 60 * 1000,
+    '1h': 60 * 60 * 1000,
+    '2h': 2 * 60 * 60 * 1000,
+    '3h': 3 * 60 * 60 * 1000,
+    '6h': 6 * 60 * 60 * 1000,
+    '12h': 12 * 60 * 60 * 1000,
+    '24h': 24 * 60 * 60 * 1000,
+    '2d': 2 * 24 * 60 * 60 * 1000,
+    '3d': 3 * 24 * 60 * 60 * 1000,
+    '1week': 7 * 24 * 60 * 60 * 1000,
+    '2weeks': 14 * 24 * 60 * 1000,
+    '3weeks': 21 * 24 * 60 * 1000,
+    '4weeks': 28 * 24 * 60 * 1000,
+    '6weeks': 42 * 24 * 60 * 1000,
+    '8weeks': 56 * 24 * 60 * 1000,
+    '3months': 90 * 24 * 60 * 1000,
+    '6months': 180 * 24 * 60 * 1000
+  };
+  
+  return timeMap[timeDelay] || timeMap['24h']; // Default to 24h if unknown
+};
+
+// Get default time delay for automation types
+export const getDefaultTimeDelay = (category, automationType) => {
+  const defaults = {
+    reminders: {
+      upcomingClass: '24h',
+      classReminder: '1h'
+    },
+    classUpdates: {
+      newBooking: 'immediate',
+      rescheduled: 'immediate',
+      cancelled: 'immediate'
+    },
+    engagement: {
+      thankYouVisit: 'immediate'
+    },
+    bookingBoost: {
+      reminderRebook: '3weeks',
+      winBackLapsed: '8weeks'
+    },
+    milestones: {
+      welcomeNew: 'immediate',
+      birthdayGreeting: 'immediate'
+    }
+  };
+  
+  return defaults[category]?.[automationType] || 'immediate';
+};
+
+// Calculate exact send time based on booking time and delay
+export const calculateSendTime = (bookingStartTime, timeDelay) => {
+  const delayMs = convertTimeDelayToMs(timeDelay);
+  const startTime = new Date(bookingStartTime);
+  
+  if (timeDelay.includes('week') || timeDelay.includes('month')) {
+    // For post-class delays, add to the start time
+    return new Date(startTime.getTime() + delayMs);
+  } else {
+    // For pre-class delays, subtract from the start time
+    return new Date(startTime.getTime() - delayMs);
+  }
+};
+
+// Enhanced load email template with automation data
+export const loadEmailTemplateWithAutomation = async (templateFile, templateData, instructorId, category, automationType) => {
+  try {
+    // Get coupon code and personal message if applicable
+    const couponCode = await getAutomationCouponCode(instructorId, category, automationType);
+    const personalMessage = await getAutomationPersonalMessage(instructorId, category, automationType);
+    
+    // Add automation data to template data
+    const enhancedTemplateData = {
+      ...templateData,
+      couponCode: couponCode,
+      personalMessage: personalMessage,
+      hasCouponCode: couponCode ? 'true' : 'false',
+      hasPersonalMessage: personalMessage ? 'true' : 'false'
+    };
+    
+    return loadEmailTemplate(templateFile, enhancedTemplateData);
+  } catch (error) {
+    console.error('Error loading enhanced email template:', error);
+    return loadEmailTemplate(templateFile, templateData); // Fallback to basic template
+  }
+};
+
 // Load and populate email template
 export const loadEmailTemplate = (templateFile, templateData) => {
   try {
@@ -124,6 +246,29 @@ export const loadEmailTemplate = (templateFile, templateData) => {
     }
 
     let templateContent = fs.readFileSync(templatePath, 'utf-8');
+    
+    // Handle conditional sections first (before variable replacement)
+    // Handle {{#hasVariable}} ... {{/hasVariable}} conditionals
+    const conditionalRegex = /\{\{\#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
+    templateContent = templateContent.replace(conditionalRegex, (match, variable, content) => {
+      const value = templateData[variable];
+      // Show content if variable is truthy and not empty string
+      if (value && value !== '' && value !== 'false') {
+        return content;
+      }
+      return '';
+    });
+    
+    // Handle {{^hasVariable}} ... {{/hasVariable}} inverse conditionals  
+    const inverseConditionalRegex = /\{\{\^(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
+    templateContent = templateContent.replace(inverseConditionalRegex, (match, variable, content) => {
+      const value = templateData[variable];
+      // Show content if variable is falsy or empty string
+      if (!value || value === '' || value === 'false') {
+        return content;
+      }
+      return '';
+    });
     
     // Replace template variables
     Object.keys(templateData).forEach(key => {
@@ -155,6 +300,24 @@ export const sendEmail = async (to, subject, htmlContent, fromName = "PocketClas
     return { success: true, messageId: result.messageId };
   } catch (error) {
     console.error('Error sending email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Send email with tracking (increments mail count for automations)
+export const sendEmailWithTracking = async (to, subject, htmlContent, instructorId, category, automationType, fromName = "PocketClass") => {
+  try {
+    // Send the email first
+    const emailResult = await sendEmail(to, subject, htmlContent, fromName);
+    
+    // If email sent successfully, increment the counter for ALL automations (free and premium)
+    if (emailResult.success) {
+      await incrementAutomationMailCount(instructorId, category, automationType);
+    }
+    
+    return emailResult;
+  } catch (error) {
+    console.error('Error sending email with tracking:', error);
     return { success: false, error: error.message };
   }
 };
@@ -254,6 +417,24 @@ export const sendEmailToBookingRecipients = async (booking, studentData, subject
   }
 };
 
+// Send email to booking recipients with tracking (for automations)
+export const sendEmailToBookingRecipientsWithTracking = async (booking, studentData, subject, htmlContent, instructorId, category, automationType, fromName = "PocketClass") => {
+  try {
+    // Send the emails first
+    const emailResult = await sendEmailToBookingRecipients(booking, studentData, subject, htmlContent, fromName);
+    
+    // If emails sent successfully, increment the counter for ALL automations (free and premium)
+    if (emailResult.success) {
+      await incrementAutomationMailCount(instructorId, category, automationType);
+    }
+    
+    return emailResult;
+  } catch (error) {
+    console.error('Error sending email to booking recipients with tracking:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Format date and time
 export const formatDateTime = (dateTime, timezone = 'America/Toronto') => {
   const date = new Date(dateTime);
@@ -296,4 +477,70 @@ export const generateBookingLinks = (studentId, bookingId) => {
     helpCenterLink: `${baseUrl}/support`,
     supportLink: `${baseUrl}/support`
   };
+};
+
+// Get automation coupon code for specific instructor and automation
+export const getAutomationCouponCode = async (instructorId, category, automationType) => {
+  try {
+    const instructorData = await getUserData(instructorId);
+    if (!instructorData) return '';
+    
+    // Check if automation is enabled
+    const isEnabled = await checkAutomationEnabled(instructorId, category, automationType);
+    if (!isEnabled) return '';
+    
+    // Only return coupon code for premium users on premium automations (free automations can't have coupons)
+    if (isFreeAutomation(category, automationType)) {
+      return '';
+    }
+    
+    return instructorData.automations?.[category]?.[automationType]?.couponCode || '';
+  } catch (error) {
+    console.error('Error getting automation coupon code:', error);
+    return '';
+  }
+};
+
+// Get automation personal message for specific instructor and automation
+export const getAutomationPersonalMessage = async (instructorId, category, automationType) => {
+  try {
+    const instructorData = await getUserData(instructorId);
+    if (!instructorData) return '';
+    
+    // Check if automation is enabled
+    const isEnabled = await checkAutomationEnabled(instructorId, category, automationType);
+    if (!isEnabled) return '';
+    
+    // Only return personal message for premium users on premium automations (free automations can't have personal messages)
+    if (isFreeAutomation(category, automationType)) {
+      return '';
+    }
+    
+    return instructorData.automations?.[category]?.[automationType]?.personalMessage || '';
+  } catch (error) {
+    console.error('Error getting automation personal message:', error);
+    return '';
+  }
+};
+
+// Update automation mail count (for statistics)
+export const incrementAutomationMailCount = async (instructorId, category, automationType) => {
+  try {
+    const instructorData = await getUserData(instructorId);
+    if (!instructorData) return false;
+    
+    const currentCount = instructorData.automations?.[category]?.[automationType]?.mailsSent || 0;
+    
+    // Update the mail count in the database
+    const updateData = {
+      [`automations.${category}.${automationType}.mailsSent`]: currentCount + 1,
+      updatedAt: new Date()
+    };
+    
+    await updateDoc(doc(db, "Users", instructorId), updateData);
+    return true;
+  } catch (error) {
+    console.error('Error incrementing automation mail count:', error);
+    return false;
+  }
 };

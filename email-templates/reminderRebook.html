@@ -37,18 +37,27 @@
 
         <p>{{instructorFirstName}} has some exciting new class options available, and we think you'd love to continue where you left off!</p>
 
+        {{#hasPersonalMessage}}
+        <div style="background-color: #f0f8ff; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #007BFF;">
+            <h4 style="margin: 0 0 10px 0; color: #0056b3;">💌 Personal Message from {{instructorFirstName}}:</h4>
+            <p style="margin: 0; color: #0056b3; font-style: italic;">"{{personalMessage}}"</p>
+        </div>
+        {{/hasPersonalMessage}}
+
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{bookingLink}}" style="display: inline-block; background-color: #E63F2B; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold;">
                 Book Your Next Class
             </a>
         </div>
 
+        {{#hasCouponCode}}
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0;">
             <h4 style="margin: 0 0 10px 0; color: #856404;">🎁 Special Offer</h4>
             <p style="margin: 0; color: #856404; font-size: 14px;">
-                Book your next class within the next 7 days and get <strong>10% off</strong> your session! Use code: <strong>WELCOME-BACK</strong>
+                Book your next class and use this exclusive coupon code: <strong>{{couponCode}}</strong>
             </p>
         </div>
+        {{/hasCouponCode}}
 
         <p>We'd love to see you back in class soon. If you have any questions or need help choosing your next class, feel free to reach out!</p>
 

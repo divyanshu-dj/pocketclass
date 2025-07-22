@@ -48,6 +48,11 @@ export default function handler(req, res) {
       firstClassName: 'Yoga for Beginners',
       joinDate: 'July 1, 2025',
       preferredInstructorName: 'Sarah Williams',
+      // New automation customization fields
+      couponCode: 'SAVE25NOW',
+      personalMessage: 'Hi Alex! I\'m so excited to have you in my class. Your dedication to learning yoga has been inspiring, and I can\'t wait to help you continue your journey!',
+      hasCouponCode: 'true',
+      hasPersonalMessage: 'true',
       // Links (these would be dynamic in real implementation)
       rescheduleLink: 'https://www.pocketclass.ca/reschedule',
       cancelLink: 'https://www.pocketclass.ca/cancel',
@@ -68,6 +73,29 @@ export default function handler(req, res) {
     };
 
     let populatedContent = templateContent;
+    
+    // Handle conditional sections first (before variable replacement)
+    // Handle {{#hasVariable}} ... {{/hasVariable}} conditionals
+    const conditionalRegex = /\{\{\#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
+    populatedContent = populatedContent.replace(conditionalRegex, (match, variable, content) => {
+      const value = sampleData[variable];
+      // Show content if variable is truthy and not empty string
+      if (value && value !== '' && value !== 'false') {
+        return content;
+      }
+      return '';
+    });
+    
+    // Handle {{^hasVariable}} ... {{/hasVariable}} inverse conditionals  
+    const inverseConditionalRegex = /\{\{\^(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g;
+    populatedContent = populatedContent.replace(inverseConditionalRegex, (match, variable, content) => {
+      const value = sampleData[variable];
+      // Show content if variable is falsy or empty string
+      if (!value || value === '' || value === 'false') {
+        return content;
+      }
+      return '';
+    });
     
     // Replace all template variables
     Object.keys(sampleData).forEach(key => {

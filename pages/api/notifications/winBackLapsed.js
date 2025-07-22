@@ -2,10 +2,13 @@ import {
   getUserData, 
   getClassData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
+  loadEmailTemplateWithAutomation,
+  sendEmailWithTracking,
   formatDateTime,
-  generateBookingLinks
+  generateBookingLinks,
+  // Add the new timing helpers
+  getAutomationTimeDelay,
+  calculateSendTime
 } from './notificationService';
 import { db } from '../../../firebaseConfig';
 import { collection, getDocs, query, where, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
@@ -27,6 +30,7 @@ export default async function handler(req, res) {
     console.log(`Found ${users.length} total users`);
 
     let emailsSent = 0;
+    let emailsScheduled = 0;
     const emailPromises = [];
 
     for (const user of users) {
@@ -93,6 +97,24 @@ export default async function handler(req, res) {
           continue; // Automation not enabled
         }
 
+        // Get custom timing for this automation (winBackLapsed is premium)
+        const timeDelay = await getAutomationTimeDelay(
+          lastBooking.instructor_id, 
+          'bookingBoost', 
+          'winBackLapsed'
+        );
+        
+        // Calculate when this email should be sent
+        const sendTime = calculateSendTime(new Date(), timeDelay);
+        const now = new Date();
+        
+        // If the send time is in the future, skip for now (will be processed by scheduler)
+        if (sendTime > now) {
+          console.log(`Win-back email for user ${user.id} scheduled for ${sendTime}`);
+          emailsScheduled++;
+          continue;
+        }
+
         // Calculate stats
         const totalClassesCompleted = allBookings.length;
         
@@ -132,19 +154,28 @@ export default async function handler(req, res) {
           ...links
         };
 
-        // Load email template
-        const htmlContent = loadEmailTemplate('winBackLapsed.html', templateData);
+        // Load email template with automation enhancements
+        const htmlContent = await loadEmailTemplateWithAutomation(
+          'winBackLapsed.html', 
+          templateData,
+          lastBooking.instructor_id,
+          'bookingBoost',
+          'winBackLapsed'
+        );
         
         if (!htmlContent) {
           console.error(`Failed to load template for user ${user.id}`);
           continue;
         }
 
-        // Send email
-        const emailPromise = sendEmail(
+        // Send email with tracking
+        const emailPromise = sendEmailWithTracking(
           user.email,
           `We Miss You ${user.firstName}! Come Back with 30% Off`,
           htmlContent,
+          lastBooking.instructor_id,
+          'bookingBoost',
+          'winBackLapsed',
           favoriteInstructorData ? 
             `${favoriteInstructorData.firstName} from PocketClass` : 
             "PocketClass"
@@ -172,12 +203,13 @@ export default async function handler(req, res) {
     // Wait for all emails to be processed
     await Promise.all(emailPromises);
 
-    console.log(`Win back lapsed students process completed. Sent ${emailsSent} emails.`);
+    console.log(`Win back lapsed students process completed. Sent ${emailsSent} emails immediately, ${emailsScheduled} scheduled for later.`);
 
     return res.status(200).json({
       success: true,
-      message: `Sent ${emailsSent} win back lapsed student emails`,
+      message: `Sent ${emailsSent} win back lapsed student emails immediately, ${emailsScheduled} scheduled for later`,
       emailsSent,
+      emailsScheduled,
       totalUsersProcessed: users.length
     });
 

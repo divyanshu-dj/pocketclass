@@ -2,11 +2,13 @@ import {
   getUserData, 
   getClassData, 
   checkAutomationEnabled,
-  loadEmailTemplate,
-  sendEmail,
-  sendEmailToBookingRecipients,
+  loadEmailTemplateWithAutomation,
+  sendEmailToBookingRecipientsWithTracking,
   formatDateTime,
-  generateBookingLinks
+  generateBookingLinks,
+  // Add the new timing helpers
+  getAutomationTimeDelay,
+  calculateSendTime
 } from './notificationService';
 import { db } from '../../../firebaseConfig';
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
@@ -100,6 +102,33 @@ export default async function handler(req, res) {
       });
     }
 
+    // Get custom timing for this automation (welcomeNew is premium)
+    const timeDelay = await getAutomationTimeDelay(
+      booking.instructor_id, 
+      'milestones', 
+      'welcomeNew'
+    );
+    
+    // Calculate when this welcome email should be sent based on class completion time
+    const classEndTime = new Date(booking.startTime);
+    // Add class duration to get end time
+    const classDuration = classData.Duration || 60;
+    classEndTime.setMinutes(classEndTime.getMinutes() + classDuration);
+    
+    const sendTime = calculateSendTime(classEndTime, timeDelay);
+    const now = new Date();
+    
+    // If the send time is in the future, return early (will be processed by scheduler)
+    if (sendTime > now) {
+      console.log(`Welcome new student email for booking ${bookingId} scheduled for ${sendTime}`);
+      return res.status(200).json({
+        success: true,
+        message: `Welcome new student email scheduled for ${sendTime}`,
+        scheduled: true,
+        scheduledFor: sendTime
+      });
+    }
+
     // Format join date (today since they just completed their first class)
     const joinDate = new Date().toLocaleDateString('en-US', { 
       year: 'numeric', 
@@ -124,8 +153,14 @@ export default async function handler(req, res) {
       ...links
     };
 
-    // Load email template
-    const htmlContent = loadEmailTemplate('welcomeNew.html', templateData);
+    // Load email template with automation enhancements
+    const htmlContent = await loadEmailTemplateWithAutomation(
+      'welcomeNew.html', 
+      templateData,
+      booking.instructor_id,
+      'milestones',
+      'welcomeNew'
+    );
     
     if (!htmlContent) {
       return res.status(500).json({ 
@@ -134,12 +169,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Send email to all booking recipients (student + group emails)
-    const emailResult = await sendEmailToBookingRecipients(
+    // Send email to all booking recipients (student + group emails) with tracking
+    const emailResult = await sendEmailToBookingRecipientsWithTracking(
       booking,
       studentData,
       `Welcome to PocketClass, ${studentData.firstName}! 🎉`,
       htmlContent,
+      booking.instructor_id,
+      'milestones',
+      'welcomeNew',
       `${instructorData.firstName} from PocketClass`
     );
 

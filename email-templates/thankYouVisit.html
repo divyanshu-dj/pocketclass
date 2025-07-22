@@ -39,12 +39,28 @@
             </a>
         </div>
 
+        {{#hasPersonalMessage}}
+        <div style="background-color: #f0f8ff; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #007BFF;">
+            <h4 style="margin: 0 0 10px 0; color: #0056b3;">💌 Personal Message from {{instructorFirstName}}:</h4>
+            <p style="margin: 0; color: #0056b3; font-style: italic;">"{{personalMessage}}"</p>
+        </div>
+        {{/hasPersonalMessage}}
+
         <div style="background-color: #e7f3ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
             <h4 style="margin: 0 0 10px 0; color: #004085;">🔄 Want to Continue Learning?</h4>
             <p style="margin: 0; color: #004085; font-size: 14px;">
                 Keep the momentum going! Book another session with {{instructorFirstName}} or explore other classes that might interest you.
             </p>
         </div>
+
+        {{#hasCouponCode}}
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107;">
+            <h4 style="margin: 0 0 10px 0; color: #856404;">🎁 Special Offer for Your Next Class!</h4>
+            <p style="margin: 0; color: #856404; font-size: 14px;">
+                Use your exclusive coupon code: <strong>{{couponCode}}</strong>
+            </p>
+        </div>
+        {{/hasCouponCode}}
 
         <div style="text-align: center; margin: 20px 0;">
             <a href="{{bookAgainLink}}" style="display: inline-block; background-color: #E63F2B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-right: 10px;">
