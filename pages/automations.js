@@ -70,7 +70,8 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
     discountValue: '',
     discountType: 'percentage',
     expiryDate: '',
-    remainingUses: '10'
+    remainingUses: '-1',
+    unlimitedUses: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -104,7 +105,8 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
           discountValue: '',
           discountType: 'percentage',
           expiryDate: '',
-          remainingUses: '10'
+          remainingUses: '10',
+          unlimitedUses: false,
         });
       }
     } catch (error) {
@@ -206,20 +208,19 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Number of Uses
+            {/* Toggle to unlimited uses per student(False by default) */}
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="unlimitedUses"
+                checked={formData.unlimitedUses}
+                onChange={handleChange}
+                className="form-checkbox h-4 w-4 text-[#E63F2B] border-gray-300 rounded focus:ring-[#E63F2B]"
+              />
+              <span className="ml-2 text-sm text-gray-600">
+                Allow users to use this voucher unlimited times
+              </span>
             </label>
-            <input
-              type="number"
-              name="remainingUses"
-              required
-              min="-1"
-              value={formData.remainingUses}
-              onChange={handleChange}
-              placeholder="10 (or -1 for unlimited)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B]"
-            />
-            <p className="text-xs text-gray-500 mt-1">Use -1 for unlimited uses</p>
           </div>
 
           <div className="flex space-x-3 pt-4">
@@ -896,6 +897,20 @@ const AutomationsPage = () => {
         remainingUses: Number(voucherData.remainingUses),
         expiryDate: new Date(voucherData.expiryDate),
       };
+
+      // Check if voucher code already exists
+      const allVouchersSnapshot = await getDocs(
+        query(
+          collection(db, 'vouchers'),
+          where('userId', '==', user.uid),
+          where('code', '==', newVoucher.code)
+        )
+      );
+      const existingVoucher = allVouchersSnapshot.docs.find(doc => doc.data().code === newVoucher.code);
+      if (existingVoucher) {
+        toast.error("Voucher code already exists. Please choose a different code.");
+        return null;
+      }
 
       const docRef = await addDoc(collection(db, 'vouchers'), newVoucher);
       const createdVoucher = { id: docRef.id, ...newVoucher };

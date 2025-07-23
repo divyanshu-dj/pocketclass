@@ -19,6 +19,7 @@ import {
   deleteDoc,
   Timestamp,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 import moment from "moment-timezone";
 import { loadStripe } from "@stripe/stripe-js";
@@ -66,6 +67,7 @@ export default function index({
   const [voucher, setVoucher] = useState("");
   const [voucherVerified, setVoucherVerified] = useState(false);
   const [discount, setDiscount] = useState(null);
+  const [discountId, setDiscountId] = useState(null);
   const [discountType, setDiscountType] = useState("percentage");
   const [error, setError] = useState(null);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -173,7 +175,11 @@ export default function index({
       }
 
       const vouchersRef = collection(db, "vouchers");
-      const q = query(vouchersRef, where("code", "==", voucher));
+      const q = query(
+        vouchersRef,
+        where("code", "==", voucher),
+        where("userId", "==", instructorId)
+      );
 
       const querySnapshot = await getDocs(q);
 
@@ -182,7 +188,10 @@ export default function index({
         return;
       }
 
-      const voucherData = querySnapshot.docs[0].data();
+      // Include ID in voucherData
+      const doc = querySnapshot.docs[0];
+      const voucherData = { id: doc.id, ...doc.data() };
+
       const currentDate = new Date();
 
       if (currentDate > voucherData.expiryDate?.toDate()) {
@@ -190,12 +199,28 @@ export default function index({
         return;
       }
 
-      if (voucherData.usageLimit <= 0) {
+      if (voucherData.remainingUses == 0) {
         setError("Voucher usage limit reached");
         return;
       }
 
+      if (voucherData.unlimitedUses === false) {
+        const usesRef = collection(db, "VoucherUses");
+
+        const usesQuery = query(
+          usesRef,
+          where("voucherId", "==", voucherData.id),
+          where("userId", "==", user.uid)
+        );
+        const usesSnapshot = await getDocs(usesQuery);
+        if (!usesSnapshot.empty) {
+          setError("Voucher usage limit reached");
+          return;
+        }
+      }
+
       setDiscount(voucherData.discountValue);
+      setDiscountId(voucherData.id);
       setDiscountType(voucherData.discountType || "percentage");
       setVoucherVerified(true);
       setError(null);
@@ -858,16 +883,18 @@ export default function index({
       price: price,
       paymentIntentId: payment_intent_id,
       createdAt: serverTimestamp(),
-      packageDiscount: parseFloat(selectedPackage?.num_sessions
-        ? ((selectedPackage?.Discount
-            ? selectedPackage.Discount
-            : selectedPackage?.discountPercentage) *
-            (selectedPackage?.Price
-              ? selectedPackage.Price
-              : classData.Price)) /
-          100
-        : 0),
-      voucherDiscount:parseFloat(
+      packageDiscount: parseFloat(
+        selectedPackage?.num_sessions
+          ? ((selectedPackage?.Discount
+              ? selectedPackage.Discount
+              : selectedPackage?.discountPercentage) *
+              (selectedPackage?.Price
+                ? selectedPackage.Price
+                : classData.Price)) /
+              100
+          : 0
+      ),
+      voucherDiscount: parseFloat(
         discountType === "percentage"
           ? (
               (discount *
@@ -882,7 +909,8 @@ export default function index({
                   : classData.Price)) /
               100
             ).toFixed(2)
-          : discount),
+          : discount
+      ),
       subTotal: (() => {
         const basePrice = selectedPackage?.num_sessions
           ? selectedPackage.Price -
@@ -952,7 +980,7 @@ export default function index({
         return parseFloat(total.toFixed(2));
       })(),
     };
-    console.log(bookingData)
+    console.log(bookingData);
 
     const bookingsRef = collection(db, "Bookings");
     const slotQuery = query(
@@ -1333,6 +1361,31 @@ END:VCALENDAR`.trim();
       }
     }
 
+    if (voucherVerified) {
+      const voucherRef = doc(db, "vouchers", discountId);
+      const voucherSnapshot = await getDoc(voucherRef);
+      if (voucherSnapshot.exists()) {
+        const voucherData = voucherSnapshot.data();
+        if (voucherData.remainingUses > 0) {
+          await updateDoc(voucherRef, {
+            remainingUses: voucherData.remainingUses - 1,
+          });
+        }
+      }
+      // In VoucherUses collection, add a new document with the voucherId and userId
+      const voucherUsesRef = collection(db, "VoucherUses");
+      const voucherCode = voucherSnapshot.data().code;
+      const voucherUseData = {
+        voucherId: discountId,
+        userId: user.uid,
+        usedAt: serverTimestamp(),
+        voucherCode: voucherCode,
+        classId: classId,
+        instructorId: instructorId,
+      };
+      await addDoc(voucherUsesRef, voucherUseData);
+    }
+
     if (packageClasses > 0 && selectedPackage === "Credits") {
       setBookLoading(true);
       const packagesRef = collection(db, "Packages");
@@ -1510,17 +1563,19 @@ END:VCALENDAR`.trim();
       mode: selectedSlot.classId ? "group" : "individual",
       createdAt: serverTimestamp(),
       price: bookingDataPrice,
-      packageDiscount: parseFloat(selectedPackage?.num_sessions
-        ? ((selectedPackage?.Discount
-            ? selectedPackage.Discount
-            : selectedPackage?.discountPercentage) *
-            (selectedPackage?.Price
-              ? selectedPackage.Price
-              : classData.Price)) /
-          100
-        : 0),
-      voucherDiscount:
-        parseFloat(discountType === "percentage"
+      packageDiscount: parseFloat(
+        selectedPackage?.num_sessions
+          ? ((selectedPackage?.Discount
+              ? selectedPackage.Discount
+              : selectedPackage?.discountPercentage) *
+              (selectedPackage?.Price
+                ? selectedPackage.Price
+                : classData.Price)) /
+              100
+          : 0
+      ),
+      voucherDiscount: parseFloat(
+        discountType === "percentage"
           ? (
               (discount *
                 (selectedPackage?.num_sessions
@@ -1534,7 +1589,8 @@ END:VCALENDAR`.trim();
                   : classData.Price)) /
               100
             ).toFixed(2)
-          : discount),
+          : discount
+      ),
       subTotal: (() => {
         const basePrice = selectedPackage?.num_sessions
           ? selectedPackage.Price -
@@ -1605,7 +1661,7 @@ END:VCALENDAR`.trim();
       })(),
     };
 
-    console.log(bookingData)
+    console.log(bookingData);
 
     const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
 
@@ -2978,19 +3034,6 @@ END:VCALENDAR`.trim();
             parseInt(selectedPackage?.num_sessions, 10) -
             (numberOfGroupMembers ? numberOfGroupMembers : 1),
         });
-      }
-      // In the handleSubmit function of CheckoutForm, after successful payment:
-      if (voucherVerified) {
-        const vouchersRef = collection(db, "vouchers");
-        const q = query(vouchersRef, where("code", "==", voucher));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const voucherDoc = querySnapshot.docs[0];
-          await updateDoc(voucherDoc.ref, {
-            usageLimit: increment(-1),
-          });
-        }
       }
 
       setStripeOptions(null);
