@@ -218,7 +218,7 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
                 className="form-checkbox h-4 w-4 text-[#E63F2B] border-gray-300 rounded focus:ring-[#E63F2B]"
               />
               <span className="ml-2 text-sm text-gray-600">
-                Allow users to use this voucher unlimited times
+                Allow students to use this voucher unlimited times
               </span>
             </label>
           </div>

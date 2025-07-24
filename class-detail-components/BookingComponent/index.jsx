@@ -2614,6 +2614,7 @@ const CheckoutForm = ({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState("Processing your payment...");
   const sendEmail = async (
     targetEmails,
     targetSubject,
@@ -2666,10 +2667,13 @@ const CheckoutForm = ({
     setLoading(true);
     if (!stripe || !elements) {
       toast.error("Stripe is not loaded yet.");
+      setLoading(false);
       return;
     }
     if (!agreeToTerms) {
       toast.error("Please agree to the Terms of Service");
+      setLoading(false);
+      return;
     }
 
     // if (!user?.displayName || !user?.email) {
@@ -2695,31 +2699,34 @@ const CheckoutForm = ({
       const paymentMethodId = paymentIntent.payment_method;
       // If payment Method ID exists, updatePaymentMethodId
       if (paymentMethodId) {
-        try {
-          await fetch("/api/updatePaymentMethod", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: user?.uid,
-              paymentMethodId: paymentMethodId,
-            }),
+        fetch("/api/updatePaymentMethod", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.uid,
+            paymentMethodId,
+          }),
+        })
+          .then(() => {
+            const customerId = paymentIntent.customer;
+            if (customerId) {
+              const userDocRef = doc(db, "Users", user.uid);
+              return updateDoc(userDocRef, {
+                stripeCustomerId: customerId,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "Error updating payment method or customer ID:",
+              error
+            );
           });
-        } catch (error) {
-          console.error("Error updating payment method:", error);
-        }
       }
 
-      const customerId = paymentIntent.customer;
-      // Check if user already has stripeCustomerId
-      if (customerId) {
-        // Update user document with stripeCustomerId
-        const userDocRef = doc(db, "Users", user.uid);
-        await updateDoc(userDocRef, {
-          stripeCustomerId: customerId,
-        });
-      }
+      setCurrentStep("Payment successful! Confirming your booking...");
       // Proceed with booking confirmation
       const bookingDocRef = doc(db, "Bookings", bookingRef);
 
@@ -2968,6 +2975,8 @@ END:VCALENDAR`.trim();
       </div>
     `;
 
+      setCurrentStep("Booking confirmed! Sending confirmation emails...");
+
       const notificationRef = collection(db, "notifications");
 
       const now = Timestamp?.now();
@@ -2997,8 +3006,8 @@ END:VCALENDAR`.trim();
         console.error("Error sending booking notification:", error);
       }
 
-      // Send create-event request to Google Calendar API
-      const calendarResponse = await fetch("/api/calendar/create-event", {
+      console.log("Finishing booking confirmation...");
+      fetch("/api/calendar/create-event", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -3012,16 +3021,21 @@ END:VCALENDAR`.trim();
             location: location,
             meetingLink: meetingLink,
             userEmails: [user?.email, ...(mode === "Group" ? groupEmails : [])],
-            timeZone: timeZone ? timeZone : "America/Toronto",
+            timeZone: timeZone || "America/Toronto",
           },
-          timeZone: timeZone ? timeZone : "America/Toronto",
+          timeZone: timeZone || "America/Toronto",
           userId: bookingData.instructor_id,
         }),
-      });
-      if (!calendarResponse.ok) {
-        const errorText = await calendarResponse.text();
-        console.error("Error creating calendar event:", errorText);
-      }
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Error creating calendar event:", errorText);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating calendar event:", error);
+        });
       if (selectedPackage?.num_sessions) {
         const docRef = await addDoc(collection(db, "Packages"), {
           payment_intent_id: paymentIntent.id,
@@ -3050,47 +3064,69 @@ END:VCALENDAR`.trim();
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto"
+      className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto relative"
     >
-      <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
-        <div className="text-base font-semibold text-[#E73F2B]">
-          Paying: ${selectedPackage?.num_sessions ? packagePrice : price}
+      {/* Loader overlay when loading */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center bg-white transition-opacity duration-300 ${
+          loading
+            ? "opacity-100 pointer-events-auto z-10"
+            : "opacity-0 pointer-events-none z-0"
+        }`}
+      >
+        <div className="loader border-4 border-[#E73F2B] border-t-transparent rounded-full w-12 h-12 animate-spin mb-4"></div>
+        <p className="px-4 text-[#E73F2B] font-semibold text-lg">
+          Processing: {currentStep}...
+        </p>
+      </div>
+
+      {/* Payment Form Content */}
+      <div
+        className={`${
+          loading ? "opacity-0 pointer-events-none" : "opacity-100"
+        } transition-opacity duration-300`}
+      >
+        <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
+          <div className="text-base font-semibold text-[#E73F2B]">
+            Paying: ${selectedPackage?.num_sessions ? packagePrice : price}
+          </div>
+          <button
+            type="button"
+            className="top-4 right- flex flex-row items-center gap-1 text-center"
+            onClick={() => {
+              setStripeOptions(null);
+              setTimer(null);
+            }}
+          >
+            <ChevronLeftIcon className="h-4 w-4 mt-1" />
+            Go Back
+          </button>
         </div>
-        <button
-          className="top-4 right- flex flex-row items-center gap-1 text-center"
-          onClick={() => {
-            setStripeOptions(null);
-            setTimer(null);
+        <div className="flex flex-row items-center justify-between mb-4">
+          <h1 className="text-lg font-bold">Complete Payment</h1>
+
+          <div className="flex items-center">
+            <p className="text-sm text-gray-500 mr-2">Expires in:</p>
+            <p className="text-sm text-[#E73F2B] font-bold">
+              {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
+              {timer % 60}
+            </p>
+          </div>
+        </div>
+        <AddressElement options={{ mode: "billing" }} />
+        <PaymentElement
+          options={{
+            layout: "tabs",
+            paymentMethodOrder: ["card", "link"],
           }}
+        />
+        <button
+          className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
+          disabled={loading}
         >
-          <ChevronLeftIcon className="h-4 w-4 mt-1" />
-          Go Back
+          {loading ? "Processing..." : "Pay"}
         </button>
       </div>
-      <div className="flex flex-row items-center justify-between mb-4">
-        <h1 className="text-lg font-bold">Complete Payment</h1>
-
-        <div className="flex items-center">
-          <p className="text-sm text-gray-500 mr-2">Expires in:</p>
-          <p className="text-sm text-[#E73F2B] font-bold">
-            {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
-            {timer % 60}
-          </p>
-        </div>
-      </div>
-      <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement
-        options={{
-          layout: "tabs",
-          paymentMethodOrder: ["card", "link"],
-        }}
-      />
-      <button
-        className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
-        disabled={loading}
-      >
-        {loading ? "Processing..." : "Pay"}
-      </button>
     </form>
   );
 };
