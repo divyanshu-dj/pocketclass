@@ -3075,7 +3075,7 @@ END:VCALENDAR`.trim();
         }`}
       >
         <div className="loader border-4 border-[#E73F2B] border-t-transparent rounded-full w-12 h-12 animate-spin mb-4"></div>
-        <p className="px-4 text-[#E73F2B] font-semibold text-lg">
+        <p className="px-8 text-center text-[#E73F2B] font-semibold text-lg">
           Processing: {currentStep}...
         </p>
       </div>
