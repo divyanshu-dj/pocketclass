@@ -135,15 +135,41 @@ function TopClassesSection({
           })
         );
 
-        // Sort by distance then rating
-        const sortedClasses = classesWithInstructors
-          .filter((c) => c.distance !== Infinity)
-          .sort((a, b) => {
-            if (a.distance === b.distance) {
-              return b.averageRating - a.averageRating;
-            }
-            return a.distance - b.distance;
-          });
+        let sortedClasses;
+
+        if (userLocation) {
+          // Location is set: sort by rating, then review count, only classes with valid distance
+          const reviewed = classesWithInstructors
+            .filter((c) => c.reviewCount > 0 && c.distance !== Infinity)
+            .sort((a, b) => {
+              if (b.averageRating !== a.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              return b.reviewCount - a.reviewCount;
+            });
+
+          const noReviews = classesWithInstructors.filter(
+            (c) => c.reviewCount === 0 && c.distance !== Infinity
+          );
+
+          sortedClasses = [...reviewed, ...noReviews];
+        } else {
+          // Location not set: sort all by rating, then review count
+          const reviewed = classesWithInstructors
+            .filter((c) => c.reviewCount > 0)
+            .sort((a, b) => {
+              if (b.averageRating !== a.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              return b.reviewCount - a.reviewCount;
+            });
+
+          const noReviews = classesWithInstructors.filter(
+            (c) => c.reviewCount === 0
+          );
+
+          sortedClasses = [...reviewed, ...noReviews];
+        }
 
         setClasses(sortedClasses);
       } finally {
@@ -151,9 +177,7 @@ function TopClassesSection({
       }
     };
 
-    if (userLocation) {
-      fetchClassesAndInstructors();
-    }
+    fetchClassesAndInstructors();
   }, [reviews, activeFilter, userLocation]);
 
   // Filter based on activeFilter
@@ -176,7 +200,7 @@ function TopClassesSection({
     <div className="grow-0 shrink-0">
       <div>
         {!activeFilter && (
-          <p className="section-heading !text-left">Top-Rated Nearby Classes</p>
+          <p className="section-heading !text-left">Top Rated Classes Near You</p>
         )}
         <p className="text-lg font-bold text-[#261f22] mt-4">
           Discover amazing learning experiences near you
