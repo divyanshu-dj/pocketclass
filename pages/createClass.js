@@ -7,7 +7,7 @@ import { categories } from "../utils/categories";
 import { useDropzone } from "react-dropzone";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import { useFormik } from 'formik';
+import { useFormik } from "formik";
 import { classSchema } from "../Validation/createClass";
 
 const MapCoordinates = dynamic(() => import("../components/MapCoordinates"), {
@@ -53,6 +53,68 @@ import imageCompression from "browser-image-compression";
 import ToggleSwitch from "../components/toggle";
 import VideoPlayer from "../components/VideoPlayer";
 
+const SortableImage = ({ image, onRemove }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: image.name,
+    });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  console.log(image);
+  const isImage = image.type?.startsWith("image");
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative touch-none"
+      {...attributes} // only structural attributes
+    >
+      <button
+        type="button"
+        className="text-logo-red absolute top-2 right-2 z-20"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(e, image.name);
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="#e73f2b"
+          viewBox="0 0 30 30"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-5 h-5 mr-1"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+          ></path>
+        </svg>
+      </button>
+      {isImage ? (
+        <img
+          src={image.src}
+          alt={`Preview ${image.name}`}
+          className="w-full h-48 object-cover rounded-lg border"
+        />
+      ) : (
+        <video src={image.src} className="object-cover rounded-lg w-full h-48" />
+      )}
+
+      <div
+        {...listeners}
+        className="absolute bottom-0 h-full w-full px-2 py-1 rounded shadow cursor-grab z-10"
+      ></div>
+    </div>
+  );
+};
+
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
   const [imageError, setImageError] = useState(null);
@@ -88,26 +150,26 @@ export default function CreateClass() {
 
   const formik = useFormik({
     initialValues: {
-      class_name: '',
-      category: '',
-      sub_category: '',
-      mode_of_class: '',
-      description: '',
-      price: '',
-      pricing: '',
-      groupSize: '',
-      groupPrice: '',
-      experience: '',
-      about: '',
-      funfact: '',
-      name: '',
-      numberOfSessions: '',
-      priceOfCompleteCourse: '',
-      discount: '',
+      class_name: "",
+      category: "",
+      sub_category: "",
+      mode_of_class: "",
+      description: "",
+      price: "",
+      pricing: "",
+      groupSize: "",
+      groupPrice: "",
+      experience: "",
+      about: "",
+      funfact: "",
+      name: "",
+      numberOfSessions: "",
+      priceOfCompleteCourse: "",
+      discount: "",
     },
-    validationSchema: classSchema,  // Use Yup validation schema
-    validateOnChange: true,  // Ensure validation happens on each change
-    validateOnBlur: true,    // Ensure validation happens on blur
+    validationSchema: classSchema, // Use Yup validation schema
+    validateOnChange: true, // Ensure validation happens on each change
+    validateOnBlur: true, // Ensure validation happens on blur
   });
 
   const addClass = async (e) => {
@@ -123,22 +185,28 @@ export default function CreateClass() {
     ) {
       toast.error("Please fill all fields");
       return;
-    }if (form.Images.length < 1) {
+    }
+    if (form.Images.length < 1) {
       setImageError("Please upload at least 1 image");
       toast.error("Please upload at least 1 image");
       setLoading(false);
       return;
     }
-    if(!form.Address){
+    if (!form.Address) {
       setAddressError("Please select a location on the map");
       toast.error("Please select a location on the map");
       setLoading(false);
       return;
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10*1024*1024) { // 10MB
-      setImageError("Total size of all images must be less than or equal to 10MB");
-      toast.error("Total size of all images must be less than or equal to 10MB");
+    if (totalSize > 10 * 1024 * 1024) {
+      // 10MB
+      setImageError(
+        "Total size of all images must be less than or equal to 10MB"
+      );
+      toast.error(
+        "Total size of all images must be less than or equal to 10MB"
+      );
       setLoading(false);
       return;
     }
@@ -184,10 +252,11 @@ export default function CreateClass() {
 
       // Upload images and get URLs in order
       const uploadPromises = form.Images.map((img, index) => {
-        const fileName = `${Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
+        const fileName = `${
+          Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
           "-" +
           img.name
-          }`;
+        }`;
         const fileRef = ref(storage, `images/${fileName}`);
         return uploadBytes(fileRef, img).then((res) =>
           getDownloadURL(ref(storage, res.metadata.fullPath))
@@ -232,14 +301,14 @@ export default function CreateClass() {
       ]);
       setPreviewImages([]);
       setUploadedFiles([]);
-      
+
       // Check if user came from instructor onboarding
-      if (router.query.from === 'instructor-onboarding') {
+      if (router.query.from === "instructor-onboarding") {
         router.push("/instructor-onboarding");
       } else {
         router.push("/confirmClass/" + addingClass.id);
       }
-      
+
       toast.success("Class Added");
     } catch (error) {
       console.error("Error adding class:", error);
@@ -306,7 +375,7 @@ export default function CreateClass() {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
-  
+
     Promise.all(previews).then((dataURLs) =>
       setPreviewImages((prev) => [...prev, ...dataURLs])
     );
@@ -341,7 +410,7 @@ export default function CreateClass() {
         }
       })
     );
-  
+
     setUploadedFiles((prev) => [...prev, ...compressedFiles]);
     setForm((prevForm) => ({
       ...prevForm,
@@ -354,24 +423,27 @@ export default function CreateClass() {
       setImageError(null); // Clear error if images are present
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10*1024*1024) { // 10MB
-      setImageError("Total size of all images must be less than or equal to 10MB");
+    if (totalSize > 10 * 1024 * 1024) {
+      // 10MB
+      setImageError(
+        "Total size of all images must be less than or equal to 10MB"
+      );
       setLoading(false);
       return;
     }
-  },[form.Images]);
+  }, [form.Images]);
 
   useEffect(() => {
     if (form.Address) {
       setAddressError(null); // Clear error if address is present
     }
-  },[form.Address]);
+  }, [form.Address]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': [],
-      'video/*': []
+      "image/*": [],
+      "video/*": [],
     },
     multiple: true,
   });
@@ -404,69 +476,6 @@ export default function CreateClass() {
   useEffect(() => {
     if (!userLoading && !user) goToMainPage();
   }, [userLoading, user]);
-
-  const SortableImage = ({ image, onRemove }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-      useSortable({
-        id: image.name,
-      });
-
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-    console.log(image);
-    const isImage = image.type?.startsWith("image");
-
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="relative touch-none"
-        {...attributes} // only structural attributes
-      >
-        <button
-          type="button"
-          className="text-logo-red absolute top-2 right-2 z-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(e, image.name);
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="#e73f2b"
-            viewBox="0 0 30 30"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5 mr-1"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
-            ></path>
-          </svg>
-        </button>
-        {isImage ? (
-          <img
-            src={image.src}
-            alt={`Preview ${image.name}`}
-            className="w-full h-48 object-cover rounded-lg border"
-          />
-        ) : (
-          <video src={image.src} className="object-cover w-full h-48" />
-        )}
-  
-        <div
-          {...listeners}
-          className="absolute bottom-0 h-full w-full px-2 py-1 rounded shadow cursor-grab z-10"
-        >
-        </div>
-      </div>
-    );
-  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -522,7 +531,13 @@ export default function CreateClass() {
         <div>
           <p className="text-center text-gray-500 pb-5 text-lg">
             {" "}
-            {formatDate()}.{" "} <button className="text-logo-red" onClick={() => setShowModal(true)}>Watch Guide</button>
+            {formatDate()}.{" "}
+            <button
+              className="text-logo-red"
+              onClick={() => setShowModal(true)}
+            >
+              Watch Guide
+            </button>
           </p>
         </div>
 
@@ -545,12 +560,14 @@ export default function CreateClass() {
                   value={form.Name}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Name: e.target.value })
+                    setForm({ ...form, Name: e.target.value });
                   }}
                   className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                 />
                 {formik.touched.className && formik.errors.className && (
-                  <div className="text-red-500 text-sm">{formik.errors.className}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.className}
+                  </div>
                 )}
               </div>
             </div>
@@ -565,9 +582,8 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Category: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Category: e.target.value });
+                  }}
                 >
                   <option value="">Select Category</option>
                   {categories &&
@@ -579,7 +595,9 @@ export default function CreateClass() {
                     ))}
                 </select>
                 {formik.touched.category && formik.errors.category && (
-                  <div className="text-red-500 text-sm">{formik.errors.category}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.category}
+                  </div>
                 )}
               </div>
               <div className="flex-grow">
@@ -592,9 +610,8 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, SubCategory: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, SubCategory: e.target.value });
+                  }}
                 >
                   <option value="">Select Sub Category</option>
                   {categories &&
@@ -608,7 +625,9 @@ export default function CreateClass() {
                       ))}
                 </select>
                 {formik.touched.sub_category && formik.errors.sub_category && (
-                  <div className="text-red-500 text-sm">{formik.errors.sub_category}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.sub_category}
+                  </div>
                 )}
               </div>
             </div>
@@ -622,15 +641,18 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Mode: e.target.value })
+                    setForm({ ...form, Mode: e.target.value });
                   }}
                 >
                   <option value="Online">Online</option>
                   <option value="Offline">In Person</option>
                 </select>
-                {formik.touched.mode_of_class && formik.errors.mode_of_class && (
-                  <div className="text-red-500 text-sm">{formik.errors.mode_of_class}</div>
-                )}
+                {formik.touched.mode_of_class &&
+                  formik.errors.mode_of_class && (
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.mode_of_class}
+                    </div>
+                  )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -646,12 +668,13 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Description: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Description: e.target.value });
+                  }}
                 />
                 {formik.touched.description && formik.errors.description && (
-                  <div className="text-red-500 text-sm">{formik.errors.description}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.description}
+                  </div>
                 )}
               </div>
             </div>
@@ -668,11 +691,13 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Price: e.target.value })
+                    setForm({ ...form, Price: e.target.value });
                   }}
                 />
                 {formik.touched.price && formik.errors.price && (
-                  <div className="text-red-500 text-sm">{formik.errors.price}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.price}
+                  </div>
                 )}
               </div>
             </div>
@@ -689,12 +714,13 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Pricing: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Pricing: e.target.value });
+                  }}
                 />
                 {formik.touched.pricing && formik.errors.pricing && (
-                  <div className="text-red-500 text-sm">{formik.errors.pricing}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.pricing}
+                  </div>
                 )}
               </div>
             </div>
@@ -720,14 +746,12 @@ export default function CreateClass() {
                       ? "Drop the files here"
                       : "Click to upload files or Drag & Drop"}
                   </p>
-                  <p className="text-gray-500 text-base">
-                    files(10MB max)
-                  </p>
+                  <p className="text-gray-500 text-base">files(10MB max)</p>
                 </div>
               </div>
               {imageError && (
-                  <div className="text-red-500 text-sm">{imageError}</div>
-                )}
+                <div className="text-red-500 text-sm">{imageError}</div>
+              )}
             </div>
             <DndContext
               sensors={sensors}
@@ -751,7 +775,9 @@ export default function CreateClass() {
             </DndContext>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Experience (Optional)</label>
+                <label className="text-lg font-bold">
+                  Experience (Optional)
+                </label>
                 <textarea
                   required
                   name="experience"
@@ -759,10 +785,10 @@ export default function CreateClass() {
                   placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
                   value={form.Experience}
                   onBlur={formik.handleBlur}
-                  onChange={(e) =>{
+                  onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Experience: e.target.value })}
-                  }
+                    setForm({ ...form, Experience: e.target.value });
+                  }}
                 />
               </div>
             </div>
@@ -778,7 +804,8 @@ export default function CreateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, About: e.target.value })}}
+                    setForm({ ...form, About: e.target.value });
+                  }}
                 />
               </div>
             </div>
@@ -792,10 +819,10 @@ export default function CreateClass() {
                   placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
                   value={form.FunFact}
                   onBlur={formik.handleBlur}
-                  onChange={(e) =>{
+                  onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, FunFact: e.target.value })}
-                  }
+                    setForm({ ...form, FunFact: e.target.value });
+                  }}
                 />
               </div>
             </div>
@@ -819,9 +846,9 @@ export default function CreateClass() {
                   readOnly
                   onBlur={formik.handleBlur}
                   value={form.Address}
-                  onChange={(e) =>{
-                    formik.handleChange(e);}
-                  }
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                  }}
                   className="w-full border-0 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
                 />
                 {addressError && (
@@ -829,7 +856,7 @@ export default function CreateClass() {
                 )}
               </div>
             </div>
-            <ToggleSwitch form={form} setForm={setForm} formik={formik}/>
+            <ToggleSwitch form={form} setForm={setForm} formik={formik} />
             <div className="w-full max-w-[750px] mt-4 flex flex-wrap gap-2 justify-between items-center">
               <div>
                 <div className="text-xl font-bold">Create a Package</div>
@@ -860,118 +887,123 @@ export default function CreateClass() {
               </button>
             </div>
             <div className="flex flex-col gap-3 w-full max-w-[750px]">
-              {packages && packages.map((pkg, idx) => (
-                <div
-                  key={idx}
-                  className="flex flex-col gap-6 rounded-3xl border-gray-200 p-5 px-6 border-[1px] "
-                >
-                  <div>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPackages((prev) =>
-                            prev.filter((_, i) => i !== idx)
-                          );
-                        }}
-                        className="text-sm text-red-500 font-bold"
-                      >
-                        Remove
-                      </button>
+              {packages &&
+                packages.map((pkg, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col gap-6 rounded-3xl border-gray-200 p-5 px-6 border-[1px] "
+                  >
+                    <div>
+                      <div className="flex justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPackages((prev) =>
+                              prev.filter((_, i) => i !== idx)
+                            );
+                          }}
+                          className="text-sm text-red-500 font-bold"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div>
+                        <label className="text-lg font-bold">Name</label>
+                        <input
+                          required
+                          name={`Name-${idx}`}
+                          className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                          placeholder="e.g., Tennis Starter Pack"
+                          type={"text"}
+                          value={pkg.Name}
+                          onChange={(e) =>
+                            setPackages((prev) =>
+                              prev.map((p, i) =>
+                                i === idx ? { ...p, Name: e.target.value } : p
+                              )
+                            )
+                          }
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="text-lg font-bold">Name</label>
-                      <input
-                        required
-                        name={`Name-${idx}`}
-                        className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                        placeholder="e.g., Tennis Starter Pack"
-                        type={"text"}
-                        value={pkg.Name}
-                        onChange={(e) =>
-                          setPackages((prev) =>
-                            prev.map((p, i) =>
-                              i === idx ? { ...p, Name: e.target.value } : p
-                            )
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-lg font-bold">
-                      Number of Sessions
-                    </label>
-                    <input
-                      required
-                      name={`sessions-${idx}`}
-                      className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                      placeholder="Number of Sessions in package"
-                      type={"text"}
-                      value={pkg.num_sessions}
-                      onChange={(e) =>
-                        setPackages((prev) =>
-                          prev.map((p, i) =>
-                            i === idx
-                              ? { ...p, num_sessions: e.target.value }
-                              : p
-                          )
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="bg-gray-400 h-[1px]"></div>
-                  <div className="flex flex-col gap-4">
-                    <label className="text-lg font-bold">Total Price</label>
-                    <div className="flex flex-wrap flex-row justify-between items-center">
-                      <label className="text-base font-bold">
-                        Price of complete package
-                      </label>
-                      <input
-                        required
-                        name={`price-${idx}`}
-                        className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                        placeholder="Price"
-                        type={"number"}
-                        value={pkg.Price}
-                        onChange={(e) =>
-                          setPackages((prev) =>
-                            prev.map((p, i) =>
-                              i === idx ? { ...p, Price: e.target.value } : p
-                            )
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-row flex-wrap justify-between items-center">
-                      <label className="text-base font-bold">
-                        Discount Percentage
-                      </label>
-                      <input
-                        required
-                        name={`discount-${idx}`}
-                        className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                        placeholder="Discount"
-                        type={"number"}
-                        value={pkg.Discount}
-                        onChange={(e) =>
-                          setPackages((prev) =>
-                            prev.map((p, i) =>
-                              i === idx ? { ...p, Discount: e.target.value } : p
-                            )
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-row justify-between items-center">
-                      <label className="text-lg font-bold">Package Price</label>
                       <label className="text-lg font-bold">
-                        $ {pkg.Price - (pkg.Price * pkg.Discount) / 100}
+                        Number of Sessions
                       </label>
+                      <input
+                        required
+                        name={`sessions-${idx}`}
+                        className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                        placeholder="Number of Sessions in package"
+                        type={"text"}
+                        value={pkg.num_sessions}
+                        onChange={(e) =>
+                          setPackages((prev) =>
+                            prev.map((p, i) =>
+                              i === idx
+                                ? { ...p, num_sessions: e.target.value }
+                                : p
+                            )
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="bg-gray-400 h-[1px]"></div>
+                    <div className="flex flex-col gap-4">
+                      <label className="text-lg font-bold">Total Price</label>
+                      <div className="flex flex-wrap flex-row justify-between items-center">
+                        <label className="text-base font-bold">
+                          Price of complete package
+                        </label>
+                        <input
+                          required
+                          name={`price-${idx}`}
+                          className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                          placeholder="Price"
+                          type={"number"}
+                          value={pkg.Price}
+                          onChange={(e) =>
+                            setPackages((prev) =>
+                              prev.map((p, i) =>
+                                i === idx ? { ...p, Price: e.target.value } : p
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-row flex-wrap justify-between items-center">
+                        <label className="text-base font-bold">
+                          Discount Percentage
+                        </label>
+                        <input
+                          required
+                          name={`discount-${idx}`}
+                          className="border-2 text-center md:w-auto w-full border-gray-100 text-base rounded-xl p-1 px-4 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
+                          placeholder="Discount"
+                          type={"number"}
+                          value={pkg.Discount}
+                          onChange={(e) =>
+                            setPackages((prev) =>
+                              prev.map((p, i) =>
+                                i === idx
+                                  ? { ...p, Discount: e.target.value }
+                                  : p
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-row justify-between items-center">
+                        <label className="text-lg font-bold">
+                          Package Price
+                        </label>
+                        <label className="text-lg font-bold">
+                          $ {pkg.Price - (pkg.Price * pkg.Discount) / 100}
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="flex flex-row gap-4 w-full mb-4 max-w-[750px]">
               <button
@@ -995,7 +1027,12 @@ export default function CreateClass() {
           </form>
         </div>
       </div>
-      <VideoPlayer isOpen={showModal} onClose={setShowModal} videoSrc={"/tutorials/Step2.mp4"} title={"Create Class Tutorial"}/>
+      <VideoPlayer
+        isOpen={showModal}
+        onClose={setShowModal}
+        videoSrc={"/tutorials/Step2.mp4"}
+        title={"Create Class Tutorial"}
+      />
 
       <Footer />
       <ToastContainer
