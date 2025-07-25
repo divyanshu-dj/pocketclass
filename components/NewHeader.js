@@ -527,7 +527,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                   {/* Become an Instructor Button */}
                   {!userData?.isInstructor && (
                     <Link href="/instructor-onboarding">
-                      <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                      <button className="hidden md:inline-block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                         Become an Instructor
                       </button>
                     </Link>
