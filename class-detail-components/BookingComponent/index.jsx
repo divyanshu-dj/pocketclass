@@ -883,18 +883,16 @@ export default function index({
       price: price,
       paymentIntentId: payment_intent_id,
       createdAt: serverTimestamp(),
-      packageDiscount: parseFloat(
-        selectedPackage?.num_sessions
-          ? ((selectedPackage?.Discount
-              ? selectedPackage.Discount
-              : selectedPackage?.discountPercentage) *
-              (selectedPackage?.Price
-                ? selectedPackage.Price
-                : classData.Price)) /
-              100
-          : 0
-      ),
-      voucherDiscount: parseFloat(
+      packageDiscount: parseFloat(selectedPackage?.num_sessions
+        ? ((selectedPackage?.Discount
+            ? selectedPackage.Discount
+            : selectedPackage?.discountPercentage) *
+            (selectedPackage?.Price
+              ? selectedPackage.Price
+              : classData.Price)) /
+          100*numberOfGroupMembers
+        : 0),
+      voucherDiscount:parseFloat(
         discountType === "percentage"
           ? (
               (discount *
@@ -928,7 +926,7 @@ export default function index({
             : discount
           : 0;
 
-        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
       })(),
       processingFee: (() => {
         const basePrice = selectedPackage?.num_sessions
@@ -973,14 +971,13 @@ export default function index({
             : discount
           : 0;
 
-        const subtotal = basePrice - voucherDiscount;
-        const processingFee = subtotal * 0.029 + 0.8;
+        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
         const total = subtotal + processingFee;
 
         return parseFloat(total.toFixed(2));
       })(),
     };
-    console.log(bookingData);
 
     const bookingsRef = collection(db, "Bookings");
     const slotQuery = query(
@@ -1563,19 +1560,17 @@ END:VCALENDAR`.trim();
       mode: selectedSlot.classId ? "group" : "individual",
       createdAt: serverTimestamp(),
       price: bookingDataPrice,
-      packageDiscount: parseFloat(
-        selectedPackage?.num_sessions
-          ? ((selectedPackage?.Discount
-              ? selectedPackage.Discount
-              : selectedPackage?.discountPercentage) *
-              (selectedPackage?.Price
-                ? selectedPackage.Price
-                : classData.Price)) /
-              100
-          : 0
-      ),
-      voucherDiscount: parseFloat(
-        discountType === "percentage"
+      packageDiscount: parseFloat(selectedPackage?.num_sessions
+        ? ((selectedPackage?.Discount
+            ? selectedPackage.Discount
+            : selectedPackage?.discountPercentage) *
+            (selectedPackage?.Price
+              ? selectedPackage.Price
+              : classData.Price)) /
+          100*numberOfGroupMembers
+        : 0),
+      voucherDiscount:
+        parseFloat(discountType === "percentage"\
           ? (
               (discount *
                 (selectedPackage?.num_sessions
@@ -1608,7 +1603,7 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
       })(),
       processingFee: (() => {
         const basePrice = selectedPackage?.num_sessions
@@ -1653,15 +1648,13 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        const subtotal = basePrice - voucherDiscount;
-        const processingFee = subtotal * 0.029 + 0.8;
+        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
         const total = subtotal + processingFee;
 
         return parseFloat(total.toFixed(2));
       })(),
     };
-
-    console.log(bookingData);
 
     const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
 
