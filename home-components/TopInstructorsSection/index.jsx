@@ -14,22 +14,48 @@ import InstructorSection from "../InstructorSection/index";
 import { db } from "../../firebaseConfig";
 
 function TopClassesSection({
-  showAll = false,
   activeFilter = null,
   onClassesLoad,
+  displayCount = 4,
 }) {
   const [classes, setClasses] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState(null);
 
+  // 🧭 Get user location
   useEffect(() => {
-    const filteredClasses = activeFilter
-      ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
-      : classes;
-    onClassesLoad?.(filteredClasses.length);
-  }, [classes, activeFilter, onClassesLoad]);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          console.warn("Geolocation error:", err.message);
+        }
+      );
+    }
+  }, []);
 
-  // Fetch reviews
+  // 🧠 Calculate distance using Haversine formula
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (val) => (val * Math.PI) / 180;
+    const R = 6371; // Earth's radius in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+
+  // 👂 Listen to review updates
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "Reviews"), (snapshot) => {
       setReviews(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
@@ -42,10 +68,7 @@ function TopClassesSection({
     setLoading(true);
     const fetchClassesAndInstructors = async () => {
       try {
-        // Create appropriate query based on whether filter is active
-        const classesQuery = activeFilter
-          ? query(collection(db, "classes"))
-          : query(collection(db, "classes"), where("TopRated", "==", true));
+        const classesQuery = query(collection(db, "classes"));
 
         const classesSnapshot = await getDocs(classesQuery);
 
@@ -56,6 +79,7 @@ function TopClassesSection({
               ...doc.data(),
             };
 
+            // Instructor Info
             if (classData.classCreator) {
               const instructorRef = firestoreDoc(
                 db,
@@ -67,12 +91,13 @@ function TopClassesSection({
                 classData.name = classData.Name || "N/A";
                 classData.profileImage = classData.Images?.[0] || "N/A";
                 classData.category = classData.Category || "N/A";
-                classData.instructorName = instructorDoc.data().firstName || "Instructor";
+                classData.instructorName =
+                  instructorDoc.data().firstName || "Instructor";
                 classData.instructorImage = instructorDoc.data().profileImage;
               }
             }
 
-            // Calculate average rating for this class
+            // Ratings
             const classReviews = reviews.filter(
               (rev) => rev.classID === classData.id
             );
@@ -92,13 +117,60 @@ function TopClassesSection({
             classData.averageRating = avgRating;
             classData.reviewCount = classReviews.length;
 
+            // Distance from user
+            if (userLocation && classData.latitude && classData.longitude) {
+              const classLat = parseFloat(classData.latitude);
+              const classLon = parseFloat(classData.longitude);
+              classData.distance = getDistance(
+                userLocation.latitude,
+                userLocation.longitude,
+                classLat,
+                classLon
+              );
+            } else {
+              classData.distance = Infinity;
+            }
+
             return classData;
           })
         );
 
-        const sortedClasses = classesWithInstructors.sort(
-          (a, b) => b.averageRating - a.averageRating
-        );
+        let sortedClasses;
+
+        if (userLocation) {
+          // Location is set: sort by rating, then review count, only classes with valid distance
+          const reviewed = classesWithInstructors
+            .filter((c) => c.reviewCount > 0 && c.distance !== Infinity)
+            .sort((a, b) => {
+              if (b.averageRating !== a.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              return b.reviewCount - a.reviewCount;
+            });
+
+          const noReviews = classesWithInstructors.filter(
+            (c) => c.reviewCount === 0 && c.distance !== Infinity
+          );
+
+          sortedClasses = [...reviewed, ...noReviews];
+        } else {
+          // Location not set: sort all by rating, then review count
+          const reviewed = classesWithInstructors
+            .filter((c) => c.reviewCount > 0)
+            .sort((a, b) => {
+              if (b.averageRating !== a.averageRating) {
+                return b.averageRating - a.averageRating;
+              }
+              return b.reviewCount - a.reviewCount;
+            });
+
+          const noReviews = classesWithInstructors.filter(
+            (c) => c.reviewCount === 0
+          );
+
+          sortedClasses = [...reviewed, ...noReviews];
+        }
+
         setClasses(sortedClasses);
       } finally {
         setLoading(false);
@@ -106,26 +178,32 @@ function TopClassesSection({
     };
 
     fetchClassesAndInstructors();
-  }, [reviews, activeFilter]);
+  }, [reviews, activeFilter, userLocation]);
 
-  const displayedClasses = showAll
-    ? activeFilter
-      ? classes
-          .filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
-          .slice(0, 12)
-      : classes.slice(0, 12)
-    : activeFilter
-    ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter))).slice(0, 4)
-    : classes.slice(0, 4);
+  // Filter based on activeFilter
+  const filteredClasses = activeFilter
+    ? classes.filter(
+        (classItem) =>
+          classItem.Type === activeFilter ||
+          classItem.SubCategory === activeFilter
+      )
+    : classes;
+
+  // Inform parent of count AFTER filtering
+  useEffect(() => {
+    onClassesLoad?.(filteredClasses.length);
+  }, [filteredClasses, onClassesLoad]);
+
+  const displayedClasses = filteredClasses.slice(0, displayCount || 4);
 
   return (
     <div className="grow-0 shrink-0">
-      <div className="">
+      <div>
         {!activeFilter && (
-          <p className="section-heading !text-left">Top-Rated Classes</p>
+          <p className="section-heading !text-left">Top Rated Classes Near You</p>
         )}
-        <p className="[font-family:'DM_Sans',sans-serif] text-lg font-bold text-[#261f22] mt-4 m-0 p-0">
-          Discover amazing learning experiences
+        <p className="text-lg font-bold text-[#261f22] mt-4">
+          Discover amazing learning experiences near you
         </p>
       </div>
       <div>
@@ -141,6 +219,7 @@ function TopClassesSection({
                   key={classItem.id}
                   classId={classItem.id}
                   instructor={classItem}
+                  reviews={reviews}
                   loading={false}
                 />
               ))}

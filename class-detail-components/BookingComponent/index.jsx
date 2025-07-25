@@ -865,7 +865,7 @@ export default function index({
             (selectedPackage?.Price
               ? selectedPackage.Price
               : classData.Price)) /
-          100
+          100*numberOfGroupMembers
         : 0),
       voucherDiscount:parseFloat(
         discountType === "percentage"
@@ -900,7 +900,7 @@ export default function index({
             : discount
           : 0;
 
-        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
       })(),
       processingFee: (() => {
         const basePrice = selectedPackage?.num_sessions
@@ -945,14 +945,13 @@ export default function index({
             : discount
           : 0;
 
-        const subtotal = basePrice - voucherDiscount;
-        const processingFee = subtotal * 0.029 + 0.8;
+        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
         const total = subtotal + processingFee;
 
         return parseFloat(total.toFixed(2));
       })(),
     };
-    console.log(bookingData)
 
     const bookingsRef = collection(db, "Bookings");
     const slotQuery = query(
@@ -1515,7 +1514,7 @@ END:VCALENDAR`.trim();
             (selectedPackage?.Price
               ? selectedPackage.Price
               : classData.Price)) /
-          100
+          100*numberOfGroupMembers
         : 0),
       voucherDiscount:
         parseFloat(discountType === "percentage"
@@ -1550,7 +1549,7 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        return parseFloat((basePrice - voucherDiscount).toFixed(2));
+        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
       })(),
       processingFee: (() => {
         const basePrice = selectedPackage?.num_sessions
@@ -1595,15 +1594,13 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        const subtotal = basePrice - voucherDiscount;
-        const processingFee = subtotal * 0.029 + 0.8;
+        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
         const total = subtotal + processingFee;
 
         return parseFloat(total.toFixed(2));
       })(),
     };
-
-    console.log(bookingData)
 
     const bookingRef = await addDoc(collection(db, "Bookings"), bookingData);
 

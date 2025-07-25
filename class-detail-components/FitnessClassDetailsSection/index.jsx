@@ -54,7 +54,7 @@ function FitnessClassDetailsSection({
     const checkWidth = () => {
       const width = window.innerWidth;
       setIsMobile(width <= 500);
-      setIsTablet(width > 500 && width <= 1024);
+      setIsTablet(width <= 1024);
     };
 
     checkWidth();
@@ -155,39 +155,44 @@ function FitnessClassDetailsSection({
       subcategoryIcon: subcategoryData?.imagePath || "",
     };
   };
+
+  const scrollToRef = (ref, offset = 250) => {
+    if (ref.current) {
+      const elementTop = ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementTop + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-6 md:mt-14 section-spacing">
-      {isTablet && (
-        <div className="fixed self-start z-30 bg-white border-b border-gray-200 py-3 px-4 w-full">
-          <div className="flex gap-6 justify-start overflow-x-auto max-w-full">
+    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing">
+      {isMobile && (
+        <div className="fixed top-0 z-30 bg-white border-b border-gray-200 w-full h-[180px] flex flex-col justify-end px-4">
+          <div className="flex gap-6 justify-start overflow-x-auto pb-3 max-w-full">
             <button
-              onClick={() =>
-                instructorRef.current?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToRef(instructorRef,400)}
               className="text-sm font-medium text-[#261f22] whitespace-nowrap"
             >
               Instructor
             </button>
             <button
-              onClick={() =>
-                bookingRef.current?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToRef(bookingRef,250)}
               className="text-sm font-medium text-[#261f22] whitespace-nowrap"
             >
               Booking
             </button>
             <button
-              onClick={() =>
-                reviewsRef.current?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToRef(reviewsRef,-200)}
               className="text-sm font-medium text-[#261f22] whitespace-nowrap"
             >
               Reviews
             </button>
             <button
-              onClick={() =>
-                faqRef.current?.scrollIntoView({ behavior: "smooth" })
-              }
+              onClick={() => scrollToRef(faqRef,250)}
               className="text-sm font-medium text-[#261f22] whitespace-nowrap"
             >
               FAQ
@@ -442,10 +447,12 @@ function FitnessClassDetailsSection({
           classId={classId}
           currentClassData={classData}
         />
-        <FAQAccordion
-          instructorId={classCreatorData?.userUid}
-          classId={classId}
-        />
+        <div ref={faqRef}>
+          <FAQAccordion
+            instructorId={classCreatorData?.userUid}
+            classId={classId}
+          />
+        </div>
       </div>
     </div>
   );
