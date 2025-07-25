@@ -3,7 +3,17 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebaseConfig";
-import { doc, getDoc, updateDoc, serverTimestamp, collection, getDocs, query, where, addDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  collection,
+  getDocs,
+  query,
+  where,
+  addDoc,
+} from "firebase/firestore";
 import { toast } from "react-toastify";
 import PremiumPurchaseModal from "../components/PremiumPurchaseModal";
 
@@ -64,13 +74,18 @@ import {
 } from "@heroicons/react/solid";
 
 // Voucher Creation Modal Component
-const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher }) => {
+const VoucherCreationModal = ({
+  isOpen,
+  onClose,
+  onVoucherCreated,
+  createVoucher,
+}) => {
   const [formData, setFormData] = useState({
-    code: '',
-    discountValue: '',
-    discountType: 'percentage',
-    expiryDate: '',
-    remainingUses: '-1',
+    code: "",
+    discountValue: "",
+    discountType: "percentage",
+    expiryDate: "",
+    remainingUses: "-1",
     unlimitedUses: false,
   });
   const [loading, setLoading] = useState(false);
@@ -80,16 +95,19 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
     if (isOpen && !formData.expiryDate) {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 30);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        expiryDate: futureDate.toISOString().split('T')[0]
+        expiryDate: futureDate.toISOString().split("T")[0],
       }));
     }
   }, [isOpen, formData.expiryDate]);
 
   const generateRandomCode = () => {
-    const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-    setFormData(prev => ({ ...prev, code: randomCode }));
+    const randomCode = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
+    setFormData((prev) => ({ ...prev, code: randomCode }));
   };
 
   const handleSubmit = async (e) => {
@@ -101,16 +119,16 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
       if (voucher) {
         onVoucherCreated(voucher);
         setFormData({
-          code: '',
-          discountValue: '',
-          discountType: 'percentage',
-          expiryDate: '',
-          remainingUses: '10',
+          code: "",
+          discountValue: "",
+          discountType: "percentage",
+          expiryDate: "",
+          remainingUses: "10",
           unlimitedUses: false,
         });
       }
     } catch (error) {
-      console.error('Error creating voucher:', error);
+      console.error("Error creating voucher:", error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +136,7 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   if (!isOpen) return null;
@@ -127,7 +145,9 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Create New Voucher</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Create New Voucher
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -202,7 +222,7 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
               required
               value={formData.expiryDate}
               onChange={handleChange}
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B]"
             />
           </div>
@@ -236,7 +256,7 @@ const VoucherCreationModal = ({ isOpen, onClose, onVoucherCreated, createVoucher
               disabled={loading}
               className="flex-1 px-4 py-2 bg-[#E63F2B] text-white rounded-lg hover:bg-[#E63F2B]/90 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Voucher'}
+              {loading ? "Creating..." : "Create Voucher"}
             </button>
           </div>
         </form>
@@ -260,21 +280,21 @@ const AutomationsPage = () => {
   const [showVoucherModal, setShowVoucherModal] = useState(false); // Show voucher creation modal
   const [automations, setAutomations] = useState({
     reminders: {
-      upcomingClass: { 
-        enabled: true, 
-        timeDelay: "24h", 
+      upcomingClass: {
+        enabled: true,
+        timeDelay: "24h",
         customTime: "24h",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
-      classReminder: { 
-        enabled: true, 
-        timeDelay: "1h", 
+      classReminder: {
+        enabled: true,
+        timeDelay: "1h",
         customTime: "1h",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
     },
     classUpdates: {
@@ -284,7 +304,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
       rescheduled: {
         enabled: true,
@@ -292,7 +312,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
       cancelled: {
         enabled: true,
@@ -300,7 +320,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
     },
     engagement: {
@@ -310,7 +330,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
     },
     bookingBoost: {
@@ -320,7 +340,7 @@ const AutomationsPage = () => {
         customTime: "3weeks",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
       winBackLapsed: {
         enabled: false,
@@ -328,7 +348,7 @@ const AutomationsPage = () => {
         customTime: "8weeks",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
     },
     milestones: {
@@ -338,7 +358,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
       birthdayGreeting: {
         enabled: false,
@@ -346,7 +366,7 @@ const AutomationsPage = () => {
         customTime: "immediate",
         couponCode: "",
         personalMessage: "",
-        mailsSent: 0
+        mailsSent: 0,
       },
     },
   });
@@ -633,7 +653,7 @@ const AutomationsPage = () => {
                     customTime: "24h",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                   classReminder: {
                     enabled: true,
@@ -641,7 +661,7 @@ const AutomationsPage = () => {
                     customTime: "1h",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                 },
                 classUpdates: {
@@ -651,7 +671,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                   rescheduled: {
                     enabled: true,
@@ -659,7 +679,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                   cancelled: {
                     enabled: true,
@@ -667,7 +687,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                 },
                 engagement: {
@@ -677,7 +697,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                 },
                 bookingBoost: {
@@ -687,7 +707,7 @@ const AutomationsPage = () => {
                     customTime: "3weeks",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                   winBackLapsed: {
                     enabled: false,
@@ -695,7 +715,7 @@ const AutomationsPage = () => {
                     customTime: "8weeks",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                 },
                 milestones: {
@@ -705,7 +725,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                   birthdayGreeting: {
                     enabled: false,
@@ -713,7 +733,7 @@ const AutomationsPage = () => {
                     customTime: "immediate",
                     couponCode: "",
                     personalMessage: "",
-                    mailsSent: 0
+                    mailsSent: 0,
                   },
                 },
               };
@@ -733,9 +753,13 @@ const AutomationsPage = () => {
                       ...defaults,
                       ...saved,
                       // Ensure all required fields exist with proper defaults
-                      customTime: saved.customTime || saved.timeDelay || defaults.customTime,
+                      customTime:
+                        saved.customTime ||
+                        saved.timeDelay ||
+                        defaults.customTime,
                       couponCode: saved.couponCode || defaults.couponCode,
-                      personalMessage: saved.personalMessage || defaults.personalMessage,
+                      personalMessage:
+                        saved.personalMessage || defaults.personalMessage,
                       mailsSent: saved.mailsSent || defaults.mailsSent,
                     };
                   }
@@ -849,28 +873,34 @@ const AutomationsPage = () => {
     try {
       if (user?.uid) {
         const querySnapshot = await getDocs(
-          query(
-            collection(db, "vouchers"),
-            where("userId", "==", user.uid),
-          )
+          query(collection(db, "vouchers"), where("userId", "==", user.uid))
         );
 
-        const fetchedVouchers = querySnapshot?.docs?.map?.((doc) => ({ 
-          id: doc.id, 
-          ...doc.data() 
+        const fetchedVouchers = querySnapshot?.docs?.map?.((doc) => ({
+          id: doc.id,
+          ...doc.data(),
         }));
-        
+
         // Filter active vouchers (not expired and has remaining uses)
-        const activeVouchers = fetchedVouchers.filter(voucher => {
+        const activeVouchers = fetchedVouchers.filter((voucher) => {
           const now = new Date();
-          const expiryDate = voucher.expiryDate?.toDate ? voucher.expiryDate.toDate() : new Date(voucher.expiryDate);
-          return expiryDate > now && (voucher.remainingUses > 0 || voucher.remainingUses === -1);
+          const expiryDate = voucher.expiryDate?.toDate
+            ? voucher.expiryDate.toDate()
+            : new Date(voucher.expiryDate);
+          return (
+            expiryDate > now &&
+            (voucher.remainingUses > 0 || voucher.remainingUses === -1)
+          );
         });
 
         // Sort by expiry date
         activeVouchers.sort((a, b) => {
-          const dateA = a.expiryDate?.toDate ? a.expiryDate.toDate() : new Date(a.expiryDate);
-          const dateB = b.expiryDate?.toDate ? b.expiryDate.toDate() : new Date(b.expiryDate);
+          const dateA = a.expiryDate?.toDate
+            ? a.expiryDate.toDate()
+            : new Date(a.expiryDate);
+          const dateB = b.expiryDate?.toDate
+            ? b.expiryDate.toDate()
+            : new Date(b.expiryDate);
           return dateA - dateB;
         });
 
@@ -901,23 +931,27 @@ const AutomationsPage = () => {
       // Check if voucher code already exists
       const allVouchersSnapshot = await getDocs(
         query(
-          collection(db, 'vouchers'),
-          where('userId', '==', user.uid),
-          where('code', '==', newVoucher.code)
+          collection(db, "vouchers"),
+          where("userId", "==", user.uid),
+          where("code", "==", newVoucher.code)
         )
       );
-      const existingVoucher = allVouchersSnapshot.docs.find(doc => doc.data().code === newVoucher.code);
+      const existingVoucher = allVouchersSnapshot.docs.find(
+        (doc) => doc.data().code === newVoucher.code
+      );
       if (existingVoucher) {
-        toast.error("Voucher code already exists. Please choose a different code.");
+        toast.error(
+          "Voucher code already exists. Please choose a different code."
+        );
         return null;
       }
 
-      const docRef = await addDoc(collection(db, 'vouchers'), newVoucher);
+      const docRef = await addDoc(collection(db, "vouchers"), newVoucher);
       const createdVoucher = { id: docRef.id, ...newVoucher };
-      
+
       setVouchers([...vouchers, createdVoucher]);
-      toast.success('Voucher created successfully!');
-      
+      toast.success("Voucher created successfully!");
+
       return createdVoucher;
     } catch (error) {
       console.error("Error creating voucher:", error);
@@ -982,16 +1016,16 @@ const AutomationsPage = () => {
     const premiumExpire = timestampToDate(userData?.premiumExpire);
     const hasValidPremium = premiumExpire && premiumExpire >= today;
     const isLocked = isPremium && !hasValidPremium;
-    const canCustomize = hasValidPremium || !isPremium;
 
     return (
       <div
-        className={`bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow ${
+        className={`bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow w-full ${
           isLocked ? "opacity-75" : ""
         }`}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-4">
+        <div className="flex flex-col md:flex-row md:justify-between items-start">
+          {/* icon + content */}
+          <div className="flex flex-col sm:flex-row sm:items-start flex-1 space-y-4 sm:space-y-0 sm:space-x-4">
             <div
               className={`p-3 rounded-lg ${
                 enabled && !isLocked ? "bg-[#E63F2B]/10" : "bg-gray-100"
@@ -1003,24 +1037,25 @@ const AutomationsPage = () => {
                 }`}
               />
             </div>
+
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2">
+              <div className="flex flex-wrap items-center space-x-2 mb-2">
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                {isPremium ? (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-yellow-500 text-white">
-                    Premium
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-green-500 text-white">
-                    Free
-                  </span>
-                )}
+                <span
+                  className={`inline-flex items-center px-2 py-1 ml-0 mt-1 md:mt-0 md:ml-1 rounded-full text-xs font-medium ${
+                    isPremium
+                      ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white"
+                      : "bg-gradient-to-r from-green-400 to-green-500 text-white"
+                  }`}
+                >
+                  {isPremium ? "Premium" : "Free"}
+                </span>
               </div>
+
               <p className="text-gray-600 text-sm leading-relaxed mb-3">
                 {description}
               </p>
 
-              {/* Premium Features Preview */}
               {hasValidPremium && (couponCode || personalMessage) && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
                   <div className="space-y-2">
@@ -1028,7 +1063,10 @@ const AutomationsPage = () => {
                       <div className="flex items-center space-x-2">
                         <CashIcon className="w-4 h-4 text-yellow-600" />
                         <span className="text-xs text-yellow-700">
-                          Coupon: <code className="bg-yellow-200 px-1 rounded">{couponCode}</code>
+                          Coupon:{" "}
+                          <code className="bg-yellow-200 px-1 rounded">
+                            {couponCode}
+                          </code>
                         </span>
                       </div>
                     )}
@@ -1044,7 +1082,7 @@ const AutomationsPage = () => {
                 </div>
               )}
 
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-wrap items-center space-x-3">
                 <span
                   className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                     enabled && !isLocked
@@ -1060,6 +1098,7 @@ const AutomationsPage = () => {
                     ? "Premium Required"
                     : "Disabled"}
                 </span>
+
                 <button
                   onClick={onManage}
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
@@ -1070,7 +1109,9 @@ const AutomationsPage = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+
+          {/* actions */}
+          <div className="flex items-center space-x-3 mt-4 md:mt-0 self-end md:self-auto">
             {isLocked && (
               <button
                 onClick={() => setShowPremiumModal(true)}
@@ -1079,10 +1120,11 @@ const AutomationsPage = () => {
                 Upgrade
               </button>
             )}
+
             <button
               onClick={onToggle}
               disabled={isLocked}
-              className={`relative inline-flex h-6 w-11 items-centers rounded-full items-center  transition-colors ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 enabled && !isLocked ? "bg-[#E63F2B]" : "bg-gray-300"
               } ${isLocked ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
@@ -1097,6 +1139,7 @@ const AutomationsPage = () => {
       </div>
     );
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "reminders":
@@ -1119,7 +1162,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.reminders.upcomingClass.mailsSent || 0}
               couponCode={automations.reminders.upcomingClass.couponCode || ""}
-              personalMessage={automations.reminders.upcomingClass.personalMessage || ""}
+              personalMessage={
+                automations.reminders.upcomingClass.personalMessage || ""
+              }
             />
             <AutomationCard
               icon={BellIcon}
@@ -1138,7 +1183,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.reminders.classReminder.mailsSent || 0}
               couponCode={automations.reminders.classReminder.couponCode || ""}
-              personalMessage={automations.reminders.classReminder.personalMessage || ""}
+              personalMessage={
+                automations.reminders.classReminder.personalMessage || ""
+              }
             />
           </div>
         );
@@ -1163,7 +1210,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.classUpdates.newBooking.mailsSent || 0}
               couponCode={automations.classUpdates.newBooking.couponCode || ""}
-              personalMessage={automations.classUpdates.newBooking.personalMessage || ""}
+              personalMessage={
+                automations.classUpdates.newBooking.personalMessage || ""
+              }
             />
             <AutomationCard
               icon={RefreshIcon}
@@ -1182,7 +1231,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.classUpdates.rescheduled.mailsSent || 0}
               couponCode={automations.classUpdates.rescheduled.couponCode || ""}
-              personalMessage={automations.classUpdates.rescheduled.personalMessage || ""}
+              personalMessage={
+                automations.classUpdates.rescheduled.personalMessage || ""
+              }
             />
             <AutomationCard
               icon={XIcon}
@@ -1201,7 +1252,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.classUpdates.cancelled.mailsSent || 0}
               couponCode={automations.classUpdates.cancelled.couponCode || ""}
-              personalMessage={automations.classUpdates.cancelled.personalMessage || ""}
+              personalMessage={
+                automations.classUpdates.cancelled.personalMessage || ""
+              }
             />
           </div>
         );
@@ -1217,9 +1270,7 @@ const AutomationsPage = () => {
               onToggle={() =>
                 toggleAutomation("bookingBoost", "reminderRebook")
               }
-              onManage={() =>
-                openManageModal("bookingBoost", "reminderRebook")
-              }
+              onManage={() => openManageModal("bookingBoost", "reminderRebook")}
               hasSettings={true}
               isPremium={true}
               category="bookingBoost"
@@ -1229,8 +1280,12 @@ const AutomationsPage = () => {
                 automations.bookingBoost.reminderRebook.timeDelay
               }
               mailsSent={automations.bookingBoost.reminderRebook.mailsSent || 0}
-              couponCode={automations.bookingBoost.reminderRebook.couponCode || ""}
-              personalMessage={automations.bookingBoost.reminderRebook.personalMessage || ""}
+              couponCode={
+                automations.bookingBoost.reminderRebook.couponCode || ""
+              }
+              personalMessage={
+                automations.bookingBoost.reminderRebook.personalMessage || ""
+              }
             />
             <AutomationCard
               icon={TrendingUpIcon}
@@ -1238,9 +1293,7 @@ const AutomationsPage = () => {
               description="Reach students that you haven't seen for a while and encourage them to book their next class."
               enabled={automations.bookingBoost.winBackLapsed.enabled}
               onToggle={() => toggleAutomation("bookingBoost", "winBackLapsed")}
-              onManage={() =>
-                openManageModal("bookingBoost", "winBackLapsed")
-              }
+              onManage={() => openManageModal("bookingBoost", "winBackLapsed")}
               hasSettings={true}
               isPremium={true}
               category="bookingBoost"
@@ -1250,8 +1303,12 @@ const AutomationsPage = () => {
                 automations.bookingBoost.winBackLapsed.timeDelay
               }
               mailsSent={automations.bookingBoost.winBackLapsed.mailsSent || 0}
-              couponCode={automations.bookingBoost.winBackLapsed.couponCode || ""}
-              personalMessage={automations.bookingBoost.winBackLapsed.personalMessage || ""}
+              couponCode={
+                automations.bookingBoost.winBackLapsed.couponCode || ""
+              }
+              personalMessage={
+                automations.bookingBoost.winBackLapsed.personalMessage || ""
+              }
             />
           </div>
         );
@@ -1277,7 +1334,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.milestones?.welcomeNew?.mailsSent || 0}
               couponCode={automations.milestones?.welcomeNew?.couponCode || ""}
-              personalMessage={automations.milestones?.welcomeNew?.personalMessage || ""}
+              personalMessage={
+                automations.milestones?.welcomeNew?.personalMessage || ""
+              }
             />
             <AutomationCard
               icon={GiftIcon}
@@ -1289,9 +1348,7 @@ const AutomationsPage = () => {
               onToggle={() =>
                 toggleAutomation("milestones", "birthdayGreeting")
               }
-              onManage={() =>
-                openManageModal("milestones", "birthdayGreeting")
-              }
+              onManage={() => openManageModal("milestones", "birthdayGreeting")}
               hasSettings={true}
               isPremium={true}
               category="milestones"
@@ -1301,9 +1358,15 @@ const AutomationsPage = () => {
                 automations.milestones?.birthdayGreeting?.timeDelay ||
                 "immediate"
               }
-              mailsSent={automations.milestones?.birthdayGreeting?.mailsSent || 0}
-              couponCode={automations.milestones?.birthdayGreeting?.couponCode || ""}
-              personalMessage={automations.milestones?.birthdayGreeting?.personalMessage || ""}
+              mailsSent={
+                automations.milestones?.birthdayGreeting?.mailsSent || 0
+              }
+              couponCode={
+                automations.milestones?.birthdayGreeting?.couponCode || ""
+              }
+              personalMessage={
+                automations.milestones?.birthdayGreeting?.personalMessage || ""
+              }
             />
           </div>
         );
@@ -1328,7 +1391,9 @@ const AutomationsPage = () => {
               }
               mailsSent={automations.engagement.thankYouVisit.mailsSent || 0}
               couponCode={automations.engagement.thankYouVisit.couponCode || ""}
-              personalMessage={automations.engagement.thankYouVisit.personalMessage || ""}
+              personalMessage={
+                automations.engagement.thankYouVisit.personalMessage || ""
+              }
             />
           </div>
         );
@@ -1456,8 +1521,8 @@ const AutomationsPage = () => {
             // No active subscription - show "Buy Premium" CTA
             return (
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 mb-4 border-l-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col gap-6 md:gap-0 md:flex-row  items-center justify-between">
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-0 items-center space-x-4">
                     <div className="p-3 bg-white/20 rounded-lg">
                       <StarIcon className="w-8 h-8 text-white" />
                     </div>
@@ -1536,7 +1601,7 @@ const AutomationsPage = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <a
-                    href={`/profile/${user?.uid}`}
+                      href={`/profile/${user?.uid}`}
                       className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
                         isExpiringSoon
                           ? "bg-orange-600 text-white hover:bg-orange-700"
@@ -1633,7 +1698,8 @@ const AutomationsPage = () => {
               <li className="flex items-center space-x-2">
                 <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
                 <span>
-                  <strong>Coupon Codes & Personal Messages</strong> - Add special offers and personal touches
+                  <strong>Coupon Codes & Personal Messages</strong> - Add
+                  special offers and personal touches
                 </span>
               </li>
               <li className="flex items-center space-x-2">
@@ -1690,7 +1756,7 @@ const AutomationsPage = () => {
 
       {/* Unified Manage Modal */}
       {showManageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style={{ zIndex: 1000 }}>
           <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -1700,7 +1766,9 @@ const AutomationsPage = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.title || 'Manage Automation'}
+                    {automationDefinitions[showManageModal.category]?.[
+                      showManageModal.automation
+                    ]?.title || "Manage Automation"}
                   </h3>
                   <p className="text-sm text-gray-500">
                     Configure settings, preview email, and view stats
@@ -1716,52 +1784,77 @@ const AutomationsPage = () => {
             </div>
 
             {/* Modal Tabs */}
-            <div className="border-b border-gray-200">
+            <div className="border-b overflow-x-auto border-gray-200">
               <nav className="flex space-x-8 px-6">
                 {[
-                  { id: "description", label: "Description", icon: InformationCircleIcon },
+                  {
+                    id: "description",
+                    label: "Description",
+                    icon: InformationCircleIcon,
+                  },
                   ...(() => {
                     const today = new Date();
-                    const premiumExpire = timestampToDate(userData?.premiumExpire);
-                    const hasValidPremium = premiumExpire && premiumExpire >= today;
-                    const isPremiumAutomation = !isFreeAutomation(showManageModal.category, showManageModal.automation);
-                    const isReminderOrClassUpdate = showManageModal.category === "reminders" || showManageModal.category === "classUpdates";
-                    
+                    const premiumExpire = timestampToDate(
+                      userData?.premiumExpire
+                    );
+                    const hasValidPremium =
+                      premiumExpire && premiumExpire >= today;
+                    const isPremiumAutomation = !isFreeAutomation(
+                      showManageModal.category,
+                      showManageModal.automation
+                    );
+                    const isReminderOrClassUpdate =
+                      showManageModal.category === "reminders" ||
+                      showManageModal.category === "classUpdates";
+
                     // Specific automations that should not have settings (timing) configuration
                     const noSettingsAutomations = [
                       { category: "milestones", automation: "welcomeNew" },
-                      { category: "milestones", automation: "birthdayGreeting" },
+                      {
+                        category: "milestones",
+                        automation: "birthdayGreeting",
+                      },
                       { category: "engagement", automation: "thankYouVisit" },
                       { category: "classUpdates", automation: "newBooking" },
                       { category: "classUpdates", automation: "rescheduled" },
-                      { category: "classUpdates", automation: "cancelled" }
+                      { category: "classUpdates", automation: "cancelled" },
                     ];
-                    
+
                     const shouldHideSettings = noSettingsAutomations.some(
-                      item => item.category === showManageModal.category && item.automation === showManageModal.automation
+                      (item) =>
+                        item.category === showManageModal.category &&
+                        item.automation === showManageModal.automation
                     );
-                    
+
                     const tabs = [];
-                    
+
                     // Only show settings and customization tabs for premium automations when user has premium
                     // BUT never show customization for reminders or class updates
                     // AND never show settings for specific automations (welcomeNew, birthdayGreeting, thankYouVisit)
                     if (isPremiumAutomation) {
                       // Only show settings if it's not in the excluded list
                       if (!shouldHideSettings) {
-                        tabs.push({ id: "settings", label: "Settings", icon: ClockIcon });
+                        tabs.push({
+                          id: "settings",
+                          label: "Settings",
+                          icon: ClockIcon,
+                        });
                       }
-                      
+
                       // Never show customization for reminders or class updates
                       if (!isReminderOrClassUpdate) {
-                        tabs.push({ id: "customization", label: "Customization", icon: ChatAltIcon });
+                        tabs.push({
+                          id: "customization",
+                          label: "Customization",
+                          icon: ChatAltIcon,
+                        });
                       }
                     }
-                    
+
                     return tabs;
                   })(),
                   { id: "email", label: "Email Preview", icon: EyeIcon },
-                  { id: "stats", label: "Stats", icon: TrendingUpIcon }
+                  { id: "stats", label: "Stats", icon: TrendingUpIcon },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -1788,7 +1881,11 @@ const AutomationsPage = () => {
                       How it Works
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      {automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.fullDescription}
+                      {
+                        automationDefinitions[showManageModal.category]?.[
+                          showManageModal.automation
+                        ]?.fullDescription
+                      }
                     </p>
                   </div>
 
@@ -1797,7 +1894,9 @@ const AutomationsPage = () => {
                       When it Triggers
                     </h4>
                     <ul className="space-y-2">
-                      {automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.triggers.map((trigger, index) => (
+                      {automationDefinitions[showManageModal.category]?.[
+                        showManageModal.automation
+                      ]?.triggers.map((trigger, index) => (
                         <li key={index} className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-[#E63F2B] rounded-full"></div>
                           <span className="text-gray-700">{trigger}</span>
@@ -1811,7 +1910,9 @@ const AutomationsPage = () => {
                       Key Benefits
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.benefits.map((benefit, index) => (
+                      {automationDefinitions[showManageModal.category]?.[
+                        showManageModal.automation
+                      ]?.benefits.map((benefit, index) => (
                         <div
                           key={index}
                           className="flex items-center space-x-2 bg-green-50 p-3 rounded-lg"
@@ -1833,12 +1934,17 @@ const AutomationsPage = () => {
                     // Check if this automation should not have settings
                     const noSettingsAutomations = [
                       { category: "milestones", automation: "welcomeNew" },
-                      { category: "milestones", automation: "birthdayGreeting" },
-                      { category: "engagement", automation: "thankYouVisit" }
+                      {
+                        category: "milestones",
+                        automation: "birthdayGreeting",
+                      },
+                      { category: "engagement", automation: "thankYouVisit" },
                     ];
-                    
+
                     const shouldHideSettings = noSettingsAutomations.some(
-                      item => item.category === showManageModal.category && item.automation === showManageModal.automation
+                      (item) =>
+                        item.category === showManageModal.category &&
+                        item.automation === showManageModal.automation
                     );
 
                     if (shouldHideSettings) {
@@ -1850,7 +1956,8 @@ const AutomationsPage = () => {
                               No Timing Settings Available
                             </h4>
                             <p className="text-sm text-gray-600">
-                              This automation uses fixed timing and cannot be customized.
+                              This automation uses fixed timing and cannot be
+                              customized.
                             </p>
                           </div>
                         </div>
@@ -1891,7 +1998,8 @@ const AutomationsPage = () => {
                               }`}
                             >
                               <div className="font-medium">
-                                {timeDelayOptions[timeOption]?.label || timeOption}
+                                {timeDelayOptions[timeOption]?.label ||
+                                  timeOption}
                               </div>
                               <div className="text-sm text-gray-500 mt-1">
                                 {timeOption === "immediate"
@@ -1914,10 +2022,18 @@ const AutomationsPage = () => {
                 <div className="space-y-6">
                   {(() => {
                     const today = new Date();
-                    const premiumExpire = timestampToDate(userData?.premiumExpire);
-                    const hasValidPremium = premiumExpire && premiumExpire >= today;
-                    const isPremiumAutomation = !isFreeAutomation(showManageModal.category, showManageModal.automation);
-                    const isReminderOrClassUpdate = showManageModal.category === "reminders" || showManageModal.category === "classUpdates";
+                    const premiumExpire = timestampToDate(
+                      userData?.premiumExpire
+                    );
+                    const hasValidPremium =
+                      premiumExpire && premiumExpire >= today;
+                    const isPremiumAutomation = !isFreeAutomation(
+                      showManageModal.category,
+                      showManageModal.automation
+                    );
+                    const isReminderOrClassUpdate =
+                      showManageModal.category === "reminders" ||
+                      showManageModal.category === "classUpdates";
 
                     // Never show customization for reminders or class updates
                     if (isReminderOrClassUpdate) {
@@ -1929,7 +2045,11 @@ const AutomationsPage = () => {
                               No Customization Available
                             </h4>
                             <p className="text-sm text-gray-600">
-                              Customization is not available for {showManageModal.category === "reminders" ? "reminder" : "class update"} automations.
+                              Customization is not available for{" "}
+                              {showManageModal.category === "reminders"
+                                ? "reminder"
+                                : "class update"}{" "}
+                              automations.
                             </p>
                           </div>
                         </div>
@@ -1937,213 +2057,247 @@ const AutomationsPage = () => {
                     }
 
                     if (isPremiumAutomation && !hasValidPremium) {
-  return (
-    <div className="text-center py-8">
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
-        <StarIcon className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-        <h4 className="text-lg font-semibold text-yellow-900 mb-2">
-          Premium Feature
-        </h4>
-        <p className="text-sm text-yellow-700">
-          Coupon codes and personal messages are available with a premium subscription.
-        </p>
-      </div>
+                      return (
+                        <div className="text-center py-8">
+                          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
+                            <StarIcon className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+                            <h4 className="text-lg font-semibold text-yellow-900 mb-2">
+                              Premium Feature
+                            </h4>
+                            <p className="text-sm text-yellow-700">
+                              Coupon codes and personal messages are available
+                              with a premium subscription.
+                            </p>
+                          </div>
 
-      {/* Coupon Code UI (Disabled) */}
-      <div className="text-left mb-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-3">
-          Coupon Code
-        </h4>
-        <p className="text-sm text-gray-600 mb-4">
-          Select an existing voucher or create a new one for this automation
-        </p>
-
-        <select
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
-          disabled
-        >
-          <option>Upgrade to select a voucher</option>
-        </select>
-
-        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-          <button
-            disabled
-            className="w-full px-4 py-3 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center space-x-2"
-          >
-            <GiftIcon className="w-5 h-5" />
-            <span>Create New Voucher</span>
-          </button>
-        </div>
-
-        <p className="text-xs text-gray-400 mt-2 italic">
-          Leave empty if you don't want to include a coupon code
-        </p>
-      </div>
-
-      {/* Personal Message UI (Disabled) */}
-      <div className="text-left mb-8">
-        <h4 className="text-lg font-semibold text-gray-900 mb-3">
-          Personal Message
-        </h4>
-        <p className="text-sm text-gray-600 mb-4">
-          Add a personal touch to your automated emails
-        </p>
-
-        <textarea
-          rows={4}
-          disabled
-          placeholder="Premium feature. Upgrade to add a personal message."
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 resize-none cursor-not-allowed"
-        />
-
-        <p className="text-xs text-gray-400 mt-2 italic">
-          This will be added to the email template.
-        </p>
-      </div>
-
-      {/* Upgrade Button */}
-      <button
-        onClick={() => {
-          closeManageModal();
-          setShowPremiumModal(true);
-        }}
-        className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all"
-      >
-        Upgrade to Premium
-      </button>
-    </div>
-  );
-}
-
-
-                    return (
-                      <>
-                        {/* Only show coupon codes for non-reminder and non-class-update automations */}
-                        {showManageModal.category !== "reminders" && showManageModal.category !== "classUpdates" && (
-                          <div>
+                          {/* Coupon Code UI (Disabled) */}
+                          <div className="text-left mb-6">
                             <h4 className="text-lg font-semibold text-gray-900 mb-3">
                               Coupon Code
                             </h4>
                             <p className="text-sm text-gray-600 mb-4">
-                              Select an existing voucher or create a new one for this automation
+                              Select an existing voucher or create a new one for
+                              this automation
                             </p>
-                            
-                            {/* Current Coupon Code Display */}
-                            {automations[showManageModal.category]?.[showManageModal.automation]?.couponCode && (
-                              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-2">
-                                    <GiftIcon className="w-5 h-5 text-green-600" />
-                                    <span className="font-medium text-green-800">
-                                      Current: {automations[showManageModal.category]?.[showManageModal.automation]?.couponCode}
-                                    </span>
-                                  </div>
-                                  <button
-                                    onClick={() =>
-                                      updateAutomationCoupon(
-                                        showManageModal.category,
-                                        showManageModal.automation,
-                                        ""
-                                      )
-                                    }
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    <XIcon className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            )}
 
-                            {/* Select Existing Voucher */}
-                            <div className="space-y-3 mb-4">
-                              <div className="flex items-center justify-between">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Select Existing Voucher
-                                </label>
-                                <button
-                                  onClick={fetchVouchers}
-                                  className="text-[#E63F2B] hover:text-[#E63F2B]/80 text-sm flex items-center space-x-1"
-                                >
-                                  <RefreshIcon className="w-4 h-4" />
-                                  <span>Refresh</span>
-                                </button>
-                              </div>
-                              {vouchers.length > 0 ? (
-                                <select
-                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B]"
-                                  onChange={(e) => {
-                                    if (e.target.value) {
-                                      updateAutomationCoupon(
-                                        showManageModal.category,
-                                        showManageModal.automation,
-                                        e.target.value
-                                      );
-                                    }
-                                  }}
-                                  value=""
-                                >
-                                  <option value="">Choose a voucher...</option>
-                                  {vouchers.map((voucher) => (
-                                    <option key={voucher.id} value={voucher.code}>
-                                      {voucher.code} - {voucher.discountValue}
-                                      {voucher.discountType === "percentage" ? "%" : "$"} off
-                                      (Expires: {voucher.expiryDate?.toDate ? 
-                                        voucher.expiryDate.toDate().toLocaleDateString() : 
-                                        new Date(voucher.expiryDate).toLocaleDateString()})
-                                    </option>
-                                  ))}
-                                </select>
-                              ) : (
-                                <p className="text-sm text-gray-500 italic">No active vouchers found</p>
-                              )}
-                            </div>
+                            <select
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                              disabled
+                            >
+                              <option>Upgrade to select a voucher</option>
+                            </select>
 
-                            {/* Quick Voucher Creation */}
                             <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
                               <button
-                                onClick={() => setShowVoucherModal(true)}
-                                className="w-full px-4 py-3 bg-[#E63F2B] text-white rounded-lg hover:bg-[#E63F2B]/90 transition-colors flex items-center justify-center space-x-2"
+                                disabled
+                                className="w-full px-4 py-3 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center space-x-2"
                               >
                                 <GiftIcon className="w-5 h-5" />
                                 <span>Create New Voucher</span>
                               </button>
                             </div>
-                            
-                            <p className="text-xs text-gray-500 mt-2">
-                              Leave empty if you don't want to include a coupon code
+
+                            <p className="text-xs text-gray-400 mt-2 italic">
+                              Leave empty if you don't want to include a coupon
+                              code
                             </p>
                           </div>
-                        )}
 
-                        {/* Only show personal message for non-reminder and non-class-update automations */}
-                        {showManageModal.category !== "reminders" && showManageModal.category !== "classUpdates" && (
-                          <div>
+                          {/* Personal Message UI (Disabled) */}
+                          <div className="text-left mb-8">
                             <h4 className="text-lg font-semibold text-gray-900 mb-3">
                               Personal Message
                             </h4>
                             <p className="text-sm text-gray-600 mb-4">
                               Add a personal touch to your automated emails
                             </p>
-                            <div className="space-y-3">
-                              <textarea
-                                rows={4}
-                                placeholder="e.g., I hope you enjoyed our session! Looking forward to seeing you again soon. - Sarah"
-                                value={automations[showManageModal.category]?.[showManageModal.automation]?.personalMessage || ""}
-                                onChange={(e) =>
-                                  updateAutomationMessage(
-                                    showManageModal.category,
-                                    showManageModal.automation,
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B] resize-none"
-                              />
-                              <p className="text-xs text-gray-500">
-                                Keep it short and personal. This will be added to the email template.
+
+                            <textarea
+                              rows={4}
+                              disabled
+                              placeholder="Premium feature. Upgrade to add a personal message."
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 resize-none cursor-not-allowed"
+                            />
+
+                            <p className="text-xs text-gray-400 mt-2 italic">
+                              This will be added to the email template.
+                            </p>
+                          </div>
+
+                          {/* Upgrade Button */}
+                          <button
+                            onClick={() => {
+                              closeManageModal();
+                              setShowPremiumModal(true);
+                            }}
+                            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all"
+                          >
+                            Upgrade to Premium
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {/* Only show coupon codes for non-reminder and non-class-update automations */}
+                        {showManageModal.category !== "reminders" &&
+                          showManageModal.category !== "classUpdates" && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                                Coupon Code
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Select an existing voucher or create a new one
+                                for this automation
+                              </p>
+
+                              {/* Current Coupon Code Display */}
+                              {automations[showManageModal.category]?.[
+                                showManageModal.automation
+                              ]?.couponCode && (
+                                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                      <GiftIcon className="w-5 h-5 text-green-600" />
+                                      <span className="font-medium text-green-800">
+                                        Current:{" "}
+                                        {
+                                          automations[
+                                            showManageModal.category
+                                          ]?.[showManageModal.automation]
+                                            ?.couponCode
+                                        }
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() =>
+                                        updateAutomationCoupon(
+                                          showManageModal.category,
+                                          showManageModal.automation,
+                                          ""
+                                        )
+                                      }
+                                      className="text-red-600 hover:text-red-800"
+                                    >
+                                      <XIcon className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Select Existing Voucher */}
+                              <div className="space-y-3 mb-4">
+                                <div className="flex items-center justify-between">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Select Existing Voucher
+                                  </label>
+                                  <button
+                                    onClick={fetchVouchers}
+                                    className="text-[#E63F2B] hover:text-[#E63F2B]/80 text-sm flex items-center space-x-1"
+                                  >
+                                    <RefreshIcon className="w-4 h-4" />
+                                    <span>Refresh</span>
+                                  </button>
+                                </div>
+                                {vouchers.length > 0 ? (
+                                  <select
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B]"
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        updateAutomationCoupon(
+                                          showManageModal.category,
+                                          showManageModal.automation,
+                                          e.target.value
+                                        );
+                                      }
+                                    }}
+                                    value=""
+                                  >
+                                    <option value="">
+                                      Choose a voucher...
+                                    </option>
+                                    {vouchers.map((voucher) => (
+                                      <option
+                                        key={voucher.id}
+                                        value={voucher.code}
+                                      >
+                                        {voucher.code} - {voucher.discountValue}
+                                        {voucher.discountType === "percentage"
+                                          ? "%"
+                                          : "$"}{" "}
+                                        off (Expires:{" "}
+                                        {voucher.expiryDate?.toDate
+                                          ? voucher.expiryDate
+                                              .toDate()
+                                              .toLocaleDateString()
+                                          : new Date(
+                                              voucher.expiryDate
+                                            ).toLocaleDateString()}
+                                        )
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <p className="text-sm text-gray-500 italic">
+                                    No active vouchers found
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Quick Voucher Creation */}
+                              <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                                <button
+                                  onClick={() => setShowVoucherModal(true)}
+                                  className="w-full px-4 py-3 bg-[#E63F2B] text-white rounded-lg hover:bg-[#E63F2B]/90 transition-colors flex items-center justify-center space-x-2"
+                                >
+                                  <GiftIcon className="w-5 h-5" />
+                                  <span>Create New Voucher</span>
+                                </button>
+                              </div>
+
+                              <p className="text-xs text-gray-500 mt-2">
+                                Leave empty if you don't want to include a
+                                coupon code
                               </p>
                             </div>
-                          </div>
-                        )}
+                          )}
+
+                        {/* Only show personal message for non-reminder and non-class-update automations */}
+                        {showManageModal.category !== "reminders" &&
+                          showManageModal.category !== "classUpdates" && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                                Personal Message
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-4">
+                                Add a personal touch to your automated emails
+                              </p>
+                              <div className="space-y-3">
+                                <textarea
+                                  rows={4}
+                                  placeholder="e.g., I hope you enjoyed our session! Looking forward to seeing you again soon. - Sarah"
+                                  value={
+                                    automations[showManageModal.category]?.[
+                                      showManageModal.automation
+                                    ]?.personalMessage || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateAutomationMessage(
+                                      showManageModal.category,
+                                      showManageModal.automation,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63F2B] focus:border-[#E63F2B] resize-none"
+                                />
+                                <p className="text-xs text-gray-500">
+                                  Keep it short and personal. This will be added
+                                  to the email template.
+                                </p>
+                              </div>
+                            </div>
+                          )}
                       </>
                     );
                   })()}
@@ -2163,7 +2317,19 @@ const AutomationsPage = () => {
 
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
                     <iframe
-                      src={`/api/email-template?template=${automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.templateFile}&couponCode=${automations[showManageModal.category]?.[showManageModal.automation]?.couponCode || ""}&personalMessage=${encodeURIComponent(automations[showManageModal.category]?.[showManageModal.automation]?.personalMessage || "")}`}
+                      src={`/api/email-template?template=${
+                        automationDefinitions[showManageModal.category]?.[
+                          showManageModal.automation
+                        ]?.templateFile
+                      }&couponCode=${
+                        automations[showManageModal.category]?.[
+                          showManageModal.automation
+                        ]?.couponCode || ""
+                      }&personalMessage=${encodeURIComponent(
+                        automations[showManageModal.category]?.[
+                          showManageModal.automation
+                        ]?.personalMessage || ""
+                      )}`}
                       className="w-full h-96 border-none"
                       title="Email Preview"
                     />
@@ -2190,12 +2356,18 @@ const AutomationsPage = () => {
                         <div className="flex items-center space-x-3 mb-2">
                           <MailIcon className="w-8 h-8 text-blue-600" />
                           <div>
-                            <h5 className="font-semibold text-blue-900">Emails Sent</h5>
+                            <h5 className="font-semibold text-blue-900">
+                              Emails Sent
+                            </h5>
                             <p className="text-sm text-blue-700">Total sent</p>
                           </div>
                         </div>
                         <p className="text-3xl font-bold text-blue-800">
-                          {(automations[showManageModal.category]?.[showManageModal.automation]?.mailsSent || 0).toLocaleString()}
+                          {(
+                            automations[showManageModal.category]?.[
+                              showManageModal.automation
+                            ]?.mailsSent || 0
+                          ).toLocaleString()}
                         </p>
                       </div>
 
@@ -2203,12 +2375,20 @@ const AutomationsPage = () => {
                         <div className="flex items-center space-x-3 mb-2">
                           <CheckCircleIcon className="w-8 h-8 text-green-600" />
                           <div>
-                            <h5 className="font-semibold text-green-900">Status</h5>
-                            <p className="text-sm text-green-700">Current state</p>
+                            <h5 className="font-semibold text-green-900">
+                              Status
+                            </h5>
+                            <p className="text-sm text-green-700">
+                              Current state
+                            </p>
                           </div>
                         </div>
                         <p className="text-lg font-bold text-green-800">
-                          {automations[showManageModal.category]?.[showManageModal.automation]?.enabled ? "Enabled" : "Disabled"}
+                          {automations[showManageModal.category]?.[
+                            showManageModal.automation
+                          ]?.enabled
+                            ? "Enabled"
+                            : "Disabled"}
                         </p>
                       </div>
 
@@ -2216,12 +2396,20 @@ const AutomationsPage = () => {
                         <div className="flex items-center space-x-3 mb-2">
                           <ClockIcon className="w-8 h-8 text-yellow-600" />
                           <div>
-                            <h5 className="font-semibold text-yellow-900">Timing</h5>
-                            <p className="text-sm text-yellow-700">Send timing</p>
+                            <h5 className="font-semibold text-yellow-900">
+                              Timing
+                            </h5>
+                            <p className="text-sm text-yellow-700">
+                              Send timing
+                            </p>
                           </div>
                         </div>
                         <p className="text-lg font-bold text-yellow-800">
-                          {formatTimeDelay(automations[showManageModal.category]?.[showManageModal.automation]?.customTime || "immediate")}
+                          {formatTimeDelay(
+                            automations[showManageModal.category]?.[
+                              showManageModal.automation
+                            ]?.customTime || "immediate"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -2229,8 +2417,9 @@ const AutomationsPage = () => {
 
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">
-                      <strong>Note:</strong> Email statistics are updated in real-time as automations are triggered.
-                      Stats may take a few minutes to reflect recent activity.
+                      <strong>Note:</strong> Email statistics are updated in
+                      real-time as automations are triggered. Stats may take a
+                      few minutes to reflect recent activity.
                     </p>
                   </div>
                 </div>
@@ -2240,7 +2429,12 @@ const AutomationsPage = () => {
             {/* Modal Footer */}
             <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
               <div className="text-sm text-gray-500">
-                Template: {automationDefinitions[showManageModal.category]?.[showManageModal.automation]?.templateFile}
+                Template:{" "}
+                {
+                  automationDefinitions[showManageModal.category]?.[
+                    showManageModal.automation
+                  ]?.templateFile
+                }
               </div>
               <div className="flex items-center space-x-3">
                 <button

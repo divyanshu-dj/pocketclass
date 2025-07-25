@@ -119,7 +119,7 @@ const PremiumPurchaseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style={{ zIndex: 1000 }}>
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -224,13 +224,13 @@ const PremiumPurchaseModal = ({
             <button
               onClick={handleStartPurchase}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#E63F2B] to-[#FF6B5A] text-white py-4 rounded-lg font-semibold text-lg hover:from-[#D63825] hover:to-[#E55B4A] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-[#E63F2B] to-[#FF6B5A] text-white py-4 rounded-lg font-semibold text-sm md:text-lg hover:from-[#D63825] hover:to-[#E55B4A] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
               ) : (
                 <>
-                  <CreditCardIcon className="w-5 h-5" />
+                  <CreditCardIcon className="w-5 h-5 hidden md:block" />
                   <span>Start Premium Subscription - $5.95/month</span>
                 </>
               )}
