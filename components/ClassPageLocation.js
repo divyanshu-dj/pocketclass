@@ -33,7 +33,7 @@ export default function ClassLocationMap({ longitude, latitude, address }) {
   };
 
   return (
-    <div className="w-full mb-3">
+    <div className="w-full mb-10">
       <div ref={mapContainer} className="w-full h-[400px] rounded-xl mb-4" />
       <button className="text-left text-gray-600 transition-colors duration-200">
         📍 {address}
