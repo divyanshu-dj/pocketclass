@@ -1570,7 +1570,7 @@ END:VCALENDAR`.trim();
           100*numberOfGroupMembers
         : 0),
       voucherDiscount:
-        parseFloat(discountType === "percentage"\
+        parseFloat(discountType === "percentage"
           ? (
               (discount *
                 (selectedPackage?.num_sessions
