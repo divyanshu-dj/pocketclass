@@ -1731,7 +1731,10 @@ const AutomationsPage = () => {
                     const noSettingsAutomations = [
                       { category: "milestones", automation: "welcomeNew" },
                       { category: "milestones", automation: "birthdayGreeting" },
-                      { category: "engagement", automation: "thankYouVisit" }
+                      { category: "engagement", automation: "thankYouVisit" },
+                      { category: "classUpdates", automation: "newBooking" },
+                      { category: "classUpdates", automation: "rescheduled" },
+                      { category: "classUpdates", automation: "cancelled" }
                     ];
                     
                     const shouldHideSettings = noSettingsAutomations.some(
@@ -1743,7 +1746,7 @@ const AutomationsPage = () => {
                     // Only show settings and customization tabs for premium automations when user has premium
                     // BUT never show customization for reminders or class updates
                     // AND never show settings for specific automations (welcomeNew, birthdayGreeting, thankYouVisit)
-                    if (isPremiumAutomation && hasValidPremium) {
+                    if (isPremiumAutomation) {
                       // Only show settings if it's not in the excluded list
                       if (!shouldHideSettings) {
                         tabs.push({ id: "settings", label: "Settings", icon: ClockIcon });
