@@ -1937,29 +1937,84 @@ const AutomationsPage = () => {
                     }
 
                     if (isPremiumAutomation && !hasValidPremium) {
-                      return (
-                        <div className="text-center py-8">
-                          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
-                            <StarIcon className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-                            <h4 className="text-lg font-semibold text-yellow-900 mb-2">
-                              Premium Feature
-                            </h4>
-                            <p className="text-sm text-yellow-700">
-                              Coupon codes and personal messages are available with a premium subscription.
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => {
-                              closeManageModal();
-                              setShowPremiumModal(true);
-                            }}
-                            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all"
-                          >
-                            Upgrade to Premium
-                          </button>
-                        </div>
-                      );
-                    }
+  return (
+    <div className="text-center py-8">
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
+        <StarIcon className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+        <h4 className="text-lg font-semibold text-yellow-900 mb-2">
+          Premium Feature
+        </h4>
+        <p className="text-sm text-yellow-700">
+          Coupon codes and personal messages are available with a premium subscription.
+        </p>
+      </div>
+
+      {/* Coupon Code UI (Disabled) */}
+      <div className="text-left mb-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-3">
+          Coupon Code
+        </h4>
+        <p className="text-sm text-gray-600 mb-4">
+          Select an existing voucher or create a new one for this automation
+        </p>
+
+        <select
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+          disabled
+        >
+          <option>Upgrade to select a voucher</option>
+        </select>
+
+        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+          <button
+            disabled
+            className="w-full px-4 py-3 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            <GiftIcon className="w-5 h-5" />
+            <span>Create New Voucher</span>
+          </button>
+        </div>
+
+        <p className="text-xs text-gray-400 mt-2 italic">
+          Leave empty if you don't want to include a coupon code
+        </p>
+      </div>
+
+      {/* Personal Message UI (Disabled) */}
+      <div className="text-left mb-8">
+        <h4 className="text-lg font-semibold text-gray-900 mb-3">
+          Personal Message
+        </h4>
+        <p className="text-sm text-gray-600 mb-4">
+          Add a personal touch to your automated emails
+        </p>
+
+        <textarea
+          rows={4}
+          disabled
+          placeholder="Premium feature. Upgrade to add a personal message."
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 resize-none cursor-not-allowed"
+        />
+
+        <p className="text-xs text-gray-400 mt-2 italic">
+          This will be added to the email template.
+        </p>
+      </div>
+
+      {/* Upgrade Button */}
+      <button
+        onClick={() => {
+          closeManageModal();
+          setShowPremiumModal(true);
+        }}
+        className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all"
+      >
+        Upgrade to Premium
+      </button>
+    </div>
+  );
+}
+
 
                     return (
                       <>
