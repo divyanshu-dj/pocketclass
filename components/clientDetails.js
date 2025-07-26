@@ -1058,7 +1058,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
 
                     <div className="p-4 flex-1 overflow-y-auto">
                       {/* Title Input with Generate button */}
-                      <div className="flex gap-3 mb-4">
+                      <div className="flex gap-3 mb-4 flex-col md:flex-row">
                         <input
                           type="text"
                           value={editingNoteId ? editingNoteTitle : newNoteTitle}
@@ -1107,7 +1107,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                       </div>
                     </div>
 
-                    <div className="p-4 border-t border-gray-200 flex justify-between">
+                    <div className="p-4 border-t border-gray-200 flex flex-col md:flex-row gap-3 justify-between">
                       <div className="space-x-2">
                         <button
                           onClick={summarizeNote}
