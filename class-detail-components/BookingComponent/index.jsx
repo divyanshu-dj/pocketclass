@@ -19,6 +19,7 @@ import {
   deleteDoc,
   Timestamp,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 import moment from "moment-timezone";
 import { loadStripe } from "@stripe/stripe-js";
@@ -66,6 +67,7 @@ export default function index({
   const [voucher, setVoucher] = useState("");
   const [voucherVerified, setVoucherVerified] = useState(false);
   const [discount, setDiscount] = useState(null);
+  const [discountId, setDiscountId] = useState(null);
   const [discountType, setDiscountType] = useState("percentage");
   const [error, setError] = useState(null);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -173,7 +175,11 @@ export default function index({
       }
 
       const vouchersRef = collection(db, "vouchers");
-      const q = query(vouchersRef, where("code", "==", voucher));
+      const q = query(
+        vouchersRef,
+        where("code", "==", voucher),
+        where("userId", "==", instructorId)
+      );
 
       const querySnapshot = await getDocs(q);
 
@@ -182,7 +188,10 @@ export default function index({
         return;
       }
 
-      const voucherData = querySnapshot.docs[0].data();
+      // Include ID in voucherData
+      const doc = querySnapshot.docs[0];
+      const voucherData = { id: doc.id, ...doc.data() };
+
       const currentDate = new Date();
 
       if (currentDate > voucherData.expiryDate?.toDate()) {
@@ -190,12 +199,28 @@ export default function index({
         return;
       }
 
-      if (voucherData.usageLimit <= 0) {
+      if (voucherData.remainingUses == 0) {
         setError("Voucher usage limit reached");
         return;
       }
 
+      if (voucherData.unlimitedUses === false) {
+        const usesRef = collection(db, "VoucherUses");
+
+        const usesQuery = query(
+          usesRef,
+          where("voucherId", "==", voucherData.id),
+          where("userId", "==", user.uid)
+        );
+        const usesSnapshot = await getDocs(usesQuery);
+        if (!usesSnapshot.empty) {
+          setError("Voucher usage limit reached");
+          return;
+        }
+      }
+
       setDiscount(voucherData.discountValue);
+      setDiscountId(voucherData.id);
       setDiscountType(voucherData.discountType || "percentage");
       setVoucherVerified(true);
       setError(null);
@@ -882,7 +907,8 @@ export default function index({
                   : classData.Price)) /
               100
             ).toFixed(2)
-          : discount),
+          : discount
+      ),
       subTotal: (() => {
         const basePrice = selectedPackage?.num_sessions
           ? selectedPackage.Price -
@@ -1225,18 +1251,20 @@ END:VCALENDAR`.trim();
     };
     await addDoc(notificationRef, notificationData);
 
-    await sendEmail(
-      recipientEmails,
-      `New Booking for ${classData.Name} with Pocketclass!`,
-      htmlContent,
-      [
-        {
-          filename: "booking-invite.ics",
-          content: icsContent,
-          type: "text/calendar",
+    // Send new booking notification using our notification service
+    try {
+      await fetch("/api/notifications/newBooking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ]
-    );
+        body: JSON.stringify({
+          bookingId: bookingRef.id,
+        }),
+      });
+    } catch (error) {
+      console.error("Error sending booking notification:", error);
+    }
 
     setStripeOptions(null);
     toast.success("Booking confirmed!");
@@ -1328,6 +1356,31 @@ END:VCALENDAR`.trim();
         setStripeLoading(false);
         return;
       }
+    }
+
+    if (voucherVerified) {
+      const voucherRef = doc(db, "vouchers", discountId);
+      const voucherSnapshot = await getDoc(voucherRef);
+      if (voucherSnapshot.exists()) {
+        const voucherData = voucherSnapshot.data();
+        if (voucherData.remainingUses > 0) {
+          await updateDoc(voucherRef, {
+            remainingUses: voucherData.remainingUses - 1,
+          });
+        }
+      }
+      // In VoucherUses collection, add a new document with the voucherId and userId
+      const voucherUsesRef = collection(db, "VoucherUses");
+      const voucherCode = voucherSnapshot.data().code;
+      const voucherUseData = {
+        voucherId: discountId,
+        userId: user.uid,
+        usedAt: serverTimestamp(),
+        voucherCode: voucherCode,
+        classId: classId,
+        instructorId: instructorId,
+      };
+      await addDoc(voucherUsesRef, voucherUseData);
     }
 
     if (packageClasses > 0 && selectedPackage === "Credits") {
@@ -1531,7 +1584,8 @@ END:VCALENDAR`.trim();
                   : classData.Price)) /
               100
             ).toFixed(2)
-          : discount),
+          : discount
+      ),
       subTotal: (() => {
         const basePrice = selectedPackage?.num_sessions
           ? selectedPackage.Price -
@@ -2553,6 +2607,7 @@ const CheckoutForm = ({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState("Processing your payment...");
   const sendEmail = async (
     targetEmails,
     targetSubject,
@@ -2605,10 +2660,13 @@ const CheckoutForm = ({
     setLoading(true);
     if (!stripe || !elements) {
       toast.error("Stripe is not loaded yet.");
+      setLoading(false);
       return;
     }
     if (!agreeToTerms) {
       toast.error("Please agree to the Terms of Service");
+      setLoading(false);
+      return;
     }
 
     // if (!user?.displayName || !user?.email) {
@@ -2634,31 +2692,34 @@ const CheckoutForm = ({
       const paymentMethodId = paymentIntent.payment_method;
       // If payment Method ID exists, updatePaymentMethodId
       if (paymentMethodId) {
-        try {
-          await fetch("/api/updatePaymentMethod", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: user?.uid,
-              paymentMethodId: paymentMethodId,
-            }),
+        fetch("/api/updatePaymentMethod", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.uid,
+            paymentMethodId,
+          }),
+        })
+          .then(() => {
+            const customerId = paymentIntent.customer;
+            if (customerId) {
+              const userDocRef = doc(db, "Users", user.uid);
+              return updateDoc(userDocRef, {
+                stripeCustomerId: customerId,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "Error updating payment method or customer ID:",
+              error
+            );
           });
-        } catch (error) {
-          console.error("Error updating payment method:", error);
-        }
       }
 
-      const customerId = paymentIntent.customer;
-      // Check if user already has stripeCustomerId
-      if (customerId) {
-        // Update user document with stripeCustomerId
-        const userDocRef = doc(db, "Users", user.uid);
-        await updateDoc(userDocRef, {
-          stripeCustomerId: customerId,
-        });
-      }
+      setCurrentStep("Payment successful! Confirming your booking...");
       // Proceed with booking confirmation
       const bookingDocRef = doc(db, "Bookings", bookingRef);
 
@@ -2907,6 +2968,8 @@ END:VCALENDAR`.trim();
       </div>
     `;
 
+      setCurrentStep("Booking confirmed! Sending confirmation emails...");
+
       const notificationRef = collection(db, "notifications");
 
       const now = Timestamp?.now();
@@ -2921,21 +2984,23 @@ END:VCALENDAR`.trim();
       };
       await addDoc(notificationRef, notificationData);
 
-      await sendEmail(
-        recipientEmails,
-        `New Booking for ${classData.Name} with Pocketclass!`,
-        htmlContent,
-        [
-          {
-            filename: "booking-invite.ics",
-            content: icsContent,
-            type: "text/calendar",
+      // Send new booking notification using our notification service
+      try {
+        await fetch("/api/notifications/newBooking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        ]
-      );
+          body: JSON.stringify({
+            bookingId: bookingRef,
+          }),
+        });
+      } catch (error) {
+        console.error("Error sending booking notification:", error);
+      }
 
-      // Send create-event request to Google Calendar API
-      const calendarResponse = await fetch("/api/calendar/create-event", {
+      console.log("Finishing booking confirmation...");
+      fetch("/api/calendar/create-event", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2949,16 +3014,21 @@ END:VCALENDAR`.trim();
             location: location,
             meetingLink: meetingLink,
             userEmails: [user?.email, ...(mode === "Group" ? groupEmails : [])],
-            timeZone: timeZone ? timeZone : "America/Toronto",
+            timeZone: timeZone || "America/Toronto",
           },
-          timeZone: timeZone ? timeZone : "America/Toronto",
+          timeZone: timeZone || "America/Toronto",
           userId: bookingData.instructor_id,
         }),
-      });
-      if (!calendarResponse.ok) {
-        const errorText = await calendarResponse.text();
-        console.error("Error creating calendar event:", errorText);
-      }
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Error creating calendar event:", errorText);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating calendar event:", error);
+        });
       if (selectedPackage?.num_sessions) {
         const docRef = await addDoc(collection(db, "Packages"), {
           payment_intent_id: paymentIntent.id,
@@ -2971,19 +3041,6 @@ END:VCALENDAR`.trim();
             parseInt(selectedPackage?.num_sessions, 10) -
             (numberOfGroupMembers ? numberOfGroupMembers : 1),
         });
-      }
-      // In the handleSubmit function of CheckoutForm, after successful payment:
-      if (voucherVerified) {
-        const vouchersRef = collection(db, "vouchers");
-        const q = query(vouchersRef, where("code", "==", voucher));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const voucherDoc = querySnapshot.docs[0];
-          await updateDoc(voucherDoc.ref, {
-            usageLimit: increment(-1),
-          });
-        }
       }
 
       setStripeOptions(null);
@@ -3000,47 +3057,69 @@ END:VCALENDAR`.trim();
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto"
+      className="bg-white p-8 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto relative"
     >
-      <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
-        <div className="text-base font-semibold text-[#E73F2B]">
-          Paying: ${selectedPackage?.num_sessions ? packagePrice : price}
+      {/* Loader overlay when loading */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center bg-white transition-opacity duration-300 ${
+          loading
+            ? "opacity-100 pointer-events-auto z-10"
+            : "opacity-0 pointer-events-none z-0"
+        }`}
+      >
+        <div className="loader border-4 border-[#E73F2B] border-t-transparent rounded-full w-12 h-12 animate-spin mb-4"></div>
+        <p className="px-8 text-center text-[#E73F2B] font-semibold text-lg">
+          Processing: {currentStep}...
+        </p>
+      </div>
+
+      {/* Payment Form Content */}
+      <div
+        className={`${
+          loading ? "opacity-0 pointer-events-none" : "opacity-100"
+        } transition-opacity duration-300`}
+      >
+        <div className="flex flex-row justify-between text-[#E73F2B] mb-2">
+          <div className="text-base font-semibold text-[#E73F2B]">
+            Paying: ${selectedPackage?.num_sessions ? packagePrice : price}
+          </div>
+          <button
+            type="button"
+            className="top-4 right- flex flex-row items-center gap-1 text-center"
+            onClick={() => {
+              setStripeOptions(null);
+              setTimer(null);
+            }}
+          >
+            <ChevronLeftIcon className="h-4 w-4 mt-1" />
+            Go Back
+          </button>
         </div>
-        <button
-          className="top-4 right- flex flex-row items-center gap-1 text-center"
-          onClick={() => {
-            setStripeOptions(null);
-            setTimer(null);
+        <div className="flex flex-row items-center justify-between mb-4">
+          <h1 className="text-lg font-bold">Complete Payment</h1>
+
+          <div className="flex items-center">
+            <p className="text-sm text-gray-500 mr-2">Expires in:</p>
+            <p className="text-sm text-[#E73F2B] font-bold">
+              {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
+              {timer % 60}
+            </p>
+          </div>
+        </div>
+        <AddressElement options={{ mode: "billing" }} />
+        <PaymentElement
+          options={{
+            layout: "tabs",
+            paymentMethodOrder: ["card", "link"],
           }}
+        />
+        <button
+          className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
+          disabled={loading}
         >
-          <ChevronLeftIcon className="h-4 w-4 mt-1" />
-          Go Back
+          {loading ? "Processing..." : "Pay"}
         </button>
       </div>
-      <div className="flex flex-row items-center justify-between mb-4">
-        <h1 className="text-lg font-bold">Complete Payment</h1>
-
-        <div className="flex items-center">
-          <p className="text-sm text-gray-500 mr-2">Expires in:</p>
-          <p className="text-sm text-[#E73F2B] font-bold">
-            {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
-            {timer % 60}
-          </p>
-        </div>
-      </div>
-      <AddressElement options={{ mode: "billing" }} />
-      <PaymentElement
-        options={{
-          layout: "tabs",
-          paymentMethodOrder: ["card", "link"],
-        }}
-      />
-      <button
-        className="mt-4 p-2 bg-[#E73F2B] text-white rounded w-full"
-        disabled={loading}
-      >
-        {loading ? "Processing..." : "Pay"}
-      </button>
     </form>
   );
 };

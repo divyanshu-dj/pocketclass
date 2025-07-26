@@ -112,29 +112,48 @@ function UpdateProfile() {
 
   const validateFields = (data) => {
     const errors = {};
-    if (!data.firstName) errors.firstName = "First Name is required";
-    if (!data.lastName) errors.lastName = "Last Name is required";
-    if (!data.gender && (userData?.isInstructor || router.query.onboarding))
+    const missingFields = [];
+
+    if (!data.firstName) {
+      errors.firstName = "First Name is required";
+      missingFields.push("First Name");
+    }
+    if (!data.lastName) {
+      errors.lastName = "Last Name is required";
+      missingFields.push("Last Name");
+    }
+    if (!data.gender && (userData?.isInstructor || router.query.onboarding)) {
       errors.gender = "Gender is required";
+      missingFields.push("Gender");
+    }
     if (
       !data.phoneNumber &&
       (userData?.isInstructor || router.query.onboarding)
-    )
+    ) {
       errors.phoneNumber = "Phone Number is required";
-    if (!data.dob && (userData?.isInstructor || router.query.onboarding))
+      missingFields.push("Phone Number");
+    }
+    if (!data.dob && (userData?.isInstructor || router.query.onboarding)) {
       errors.dob = "Date of Birth is required";
+      missingFields.push("Date of Birth");
+    }
     if (
       !data.profileDescription &&
       (userData?.isInstructor || router.query.onboarding)
-    )
+    ) {
       errors.profileDescription = "Description is required";
+      missingFields.push("Profile Description");
+    }
     if (
       !droppedFile?.name &&
       !userData.profileImage &&
       (userData?.isInstructor || router.query.onboarding)
-    )
+    ) {
       errors.droppedFile = "Image is required";
-    return errors;
+      missingFields.push("Profile Image");
+    }
+
+    return { errors, missingFields };
   };
 
   const onDrop = (acceptedFiles) => {
@@ -177,9 +196,26 @@ function UpdateProfile() {
       profileDescription: e.target.profileDescription.value,
     };
 
-    const errors = validateFields(data);
+    const { errors, missingFields } = validateFields(data);
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      
+      // Show specific toast message about what's missing
+      if (missingFields.length === 1) {
+        toast.error(`Please fill in the missing field: ${missingFields[0]}`, {
+          toastId: "missing-field-toast",
+        });
+      } else if (missingFields.length === 2) {
+        toast.error(`Please fill in the missing fields: ${missingFields.join(" and ")}`, {
+          toastId: "missing-fields-toast",
+        });
+      } else if (missingFields.length > 2) {
+        const lastField = missingFields.pop();
+        toast.error(`Please fill in the missing fields: ${missingFields.join(", ")}, and ${lastField}`, {
+          toastId: "missing-fields-toast",
+        });
+      }
+      
       return;
     }
 
