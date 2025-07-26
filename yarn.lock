@@ -1109,7 +1109,7 @@
   resolved "https://registry.npmjs.org/@kurkle/color/-/color-0.3.4.tgz"
   integrity sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==
 
-"@langchain/core@>=0.2.21 <0.4.0", "@langchain/core@>=0.3.58 <0.4.0":
+"@langchain/core@^0.3.66", "@langchain/core@>=0.2.21 <0.4.0", "@langchain/core@>=0.3.58 <0.4.0":
   version "0.3.66"
   resolved "https://registry.npmjs.org/@langchain/core/-/core-0.3.66.tgz"
   integrity sha512-d3SgSDOlgOjdIbReIXVQl9HaQzKqO/5+E+o3kJwoKXLGP9dxi7+lMyaII7yv7G8/aUxMWLwFES9zc1jFoeJEZw==
