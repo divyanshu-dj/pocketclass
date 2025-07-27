@@ -435,7 +435,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           <div ref={containerRef} className="search-bar-wrapper transition-all">
             {!isShrunk && (
               <div
-                className={`active-bg ${
+                className={`active-bg w-[50%] hidden ${
                   isMenuSmall ? "h-full" : "h-[52px] dm2:h-[62px]"
                 }`}
                 style={{

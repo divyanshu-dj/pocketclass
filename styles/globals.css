@@ -7,6 +7,14 @@ html {
   scrollbar-gutter: stable;
 }
 
+.hide-x-scrollbar {       /* still scrollable */
+  scrollbar-width: none;   /* Firefox */
+}
+
+.hide-x-scrollbar::-webkit-scrollbar {
+  display: none;           /* Chrome, Safari */
+}
+
 html,
 body {
   /* padding: 0;
