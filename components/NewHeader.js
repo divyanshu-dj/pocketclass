@@ -390,7 +390,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         )}
 
       <div
-        className={`transition-all flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-500 hide-x-scrollbar ${
+        className={`transition-all flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-1000 hide-x-scrollbar ${
           isMenuShrunk
             ? "h-[90px] dm2:h-[100px]"
             : `${isMenuSmall ? "h-auto dm2:h-[100px]" : "h-auto"}`
@@ -415,7 +415,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
           {/* Animated Desktop Categories */}
           <div className="hidden md:flex justify-center items-center absolute left-1/2 transform -translate-x-1/2">
             <div
-              className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                 isMenuShrunk || isMenuSmall
                   ? "opacity-0 scale-90 translate-y-[-10px]"
                   : "opacity-100 scale-100 translate-y-0"
@@ -630,6 +630,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                   <Link href={`/classbookings?id=${user.uid}`}>
                                     Class Bookings
                                   </Link>
+                                </p>
                                 </li>
                                 <li>
                                   <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
@@ -810,7 +811,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         {/* Animated Mobile Categories */}
         {isHome && (
           <div
-            className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full justify-center md:hidden flex ${
+            className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full justify-center md:hidden flex ${
               hideIcons
                 ? "mb-0 max-h-0 opacity-0 -translate-y-5"
                 : "mb-3 max-h-[200px] opacity-100 translate-y-0"
@@ -853,7 +854,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
         {/* Animated Search Bar */}
         <div
-          className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             isMenuShrunk || (isMenuSmall && screenWidth > 800)
               ? "absolute inset-0 flex items-center justify-center"
               : "relative"
@@ -865,7 +866,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                 : "scale(1) translateY(0)",
             opacity:
               isMenuShrunk || (isMenuSmall && screenWidth > 800) ? 0.85 : 1,
-            transition: "all 500ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transition: "all 1000ms cubic-bezier(0.34, 1.56, 0.64, 1)",
             pointerEvents:
               isMenuShrunk || (isMenuSmall && screenWidth > 800)
                 ? "none"
