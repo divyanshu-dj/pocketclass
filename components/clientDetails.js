@@ -663,7 +663,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    Total Sales
+                    Total Sale
                   </p>
                   <p className="text-xl font-bold text-gray-900">
                     CA$ {(selectedClient.totalSales || 0).toFixed(2)}
