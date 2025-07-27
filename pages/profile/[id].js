@@ -15,6 +15,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import NewHeader from "../../components/NewHeader";
+import SubscriptionManagement from "../../components/SubscriptionManagement";
 
 // Hero Icons imports
 import {
@@ -86,100 +87,109 @@ export default function Profile() {
           {/* Two Column Layout - Left narrower, Right wider */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Left Column - Profile Card (2/5 width) */}
-            <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              {/* Edit Button */}
-              {user && user.uid === id && (
-                <div className="flex justify-end mb-6">
-                  <button
-                    onClick={() => {
-                      router.push({
-                        pathname: `/updateProfile/${user.uid}`,
-                      });
-                    }}
-                    className="text-logo-red hover:text-logo-red/80 font-medium text-sm transition-colors duration-200"
-                  >
-                    Edit
-                  </button>
-                </div>
-              )}
-
-              {/* Profile Image */}
-              <div className="text-center mb-8">
-                <div className="relative inline-block">
-                  {userData.profileImage ? (
-                    <img
-                      src={userData?.profileImage}
-                      referrerPolicy="no-referrer"
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 mx-auto"
-                      alt="User Profile Image"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-full bg-logo-red flex items-center justify-center border-4 border-gray-100 mx-auto">
-                      <span className="text-white text-2xl font-bold">
-                        {userData.firstName
-                          ? userData.firstName.charAt(0)
-                          : user?.displayName?.charAt(0) || "U"}
-                      </span>
-                    </div>
-                  )}
-                  {/* Edit Icon on Image */}
-                  {user && user.uid === id && (
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                {/* Edit Button */}
+                {user && user.uid === id && (
+                  <div className="flex justify-end mb-6">
                     <button
                       onClick={() => {
                         router.push({
                           pathname: `/updateProfile/${user.uid}`,
                         });
                       }}
-                      className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-sm"
+                      className="text-logo-red hover:text-logo-red/80 font-medium text-sm transition-colors duration-200"
                     >
-                      <PencilIcon className="w-4 h-4 text-gray-600" />
+                      Edit
                     </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Name */}
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900">
-                  {userData.firstName && userData.lastName
-                    ? `${userData.firstName} ${userData.lastName}`
-                    : user?.displayName || "User Profile"}
-                </h2>
-              </div>
-
-              {/* Essential Profile Fields - Keep only core info */}
-              <div className="space-y-6">
-                <div className="border-b border-gray-100 pb-4">
-                  <div className="text-sm font-medium text-gray-600 mb-1">
-                    First name
                   </div>
-                  <div className="text-base text-gray-900">
-                    {userData.firstName || (
-                      <span className="text-gray-400">-</span>
+                )}
+
+                {/* Profile Image */}
+                <div className="text-center mb-8">
+                  <div className="relative inline-block">
+                    {userData.profileImage ? (
+                      <img
+                        src={userData?.profileImage}
+                        referrerPolicy="no-referrer"
+                        className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 mx-auto"
+                        alt="User Profile Image"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-logo-red flex items-center justify-center border-4 border-gray-100 mx-auto">
+                        <span className="text-white text-2xl font-bold">
+                          {userData.firstName
+                            ? userData.firstName.charAt(0)
+                            : user?.displayName?.charAt(0) || "U"}
+                        </span>
+                      </div>
+                    )}
+                    {/* Edit Icon on Image */}
+                    {user && user.uid === id && (
+                      <button
+                        onClick={() => {
+                          router.push({
+                            pathname: `/updateProfile/${user.uid}`,
+                          });
+                        }}
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-sm"
+                      >
+                        <PencilIcon className="w-4 h-4 text-gray-600" />
+                      </button>
                     )}
                   </div>
                 </div>
 
-                <div className="border-b border-gray-100 pb-4">
-                  <div className="text-sm font-medium text-gray-600 mb-1">
-                    Last name
-                  </div>
-                  <div className="text-base text-gray-900">
-                    {userData.lastName || (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </div>
+                {/* Name */}
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {userData.firstName && userData.lastName
+                      ? `${userData.firstName} ${userData.lastName}`
+                      : user?.displayName || "User Profile"}
+                  </h2>
                 </div>
 
-                <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
-                    Email
+                {/* Essential Profile Fields - Keep only core info */}
+                <div className="space-y-6">
+                  <div className="border-b border-gray-100 pb-4">
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      First name
+                    </div>
+                    <div className="text-base text-gray-900">
+                      {userData.firstName || (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-base text-gray-900 break-all">
-                    {userData?.email}
+
+                  <div className="border-b border-gray-100 pb-4">
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      Last name
+                    </div>
+                    <div className="text-base text-gray-900">
+                      {userData.lastName || (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 mb-1">
+                      Email
+                    </div>
+                    <div className="text-base text-gray-900 break-all">
+                      {userData?.email}
+                    </div>
                   </div>
                 </div>
               </div>
+              
+              {/* Subscription Management Component */}
+              <SubscriptionManagement 
+                user={user}
+                userData={userData}
+                isOwnProfile={user && user.uid === id}
+              />
             </div>
 
             {/* Right Column - Detailed Information (3/5 width) */}

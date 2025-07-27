@@ -19,6 +19,7 @@ import {
   ChatIcon
 } from '@heroicons/react/outline';
 import { SupportIcon, UserIcon } from '@heroicons/react/solid';
+import { icon } from '@fortawesome/fontawesome-svg-core';
 
 const InstructorSideBar = () => {
   const [user, loading] = useAuthState(auth);
@@ -103,10 +104,16 @@ const InstructorSideBar = () => {
       active: router.pathname === '/createClass'
     },
     {
+      name: 'Automations',
+      href: '/automations',
+      icon: CogIcon,
+      active: router.pathname === '/automations'
+    },
+    {
       name: 'Class Bookings',
-      href: `/classbookings?id=${user.uid}`,
+      href: `/mybooking?id=${user.uid}`,
       icon: BookOpenIcon,
-      active: router.pathname === '/classbookings'
+      active: router.pathname === '/mybooking'
     },
     {
       name: 'My Clients',

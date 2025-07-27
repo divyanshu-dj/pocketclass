@@ -5,9 +5,11 @@ import MusicianProfileCard1 from "../MusicianProfileCard1";
 import { useRouter } from "next/router";
 import SvgIcon2 from "../MusicianCard/icons/SvgIcon2";
 
-function InstructorSection({ classId, instructor, loading }) {
+function InstructorSection({ classId, instructor, loading, reviews }) {
   const router = useRouter();
   const rating = instructor?.averageRating;
+  const classReviews = reviews?.filter((r) => r.classID === classId) || [];
+  const reviewCount = classReviews.length;
   if (loading) {
     return (
       <div className="shrink-0 bg-[white] box-border flex justify-start items-stretch flex-col grow basis-[0.00] rounded-2xl">
@@ -38,7 +40,10 @@ function InstructorSection({ classId, instructor, loading }) {
   }
 
   return (
-    <Link href={`/classes/id=${classId}`} className="box-border cursor-pointer h-full w-full">
+    <Link
+      href={`/classes/id=${classId}`}
+      className="box-border cursor-pointer h-full w-full"
+    >
       <div className="w-full h-full bg-white box-border flex flex-col justify-between rounded-2xl pb-2">
         {/* Top Section - grows to fit content */}
         <div className="flex-grow mb-2">
@@ -56,14 +61,21 @@ function InstructorSection({ classId, instructor, loading }) {
         <div className="flex items-center cursor-default gap-2 justify-between px-[15px] mt-auto w-full">
           <div className="flex items-center gap-1 flex-shrink-0">
             <SvgIcon2 className="w-5 h-5 text-[#261f22]" />
-            <p className="text-base font-bold text-[#261f22]">{rating?.toFixed(1)}</p>
+            <p className="text-base font-bold text-[#261f22]">
+              {rating?.toFixed(1)}
+              <span className="text-sm ml-1 text-[#7d797a] font-normal">
+                ({reviewCount})
+              </span>
+            </p>
           </div>
-          <div 
+          <div
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/instructor?class=${classId}&creator=${instructor.classCreator}`);
-            }} 
+              router.push(
+                `/instructor?class=${classId}&creator=${instructor.classCreator}`
+              );
+            }}
             className="transition duration-300 ease-in-out flex items-center flex-shrink min-w-0"
           >
             <div className="cursor-pointer flex items-center gap-1 px-1 py-1 text-[#7d797a] hover:text-[#000] hover:bg-gray-200 rounded-xl overflow-hidden">
