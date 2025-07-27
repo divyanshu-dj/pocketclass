@@ -663,7 +663,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    Total Sale
+                    Total Sales
                   </p>
                   <p className="text-xl font-bold text-gray-900">
                     CA$ {(selectedClient.totalSales || 0).toFixed(2)}
@@ -1183,11 +1183,15 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                           <div className="flex items-start justify-between mb-2">
                             <div
                               className="flex-1 cursor-pointer"
-                              onClick={() => openViewNoteModal(note)}
+                              
                             >
                               <h4 className="text-base font-medium">
                                 {note.title || "Untitled"}
                               </h4>
+                            <div
+                              className="flex-1 line-clamp-2 text-sm text-gray-600 mt-1"
+                              dangerouslySetInnerHTML={{ __html: note.text }}
+                            ></div>
                             </div>
                             <div className="flex items-center gap-1 ml-4">
                               <button
