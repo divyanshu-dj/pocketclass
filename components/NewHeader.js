@@ -392,7 +392,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         )}
 
       <div
-        className={`transition-all flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-1000 hide-x-scrollbar ${
+        className={`transition-all flex flex-col dm2:gap-1 bg-white pb-4 dm2:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-1000 hide-x-scrollbar ${
           isMenuShrunk
             ? "h-[90px] dm2:h-[100px]"
             : `${isMenuSmall ? "h-auto dm2:h-[100px]" : "h-auto"}`
@@ -402,20 +402,20 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         <div
           className={`${
             isHome ? "z-[9000]" : "dm2:z-50 z-[9000]"
-          } relative top-0 max-md:pt-4 max-md:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 section-spacing`}
+          } relative top-0 max-dm2:pt-4 max-dm2:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 section-spacing`}
         >
           <div className="flex items-center justify-start flex-[1]">
             <Link className="left-section cursor-pointer" href="/">
               <img
                 src="/assets/image_5c0480a2.png"
-                className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
+                className="cursor-pointer h-12 object-contain w-[117px] dm2:w-36 lg:w-44 box-border block border-[none]"
                 alt="Logo"
               />
             </Link>
           </div>
 
           {/* Animated Desktop Categories */}
-          <div className="hidden md:flex justify-center items-center absolute left-1/2 transform -translate-x-1/2">
+          <div className="hidden dm2:flex justify-center items-center absolute left-1/2 transform -translate-x-1/2">
             <div
               className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                 isMenuShrunk || isMenuSmall
@@ -489,7 +489,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         className={`${
                           currentView === "student"
                             ? "hidden"
-                            : "hidden md:block"
+                            : "hidden dm2:block"
                         } text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("student")}
                       >
@@ -500,7 +500,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         className={`${
                           currentView === "instructor"
                             ? "hidden"
-                            : "hidden md:block"
+                            : "hidden dm2:block"
                         } text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("instructor")}
                       >
@@ -511,14 +511,14 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
                   {!userData?.isInstructor && (
                     <Link href="/instructor-onboarding">
-                      <button className="hidden md:inline-block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                      <button className="hidden dm2:inline-block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                         Become an Instructor
                       </button>
                     </Link>
                   )}
 
                   <div
-                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
+                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 dm2:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
                       isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
@@ -527,11 +527,11 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                     {userData?.profileImage ? (
                       <img
                         src={userData?.profileImage}
-                        className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12"
+                        className="rounded-full cursor-pointer shrink-0 w-10 h-10 dm2:w-12 dm2:h-12"
                         alt="User"
                       />
                     ) : (
-                      <UserCircleIcon className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12" />
+                      <UserCircleIcon className="rounded-full cursor-pointer shrink-0 w-10 h-10 dm2:w-12 dm2:h-12" />
                     )}
 
                     {showDropDown && (
@@ -549,7 +549,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                   className={`${
                                     currentView === "student"
                                       ? "hidden"
-                                      : "block md:hidden"
+                                      : "block dm2:hidden"
                                   } hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
                                 >
                                   Go to Student View
@@ -559,7 +559,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                   className={`${
                                     currentView === "instructor"
                                       ? "hidden"
-                                      : "block md:hidden"
+                                      : "block dm2:hidden"
                                   } hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
                                 >
                                   Go to Instructor View
@@ -727,13 +727,13 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
               ) : (
                 <>
                   <Link href="/instructor-onboarding">
-                    <button className="hidden md:block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                    <button className="hidden dm2:block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                       Become an Instructor
                     </button>
                   </Link>
 
                   <div
-                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
+                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 dm2:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
                       isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
@@ -813,7 +813,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         {/* Animated Mobile Categories */}
         {isHome && (
           <div
-            className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full justify-center md:hidden flex ${
+            className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full justify-center dm2:hidden flex ${
               hideIcons
                 ? "mb-0 max-h-0 opacity-0 -translate-y-5"
                 : "mb-3 max-h-[200px] opacity-100 translate-y-0"
