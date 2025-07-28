@@ -55,6 +55,15 @@ export default async function (req, res) {
           continue;
         }
 
+        if (booking.price === 0 || !booking.price) {
+          console.warn(`Booking ID: ${booking.id} has no price or zero price`);
+          results.push({
+            bookingId: booking.id,
+            status: "failed",
+            reason: "No price or zero price",
+          });
+          continue;
+        }
         // Determine transfer amount
         let transferAmount = booking.price && booking.price > 0 ? booking.price * 100 : 0;
 
