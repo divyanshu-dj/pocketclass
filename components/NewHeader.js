@@ -225,14 +225,16 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
     const handleClickOutside = (event) => {
       console.log("Click",navbarRef.current, event.target);
       if (
-        navbarRef.current &&
+        (navbarRef.current &&
         navbarRef.current.contains(event.target) &&
         isMenuShrunk &&
-        window.scrollY > 0 // only expand if not at top
+        window.scrollY > 0) || (navbarRef.current &&
+        navbarRef.current.contains(event.target)) // only expand if not at top
       ) {
         console.log("Cla")
         setScrollLock(true); // lock scroll effect
         setIsMenuShrunk(false); // expand menu
+        setMenuSmall(false); // reset menu size
         playerRefs.current.forEach((player) => {
           if (player) player.play();
         });
@@ -256,7 +258,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   // Enhanced scroll handler with animations
   useEffect(() => {
     const handleScroll = () => {
-      if (!isHome || scrollLock) return;
+      if (scrollLock) return;
 
       const scrollY = window.scrollY;
       const shrinkThreshold = 0;
@@ -400,7 +402,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         <div
           className={`${
             isHome ? "z-[9000]" : "dm2:z-50 z-[9000]"
-          } relative top-0 max-md:pt-4 max-md:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
+          } relative top-0 max-md:pt-4 max-md:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 section-spacing`}
         >
           <div className="flex items-center justify-start flex-[1]">
             <Link className="left-section cursor-pointer" href="/">
@@ -451,7 +453,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         {category.name}
                       </span>
                       {activeKey === category.name.toLowerCase() && (
-                        <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                        <div className="absolute bottom-[-2px] h-0.5 bg-black rounded-full"></div>
                       )}
                     </button>
                   </div>
@@ -843,7 +845,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                       {category.name}
                     </span>
                     {activeKey === category.name.toLowerCase() && (
-                      <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                      <div className="absolute bottom-[-2px] h-0.5 bg-black rounded-full"></div>
                     )}
                   </button>
                 </div>
@@ -854,7 +856,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
         {/* Animated Search Bar */}
         <div
-          className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          className={`max-w-[98%] transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             isMenuShrunk || (isMenuSmall && screenWidth > 800)
               ? "absolute inset-0 flex items-center justify-center"
               : "relative"

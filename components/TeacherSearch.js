@@ -96,6 +96,10 @@ const TeacherSearch = ({ expandMenu, user }) => {
   const [isShrunk, setIsShrunk] = useState(false);
   const [isMenuSmall, setIsMenuSmall] = useState(true);
 
+  useEffect(()=>{
+    setActiveDropdown(null);
+  },[isShrunk,isMenuSmall])
+
   useEffect(() => {
     const isHomePage =
       router.pathname === "/" && Object.keys(router.query).length === 0;
@@ -411,7 +415,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
 
   return (
     <div
-      className={`menu-search-bar z-[100] transition-all duration-500 mx-auto max-dm2:px-3 ${
+      className={`menu-search-bar transition-all duration-500 mx-auto max-dm2:px-3 ${
         isShrunk
           ? "max-w-[230px] h-[50px]"
           : `${
@@ -435,7 +439,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           <div ref={containerRef} className="search-bar-wrapper transition-all">
             {!isShrunk && (
               <div
-                className={`active-bg w-[50%] hidden ${
+                className={`active-bg ${
                   isMenuSmall ? "h-full" : "h-[52px] dm2:h-[62px]"
                 }`}
                 style={{
