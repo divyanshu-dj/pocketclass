@@ -55,6 +55,9 @@ const quillEditorStyles = {
 
 // Rich content view styles
 const richContentStyles = `
+  .ql-editor {
+    min-height: 267px; /* For ~7 lines at 14px font-size & 1.5 line-height */
+  }
   .rich-text-content {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
@@ -1189,7 +1192,7 @@ const ClientDetailsPanel = ({ selectedClient, onBack, instructorId }) => {
                                 {note.title || "Untitled"}
                               </h4>
                             <div
-                              className="flex-1 line-clamp-2 text-sm text-gray-600 mt-1"
+                              className="flex-1 line-clamp-1 text-sm text-gray-600 mt-1"
                               dangerouslySetInnerHTML={{ __html: note.text }}
                             ></div>
                             </div>
