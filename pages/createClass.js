@@ -53,6 +53,7 @@ import imageCompression from "browser-image-compression";
 import ToggleSwitch from "../components/toggle";
 import VideoPlayer from "../components/VideoPlayer";
 import { Switch } from "antd";
+import AIEnhancedField from "../components/AIEnhancedField";
 
 export default function CreateClass() {
   const [previewImages, setPreviewImages] = useState([]);
@@ -554,26 +555,25 @@ export default function CreateClass() {
               About Class
             </div> */}
             <div className="w-full flex flex-row gap-4 max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Class Name</label>
-                <input
-                  name="className"
-                  type="text"
-                  placeholder="e.g., Beginner Tennis for Adults"
-                  onBlur={formik.handleBlur}
-                  value={form.Name}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Name: e.target.value });
-                  }}
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                />
-                {formik.touched.className && formik.errors.className && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.className}
-                  </div>
-                )}
-              </div>
+              <AIEnhancedField
+                fieldName="Name"
+                label="Class Name"
+                placeholder="e.g., Beginner Tennis for Adults"
+                value={form.Name}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Name: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                required
+              />
+              {formik.touched.className && formik.errors.className && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.className}
+                </div>
+              )}
             </div>
             <div className="flex flex-row gap-4 flex-wrap w-full max-w-[750px]">
               <div className="flex-grow">
@@ -700,27 +700,26 @@ export default function CreateClass() {
                 </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Description</label>
-                <textarea
-                  required
-                  name="description"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Write a brief overview of your class. Highlight what students will learn, the skills they'll develop, or the unique value your class offers. e.g., Learn the basics of tennis, including forehand, backhand, and serving techniques, in a fun and supportive environment."
-                  type={"text"}
-                  value={form.Description}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Description: e.target.value });
-                  }}
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.description}
-                  </div>
-                )}
-              </div>
+              <AIEnhancedField
+                fieldName="Description"
+                label="Description"
+                placeholder="Write a brief overview of your class. Highlight what students will learn, the skills they'll develop, or the unique value your class offers. e.g., Learn the basics of tennis, including forehand, backhand, and serving techniques, in a fun and supportive environment."
+                value={form.Description}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Description: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+                required
+              />
+              {formik.touched.description && formik.errors.description && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.description}
+                </div>
+              )}
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
@@ -747,26 +746,26 @@ export default function CreateClass() {
             </div>
 
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Pricing Description</label>
-                <textarea
-                  required
-                  name="pricing"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Provide additional pricing details if applicable. e.g., Discounts for group sessions or bulk bookings."
-                  value={form.Pricing}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Pricing: e.target.value });
-                  }}
-                />
-                {formik.touched.pricing && formik.errors.pricing && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.pricing}
-                  </div>
-                )}
-              </div>
+              <AIEnhancedField
+                fieldName="Pricing"
+                label="Pricing Description"
+                placeholder="Provide additional pricing details if applicable. e.g., Discounts for group sessions or bulk bookings."
+                value={form.Pricing}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Pricing: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+                required
+              />
+              {formik.touched.pricing && formik.errors.pricing && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.pricing}
+                </div>
+              )}
             </div>
             <div className="w-full max-w-[750px]">
               <div className="text-lg font-bold w-full pb-1">Media</div>
@@ -818,57 +817,52 @@ export default function CreateClass() {
               </SortableContext>
             </DndContext>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">
-                  Experience (Optional)
-                </label>
-                <textarea
-                  required
-                  name="experience"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
-                  value={form.Experience}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Experience: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="Experience"
+                label="Experience (Optional)"
+                placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
+                value={form.Experience}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Experience: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">About (Optional)</label>
-                <textarea
-                  required
-                  name="about"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Introduce yourself to potential students. Share your background, qualifications, and passion for teaching. e.g., I'm a certified tennis coach who loves helping beginners find their rhythm and passion for the sport!"
-                  value={form.About}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, About: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="About"
+                label="About (Optional)"
+                placeholder="Introduce yourself to potential students. Share your background, qualifications, and passion for teaching. e.g., I'm a certified tennis coach who loves helping beginners find their rhythm and passion for the sport!"
+                value={form.About}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, About: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Fun Fact (Optional)</label>
-                <textarea
-                  required
-                  name="funfact"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
-                  value={form.FunFact}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, FunFact: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="FunFact"
+                label="Fun Fact (Optional)"
+                placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
+                value={form.FunFact}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, FunFact: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
 
             <div className="w-full max-w-[750px]">
