@@ -84,6 +84,20 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [isMenuSmall, setMenuSmall] = useState(!isHome);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0);
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 10, width: 58 });
+  const buttonRefs = useRef([]);
+  useEffect(() => {
+    const activeIndex = categoryData.findIndex(
+      (cat) => cat.name.toLowerCase() === activeKey
+    );
+    const activeBtn = buttonRefs.current[activeIndex];
+    if (activeBtn) {
+      setTimeout(() => {
+        const { offsetLeft, offsetWidth } = activeBtn;
+        setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
+      }, 0);
+    }
+  }, [activeKey, categoryData]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -223,15 +237,15 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      console.log("Click",navbarRef.current, event.target);
+      console.log("Click", navbarRef.current, event.target);
       if (
         (navbarRef.current &&
-        navbarRef.current.contains(event.target) &&
-        isMenuShrunk &&
-        window.scrollY > 0) || (navbarRef.current &&
-        navbarRef.current.contains(event.target)) // only expand if not at top
+          navbarRef.current.contains(event.target) &&
+          isMenuShrunk &&
+          window.scrollY > 0) ||
+        (navbarRef.current && navbarRef.current.contains(event.target)) // only expand if not at top
       ) {
-        console.log("Cla")
+        console.log("Cla");
         setScrollLock(true); // lock scroll effect
         setIsMenuShrunk(false); // expand menu
         setMenuSmall(false); // reset menu size
@@ -423,40 +437,47 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                   : "opacity-100 scale-100 translate-y-0"
               }`}
             >
-              <div className="flex space-x-2.5 z-0 items-center">
+              <div className="relative flex space-x-2.5 z-0 items-center">
+                {/* Animated Underline */}
+                <div
+                  className="absolute min-w-[58px] bottom-0 h-0.5 bg-black rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    width: underlineStyle.width,
+                    transform: `translateX(${underlineStyle.left}px)`,
+                  }}
+                />
+
+                {/* Categories */}
                 {categoryData.map((category, index) => (
-                  <div key={category.name}>
-                    <button
-                      onClick={() =>
-                        handleCategoryClick(category.name.toLowerCase(), index)
-                      }
-                      className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                  <button
+                    key={category.name}
+                    ref={(el) => (buttonRefs.current[index] = el)}
+                    onClick={() =>
+                      handleCategoryClick(category.name.toLowerCase(), index)
+                    }
+                    className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                  >
+                    <Player
+                      lottieRef={(el) => (playerRefs.current[index + 3] = el)}
+                      autoplay
+                      loop={false}
+                      src={category.jsonPath}
+                      className={`h-[42px] mb-1 transition-all duration-300 ease-in-out transform ${
+                        isMenuShrunk
+                          ? "scale-90 opacity-60 -translate-y-1"
+                          : "scale-100 opacity-100 translate-y-0"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium transition-colors ${
+                        activeKey === category.name.toLowerCase()
+                          ? "text-black"
+                          : "text-gray-500"
+                      }`}
                     >
-                      <Player
-                        lottieRef={(el) => (playerRefs.current[index + 3] = el)}
-                        autoplay
-                        loop={false}
-                        src={category.jsonPath}
-                        className={`h-[42px] mb-1 transition-all duration-300 ease-in-out transform ${
-                          isMenuShrunk
-                            ? "scale-90 opacity-60 -translate-y-1"
-                            : "scale-100 opacity-100 translate-y-0"
-                        }`}
-                      />
-                      <span
-                        className={`text-xs font-medium transition-colors ${
-                          activeKey === category.name.toLowerCase()
-                            ? "text-black"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {category.name}
-                      </span>
-                      {activeKey === category.name.toLowerCase() && (
-                        <div className="absolute bottom-[-2px] h-0.5 bg-black rounded-full"></div>
-                      )}
-                    </button>
-                  </div>
+                      {category.name}
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -609,30 +630,30 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
                           {userData?.isInstructor &&
                             currentView === "instructor" && (
-                            <>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/myClass/${user.uid}`}>
-                                  My Classes
-                                </Link>
-                              </li>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/automations`}>
-                                  Automations
-                                </Link>
-                              </li>
-                              <li>
-                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <Link href={`/myStudents/${user.uid}`}>
-                                    My Clients
+                              <>
+                                <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/myClass/${user.uid}`}>
+                                    My Classes
                                   </Link>
-                                </p>
-                              </li>
-                              <li>
-                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <Link href={`/classbookings?id=${user.uid}`}>
-                                    Class Bookings
-                                  </Link>
-                                </p>
+                                </li>
+                                <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/automations`}>Automations</Link>
+                                </li>
+                                <li>
+                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link href={`/myStudents/${user.uid}`}>
+                                      My Clients
+                                    </Link>
+                                  </p>
+                                </li>
+                                <li>
+                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link
+                                      href={`/classbookings?id=${user.uid}`}
+                                    >
+                                      Class Bookings
+                                    </Link>
+                                  </p>
                                 </li>
                                 <li>
                                   <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
