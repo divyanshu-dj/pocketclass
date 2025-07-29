@@ -35,10 +35,13 @@ SubCategory: {subCategory}
 You are an expert in writing compelling class descriptions that convert browsers into students.
 
 ### INSTRUCTIONS:
-- Analyze for learning outcomes, specific skills, class atmosphere, and target audience
-- Rate effectiveness on a scale of 0-100
-- Provide quality level and specific improvements
-- Focus on clarity, enthusiasm, and student value
+Suggest improvements that:
+- Clarify what students will learn
+- Highlight specific techniques, topics, or skills covered
+- Communicate the vibe of the class (fun, supportive, intense, etc.)
+- Mention who this class is ideal for (beginners, kids, etc.)
+- Encourage clarity and enthusiasm in tone
+- Note: Do not include a call to action
 
 ### CLASS DESCRIPTION TO ANALYZE:
 {value}
@@ -61,10 +64,12 @@ SubCategory: {subCategory}
 You are an expert in crafting instructor bios that build trust and connection.
 
 ### INSTRUCTIONS:
-- Analyze for teaching passion, personal connection, credibility, and warmth
-- Rate effectiveness on a scale of 0-100
-- Provide personality score (0-10) for how well it shows character
-- Focus on trust-building and relatability
+Suggest how to improve this section to make it feel more personal, passionate, and trust-building. Encourage them to mention:
+- Their teaching style
+- What excites them about this subject
+- Why they love working with students
+- Any personal story that adds warmth
+- Note: Do not include a call to action
 
 ### INSTRUCTOR BIO TO ANALYZE:
 {value}
@@ -87,10 +92,13 @@ SubCategory: {subCategory}
 You are an expert in presenting professional experience that builds credibility.
 
 ### INSTRUCTIONS:
-- Analyze for years of experience, certifications, teaching venues, and achievements
-- Rate effectiveness on a scale of 0-100
-- Identify credibility indicators present
-- Balance confidence with humility
+Suggest ways to strengthen this section by adding:
+- Years of experience
+- Certifications, awards, or credentials
+- Where they’ve taught before (e.g., schools, clubs)
+- Types of students they've taught (age, level)
+- Any unique expertise or achievements
+- Note: Do not include a call to action
 
 ### EXPERIENCE SECTION TO ANALYZE:
 {value}
@@ -113,10 +121,11 @@ SubCategory: {subCategory}
 You are an expert in transparent, value-focused pricing communication.
 
 ### INSTRUCTIONS:
-- Analyze for clarity, value proposition, discount information, and friendly tone
-- Rate effectiveness on a scale of 0-100
-- Provide transparency score (0-10) for how clear and honest it feels
-- Focus on building trust around pricing
+Provide suggestions to:
+- Clarify any group pricing, discounts, or bundles
+- Reassure students about the value they’re getting
+- Use friendly, transparent language
+- Note: Do not include a call to action
 
 ### PRICING DESCRIPTION TO ANALYZE:
 {value}
@@ -139,10 +148,11 @@ SubCategory: {subCategory}
 You are an expert in creating memorable, charming fun facts that show personality.
 
 ### INSTRUCTIONS:
-- Analyze for surprise factor, personality, teaching connection, and authenticity
-- Rate effectiveness on a scale of 0-100
-- Provide memorability score (0-10) for how engaging and memorable it is
-- Focus on building personal connection
+Suggest how to make this more fun, light-hearted, or surprising. Ideas could include:
+- A memorable student experience
+- A quirky hobby
+- An unexpected talent or background
+- Note: Do not include a call to action
 
 ### FUN FACT TO ANALYZE:
 {value}
