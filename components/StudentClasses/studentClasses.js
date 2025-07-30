@@ -34,7 +34,13 @@ const StudentClasses = ({ appointments, classDetails, setAppointments, setClassD
   const [pastAppointments, setPastAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [rating, setRating] = useState(0);
-  const [hovered, setHovered] = useState(0);
+  const [recommendRating, setRecommendRating] = useState(0);
+  const [safetyRating, setSafetyRating] = useState(0);
+  const [hovered, setHovered] = useState({
+    rating: 0,
+    recommendRating: 0,
+    safetyRating: 0,
+  });
   const [feedback, setFeedback] = useState("");
   const [showDetailsMobile, setShowDetailsMobile] = useState(false);
   const [rescheduleModal, setRescheduleModal] = useState(false);
@@ -295,6 +301,10 @@ const StudentClasses = ({ appointments, classDetails, setAppointments, setClassD
                   setHovered={setHovered}
                   hovered={hovered}
                   rating={rating}
+                  recommendRating={recommendRating}
+                  safetyRating={safetyRating}
+                  setRecommendRating={setRecommendRating}
+                  setSafetyRating={setSafetyRating}
                   classDetails={classDetails}
                   formatDuration={formatDuration}
                   invoiceOpen={invoiceOpen}
@@ -395,6 +405,10 @@ const StudentClasses = ({ appointments, classDetails, setAppointments, setClassD
                   setHovered={setHovered}
                   hovered={hovered}
                   rating={rating}
+                  recommendRating={recommendRating}
+                  safetyRating={safetyRating}
+                  setRecommendRating={setRecommendRating}
+                  setSafetyRating={setSafetyRating}
                   classDetails={classDetails}
                   formatDuration={formatDuration}
                   invoiceOpen={invoiceOpen}

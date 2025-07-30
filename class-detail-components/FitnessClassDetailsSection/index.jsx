@@ -365,6 +365,12 @@ function FitnessClassDetailsSection({
                     </span>
                     {classData?.Mode === "Online" ? "Online" : "In-Person"}
                   </p>
+                  {/* Box to show if first class is free */}
+                  {classData?.firstFree && (
+                    <p className="[font-family:'DM_Sans',sans-serif] border border-green-400 flex flex-row items-center justify-center px-3 rounded-lg text-sm text-green-500 grow-0 py-[2px] shrink-0 basis-auto ml-[7px] m-0 p-0">
+                      First Class Free
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-4 items-center">

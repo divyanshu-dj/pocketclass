@@ -99,6 +99,7 @@ export default function index({
   const [packageClasses, setPackageClasses] = useState();
   const [grouped, setGrouped] = useState(false);
   const [giftCardValue, setGiftcardValue] = useState(0);
+  const [freeClassEnabled, setFreeClassEnabled] = useState(false);
 
   const hasCalendarConflict = (slotStart, slotEnd) => {
     const start = moment(slotStart, "YYYY-MM-DD HH:mm");
@@ -130,6 +131,39 @@ export default function index({
 
     return filteredCalender?.length > 0;
   };
+
+  useEffect(() => {
+    const fetchFreeClassSetting = async () => {
+      if (!instructorId) return;
+      if (!classId) return;
+      try {
+        const classDocRef = doc(db, "classes", classId);
+        const classDoc = await getDoc(classDocRef);
+        if (classDoc.exists()) {
+          const classData = classDoc.data();
+          console.log("Class Data for free:", classData);
+          if (classData.firstFree === true) {
+            const bookingsQuery = query(
+              collection(db, "Bookings"),
+              where("instructor_id", "==", instructorId),
+              where("student_id", "==", studentId),
+              where("class_id", "==", classId)
+            );
+            const bookingsSnapshot = await getDocs(bookingsQuery);
+            if (bookingsSnapshot.empty) {
+              console.log("No bookings found for this class and student.");
+              setFreeClassEnabled(true);
+            } else {
+              setFreeClassEnabled(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching free class setting:", error);
+      }
+    };
+    fetchFreeClassSetting();
+  }, [instructorId, classId, studentId]);
 
   useEffect(() => {
     const fetchInstructorData = async () => {
@@ -883,42 +917,49 @@ export default function index({
       price: price,
       paymentIntentId: payment_intent_id,
       createdAt: serverTimestamp(),
-      packageDiscount: parseFloat(selectedPackage?.num_sessions
-        ? ((selectedPackage?.Discount
-            ? selectedPackage.Discount
-            : selectedPackage?.discountPercentage) *
-            (selectedPackage?.Price
-              ? selectedPackage.Price
-              : classData.Price)) /
-          100*numberOfGroupMembers
-        : 0),
-      voucherDiscount:parseFloat(
-        discountType === "percentage"
-          ? (
-              (discount *
-                (selectedPackage?.num_sessions
-                  ? selectedPackage.Price -
-                    ((selectedPackage?.Discount ??
-                      selectedPackage?.discountPercentage) *
-                      selectedPackage?.Price) /
-                      100
-                  : selectedSlot.classId
-                  ? classData.groupPrice
-                  : classData.Price)) /
-              100
-            ).toFixed(2)
-          : discount
-      ),
+      packageDiscount:
+        price == 0
+          ? parseFloat(
+              selectedPackage?.num_sessions
+                ? (((selectedPackage?.Discount ??
+                    selectedPackage?.discountPercentage) *
+                    (selectedPackage?.Price ?? classData?.Price ?? 0)) /
+                    100) *
+                    numberOfGroupMembers
+                : 0
+            )
+          : 0,
+      voucherDiscount:
+        price == 0
+          ? parseFloat(
+              discountType === "percentage"
+                ? (
+                    (discount *
+                      (selectedPackage?.num_sessions
+                        ? selectedPackage?.Price -
+                          ((selectedPackage?.Discount ??
+                            selectedPackage?.discountPercentage) *
+                            selectedPackage?.Price) /
+                            100
+                        : selectedSlot.classId
+                        ? classData?.groupPrice ?? 0
+                        : classData?.Price ?? 0)) /
+                    100
+                  ).toFixed(2)
+                : discount
+            )
+          : 0,
       subTotal: (() => {
+        if (price === 0) return 0;
         const basePrice = selectedPackage?.num_sessions
-          ? selectedPackage.Price -
+          ? selectedPackage?.Price -
             ((selectedPackage?.Discount ??
               selectedPackage?.discountPercentage) *
-              selectedPackage.Price) /
+              selectedPackage?.Price) /
               100
           : selectedSlot.classId
-          ? classData.groupPrice
-          : classData.Price;
+          ? classData?.groupPrice ?? 0
+          : classData?.Price ?? 0;
 
         const voucherDiscount = voucherVerified
           ? discountType === "percentage"
@@ -926,56 +967,52 @@ export default function index({
             : discount
           : 0;
 
-        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
+        return parseFloat(
+          (basePrice * numberOfGroupMembers - voucherDiscount).toFixed(2)
+        );
       })(),
       processingFee: (() => {
+        if (price === 0) return 0;
         const basePrice = selectedPackage?.num_sessions
-          ? selectedPackage.Price -
-            (
-              ((selectedPackage?.Discount ??
-                selectedPackage?.discountPercentage) *
-                selectedPackage?.Price) /
+          ? selectedPackage?.Price -
+            ((selectedPackage?.Discount ??
+              selectedPackage?.discountPercentage) *
+              selectedPackage?.Price) /
               100
-            ).toFixed(2)
           : selectedSlot.classId
-          ? classData.groupPrice
-          : classData.Price;
+          ? classData?.groupPrice ?? 0
+          : classData?.Price ?? 0;
 
         const voucherDiscount = voucherVerified
           ? discountType === "percentage"
-            ? ((discount * basePrice) / 100).toFixed(2)
+            ? (discount * basePrice) / 100
             : discount
           : 0;
 
         const subtotal = basePrice - voucherDiscount;
-        const processingFee = (subtotal * 0.029 + 0.8).toFixed(2);
-
-        return parseFloat(processingFee);
+        return parseFloat((subtotal * 0.029 + 0.8).toFixed(2));
       })(),
       total: (() => {
+        if (price === 0) return 0;
         const basePrice = selectedPackage?.num_sessions
-          ? selectedPackage.Price -
-            (
-              ((selectedPackage?.Discount ??
-                selectedPackage?.discountPercentage) *
-                selectedPackage?.Price) /
+          ? selectedPackage?.Price -
+            ((selectedPackage?.Discount ??
+              selectedPackage?.discountPercentage) *
+              selectedPackage?.Price) /
               100
-            ).toFixed(2)
           : selectedSlot.classId
-          ? classData.groupPrice
-          : classData.Price;
+          ? classData?.groupPrice ?? 0
+          : classData?.Price ?? 0;
 
         const voucherDiscount = voucherVerified
           ? discountType === "percentage"
-            ? ((discount * basePrice) / 100).toFixed(2)
+            ? (discount * basePrice) / 100
             : discount
           : 0;
 
-        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const subtotal = basePrice * numberOfGroupMembers - voucherDiscount;
         const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
-        const total = subtotal + processingFee;
-
-        return parseFloat(total.toFixed(2));
+        return parseFloat((subtotal + processingFee).toFixed(2));
       })(),
     };
 
@@ -1516,6 +1553,13 @@ END:VCALENDAR`.trim();
       }
       return;
     }
+
+    if (freeClassEnabled && selectedPackage === null) {
+      setBookLoading(true);
+      handleSubmit(0, "FreeClass-NoIntent");
+      setStripeLoading(false);
+      return;
+    }
     setStripeLoading(true);
     const expiry = now.clone().add(5, "minutes").toISOString();
     setTimer(300);
@@ -1560,17 +1604,20 @@ END:VCALENDAR`.trim();
       mode: selectedSlot.classId ? "group" : "individual",
       createdAt: serverTimestamp(),
       price: bookingDataPrice,
-      packageDiscount: parseFloat(selectedPackage?.num_sessions
-        ? ((selectedPackage?.Discount
-            ? selectedPackage.Discount
-            : selectedPackage?.discountPercentage) *
-            (selectedPackage?.Price
-              ? selectedPackage.Price
-              : classData.Price)) /
-          100*numberOfGroupMembers
-        : 0),
-      voucherDiscount:
-        parseFloat(discountType === "percentage"
+      packageDiscount: parseFloat(
+        selectedPackage?.num_sessions
+          ? (((selectedPackage?.Discount
+              ? selectedPackage.Discount
+              : selectedPackage?.discountPercentage) *
+              (selectedPackage?.Price
+                ? selectedPackage.Price
+                : classData.Price)) /
+              100) *
+              numberOfGroupMembers
+          : 0
+      ),
+      voucherDiscount: parseFloat(
+        discountType === "percentage"
           ? (
               (discount *
                 (selectedPackage?.num_sessions
@@ -1603,7 +1650,9 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        return parseFloat(((basePrice*numberOfGroupMembers) - voucherDiscount).toFixed(2));
+        return parseFloat(
+          (basePrice * numberOfGroupMembers - voucherDiscount).toFixed(2)
+        );
       })(),
       processingFee: (() => {
         const basePrice = selectedPackage?.num_sessions
@@ -1648,7 +1697,7 @@ END:VCALENDAR`.trim();
             : discount
           : 0;
 
-        const subtotal = (basePrice*numberOfGroupMembers) - voucherDiscount;
+        const subtotal = basePrice * numberOfGroupMembers - voucherDiscount;
         const processingFee = (basePrice - voucherDiscount) * 0.029 + 0.8;
         const total = subtotal + processingFee;
 
@@ -2085,14 +2134,22 @@ END:VCALENDAR`.trim();
                         : `Class Price`}
                     </strong>
                   </p>
-                  <p>
-                    $
-                    {selectedPackage?.Price
-                      ? selectedPackage.Price
-                      : selectedSlot.classId
-                      ? classData.groupPrice
-                      : classData.Price}
-                  </p>
+                  <div className="flex items-center">
+                    {freeClassEnabled && selectedPackage == null ? (
+                      <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        First Class Free!
+                      </span>
+                    ) : (
+                      <p>
+                        $
+                        {selectedPackage?.Price
+                          ? selectedPackage.Price
+                          : selectedSlot.classId
+                          ? classData.groupPrice
+                          : classData.Price}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-row w-full justify-between">
@@ -2138,136 +2195,151 @@ END:VCALENDAR`.trim();
                 )}
 
                 {/* Add Subtotal */}
-                <div className="flex flex-row w-full justify-between border-t pt-2 mt-2">
-                  <p>
-                    <strong>Subtotal:</strong>
-                  </p>
-                  <p>
-                    $
-                    {(() => {
-                      const basePrice = selectedPackage?.num_sessions
-                        ? selectedPackage.Price -
-                          (
-                            ((selectedPackage?.Discount ??
-                              selectedPackage?.discountPercentage) *
-                              selectedPackage?.Price) /
-                            100
-                          ).toFixed(2)
-                        : selectedSlot.classId
-                        ? classData.groupPrice
-                        : classData.Price;
+                {(!freeClassEnabled ||
+                  selectedPackage != null) && (
+                    <>
+                      <div className="flex flex-row w-full justify-between border-t pt-2 mt-2">
+                        <p>
+                          <strong>Subtotal:</strong>
+                        </p>
+                        <p>
+                          $
+                          {(() => {
+                            const basePrice = selectedPackage?.num_sessions
+                              ? selectedPackage.Price -
+                                (
+                                  ((selectedPackage?.Discount ??
+                                    selectedPackage?.discountPercentage) *
+                                    selectedPackage?.Price) /
+                                  100
+                                ).toFixed(2)
+                              : selectedSlot.classId
+                              ? classData.groupPrice
+                              : classData.Price;
 
-                      const voucherDiscount = voucherVerified
-                        ? discountType === "percentage"
-                          ? ((discount * basePrice) / 100).toFixed(2)
-                          : discount
-                        : 0;
+                            const voucherDiscount = voucherVerified
+                              ? discountType === "percentage"
+                                ? ((discount * basePrice) / 100).toFixed(2)
+                                : discount
+                              : 0;
 
-                      return (basePrice - voucherDiscount).toFixed(2);
-                    })()}
-                  </p>
-                </div>
-
-                {/* Add Processing Fee */}
-                <div className="flex flex-row w-full justify-between">
-                  <div className="flex items-center gap-2">
-                    <p>
-                      <strong>Processing Fee:</strong>
-                    </p>
-                    <a
-                      href="https://stripe.com/en-ca/pricing"
-                      target="_blank"
-                      className="relative group"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-gray-500 cursor-help"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                        <div className="text-center">
-                          <div className="font-semibold mb-1">
-                            Fee Breakdown:
-                          </div>
-                          <div>2.9% - Stripe Variable Fee</div>
-                          <div>$0.30 - Stripe Fixed Fee</div>
-                          <div>$0.50 - Platform Fee</div>
-                        </div>
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                            return (basePrice - voucherDiscount).toFixed(2);
+                          })()}
+                        </p>
                       </div>
-                    </a>
-                  </div>
-                  <p>
-                    $
-                    {(() => {
-                      const basePrice = selectedPackage?.num_sessions
-                        ? selectedPackage.Price -
-                          (
-                            ((selectedPackage?.Discount ??
-                              selectedPackage?.discountPercentage) *
-                              selectedPackage?.Price) /
-                            100
-                          ).toFixed(2)
-                        : selectedSlot.classId
-                        ? classData.groupPrice
-                        : classData.Price;
 
-                      const voucherDiscount = voucherVerified
-                        ? discountType === "percentage"
-                          ? ((discount * basePrice) / 100).toFixed(2)
-                          : discount
-                        : 0;
+                      {/* Add Processing Fee */}
+                      <div className="flex flex-row w-full justify-between">
+                        <div className="flex items-center gap-2">
+                          <p>
+                            <strong>Processing Fee:</strong>
+                          </p>
+                          <a
+                            href="https://stripe.com/en-ca/pricing"
+                            target="_blank"
+                            className="relative group"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 text-gray-500 cursor-help"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                              <div className="text-center">
+                                <div className="font-semibold mb-1">
+                                  Fee Breakdown:
+                                </div>
+                                <div>2.9% - Stripe Variable Fee</div>
+                                <div>$0.30 - Stripe Fixed Fee</div>
+                                <div>$0.50 - Platform Fee</div>
+                              </div>
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                            </div>
+                          </a>
+                        </div>
+                        <p>
+                          $
+                          {(() => {
+                            const basePrice = selectedPackage?.num_sessions
+                              ? selectedPackage.Price -
+                                (
+                                  ((selectedPackage?.Discount ??
+                                    selectedPackage?.discountPercentage) *
+                                    selectedPackage?.Price) /
+                                  100
+                                ).toFixed(2)
+                              : selectedSlot.classId
+                              ? classData.groupPrice
+                              : classData.Price;
 
-                      const subtotal = basePrice - voucherDiscount;
-                      const processingFee = (subtotal * 0.029 + 0.8).toFixed(2);
+                            const voucherDiscount = voucherVerified
+                              ? discountType === "percentage"
+                                ? ((discount * basePrice) / 100).toFixed(2)
+                                : discount
+                              : 0;
 
-                      return processingFee;
-                    })()}
-                  </p>
-                </div>
+                            const subtotal = basePrice - voucherDiscount;
+                            const processingFee = (
+                              subtotal * 0.029 +
+                              0.8
+                            ).toFixed(2);
+
+                            return processingFee;
+                          })()}
+                        </p>
+                      </div>
+                    </>
+                  )}
 
                 {/* Update Total to include processing fee */}
                 <div className="flex flex-row w-full justify-between border-t pt-2 mt-2 font-bold text-lg">
                   <p>
                     <strong>Total:</strong>
                   </p>
-                  <p>
-                    $
-                    {(() => {
-                      const basePrice = selectedPackage?.num_sessions
-                        ? selectedPackage.Price -
-                          (
-                            ((selectedPackage?.Discount ??
-                              selectedPackage?.discountPercentage) *
-                              selectedPackage?.Price) /
-                            100
-                          ).toFixed(2)
-                        : selectedSlot.classId
-                        ? classData.groupPrice
-                        : classData.Price;
 
-                      const voucherDiscount = voucherVerified
-                        ? discountType === "percentage"
-                          ? ((discount * basePrice) / 100).toFixed(2)
-                          : discount
-                        : 0;
+                  {freeClassEnabled && selectedPackage == null ? (
+                    <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                      First Class Free!
+                    </span>
+                  ) : (
+                    <p>
+                      $
+                      {(() => {
+                        const basePrice = selectedPackage?.num_sessions
+                          ? selectedPackage.Price -
+                            (
+                              ((selectedPackage?.Discount ??
+                                selectedPackage?.discountPercentage) *
+                                selectedPackage?.Price) /
+                              100
+                            ).toFixed(2)
+                          : selectedSlot.classId
+                          ? classData.groupPrice
+                          : classData.Price;
 
-                      const subtotal = basePrice - voucherDiscount;
-                      const processingFee = subtotal * 0.029 + 0.8;
-                      const total = subtotal + processingFee;
+                        const voucherDiscount = voucherVerified
+                          ? discountType === "percentage"
+                            ? ((discount * basePrice) / 100).toFixed(2)
+                            : discount
+                          : 0;
 
-                      return total.toFixed(2);
-                    })()}
-                  </p>
+                        const subtotal = basePrice - voucherDiscount;
+                        const processingFee = subtotal * 0.029 + 0.8;
+                        const total = subtotal + processingFee;
+
+                        return total.toFixed(2);
+                      })()}
+                    </p>
+                  )}
                 </div>
 
                 <div>

@@ -29,6 +29,10 @@ const renderDetails = ({
   classDetails,
   ismobile,
   setRating,
+  recommendRating,
+  safetyRating,
+  setRecommendRating,
+  setSafetyRating,
   formatDuration,
   rating,
   feedback,
@@ -99,17 +103,17 @@ const renderDetails = ({
       const studentData = studentSnap.data();
 
       await addDoc(collection(db, "Reviews"), {
-        classId: classData.id,
-        studentId,
+        classID: classData.id,
+        userId: studentId,
         name: studentData.firstName
           ? `${studentData.firstName} ${studentData.lastName || ""}`.trim()
           : "",
-        photo: studentData.photoURL || "",
+        photo: studentData.profileImage || "",
         review: feedback.trim(),
         qualityRating: rating,
         userId: studentId,
-        recommendRating: rating,
-        safetyRating: rating,
+        recommendRating: recommendRating,
+        safetyRating: safetyRating,
         createdAt: new Date(),
       });
 
@@ -183,7 +187,9 @@ const renderDetails = ({
         if (!refundRes.ok || !refundData.success) {
           throw new Error(refundData.message || "Refund failed");
         }
-        refundAmount = refundData.refund.amount ? refundData.refund.amount / 100 : null; // assuming amount is in cents
+        refundAmount = refundData.refund.amount
+          ? refundData.refund.amount / 100
+          : null; // assuming amount is in cents
       }
 
       // Delete calendar event
@@ -402,16 +408,22 @@ const renderDetails = ({
                     Let us know your thoughts
                   </p>
 
+                  <p>Quality Rating</p>
+
                   <div className="flex justify-center gap-2 mb-4">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <FaStar
                         key={star}
                         size={28}
                         onClick={() => setRating(star)}
-                        onMouseEnter={() => setHovered(star)}
-                        onMouseLeave={() => setHovered(0)}
+                        onMouseEnter={() =>
+                          setHovered((prev) => ({ ...prev, rating: star }))
+                        }
+                        onMouseLeave={() =>
+                          setHovered((prev) => ({ ...prev, rating: 0 }))
+                        }
                         className={`cursor-pointer transition-colors ${
-                          Math.max(rating, hovered) >= star
+                          Math.max(rating, hovered.rating) >= star
                             ? "text-yellow-400"
                             : "text-gray-300"
                         }`}
@@ -420,20 +432,90 @@ const renderDetails = ({
                   </div>
 
                   {rating > 0 && (
-                    <div className="relative rounded-md px-1 pt-2 pb-1 bg-white border border-gray-300">
-                      <textarea
-                        value={feedback}
-                        onChange={(e) => setFeedback(e.target.value)}
-                        placeholder="Type your feedback..."
-                        className="w-full text-sm resize-none bg-transparent min-h-[80px] max-h-40 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-none border-none"
-                        style={{
-                          display: "flex",
-                          flexDirection: "column-reverse",
-                          scrollbarWidth: "none",
-                          msOverflowStyle: "none",
-                        }}
-                      />
-                    </div>
+                    // Show other ratings only if quality rating is given
+                    <>
+                      <div className="flex flex-col gap-4 mb-4">
+                        <div>
+                          <p>Recommend Rating</p>
+                          <div className="flex justify-center gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <FaStar
+                                key={star}
+                                size={28}
+                                onClick={() => setRecommendRating(star)}
+                                onMouseEnter={() =>
+                                  setHovered((prev) => ({
+                                    ...prev,
+                                    recommendRating: star,
+                                  }))
+                                }
+                                onMouseLeave={() =>
+                                  setHovered((prev) => ({
+                                    ...prev,
+                                    recommendRating: 0,
+                                  }))
+                                }
+                                className={`cursor-pointer transition-colors ${
+                                  Math.max(
+                                    recommendRating,
+                                    hovered.recommendRating
+                                  ) >= star
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p>Safety Rating</p>
+                          <div className="flex justify-center gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <FaStar
+                                key={star}
+                                size={28}
+                                onClick={() => setSafetyRating(star)}
+                                onMouseEnter={() =>
+                                  setHovered((prev) => ({
+                                    ...prev,
+                                    safetyRating: star,
+                                  }))
+                                }
+                                onMouseLeave={() =>
+                                  setHovered((prev) => ({
+                                    ...prev,
+                                    safetyRating: 0,
+                                  }))
+                                }
+                                className={`cursor-pointer transition-colors ${
+                                  Math.max(
+                                    safetyRating,
+                                    hovered.safetyRating
+                                  ) >= star
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative rounded-md px-1 pt-2 pb-1 bg-white border border-gray-300">
+                        <textarea
+                          value={feedback}
+                          onChange={(e) => setFeedback(e.target.value)}
+                          placeholder="Type your feedback..."
+                          className="w-full text-sm resize-none bg-transparent min-h-[80px] max-h-40 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-none border-none"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column-reverse",
+                            scrollbarWidth: "none",
+                            msOverflowStyle: "none",
+                          }}
+                        />
+                      </div>
+                    </>
                   )}
                   {rating > 0 && (
                     <button
