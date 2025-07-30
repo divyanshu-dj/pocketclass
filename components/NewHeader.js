@@ -20,6 +20,7 @@ import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
 import dynamic from "next/dynamic";
 import MusicSelector from "../home-components/MusicSelector";
+import { motion } from "framer-motion";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
@@ -40,11 +41,11 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [stripeIntegration, setStripeIntegration] = useState(true);
   const [classCreated, setClassCreated] = useState(true);
   const [scheduleCreated, setScheduleCreated] = useState(true);
+  const [scrollLock, setScrollLock] = useState(false);
 
   const videoRefs = useRef([]);
-  const [currentView, setCurrentView] = useState("student"); // New state for view switching
+  const [currentView, setCurrentView] = useState("student");
 
-  // Load saved view preference from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedView = localStorage.getItem("userView");
@@ -54,18 +55,18 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
     }
   }, [userData]);
 
-  // Save view preference to localStorage
   const handleViewChange = (view) => {
     setCurrentView(view);
     if (typeof window !== "undefined") {
       localStorage.setItem("userView", view);
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('localStorageChange', { 
-        detail: { key: 'userView', value: view } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent("localStorageChange", {
+          detail: { key: "userView", value: view },
+        })
+      );
 
       if (view === "instructor") {
-        router.push('/profile/' + user.uid);
+        router.push("/profile/" + user.uid);
       }
       if (view === "student") {
         router.push("/");
@@ -76,31 +77,37 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [activeKey, setActiveKey] = useState("sport");
   const navbarRef = useRef(null);
 
-
   const isHome = router.pathname === "/";
 
-  // State for menu shrinking and responsive behavior
   const [isMenuShrunk, setIsMenuShrunk] = useState(false);
   const [hideIcons, setHideIcons] = useState(false);
   const [isMenuSmall, setMenuSmall] = useState(!isHome);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0);
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 10, width: 58 });
+  const buttonRefs = useRef([]);
+  useEffect(() => {
+    const activeIndex = categoryData.findIndex(
+      (cat) => cat.name.toLowerCase() === activeKey
+    );
+    const activeBtn = buttonRefs.current[activeIndex];
+    if (activeBtn) {
+      setTimeout(() => {
+        const { offsetLeft, offsetWidth } = activeBtn;
+        setUnderlineStyle({ left: offsetLeft, width: offsetWidth });
+      }, 0);
+    }
+  }, [activeKey, categoryData]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Set initial screen width
       setScreenWidth(window.innerWidth);
-
-      // Optional: Add resize listener
       const handleResize = () => setScreenWidth(window.innerWidth);
       window.addEventListener("resize", handleResize);
-
-      // Cleanup on unmount
       return () => window.removeEventListener("resize", handleResize);
     }
   }, []);
 
-  // Set navbar height as CSS custom property
   useEffect(() => {
     const updateNavbarHeight = () => {
       if (navbarRef.current) {
@@ -120,10 +127,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
   const handleCategoryClick = (category, index) => {
     setActiveKey(category);
-
-    if (handleCategorySelection) {
-      handleCategorySelection(category);
-    }
+    if (handleCategorySelection) handleCategorySelection(category);
 
     const player = playerRefs.current[index];
     const playerMob = playerRefs.current[index + 3];
@@ -148,29 +152,19 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setSchedule(data);
-
-        if (data) {
-          setScheduleCreated(true);
-        } else {
-          setScheduleCreated(false);
-        }
+        setScheduleCreated(!!data);
       }
+
       const classesQuery = query(
         collection(db, "classes"),
         where("classCreator", "==", user.uid)
       );
 
       const docSnap2 = await getDocs(classesQuery);
-
       if (docSnap2.docs.length > 0) {
         const data = docSnap2.docs.map((doc) => doc.data());
         setClasses(data);
-
-        if (data && data.length > 0) {
-          setClassCreated(true);
-        } else {
-          setClassCreated(false);
-        }
+        setClassCreated(true);
       } else {
         setClassCreated(false);
       }
@@ -197,48 +191,27 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
       };
 
       const imageUrl = docData?.profileImage || user?.photoURL;
+      if (imageUrl) localStorage.setItem("profileImage", imageUrl);
 
-      if (imageUrl) {
-        localStorage.setItem("profileImage", imageUrl);
-      }
       setUserData(data?.data());
       setCategory(data?.data()?.category);
 
-      // Set current view based on user's instructor status
       if (data?.data()?.isInstructor) {
         setCurrentView("instructor");
-        // Dipatch custom event to notify other components
-        window.dispatchEvent(new CustomEvent('localStorageChange', { 
-          detail: { key: 'userView', value: 'instructor' } 
-        }));
+        window.dispatchEvent(
+          new CustomEvent("localStorageChange", {
+            detail: { key: "userView", value: "instructor" },
+          })
+        );
       } else {
         setCurrentView("student");
-        // Dipatch custom event to notify other components
-        window.dispatchEvent(new CustomEvent('localStorageChange', { 
-          detail: { key: 'userView', value: 'student' } 
-        }));
+        window.dispatchEvent(
+          new CustomEvent("localStorageChange", {
+            detail: { key: "userView", value: "student" },
+          })
+        );
       }
 
-      if (
-        data?.data() &&
-        data?.data().firstName &&
-        data?.data().lastName &&
-        data?.data().email &&
-        data?.data().gender &&
-        data?.data().dob &&
-        data?.data().phoneNumber &&
-        data?.data().profileImage &&
-        data?.data().profileDescription
-      ) {
-        setProfileCompleted(true);
-      } else {
-        setProfileCompleted(false);
-      }
-
-      setUserData(updatedData);
-      setCategory(updatedData?.category);
-
-      // Check for profile completeness
       const isComplete =
         docData?.firstName &&
         docData?.lastName &&
@@ -251,11 +224,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
       setProfileCompleted(!!isComplete);
 
-      // Stripe setup check
-      if (
-        data?.data()?.isInstructor &&
-        !data?.data()?.payment_enabled
-      ) {
+      if (data?.data()?.isInstructor && !data?.data()?.payment_enabled) {
         toast.error("Please setup stripe to start earning");
         setStripeIntegration(false);
       } else {
@@ -266,40 +235,75 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
     if (user?.uid) getData();
   }, [user]);
 
-  // Scroll effects
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      console.log("Click", navbarRef.current, event.target);
+      if (
+        (navbarRef.current &&
+          navbarRef.current.contains(event.target) &&
+          isMenuShrunk &&
+          window.scrollY > 0) ||
+        (navbarRef.current && navbarRef.current.contains(event.target)) // only expand if not at top
+      ) {
+        console.log("Cla");
+        setScrollLock(true); // lock scroll effect
+        setIsMenuShrunk(false); // expand menu
+        setMenuSmall(false); // reset menu size
+        playerRefs.current.forEach((player) => {
+          if (player) player.play();
+        });
+
+        // Release scroll lock after a short time
+        setTimeout(() => {
+          setScrollLock(false);
+        }, 800);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isMenuShrunk]);
+
+  // Enhanced scroll handler with animations
   useEffect(() => {
     const handleScroll = () => {
-      if (!isHome) return;
+      if (scrollLock) return;
 
       const scrollY = window.scrollY;
+      const shrinkThreshold = 0;
 
-      // Desktop scroll effects
-      if (window.innerWidth >= 768) {
-        if (scrollY > 5 && !isSearchExpanded) {
+      if (window.innerWidth >= 768 && !isSearchExpanded) {
+        if (scrollY > shrinkThreshold && !isMenuShrunk) {
           setIsMenuShrunk(true);
-        } else if (scrollY <= 5 && !isSearchExpanded) {
+          playerRefs.current.forEach((player) => {
+            if (player) player.pause();
+          });
+        } else if (scrollY <= shrinkThreshold && isMenuShrunk) {
           setIsMenuShrunk(false);
+          playerRefs.current.forEach((player) => {
+            if (player) player.play();
+          });
         }
       }
 
-      // Mobile scroll effects
-      if (scrollY > 25) {
-        setHideIcons(true);
-      } else if (scrollY <= 25) {
-        setHideIcons(false);
+      if (window.innerWidth < 768) {
+        if (scrollY > shrinkThreshold && !hideIcons) {
+          setHideIcons(true);
+        } else if (scrollY <= shrinkThreshold && hideIcons) {
+          setHideIcons(false);
+        }
       }
     };
 
-    if (isHome) {
-      window.addEventListener("scroll", handleScroll);
-    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isSearchExpanded, isHome, isMenuShrunk, hideIcons, scrollLock]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isSearchExpanded, isHome]);
-
-  // Reset states on route change
   useEffect(() => {
     setIsMenuShrunk(false);
     setMenuSmall(!isHome);
@@ -316,91 +320,83 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
           !classCreated ||
           !scheduleCreated ||
           !profileCompleted) && (
-          <div className=" bg-gray-50 py-[2px]">
+          <div className="transition-all bg-gray-50 py-[2px]">
             <div className="flex items-center text-logo-red px-2 justify-center text-base text-center lg:text-xl mt-3 mb-4 font-semibold">
               Please complete these steps to publish your class!
             </div>
             <div className="flex flex-col lg:flex-row px-4 bg-gray-50 gap-3 mt-2 mb-2 z-40">
               <div
-                onClick={() => {
-                  router.push("/profile/" + user.uid);
-                }}
-                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                onClick={() => router.push("/profile/" + user.uid)}
+                className={`flex-grow border-l-4 lg:border-t-4 lg:border-l-0 py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
                   profileCompleted ? "border-logo-red" : "border-gray-500"
                 }`}
               >
                 <div
-                  style={{ fontWeight: "400" }}
                   className="text-logo-red text-sm"
+                  style={{ fontWeight: "400" }}
                 >
                   Step 1
                 </div>
                 <div
-                  style={{ fontWeight: "500" }}
                   className="text-black text-base"
+                  style={{ fontWeight: "500" }}
                 >
                   Complete your Profile
                 </div>
               </div>
               <div
-                onClick={() => {
-                  router.push("/createClass");
-                }}
-                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                onClick={() => router.push("/createClass")}
+                className={`flex-grow border-l-4 lg:border-t-4 lg:border-l-0 py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
                   classCreated ? "border-logo-red" : "border-gray-500"
                 }`}
               >
                 <div
-                  style={{ fontWeight: "400" }}
                   className="text-logo-red text-sm"
+                  style={{ fontWeight: "400" }}
                 >
                   Step 2
                 </div>
                 <div
-                  style={{ fontWeight: "500" }}
                   className="text-black text-base"
+                  style={{ fontWeight: "500" }}
                 >
                   Create a class
                 </div>
               </div>
               <div
-                onClick={() => {
-                  router.push("/schedule");
-                }}
-                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                onClick={() => router.push("/schedule")}
+                className={`flex-grow border-l-4 lg:border-t-4 lg:border-l-0 py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
                   scheduleCreated ? "border-logo-red" : "border-gray-500"
                 }`}
               >
                 <div
-                  style={{ fontWeight: "400" }}
                   className="text-logo-red text-sm"
+                  style={{ fontWeight: "400" }}
                 >
                   Step 3
                 </div>
                 <div
-                  style={{ fontWeight: "500" }}
                   className="text-black text-base"
+                  style={{ fontWeight: "500" }}
                 >
                   Create Schedule
                 </div>
               </div>
               <div
-                onClick={() => {
-                  router.push("/addStripe");
-                }}
-                className={`flex-grow  border-l-4 lg:border-t-4 lg:border-l-0  py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
+                onClick={() => router.push("/addStripe")}
+                className={`flex-grow border-l-4 lg:border-t-4 lg:border-l-0 py-3 bg-gray-50 [font-family:Inter,sans-serif] cursor-pointer lg:rounded-b-md px-2 ${
                   stripeIntegration ? "border-logo-red" : "border-gray-500"
                 }`}
               >
                 <div
-                  style={{ fontWeight: "400" }}
                   className="text-logo-red text-sm"
+                  style={{ fontWeight: "400" }}
                 >
                   Step 4
                 </div>
                 <div
-                  style={{ fontWeight: "500" }}
                   className="text-black text-base"
+                  style={{ fontWeight: "500" }}
                 >
                   Connect Stripe
                 </div>
@@ -410,64 +406,78 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         )}
 
       <div
-        className={`flex flex-col md:gap-1 bg-white pb-4 md:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-500 ${
+        className={`transition-all flex flex-col dm2:gap-1 bg-white pb-4 dm2:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-1000 hide-x-scrollbar ${
           isMenuShrunk
             ? "h-[90px] dm2:h-[100px]"
             : `${isMenuSmall ? "h-auto dm2:h-[100px]" : "h-auto"}`
         }`}
         ref={navbarRef}
       >
-        {/*NavBar Top Part*/}
         <div
           className={`${
             isHome ? "z-[9000]" : "dm2:z-50 z-[9000]"
-          } relative top-0 max-md:pt-4 max-md:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 w-[100.00%] section-spacing`}
+          } relative top-0 max-dm2:pt-4 max-dm2:pb-3 py-6 box-border flex justify-between items-center flex-row gap-2 section-spacing`}
         >
           <div className="flex items-center justify-start flex-[1]">
             <Link className="left-section cursor-pointer" href="/">
               <img
                 src="/assets/image_5c0480a2.png"
-                className="cursor-pointer h-12 object-contain w-[117px] md:w-36 lg:w-44 box-border block border-[none]"
+                className="cursor-pointer h-12 object-contain w-[117px] dm2:w-36 lg:w-44 box-border block border-[none]"
                 alt="Logo"
               />
             </Link>
           </div>
 
-          {/* Category Buttons - Centered */}
-          <div className="hidden md:flex justify-center items-center absolute left-1/2 transform -translate-x-1/2">
+          {/* Animated Desktop Categories */}
+          <div className="hidden dm2:flex justify-center items-center absolute left-1/2 transform -translate-x-1/2">
             <div
-              className={`${isMenuShrunk || isMenuSmall ? "opacity-0" : ""}`}
+              className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                isMenuShrunk || isMenuSmall
+                  ? "opacity-0 scale-90 translate-y-[-10px]"
+                  : "opacity-100 scale-100 translate-y-0"
+              }`}
             >
-              <div className="flex space-x-2.5 items-center">
+              <div className="relative flex space-x-2.5 z-0 items-center">
+                {/* Animated Underline */}
+                <div
+                  className="absolute min-w-[58px] bottom-0 h-0.5 bg-black rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    width: underlineStyle.width,
+                    transform: `translateX(${underlineStyle.left}px)`,
+                  }}
+                />
+
+                {/* Categories */}
                 {categoryData.map((category, index) => (
-                  <div key={category.name}>
-                    <button
-                      onClick={() =>
-                        handleCategoryClick(category.name.toLowerCase(), index)
-                      }
-                      className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                  <button
+                    key={category.name}
+                    ref={(el) => (buttonRefs.current[index] = el)}
+                    onClick={() =>
+                      handleCategoryClick(category.name.toLowerCase(), index)
+                    }
+                    className="flex max-w-[75px] max-h-[75px] flex-col items-center justify-center relative cursor-pointer bg-transparent border-none p-2"
+                  >
+                    <Player
+                      lottieRef={(el) => (playerRefs.current[index + 3] = el)}
+                      autoplay
+                      loop={false}
+                      src={category.jsonPath}
+                      className={`h-[42px] mb-1 transition-all duration-300 ease-in-out transform ${
+                        isMenuShrunk
+                          ? "scale-90 opacity-60 -translate-y-1"
+                          : "scale-100 opacity-100 translate-y-0"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium transition-colors ${
+                        activeKey === category.name.toLowerCase()
+                          ? "text-black"
+                          : "text-gray-500"
+                      }`}
                     >
-                      <Player
-                        lottieRef={(el) => (playerRefs.current[index + 3] = el)}
-                        autoplay
-                        loop={false}
-                        src={category.jsonPath}
-                        className="h-[42px] mb-1 transition-transform duration-200 hover:scale-125"
-                      />
-                      <span
-                        className={`text-xs font-medium transition-colors ${
-                          activeKey === category.name.toLowerCase()
-                            ? "text-black"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {category.name}
-                      </span>
-                      {activeKey === category.name.toLowerCase() && (
-                        <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
-                      )}
-                    </button>
-                  </div>
+                      {category.name}
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -478,18 +488,14 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
               user ? (
                 <div className="flex items-center gap-4">
                   <div className="hidden dm1:block">
-                    {user ? (
-                      !userData?.isInstructor || currentView === "student" ? (
-                        <div />
-                      ) : (
-                        <div />
-                      )
+                    {!userData?.isInstructor || currentView === "student" ? (
+                      <div />
                     ) : (
                       <Image
                         priority={true}
                         src="/Rolling-1s-200px.svg"
-                        width={"30px"}
-                        height={"30px"}
+                        width={30}
+                        height={30}
                         alt="Loading"
                       />
                     )}
@@ -497,15 +503,14 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
 
                   {user && <Notifications user={user} />}
 
-                  {/* View Toggle for Instructors */}
                   {userData?.isInstructor && (
-                    // Go t instructor view and go to student view buttons
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outlined"
-                        className={`${currentView === "student"
-                          ? "hidden"
-                          : "hidden md:block"
+                        className={`${
+                          currentView === "student"
+                            ? "hidden"
+                            : "hidden dm2:block"
                         } text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("student")}
                       >
@@ -513,10 +518,11 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                       </Button>
                       <Button
                         variant="outlined"
-                        className={`${currentView === "instructor"
-                          ? "hidden"
-                          : "hidden md:block"
-                        }  text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
+                        className={`${
+                          currentView === "instructor"
+                            ? "hidden"
+                            : "hidden dm2:block"
+                        } text-sm bg-gray-100 px-3 py-2 hover:bg-gray-200 rounded-full`}
                         onClick={() => handleViewChange("instructor")}
                       >
                         Go to Instructor View
@@ -524,17 +530,16 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                     </div>
                   )}
 
-                  {/* Become an Instructor Button */}
                   {!userData?.isInstructor && (
                     <Link href="/instructor-onboarding">
-                      <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                      <button className="hidden dm2:inline-block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                         Become an Instructor
                       </button>
                     </Link>
                   )}
 
                   <div
-                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
+                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 dm2:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
                       isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
@@ -543,11 +548,11 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                     {userData?.profileImage ? (
                       <img
                         src={userData?.profileImage}
-                        className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12"
+                        className="rounded-full cursor-pointer shrink-0 w-10 h-10 dm2:w-12 dm2:h-12"
                         alt="User"
                       />
                     ) : (
-                      <UserCircleIcon className="rounded-full cursor-pointer shrink-0 w-10 h-10 md:w-12 md:h-12" />
+                      <UserCircleIcon className="rounded-full cursor-pointer shrink-0 w-10 h-10 dm2:w-12 dm2:h-12" />
                     )}
 
                     {showDropDown && (
@@ -557,33 +562,33 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                         }`}
                       >
                         <ul>
-                          {/* View toggle */}
                           {userData?.isInstructor && (
                             <div className="flex justify-between">
                               <div className="flex items-center">
                                 <button
                                   onClick={() => handleViewChange("student")}
-                                  className={`${currentView === "student"
-                                    ? "hidden"
-                                    : "block md:hidden"
-                                  }  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
+                                  className={`${
+                                    currentView === "student"
+                                      ? "hidden"
+                                      : "block dm2:hidden"
+                                  } hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
                                 >
                                   Go to Student View
                                 </button>
                                 <button
                                   onClick={() => handleViewChange("instructor")}
-                                  className={`${currentView === "instructor"
-                                    ? "hidden"
-                                    : "block md:hidden"
-                                  }  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
+                                  className={`${
+                                    currentView === "instructor"
+                                      ? "hidden"
+                                      : "block dm2:hidden"
+                                  } hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90`}
                                 >
                                   Go to Instructor View
                                 </button>
                               </div>
-                              </div>
+                            </div>
                           )}
 
-                          {/* Request/Create Class at top */}
                           {(!userData?.isInstructor ||
                             currentView === "student") &&
                           userData ? (
@@ -602,78 +607,92 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                           )}
                           <hr className="my-2" />
 
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                          <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/profile/${user.uid}`}>Profile</Link>
                           </li>
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                          <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/mybooking?id=${user.uid}`}>
                               My Booking
                             </Link>
                           </li>
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                          <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href={`/chat`}>My Messages</Link>
                           </li>
 
-                          {/* Student View Items */}
                           {(!userData?.isInstructor ||
                             currentView === "student") && (
                             <>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                              <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                 <Link href={`/wallet`}>Wallet</Link>
                               </li>
                             </>
                           )}
-                          {/* Instructor View Items */}
+
                           {userData?.isInstructor &&
                             currentView === "instructor" && (
-                            <>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/myClass/${user.uid}`}>
-                                  My Classes
-                                </Link>
-                              </li>
-                              <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                <Link href={`/automations`}>
-                                  Automations
-                                </Link>
-                              </li>
-                              <li>
-                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <Link href={`/myStudents/${user.uid}`}>
-                                    My Clients
+                              <>
+                                <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/myClass/${user.uid}`}>
+                                    My Classes
                                   </Link>
-                                </p>
-                              </li>
-                              <li>
-                                <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
-                                  <Link href={`/classbookings?id=${user.uid}`}>
-                                    Class Bookings
-                                  </Link>
-                                </p>
+                                </li>
+                                <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <Link href={`/automations`}>Automations</Link>
                                 </li>
                                 <li>
-                                  <p className="my-2 block dm1:hidden  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link href={`/myStudents/${user.uid}`}>
+                                      My Clients
+                                    </Link>
+                                  </p>
+                                </li>
+                                <li>
+                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link
+                                      href={`/classbookings?id=${user.uid}`}
+                                    >
+                                      Class Bookings
+                                    </Link>
+                                  </p>
+                                </li>
+                                <li>
+                                  <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link href={`/myStudents/${user.uid}`}>
+                                      My Clients
+                                    </Link>
+                                  </p>
+                                </li>
+                                <li>
+                                  <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                    <Link
+                                      href={`/classbookings?id=${user.uid}`}
+                                    >
+                                      Class Bookings
+                                    </Link>
+                                  </p>
+                                </li>
+                                <li>
+                                  <p className="my-2 block dm1:hidden hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                     <Link href={`/createClass`}>
                                       Create Class
                                     </Link>
                                   </p>
                                 </li>
                                 <li>
-                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                     <Link href="/schedule">
                                       Manage Schedule
                                     </Link>
                                   </p>
                                 </li>
                                 <li>
-                                  <p className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                                  <p className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                                     <Link href="/withdraw">My Wallet</Link>
                                   </p>
                                 </li>
                               </>
                             )}
 
-                          {/* Become an Instructor option for non-instructors */}
                           {!userData?.isInstructor && (
                             <li className="my-2">
                               <Link href="/instructor-onboarding">
@@ -699,21 +718,21 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                             </li>
                           )}
                           {userData?.isAdmin && (
-                            <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                            <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                               <Link href="/vouchers">Vouchers</Link>
                             </li>
                           )}
-                          <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                          <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                             <Link href="/support">Support</Link>
                           </li>
                           {userData?.isAdmin && (
-                            <li className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
+                            <li className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90">
                               <Link href="/dashboard">Dashboard</Link>
                             </li>
                           )}
                           <hr className="my-2" />
                           <li
-                            className="my-2  hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 cursor-pointer"
+                            className="my-2 hover:text-logo-red hover:scale-105 transition transform duration-200 ease-out active:scale-90 cursor-pointer"
                             onClick={() => {
                               signOut();
                               localStorage.removeItem("profileImage");
@@ -728,16 +747,14 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                 </div>
               ) : (
                 <>
-                  {/* Become an Instructor Button for logged-out users */}
                   <Link href="/instructor-onboarding">
-                    <button className="hidden md:block  bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
+                    <button className="hidden dm2:block bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors mr-4">
                       Become an Instructor
                     </button>
                   </Link>
 
-                  {/* Menu for non-logged-in users */}
                   <div
-                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 md:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
+                    className={`relative flex gap-2 items-center space-x-2 border-2 p-1 dm2:p-2 rounded-full hover:bg-gray-100 cursor-pointer ${
                       isHome ? "z-[990]" : "dm2:z-50 z-[900]"
                     }`}
                     onClick={toggleDropDown}
@@ -813,13 +830,14 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
             )}
           </div>
         </div>
-        {/* Mobile Category Buttons - Only shown on homepage */}
+
+        {/* Animated Mobile Categories */}
         {isHome && (
           <div
-            className={`ease-in-out overflow-hidden w-full justify-center md:hidden flex ${
+            className={`transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full justify-center dm2:hidden flex ${
               hideIcons
-                ? "mb-0 max-h-0 opacity-0"
-                : "mb-3 max-h-[200px] opacity-100"
+                ? "mb-0 max-h-0 opacity-0 -translate-y-5"
+                : "mb-3 max-h-[200px] opacity-100 translate-y-0"
             }`}
           >
             <div className="flex space-x-2.5 items-center">
@@ -848,7 +866,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                       {category.name}
                     </span>
                     {activeKey === category.name.toLowerCase() && (
-                      <div className="absolute bottom-[-2px] w-[110%] h-0.5 bg-black rounded-full"></div>
+                      <div className="absolute bottom-[-2px] h-0.5 bg-black rounded-full"></div>
                     )}
                   </button>
                 </div>
@@ -857,18 +875,36 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
           </div>
         )}
 
-        {/*NavBar Search Part*/}
+        {/* Animated Search Bar */}
         <div
-          className={`${
+          className={`max-w-[98%] transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
             isMenuShrunk || (isMenuSmall && screenWidth > 800)
-              ? "flex items-center justify-center h-full absolute inset-0"
+              ? "absolute inset-0 flex items-center justify-center"
               : "relative"
           }`}
+          style={{
+            transform:
+              isMenuShrunk || (isMenuSmall && screenWidth > 800)
+                ? "scale(0.85) translateY(-5px)"
+                : "scale(1) translateY(0)",
+            opacity:
+              isMenuShrunk || (isMenuSmall && screenWidth > 800) ? 0.85 : 1,
+            transition: "all 1000ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+            pointerEvents:
+              isMenuShrunk || (isMenuSmall && screenWidth > 800)
+                ? "none"
+                : "auto",
+          }}
         >
           <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
-            expandMenu={() => setIsMenuShrunk(false)}
+            expandMenu={() => {
+              setIsMenuShrunk(false);
+              playerRefs.current.forEach((player) => {
+                if (player) player.play();
+              });
+            }}
             user={user}
           />
         </div>

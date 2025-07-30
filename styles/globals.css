@@ -7,6 +7,14 @@ html {
   scrollbar-gutter: stable;
 }
 
+.hide-x-scrollbar {       /* still scrollable */
+  scrollbar-width: none;   /* Firefox */
+}
+
+.hide-x-scrollbar::-webkit-scrollbar {
+  display: none;           /* Chrome, Safari */
+}
+
 html,
 body {
   /* padding: 0;
@@ -408,4 +416,46 @@ a {
   [type='radio']:checked {
     background-color: #e73f2b !important;
   }
+}
+
+/* Dropdown animations */
+.menu-dropdown {
+  will-change: transform, opacity;
+  transform-origin: top center;
+}
+
+.search-bar-option {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clear-search-icon {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.clear-search-icon:hover {
+  transform: scale(1.1);
+}
+
+.search-hover {
+  transition: opacity 0.2s ease;
+}
+
+/* Active background indicator */
+.active-bg {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* List items in dropdown */
+.menu-dropdown li {
+  transition: background-color 0.15s ease;
+}
+
+/* Search button hover effect */
+.searchsearch {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.searchsearch:hover {
+  transform: scale(1.05) translateY(-50%);
 }

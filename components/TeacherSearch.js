@@ -8,10 +8,10 @@ import dynamic from "next/dynamic";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-day-picker/dist/style.css";
 import { useActiveIndicator } from "../hooks/useActiveIndicator";
-import { collection, getDoc, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Dynamically import DayPicker to reduce bundle size
 const DayPicker = dynamic(
   () => import("react-day-picker").then((mod) => mod.DayPicker),
   {
@@ -20,7 +20,6 @@ const DayPicker = dynamic(
   }
 );
 
-// Precompute search options outside component
 const initialSearchOptions = [
   ...smartDefaults.map((d) => ({
     label: d.name,
@@ -42,20 +41,6 @@ const initialSearchOptions = [
       payload: subCat,
     })),
   ]),
-];
-
-const distanceOptions = [
-  { value: "2", label: "2 km" },
-  { value: "5", label: "5 km" },
-  { value: "15", label: "15 km" },
-  { value: "30", label: "30 km" },
-  { value: "", label: "Any distance" },
-];
-
-const sortByOptions = [
-  { value: "rating", label: "Rating (High to Low)" },
-  { value: "price", label: "Price (Low to High)" },
-  { value: "distance", label: "Distance (Nearest)" },
 ];
 
 const ClearSearchIcon = React.memo(({ classes, onClick }) => (
@@ -86,42 +71,99 @@ const TeacherSearch = ({ expandMenu, user }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
-  const [searchDistance, setSearchDistance] = useState("");
-  const [searchSortBy, setSearchSortBy] = useState("rating");
   const [classes, setClasses] = useState([]);
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [dateRange, setDateRange] = useState([undefined, undefined]);
   const [selectedRange, setSelectedRange] = useState();
-  const dropdownRef = useRef(null);
   const [isShrunk, setIsShrunk] = useState(false);
   const [isMenuSmall, setIsMenuSmall] = useState(true);
+
+  const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const { activeStyle, updateIndicator, resetActiveBG } = useActiveIndicator();
+
+  const dropdownVariants = {
+    hidden: {
+      opacity: 0,
+      y: -10,
+      transition: { duration: 0.15, ease: "easeInOut" },
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.2, ease: "easeOut" },
+    },
+    exit: {
+      opacity: 0,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeInOut" },
+    },
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setActiveDropdown(null);
+      }
+    };
+
+    const handleScroll = () => {
+      setActiveDropdown(null);
+    };
+
+    const handleResize = () => {
+      setActiveDropdown(null);
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const isHomePage =
       router.pathname === "/" && Object.keys(router.query).length === 0;
-
     setIsMenuSmall(!isHomePage);
   }, [router.pathname, router.query]);
 
-  const { containerRef, activeStyle, updateIndicator, resetActiveBG } =
-    useActiveIndicator();
-
-  // Memoize filtered search options
   const filteredSearchOptions = useMemo(() => {
-    return initialSearchOptions.filter(
-      (item) =>
-        // Also include items that have same category or subCategory as filtered classes
-        item.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (filteredClasses.length > 0 &&
-          filteredClasses.some(
-            (cls) =>
-              cls.Category.toLowerCase() === item.label.toLowerCase() ||
-              cls.SubCategory?.toLowerCase() === item.label.toLowerCase()
-          ))
-    );
-  }, [searchTerm]);
+  const term = searchTerm.toLowerCase().trim();
+  if (!term) return initialSearchOptions;
 
-  // Handle URL parameters
+  const startsWith = [];
+  const includes = [];
+  const fromClasses = [];
+
+  for (const item of initialSearchOptions) {
+    const label = item.label.toLowerCase();
+
+    if (label.startsWith(term)) {
+      startsWith.push(item);
+    } else if (label.includes(term)) {
+      includes.push(item);
+    } else if (
+      filteredClasses.some(
+        (cls) =>
+          cls.Category?.toLowerCase() === label ||
+          cls.SubCategory?.toLowerCase() === label
+      )
+    ) {
+      fromClasses.push(item);
+    }
+  }
+
+  return [...startsWith, ...includes, ...fromClasses];
+}, [searchTerm, filteredClasses]);
+
+
   useEffect(() => {
     if (Object.keys(router.query).length && initialSearchOptions.length) {
       const { category, subCategory, startDate, endDate } = router.query;
@@ -136,33 +178,15 @@ const TeacherSearch = ({ expandMenu, user }) => {
       }
 
       setSearchTerm(term);
-
-      const selected = initialSearchOptions.find(
-        (item) => item.label === category
+      setSelectedItem(
+        initialSearchOptions.find((item) => item.label === category)
       );
-      setSelectedItem(selected);
-
       setDateRange([startDate, endDate]);
       setSelectedRange({ from: startDate, to: endDate });
     }
-  }, [router.query, initialSearchOptions]);
-
-  // Handle click outside dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        const isPickerPanel = event.target.closest(".ant-picker-panel");
-        if (isPickerPanel) return;
-        setActiveDropdown(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [router.query]);
 
   useEffect(() => {
-    // Get All classes from Firestore
     const fetchClasses = async () => {
       try {
         const classesQuery = query(collection(db, "classes"));
@@ -172,7 +196,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           ...doc.data(),
         }));
         setClasses(classesData);
-        setFilteredClasses(classesData); // Initialize filtered classes
+        setFilteredClasses(classesData);
       } catch (error) {
         console.error("Error fetching classes:", error);
       }
@@ -186,12 +210,8 @@ const TeacherSearch = ({ expandMenu, user }) => {
     const term = searchTerm.toLowerCase().trim();
     const target = text.toLowerCase();
 
-    // Exact match gets highest score
-    if (target.includes(term)) {
-      return { score: 1, match: true };
-    }
+    if (target.includes(term)) return { score: 1, match: true };
 
-    // Calculate fuzzy score based on character matching and position
     let score = 0;
     let termIndex = 0;
     let consecutiveMatches = 0;
@@ -208,23 +228,12 @@ const TeacherSearch = ({ expandMenu, user }) => {
       }
     }
 
-    // Normalize score and apply bonuses
     let normalizedScore = termIndex / term.length;
-
-    // Bonus for consecutive character matches
-    if (maxConsecutive > 1) {
+    if (maxConsecutive > 1)
       normalizedScore += (maxConsecutive / term.length) * 0.2;
-    }
-
-    // Bonus for starting with search term
-    if (target.startsWith(term.substring(0, Math.min(3, term.length)))) {
+    if (target.startsWith(term.substring(0, Math.min(3, term.length))))
       normalizedScore += 0.2;
-    }
-
-    // Penalty for very long targets with few matches
-    if (target.length > term.length * 3) {
-      normalizedScore *= 0.8;
-    }
+    if (target.length > term.length * 3) normalizedScore *= 0.8;
 
     return {
       score: Math.min(normalizedScore, 1),
@@ -232,13 +241,9 @@ const TeacherSearch = ({ expandMenu, user }) => {
     };
   };
 
-  // Replace the existing useEffect for filtering classes
   useEffect(() => {
-
     if (searchTerm && searchTerm.trim().length > 0) {
       const lowerCaseTerm = searchTerm.toLowerCase().trim();
-
-      // Score each class based on fuzzy matching
       const scoredClasses = classes.map((cls) => {
         const scores = [
           fuzzySearch(lowerCaseTerm, cls.Name || "", 0.2),
@@ -247,28 +252,20 @@ const TeacherSearch = ({ expandMenu, user }) => {
           fuzzySearch(lowerCaseTerm, cls.SubCategory || "", 0.25),
         ];
 
-        // Calculate weighted score
         const totalScore =
-          scores[0].score * 0.4 + // Name has highest weight
-          scores[1].score * 0.2 + // Description
-          scores[2].score * 0.2 + // Category
-          scores[3].score * 0.2; // SubCategory
-
+          scores[0].score * 0.4 +
+          scores[1].score * 0.2 +
+          scores[2].score * 0.2 +
+          scores[3].score * 0.2;
         const hasMatch = scores.some((s) => s.match);
 
-        return {
-          ...cls,
-          searchScore: totalScore,
-          hasMatch,
-        };
+        return { ...cls, searchScore: totalScore, hasMatch };
       });
 
-      // Filter and sort by score
       let filtered = scoredClasses
-        .filter((cls) => cls.hasMatch || cls.searchScore > 0.1) // Include even low scores
-        .sort((a, b) => b.searchScore - a.searchScore); // Sort by score descending
+        .filter((cls) => cls.hasMatch || cls.searchScore > 0.1)
+        .sort((a, b) => b.searchScore - a.searchScore);
 
-      // Limit results based on score quality
       const highQualityResults = filtered.filter(
         (cls) => cls.searchScore > 0.5
       );
@@ -279,7 +276,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
         (cls) => cls.searchScore <= 0.3
       );
 
-      // Adaptive result limiting
       let finalResults = [];
       if (highQualityResults.length > 0) {
         finalResults = [
@@ -290,33 +286,24 @@ const TeacherSearch = ({ expandMenu, user }) => {
         finalResults = mediumQualityResults.slice(0, 10);
       } else if (lowQualityResults.length > 0) {
         finalResults = lowQualityResults.slice(0, 5);
-      } else {
-        finalResults = []; // No results found
       }
 
       setFilteredClasses(finalResults);
     } else {
-      setFilteredClasses(classes); // Reset to all classes if no search term
+      setFilteredClasses(classes);
     }
   }, [searchTerm, classes]);
 
-  const isISODate = (str) => {
-    return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(str);
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
+    if (!selectedItem) return;
 
     const searchParams = {
-      distance: searchDistance,
-      sortBy: searchSortBy,
+      sortBy: "rating",
     };
-
-    if (!selectedItem) return;
 
     if (selectedItem.type === "smart") {
       searchParams.category = selectedItem.label;
-      searchParams.distance = "";
       searchParams.subCategory = selectedItem.payload.subCategories;
     } else if (selectedItem.type === "category") {
       searchParams.category = selectedItem.label;
@@ -325,19 +312,17 @@ const TeacherSearch = ({ expandMenu, user }) => {
       const category = categoryData.find((cat) =>
         cat.subCategories.some((sc) => sc.name === selectedItem.label)
       );
-      if (category) {
-        searchParams.category = category.name;
-      }
+      if (category) searchParams.category = category.name;
       searchParams.subCategory = selectedItem.label;
     }
 
     if (dateRange[0] && dateRange[1]) {
-      searchParams.startDate = isISODate(dateRange[0])
-        ? dateRange[0]
-        : dateRange[0].toISOString();
-      searchParams.endDate = isISODate(dateRange[1])
-        ? dateRange[1]
-        : dateRange[1].toISOString();
+      searchParams.startDate = dateRange[0].toISOString
+        ? dateRange[0].toISOString()
+        : dateRange[0];
+      searchParams.endDate = dateRange[1].toISOString
+        ? dateRange[1].toISOString()
+        : dateRange[1];
     }
 
     const filteredParams = Object.fromEntries(
@@ -356,10 +341,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
     setActiveDropdown(null);
   };
 
-  const handleDatePickerClick = (e) => {
-    e.stopPropagation();
-  };
-
   const formattedDateRange = () => {
     if (dateRange[0] && dateRange[1]) {
       return `${dayjs(dateRange[0]).format("MMM D")} - ${dayjs(
@@ -368,29 +349,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
     }
     return "Add dates";
   };
-
-  useEffect(() => {
-    if (activeDropdown?.length) {
-      const activeSearchBg = document.querySelector(
-        ".search-wrap-bg.active-search"
-      );
-      const defaultBg = document.querySelector(".search-wrap-bg.default");
-      if (activeSearchBg) activeSearchBg.style.opacity = "1";
-      if (defaultBg) defaultBg.style.opacity = "0";
-    } else {
-      const activeSearchBg = document.querySelector(
-        ".search-wrap-bg.active-search"
-      );
-      const defaultBg = document.querySelector(".search-wrap-bg.default");
-      if (activeSearchBg) activeSearchBg.style.opacity = "0";
-      if (defaultBg) defaultBg.style.opacity = "1";
-      resetActiveBG();
-    }
-  }, [activeDropdown, resetActiveBG]);
-
-  useEffect(() => {
-    setActiveDropdown(null);
-  }, [isShrunk]);
 
   const toggleDropdown = (type) => {
     setActiveDropdown((prev) => (prev === type ? null : type));
@@ -411,7 +369,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
 
   return (
     <div
-      className={`menu-search-bar z-[100] transition-all duration-500 mx-auto max-dm2:px-3 ${
+      className={`menu-search-bar transition-all duration-500 mx-auto max-dm2:px-3 ${
         isShrunk
           ? "max-w-[230px] h-[50px]"
           : `${
@@ -420,9 +378,10 @@ const TeacherSearch = ({ expandMenu, user }) => {
                 : "max-dm2:h-[54px] max-w-[650px]"
             }`
       }`}
+      ref={dropdownRef}
     >
       <div className="transition duration-500 h-full">
-        <div className="relative h-full" ref={dropdownRef}>
+        <div className="relative h-full">
           <div className="absolute top-0 left-0 w-full h-full">
             <div
               className={`search-wrap-bg active-search ${
@@ -432,20 +391,20 @@ const TeacherSearch = ({ expandMenu, user }) => {
             <div className="search-wrap-bg default"></div>
           </div>
 
-          <div ref={containerRef} className="search-bar-wrapper transition-all">
-            {!isShrunk && (
-              <div
-                className={`active-bg ${
-                  isMenuSmall ? "h-full" : "h-[52px] dm2:h-[62px]"
-                }`}
-                style={{
-                  left: activeStyle.left,
-                  width: activeStyle.width,
-                }}
-              ></div>
-            )}
+          <div
+            ref={containerRef}
+            className="search-bar-wrapper transition-transform"
+          >
+            {!isShrunk ||
+              (isShrunk && (
+                <div
+                  className={`active-bg ${
+                    isMenuSmall ? "h-full" : "h-[52px] dm2:h-[62px]"
+                  }`}
+                  style={{ left: activeStyle.left, width: activeStyle.width }}
+                ></div>
+              ))}
 
-            {/* Search Input */}
             <div
               className={`search-bar-option group z-50 ${
                 isShrunk
@@ -456,7 +415,12 @@ const TeacherSearch = ({ expandMenu, user }) => {
                         : "!pl-5 !pr-4 dm2:!pl-8"
                     }`
               }`}
-              onClick={() => handleOptionClick("sub", 0)}
+              onClick={() => {
+                handleOptionClick("sub", 0);
+                if (activeDropdown !== "sub") {
+                  setActiveDropdown("sub");
+                }
+              }}
             >
               <div
                 className={`search-hover initial bg-gray-200 ${
@@ -472,7 +436,12 @@ const TeacherSearch = ({ expandMenu, user }) => {
                   type="text"
                   placeholder="Explore your interests"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    if (activeDropdown !== "sub") {
+                      setActiveDropdown("sub");
+                    }
+                  }}
                   className="relative border-0 p-0 text-xs dm2:text-sm text-black bg-transparent font-semibold focus:ring-0 placeholder:text-black"
                 />
               )}
@@ -489,16 +458,9 @@ const TeacherSearch = ({ expandMenu, user }) => {
             {isShrunk ? (
               <div className="search-options-separator !opacity-100"></div>
             ) : (
-              <div
-                className={`search-options-separator ${
-                  !["picker", "sub"].includes(activeDropdown)
-                    ? "opacity-100"
-                    : "opacity-0"
-                }`}
-              ></div>
+              <div className={`search-options-separator opacity-100`}></div>
             )}
 
-            {/* Date Picker */}
             <div
               className={`search-bar-option group ${
                 isShrunk
@@ -531,9 +493,8 @@ const TeacherSearch = ({ expandMenu, user }) => {
               />
             </div>
 
-            {/* Search Button */}
             <button
-              className={`absolute right-1 dm2:right-2 -translate-y-1/2 top-1/2 flex items-center justify-center z-30 rounded-full bg-red-500 hover:bg-red-600 text-white transition duration-500 ${
+              className={`searchsearch absolute right-1 dm2:right-2 -translate-y-1/2 top-1/2 flex items-center justify-center z-30 rounded-full bg-red-500 hover:bg-red-600 text-white transition duration-500 ${
                 isShrunk
                   ? "size-9 !right-1.5"
                   : `${isMenuSmall ? "size-11 right-1" : "size-11 dm2:size-12"}`
@@ -545,110 +506,136 @@ const TeacherSearch = ({ expandMenu, user }) => {
             </button>
           </div>
 
-          {/* Dropdowns */}
-          {activeDropdown === "sub" && !isShrunk && (
-            <div className="menu-dropdown left-0 max-w-[400px] !pr-0 overflow-auto">
-              <div className="max-h-[calc(100vh_-_250px)]">
-                <ul className="flex flex-col dm2:gap-1 pr-5">
-                  {filteredSearchOptions.map((item, index) => (
-                    <li
-                      key={index}
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setSearchTerm(item.label);
-                        toggleDropdown("picker");
-                        updateIndicator(1);
-                      }}
-                      className="flex gap-3 items-center rounded-lg hover:bg-gray-100 transition p-2"
+          <AnimatePresence>
+            {activeDropdown === "sub" && !isShrunk && (
+              <motion.div
+                className="menu-dropdown left-0 max-w-[400px] !pr-0 overflow-auto"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={dropdownVariants}
+              >
+                <div className="max-h-[calc(100vh_-_250px)]">
+                  <ul className="flex flex-col dm2:gap-1 pr-5">
+                    {filteredSearchOptions.map((item, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.03 }}
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setSearchTerm(item.label);
+                          toggleDropdown("picker");
+                          updateIndicator(1);
+                        }}
+                        className="flex gap-3 items-center rounded-lg hover:bg-gray-100 transition p-2"
+                      >
+                        <div className="size-12 shrink-0 rounded flex justify-center items-center bg-gray-50">
+                          <img
+                            src={item.icon}
+                            alt={item.label}
+                            className="w-[80%] h-full object-contain"
+                          />
+                        </div>
+                        <div>
+                          <span className="font-medium">{item.label}</span>
+                          {item.payload?.description && (
+                            <p>{item.payload.description}</p>
+                          )}
+                        </div>
+                      </motion.li>
+                    ))}
+                  </ul>
+
+                  {filteredClasses.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="mt-4"
                     >
-                      <div className="size-12 shrink-0 rounded flex justify-center items-center bg-gray-50">
-                        <img
-                          src={item.icon}
-                          alt={item.label}
-                          className="w-[80%] h-full object-contain"
-                        />
-                      </div>
-                      <div>
-                        <span className="font-medium">{item.label}</span>
-                        {item.payload?.description && (
-                          <p>{item.payload.description}</p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                        Classes
+                      </h3>
+                      <ul className="space-y-1">
+                        {filteredClasses.map((cls) => (
+                          <motion.li
+                            key={cls.id}
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.1 }}
+                            className="flex items-center gap-3 p-2 hover:bg-gray-50 transition rounded-lg cursor-pointer"
+                            onClick={() => {
+                              router.push(`/classes/${cls.id}`);
+                              setActiveDropdown(null);
+                            }}
+                          >
+                            <div className="size-12 shrink-0 rounded flex justify-center items-center bg-gray-50">
+                              {cls.Images && cls.Images.length > 0 ? (
+                                <img
+                                  src={cls.Images[0]}
+                                  alt={cls.Name}
+                                  className="w-full h-full object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
+                                  <span className="text-gray-400 text-xs">
+                                    No Image
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium whitespace-nowrap text-gray-900">
+                                {cls.Name.length > 30
+                                  ? `${cls.Name.slice(0, 30)}...`
+                                  : cls.Name}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {cls.Category} •{" "}
+                                {cls.Address || "Location not specified"}
+                              </p>
+                            </div>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-                {filteredClasses.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      Classes
-                    </h3>
-                    <ul className="space-y-1">
-                      {filteredClasses.map((cls) => (
-                        <li
-                          key={cls.id}
-                          className="flex items-center gap-3 p-2 hover:bg-gray-50 transition rounded-lg cursor-pointer"
-                          onClick={() => {
-                            router.push(`/classes/${cls.id}`);
-                            setActiveDropdown(null);
-                          }}
-                        >
-                          <div className="size-12 shrink-0 rounded flex justify-center items-center bg-gray-50">
-                            {cls.Images && cls.Images.length > 0 ? (
-                              <img
-                                src={cls.Images[0]}
-                                alt={cls.Name}
-                                className="w-full h-full object-cover rounded"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                                <span className="text-gray-400 text-xs">
-                                  No Image
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium whitespace-nowrap text-gray-900">
-                              {cls.Name.length > 30
-                                ? `${cls.Name.slice(0, 30)}...`
-                                : cls.Name}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                              {cls.Category} •{" "}
-                              {cls.Address || "Location not specified"}
-                            </p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {activeDropdown === "picker" && !isShrunk && (
-            <div className="menu-dropdown right-0 !w-fit z-50">
-              <div onClick={handleDatePickerClick}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Available Between
-                </label>
-                <DayPicker
-                  mode="range"
-                  selected={selectedRange}
-                  onSelect={(range) => {
-                    setSelectedRange(range);
-                    if (range?.from && range?.to) {
-                      setDateRange([range.from, range.to]);
-                    }
-                  }}
-                  className="p-2 bg-white-100 text-sm"
-                  disabled={{ before: new Date() }}
-                />
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {activeDropdown === "picker" && !isShrunk && (
+              <motion.div
+                className="menu-dropdown right-0 !w-fit z-50"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={dropdownVariants}
+              >
+                <div onClick={(e) => e.stopPropagation()}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Available Between
+                  </label>
+                  <DayPicker
+                    mode="range"
+                    selected={selectedRange}
+                    onSelect={(range) => {
+                      setSelectedRange(range);
+                      if (range?.from && range?.to) {
+                        setDateRange([range.from, range.to]);
+                      }
+                    }}
+                    className="p-2 bg-white-100 text-sm"
+                    disabled={{ before: new Date() }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
