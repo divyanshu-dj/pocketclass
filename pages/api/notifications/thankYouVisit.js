@@ -118,7 +118,7 @@ export default async function handler(req, res) {
       classDate: classDate,
       classDuration: `${classData.Duration || 60} minutes`,
       bookingId: booking.id,
-      reviewLink: `${process.env.NODE_ENV === 'production' ? 'https://www.pocketclass.ca' : 'http://localhost:3000'}/review?bookingId=${bookingId}&instructorId=${booking.instructor_id}`,
+      reviewLink: `${process.env.NODE_ENV === 'production' ? 'https://www.pocketclass.ca' : 'http://localhost:3000'}/classes/id=${booking.class_id}#review`,
       bookAgainLink: `${process.env.NODE_ENV === 'production' ? 'https://www.pocketclass.ca' : 'http://localhost:3000'}/instructor/${booking.instructor_id}`,
       ...links
     };
