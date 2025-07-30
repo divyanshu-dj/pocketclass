@@ -49,6 +49,54 @@ function FitnessClassDetailsSection({
   const reviewsRef = useRef(null);
   const faqRef = useRef(null);
   const [isTablet, setIsTablet] = useState(false);
+  const [activeSection, setActiveSection] = useState("instructor");
+
+  useEffect(() => {
+    const createObserver = (ref, sectionName, threshold = 0.3) => {
+      if (!ref.current) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(sectionName);
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: "0px",
+          threshold,
+        }
+      );
+
+      ref.current.setAttribute("data-section", sectionName);
+      observer.observe(ref.current);
+      return observer;
+    };
+
+    const observers = [];
+
+    if (instructorRef.current) {
+      observers.push(createObserver(instructorRef, "instructor", 0.3));
+    }
+
+    if (bookingRef.current) {
+      observers.push(createObserver(bookingRef, "booking", 0.3));
+    }
+
+    if (reviewsRef.current) {
+      observers.push(createObserver(reviewsRef, "reviews", 0.2)); // 👈 lower threshold for reviews
+    }
+
+    if (faqRef.current) {
+      observers.push(createObserver(faqRef, "faq", 0.3));
+    }
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, []);
 
   useEffect(() => {
     const checkWidth = () => {
@@ -170,37 +218,46 @@ function FitnessClassDetailsSection({
 
   return (
     <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing">
-      {isMobile && (
+      {isMobile && classData && (
         <div className="fixed top-0 z-30 bg-white border-b border-gray-200 w-full h-[180px] flex flex-col justify-end px-4">
           <div className="flex gap-6 justify-start overflow-x-auto pb-3 max-w-full">
-            <button
-              onClick={() => scrollToRef(instructorRef,400)}
-              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
-            >
-              Instructor
-            </button>
-            <button
-              onClick={() => scrollToRef(bookingRef,250)}
-              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
-            >
-              Booking
-            </button>
-            <button
-              onClick={() => scrollToRef(reviewsRef,-200)}
-              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
-            >
-              Reviews
-            </button>
-            <button
-              onClick={() => scrollToRef(faqRef,250)}
-              className="text-sm font-medium text-[#261f22] whitespace-nowrap"
-            >
-              FAQ
-            </button>
+            {[
+              {
+                label: "Instructor",
+                ref: instructorRef,
+                key: "instructor",
+                offset: 550,
+              },
+              {
+                label: "Booking",
+                ref: bookingRef,
+                key: "booking",
+                offset: 250,
+              },
+              {
+                label: "Reviews",
+                ref: reviewsRef,
+                key: "reviews",
+                offset: -700,
+              },
+              { label: "FAQ", ref: faqRef, key: "faq", offset: 250 },
+            ].map(({ label, ref, key, offset }) => (
+              <button
+                key={key}
+                onClick={() => scrollToRef(ref, offset)}
+                className={`text-sm font-medium text-[#261f22] whitespace-nowrap relative pb-1 transition-all duration-300 ${
+                  activeSection === key
+                    ? "border-b-2 border-black"
+                    : "border-b-2 border-transparent"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       )}
-      <div className="flex justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
+      <div className="flex mt-2 justify-between items-start flex-col lg:flex-row gap-2 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border">
         {!classData ? (
           <div className="grow-0 shrink-0 basis-auto animate-pulse">
             {/* Title skeleton */}
