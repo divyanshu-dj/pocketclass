@@ -106,7 +106,10 @@ const SortableImage = ({ image, onRemove }) => {
           className="w-full h-48 object-cover rounded-lg border"
         />
       ) : (
-        <video src={image.src} className="object-cover rounded-lg w-full h-48" />
+        <video
+          src={image.src}
+          className="object-cover rounded-lg w-full h-48"
+        />
       )}
 
       <div
@@ -203,13 +206,13 @@ export default function CreateClass() {
       return;
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10 * 1024 * 1024) {
+    if (totalSize > 20 * 1024 * 1024) {
       // 10MB
       setImageError(
-        "Total size of all images must be less than or equal to 10MB"
+        "Total size of all images must be less than or equal to 20MB"
       );
       toast.error(
-        "Total size of all images must be less than or equal to 10MB"
+        "Total size of all images must be less than or equal to 20MB"
       );
       setLoading(false);
       return;
@@ -362,10 +365,25 @@ export default function CreateClass() {
   };
 
   const onDrop = async (acceptedFiles) => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
+    const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20 MB
+    let currentTotalSize = uploadedFiles.reduce(
+      (acc, file) => acc + file.size,
+      0
+    );
+
+    const finalAcceptedFiles = [];
+
+    for (const file of acceptedFiles) {
+      if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
+        toast.error(`Skipping "${file.name}" as total size exceeds 20MB.`);
+        continue;
+      }
+      currentTotalSize += file.size;
+      finalAcceptedFiles.push(file);
     }
-    const previews = acceptedFiles.map((file) => {
+
+    // Preview generation
+    const previews = finalAcceptedFiles.map((file) => {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () =>
@@ -377,41 +395,27 @@ export default function CreateClass() {
         reader.readAsDataURL(file);
       });
     });
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
 
-    Promise.all(previews).then((dataURLs) =>
-      setPreviewImages((prev) => [...prev, ...dataURLs])
-    );
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+    const previewData = await Promise.all(previews);
+    setPreviewImages((prev) => [...prev, ...previewData]);
+
+    // Compress images (skip compression for videos)
     const compressedFiles = await Promise.all(
-      acceptedFiles.map(async (file) => {
+      finalAcceptedFiles.map(async (file) => {
         if (file.type.startsWith("image/")) {
           try {
             const compressed = await imageCompression(file, {
-              maxSizeMB: 1, // Compress to under 1MB (adjust as needed)
+              maxSizeMB: 1,
               maxWidthOrHeight: 1920,
               useWebWorker: true,
             });
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur();
-            }
             return compressed;
           } catch (err) {
             console.error("Image compression failed:", err);
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur();
-            }
             return file; // fallback
           }
         } else {
-          if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-          }
-          return file; // No compression for videos
+          return file; // no compression for videos
         }
       })
     );
@@ -428,10 +432,10 @@ export default function CreateClass() {
       setImageError(null); // Clear error if images are present
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10 * 1024 * 1024) {
+    if (totalSize > 20 * 1024 * 1024) {
       // 10MB
       setImageError(
-        "Total size of all images must be less than or equal to 10MB"
+        "Total size of all images must be less than or equal to 20MB"
       );
       setLoading(false);
       return;
@@ -851,7 +855,7 @@ export default function CreateClass() {
                       ? "Drop the files here"
                       : "Click to upload files or Drag & Drop"}
                   </p>
-                  <p className="text-gray-500 text-base">files(10MB max)</p>
+                  <p className="text-gray-500 text-base">files(20MB max)</p>
                 </div>
               </div>
               {imageError && (

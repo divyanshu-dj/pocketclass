@@ -8,7 +8,7 @@ import { categories } from "../../utils/categories";
 import { useDropzone } from "react-dropzone";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import { useFormik } from 'formik';
+import { useFormik } from "formik";
 import { classSchema } from "../../Validation/createClass";
 import imageCompression from "browser-image-compression";
 import ToggleSwitch from "../../components/toggle";
@@ -21,7 +21,13 @@ import { useRouter } from "next/router";
 import { auth, db, storage } from "../../firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useEffect, useState, useMemo } from "react";
-import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  serverTimestamp,
+} from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
@@ -52,12 +58,12 @@ const SortableImage = ({ image, onRemove }) => {
     transition,
   };
 
-  const isVideo = image.type?.startsWith("video/") ||
-    (typeof image.src === 'string' && (
-      /\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i.test(image.src) ||
-      /%2F.*video/i.test(image.src) ||
-      /SampleVideo/i.test(image.src)
-    ));
+  const isVideo =
+    image.type?.startsWith("video/") ||
+    (typeof image.src === "string" &&
+      (/\.(mp4|webm|ogg|mov|avi|wmv|flv|mkv)$/i.test(image.src) ||
+        /%2F.*video/i.test(image.src) ||
+        /SampleVideo/i.test(image.src)));
 
   return (
     <div
@@ -91,7 +97,10 @@ const SortableImage = ({ image, onRemove }) => {
         </svg>
       </button>
       {isVideo ? (
-        <video src={image.src} className="object-cover w-full h-48 rounded-lg border" />
+        <video
+          src={image.src}
+          className="object-cover w-full h-48 rounded-lg border"
+        />
       ) : (
         <img
           src={image.src}
@@ -141,26 +150,26 @@ export default function UpdateClass() {
 
   const formik = useFormik({
     initialValues: {
-      class_name: '',
-      category: '',
-      sub_category: '',
-      mode_of_class: '',
-      description: '',
-      price: '',
-      pricing: '',
-      groupSize: '',
-      groupPrice: '',
-      experience: '',
-      about: '',
-      funfact: '',
-      name: '',
-      numberOfSessions: '',
-      priceOfCompleteCourse: '',
-      discount: '',
+      class_name: "",
+      category: "",
+      sub_category: "",
+      mode_of_class: "",
+      description: "",
+      price: "",
+      pricing: "",
+      groupSize: "",
+      groupPrice: "",
+      experience: "",
+      about: "",
+      funfact: "",
+      name: "",
+      numberOfSessions: "",
+      priceOfCompleteCourse: "",
+      discount: "",
     },
-    validationSchema: classSchema,  // Use Yup validation schema
-    validateOnChange: true,  // Ensure validation happens on each change
-    validateOnBlur: true,    // Ensure validation happens on blur
+    validationSchema: classSchema, // Use Yup validation schema
+    validateOnChange: true, // Ensure validation happens on each change
+    validateOnBlur: true, // Ensure validation happens on blur
   });
 
   useEffect(() => {
@@ -189,18 +198,18 @@ export default function UpdateClass() {
           setPreviewImages(typedImages);
           setLoadedImgs(classData.Images);
           formik.setValues({
-            class_name: classData.Name || '',
-            category: classData.Category || '',
-            sub_category: classData.SubCategory || '',
-            mode_of_class: classData.Mode || '',
-            description: classData.Description || '',
-            price: classData.Price || '',
-            pricing: classData.Pricing || '',
-            groupSize: classData.groupSize || '',
-            groupPrice: classData.groupPrice || '',
-            experience: classData.Experience || '',
-            about: classData.About || '',
-            funfact: classData.FunFact || '',
+            class_name: classData.Name || "",
+            category: classData.Category || "",
+            sub_category: classData.SubCategory || "",
+            mode_of_class: classData.Mode || "",
+            description: classData.Description || "",
+            price: classData.Price || "",
+            pricing: classData.Pricing || "",
+            groupSize: classData.groupSize || "",
+            groupPrice: classData.groupPrice || "",
+            experience: classData.Experience || "",
+            about: classData.About || "",
+            funfact: classData.FunFact || "",
             // Package fields if needed
           });
         } else {
@@ -238,16 +247,21 @@ export default function UpdateClass() {
       setLoading(false);
       return;
     }
-    if(!form.Address){
+    if (!form.Address) {
       setAddressError("Please select a location on the map");
       toast.error("Please select a location on the map");
       setLoading(false);
       return;
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10*1024*1024) { // 10MB
-      setImageError("Total size of all images must be less than or equal to 10MB");
-      toast.error("Total size of all images must be less than or equal to 10MB");
+    if (totalSize > 20 * 1024 * 1024) {
+      // 10MB
+      setImageError(
+        "Total size of all images must be less than or equal to 20MB"
+      );
+      toast.error(
+        "Total size of all images must be less than or equal to 20MB"
+      );
       setLoading(false);
       return;
     }
@@ -273,9 +287,10 @@ export default function UpdateClass() {
       const uploadPromises = uploadedFiles.map(async (img, index) => {
         const fileRef = ref(
           storage,
-          `${Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
-          "-" +
-          img.name
+          `${
+            Math.floor(Math.random() * (9999999 - 1000000 + 1) + 1000000) +
+            "-" +
+            img.name
           }`
         );
 
@@ -320,7 +335,7 @@ export default function UpdateClass() {
 
   useEffect(() => {
     return () => {
-      previewImages.forEach(img => {
+      previewImages.forEach((img) => {
         if (img.src.startsWith("blob:")) {
           URL.revokeObjectURL(img.src);
         }
@@ -328,45 +343,46 @@ export default function UpdateClass() {
     };
   }, [previewImages]);
 
-  const { getRootProps, getInputProps, fileRejections } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      const newPreviews = acceptedFiles.map((file) => {
-        const existing = uploadedFiles.find((f) => f.name === file.name);
-        if (existing) return null;
+  const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20 MB
 
-        return {
-          src: URL.createObjectURL(file),
-          name: file.name,
-          type: file.type,
-          file,
-        };
-      }).filter(Boolean);
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: async (acceptedFiles) => {
+      let currentTotalSize = [...uploadedFiles, ...loadedImgs].reduce(
+        (acc, item) => {
+          if (typeof item === "string") return acc; // Skip URL strings in loadedImgs
+          return acc + (item.size || 0);
+        },
+        0
+      );
 
-      setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
+      const finalAcceptedFiles = [];
+
+      for (const file of acceptedFiles) {
+        if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
+          toast.error(
+            `Skipping "${file.name}" — total size exceeds 20MB limit.`
+          );
+          continue;
+        }
+        currentTotalSize += file.size;
+        finalAcceptedFiles.push(file);
+      }
+
+      const newPreviews = finalAcceptedFiles.map((file) => ({
+        src: URL.createObjectURL(file),
+        name: file.name,
+        type: file.type,
+        file,
+      }));
+
+      setUploadedFiles((prev) => [...prev, ...finalAcceptedFiles]);
       setPreviewImages((prev) => [...prev, ...newPreviews]);
     },
     accept: {
-      'image/*': [],
-      'video/*': []
+      "image/*": [],
+      "video/*": [],
     },
-    maxSize: 5 * 1024 * 1024, // 5MB
     multiple: true,
-    onDropRejected: (fileRejections) => {
-      fileRejections.forEach(({ file, errors }) => {
-        errors.forEach((error) => {
-          switch (error.code) {
-            case "file-too-large":
-              toast.error(`${file.name} is too large. Max size is 5MB`);
-              break;
-            case "file-invalid-type":
-              toast.error(`${file.name} is not a supported image format`);
-              break;
-            default:
-              toast.error(`Error uploading ${file.name}: ${error.message}`);
-          }
-        });
-      });
-    },
   });
 
   const RemoveImg = (e, identifier) => {
@@ -410,8 +426,11 @@ export default function UpdateClass() {
       setImageError(null); // Clear error if images are present
     }
     const totalSize = form.Images.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 10 * 1024 * 1024) { // 10MB
-      setImageError("Total size of all images must be less than or equal to 10MB");
+    if (totalSize > 20 * 1024 * 1024) {
+      // 10MB
+      setImageError(
+        "Total size of all images must be less than or equal to 20MB"
+      );
       setLoading(false);
       return;
     }
@@ -514,11 +533,13 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Name: e.target.value })
+                    setForm({ ...form, Name: e.target.value });
                   }}
                 />
                 {!form.Name && (
-                  <div className="text-red-500 text-sm">{formik.errors.className}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.className}
+                  </div>
                 )}
               </div>
             </div>
@@ -533,9 +554,8 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Category: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Category: e.target.value });
+                  }}
                 >
                   <option value="">Select Category</option>
                   {categories &&
@@ -546,11 +566,13 @@ export default function UpdateClass() {
                       </option>
                     ))}
                 </select>
-                {!(
-                  categories.find((category) => category.name === form.Category)
+                {!categories.find(
+                  (category) => category.name === form.Category
                 ) && (
-                    <div className="text-red-500 text-sm">Invalid Category selected</div>
-                  )}
+                  <div className="text-red-500 text-sm">
+                    Invalid Category selected
+                  </div>
+                )}
               </div>
               <div className="flex-grow">
                 <label className="text-lg font-bold">Sub Category</label>
@@ -562,9 +584,8 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, SubCategory: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, SubCategory: e.target.value });
+                  }}
                 >
                   <option value="">Select Sub Category</option>
                   {categories &&
@@ -577,12 +598,15 @@ export default function UpdateClass() {
                         </option>
                       ))}
                 </select>
-                {!(
-                  categories.find((category) => category.name === form.Category)
-                    ?.subCategories.some((sub) => sub.name === form.SubCategory)
-                ) && (
-                    <div className="text-red-500 text-sm">Invalid Sub Category selected</div>
-                  )}
+                {!categories
+                  .find((category) => category.name === form.Category)
+                  ?.subCategories.some(
+                    (sub) => sub.name === form.SubCategory
+                  ) && (
+                  <div className="text-red-500 text-sm">
+                    Invalid Sub Category selected
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -594,15 +618,18 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Mode: e.target.value })
+                    setForm({ ...form, Mode: e.target.value });
                   }}
                 >
                   <option value="Online">Online</option>
                   <option value="Offline">In Person</option>
                 </select>
-                {formik.touched.mode_of_class && formik.errors.mode_of_class && (
-                  <div className="text-red-500 text-sm">{formik.errors.mode_of_class}</div>
-                )}
+                {formik.touched.mode_of_class &&
+                  formik.errors.mode_of_class && (
+                    <div className="text-red-500 text-sm">
+                      {formik.errors.mode_of_class}
+                    </div>
+                  )}
               </div>
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
@@ -618,12 +645,15 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Description: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Description: e.target.value });
+                  }}
                 />
-                {((formik.touched.description && formik.errors.description) || !form.Description || form.Description.trim() === "") && (
-                  <div className="text-red-500 text-sm">Description is required</div>
+                {((formik.touched.description && formik.errors.description) ||
+                  !form.Description ||
+                  form.Description.trim() === "") && (
+                  <div className="text-red-500 text-sm">
+                    Description is required
+                  </div>
                 )}
               </div>
             </div>
@@ -640,10 +670,11 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Price: e.target.value })
+                    setForm({ ...form, Price: e.target.value });
                   }}
                 />
-                {(formik.touched.price && formik.errors.price) || !/^\d+$/.test(form.Price) ? (
+                {(formik.touched.price && formik.errors.price) ||
+                !/^\d+$/.test(form.Price) ? (
                   <div className="text-red-500 text-sm">
                     {formik.errors.price || "Price must be a single amount"}
                   </div>
@@ -663,15 +694,20 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Pricing: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Pricing: e.target.value });
+                  }}
                 />
                 {formik.touched.pricing && formik.errors.pricing && (
-                  <div className="text-red-500 text-sm">{formik.errors.pricing}</div>
+                  <div className="text-red-500 text-sm">
+                    {formik.errors.pricing}
+                  </div>
                 )}
-                {((formik.touched.pricing && formik.errors.pricing) || !form.Pricing || form.Pricing.trim() === "") && (
-                  <div className="text-red-500 text-sm">Pricing description is required</div>
+                {((formik.touched.pricing && formik.errors.pricing) ||
+                  !form.Pricing ||
+                  form.Pricing.trim() === "") && (
+                  <div className="text-red-500 text-sm">
+                    Pricing description is required
+                  </div>
                 )}
               </div>
             </div>
@@ -728,9 +764,7 @@ export default function UpdateClass() {
                   <p className="text-gray-500 text-base mt-2">
                     Click to upload files or Drag & Drop
                   </p>
-                  <p className="text-gray-500 text-base">
-                    files(10MB max)
-                  </p>
+                  <p className="text-gray-500 text-base">files(20MB max)</p>
                 </div>
               </div>
               {imageError && (
@@ -762,7 +796,9 @@ export default function UpdateClass() {
             </div> */}
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
-                <label className="text-lg font-bold">Experience (Optional)</label>
+                <label className="text-lg font-bold">
+                  Experience (Optional)
+                </label>
                 <textarea
                   required
                   name="experience"
@@ -772,9 +808,8 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, Experience: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, Experience: e.target.value });
+                  }}
                 />
               </div>
             </div>
@@ -790,7 +825,7 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, About: e.target.value })
+                    setForm({ ...form, About: e.target.value });
                   }}
                 />
               </div>
@@ -807,9 +842,8 @@ export default function UpdateClass() {
                   onBlur={formik.handleBlur}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    setForm({ ...form, FunFact: e.target.value })
-                  }
-                  }
+                    setForm({ ...form, FunFact: e.target.value });
+                  }}
                 />
               </div>
             </div>
