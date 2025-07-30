@@ -29,6 +29,7 @@ export default async function handler(req, res) {
       model: "gemini-1.5-flash",
     });
     res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Connection", "keep-alive");
     res.setHeader("Transfer-Encoding", "chunked"); 
     res.setHeader("Cache-Control", "no-cache");
     res.flushHeaders?.();

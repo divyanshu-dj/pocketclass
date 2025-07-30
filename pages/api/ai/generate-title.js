@@ -21,6 +21,7 @@ export default async function handler(req, res) {
     const apiKey = process.env.GOOGLE_API_KEY;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Transfer-Encoding", "chunked"); 
+    res.setHeader("Connection", "keep-alive");
     res.setHeader("Cache-Control", "no-cache");
     res.flushHeaders?.();
 
