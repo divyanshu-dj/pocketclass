@@ -41,6 +41,8 @@ Suggest improvements that:
 - Communicate the vibe of the class (fun, supportive, intense, etc.)
 - Mention who this class is ideal for (beginners, kids, etc.)
 - Encourage clarity and enthusiasm in tone
+- Include logistic details like how to get to the class, what to bring, etc.
+- Should include what the student needs to prepare(clothing, instruments, etc.)
 - Note: Do not include a call to action
 
 ### CLASS DESCRIPTION TO ANALYZE:
