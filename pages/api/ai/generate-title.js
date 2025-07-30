@@ -19,6 +19,14 @@ export default async function handler(req, res) {
 
     // Get API key from environment variable
     const apiKey = process.env.GOOGLE_API_KEY;
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked"); 
+    res.setHeader("Cache-Control", "no-cache");
+    res.flushHeaders?.();
+
+    const heartbeat = setInterval(() => {
+      res.write(" ");
+    }, 5000);
     
     if (!apiKey) {
       return res.status(500).json({ error: 'API key not configured' });
@@ -60,6 +68,8 @@ export default async function handler(req, res) {
     const title = await chain.invoke({
       text,
     });
+
+    clearInterval(heartbeat);
 
     return res.status(200).json({ title: title.trim() });
   } catch (error) {

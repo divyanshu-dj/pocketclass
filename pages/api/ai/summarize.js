@@ -11,6 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const { text } = req.body;
+    
 
     if (!text || text.trim().length === 0) {
       return res.status(400).json({ error: "Text is required" });
@@ -27,6 +28,15 @@ export default async function handler(req, res) {
       apiKey,
       model: "gemini-1.5-flash",
     });
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked"); 
+    res.setHeader("Cache-Control", "no-cache");
+    res.flushHeaders?.();
+
+    // 🔹 Send heartbeats every 5 seconds to prevent timeout
+    const heartbeat = setInterval(() => {
+      res.write(" "); // send a single whitespace as heartbeat
+    }, 5000);
 
     // Create a prompt template for summarization
     const summarizePrompt = PromptTemplate.fromTemplate(`
@@ -56,6 +66,7 @@ export default async function handler(req, res) {
     const summary = await chain.invoke({
       text,
     });
+    clearInterval(heartbeat);
 
     // Remove ```html from the start if present and ``` at the end
     const cleanedSummary = summary
