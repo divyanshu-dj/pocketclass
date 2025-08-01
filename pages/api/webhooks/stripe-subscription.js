@@ -27,12 +27,14 @@ export default async function handler(req, res) {
   try {
     switch (event.type) {
       case 'customer.subscription.created':
-        console.log('Subscription created:', event.data.object);
+        await handleSubscriptionCreated(event.data.object);
         break;
       case 'customer.subscription.updated':
         await handleSubscriptionChange(event.data.object);
         break;
-
+      case 'customer.subscription.trial_will_end':
+        await handleTrialWillEnd(event.data.object);
+        break;
       case 'invoice.payment_succeeded':
         await handleSuccessfulPayment(event.data.object);
         break;
@@ -90,20 +92,53 @@ async function handleSubscriptionChange(subscription) {
   
   // Calculate premium expiry (current period end)
   const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
-
-  console.log(`Updating subscription for user ${userId}, status: ${subscription.status}, expires: ${currentPeriodEnd.toISOString()}`);
   
-  await updateDoc(userRef, {
+  // Handle different subscription statuses
+  let isPremium = false;
+  let isTrialing = false;
+  
+  if (subscription.status === 'trialing') {
+    isPremium = true;
+    isTrialing = true;
+  } else if (subscription.status === 'active') {
+    isPremium = true;
+    isTrialing = false;
+  } else if (subscription.status === 'past_due') {
+    // Keep premium for a grace period during past_due
+    isPremium = currentPeriodEnd > new Date();
+    isTrialing = false;
+  } else {
+    isPremium = false;
+    isTrialing = false;
+  }
+
+  console.log(`Updating subscription for user ${userId}, status: ${subscription.status}, isPremium: ${isPremium}, isTrialing: ${isTrialing}, expires: ${currentPeriodEnd.toISOString()}`);
+  
+  const updateData = {
     stripeSubscriptionId: subscription.id,
     subscriptionStatus: subscription.status,
     premiumExpire: currentPeriodEnd,
     subscriptionCurrentPeriodStart: new Date(subscription.current_period_start * 1000),
     subscriptionCurrentPeriodEnd: currentPeriodEnd,
-    isPremium: subscription.status === 'active',
+    isPremium: isPremium,
+    isTrialing: isTrialing,
     updatedAt: serverTimestamp()
-  });
+  };
 
-  console.log(`Updated subscription for user ${userId}: status=${subscription.status}, expires=${currentPeriodEnd.toISOString()}`);
+  // Add trial-specific fields
+  if (subscription.trial_end) {
+    updateData.trialEnd = new Date(subscription.trial_end * 1000);
+  }
+
+  // Remove trial fields if no longer trialing
+  if (!isTrialing) {
+    updateData.isTrialing = false;
+    updateData.trialWillEnd = false;
+  }
+
+  await updateDoc(userRef, updateData);
+
+  console.log(`Updated subscription for user ${userId}: status=${subscription.status}, isPremium=${isPremium}, expires=${currentPeriodEnd.toISOString()}`);
 }
 
 async function handleSuccessfulPayment(invoice) {
@@ -126,15 +161,24 @@ async function handleSuccessfulPayment(invoice) {
   console.log(`Next billing date: ${new Date(subscription.current_period_end * 1000).toISOString()}`);
   const nextBillingDate = new Date((subscription.current_period_end) * 1000);
   
-  await updateDoc(userRef, {
+  const updateData = {
     premiumExpire: nextBillingDate,
     subscriptionStatus: 'active',
     isPremium: true,
+    isTrialing: false, // No longer trialing after first payment
     lastPaymentAt: serverTimestamp(),
     lastPaymentAmount: invoice.amount_paid / 100, // Convert from cents
     subscriptionCurrentPeriodEnd: nextBillingDate,
     updatedAt: serverTimestamp()
-  });
+  };
+
+  // Remove trial-related fields after first payment
+  if (subscription.status === 'active' && !subscription.trial_end) {
+    updateData.trialWillEnd = false;
+    updateData.trialEnd = null;
+  }
+
+  await updateDoc(userRef, updateData);
 
   console.log(`Premium renewed for user ${userId} until ${nextBillingDate.toISOString()}, amount: $${invoice.amount_paid / 100}`);
 }
@@ -182,6 +226,56 @@ async function handleSubscriptionCanceled(subscription) {
   });
 
   console.log(`Subscription canceled for user ${userId}, premium until ${currentPeriodEnd.toISOString()}`);
+}
+
+async function handleSubscriptionCreated(subscription) {
+  const userId = subscription.metadata?.firebase_uid;
+  if (!userId) {
+    console.error('No firebase_uid in subscription metadata');
+    return;
+  }
+
+  const userRef = doc(db, 'Users', userId);
+  
+  // For trial subscriptions
+  if (subscription.status === 'trialing') {
+    const trialEnd = new Date(subscription.trial_end * 1000);
+    
+    console.log(`Trial subscription created for user ${userId}, trial ends: ${trialEnd.toISOString()}`);
+    
+    await updateDoc(userRef, {
+      stripeSubscriptionId: subscription.id,
+      subscriptionStatus: 'trialing',
+      isPremium: true,
+      isTrialing: true,
+      trialEnd: trialEnd,
+      premiumExpire: trialEnd,
+      subscriptionCurrentPeriodStart: new Date(subscription.current_period_start * 1000),
+      subscriptionCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      updatedAt: serverTimestamp()
+    });
+  } else {
+    // Handle non-trial subscriptions
+    await handleSubscriptionChange(subscription);
+  }
+}
+
+async function handleTrialWillEnd(subscription) {
+  const userId = subscription.metadata?.firebase_uid;
+  if (!userId) {
+    console.error('No firebase_uid in subscription metadata');
+    return;
+  }
+
+  const userRef = doc(db, 'Users', userId);
+  
+  console.log(`Trial will end soon for user ${userId}, subscription: ${subscription.id}`);
+  
+  await updateDoc(userRef, {
+    trialWillEnd: true,
+    trialEndDate: new Date(subscription.trial_end * 1000),
+    updatedAt: serverTimestamp()
+  });
 }
 
 export const config = {

@@ -116,6 +116,7 @@ function InstructorSection({ classId, instructor, loading, reviews }) {
               {instructor?.instructorImage ? (
                 <img
                   src={instructor.instructorImage}
+                  loading="lazy"
                   alt="Instructor"
                   className="w-[30px] h-[30px] rounded-full object-cover flex-shrink-0"
                 />
