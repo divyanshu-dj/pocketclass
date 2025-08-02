@@ -217,16 +217,16 @@ function FitnessClassDetailsSection({
   };
 
   return (
-    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-8 md:mt-14 section-spacing">
+    <div className="flex justify-start items-center flex-col grow-0 shrink-0 basis-auto mt-10 md:mt-14 section-spacing">
       {isMobile && classData && (
-        <div className="fixed top-0 z-30 bg-white border-b border-gray-200 w-full h-[180px] flex flex-col justify-end px-4">
+        <div className="fixed top-0 z-30 bg-white border-b border-gray-200 w-full h-[190px] flex flex-col justify-end px-4">
           <div className="flex gap-6 justify-start overflow-x-auto pb-3 max-w-full">
             {[
               {
                 label: "Instructor",
                 ref: instructorRef,
                 key: "instructor",
-                offset: 550,
+                offset: 150,
               },
               {
                 label: "Booking",
@@ -403,6 +403,7 @@ function FitnessClassDetailsSection({
           <Gallery coverImages={classData?.Images || []} />
         )}
       </div>
+      <div ref={instructorRef}></div>
       <div className="flex flex-col-reverse lg:flex-row gap-20 lg:gap-10 w-full max-w-[1312px] grow-0 shrink-0 basis-auto box-border mt-9">
         <div className="grow-0 shrink basis-auto xl:max-w-[calc(100vw)]">
           <div
@@ -462,7 +463,7 @@ function FitnessClassDetailsSection({
               )}
             </div>
           </div>
-          <div ref={instructorRef}>
+          <div>
             <FitnessProfileSection
               classId={classId}
               instructorData={classCreatorData}
