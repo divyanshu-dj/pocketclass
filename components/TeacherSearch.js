@@ -77,6 +77,11 @@ const TeacherSearch = ({ expandMenu, user }) => {
   const [selectedRange, setSelectedRange] = useState();
   const [isShrunk, setIsShrunk] = useState(false);
   const [isMenuSmall, setIsMenuSmall] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -135,34 +140,33 @@ const TeacherSearch = ({ expandMenu, user }) => {
   }, [router.pathname, router.query]);
 
   const filteredSearchOptions = useMemo(() => {
-  const term = searchTerm.toLowerCase().trim();
-  if (!term) return initialSearchOptions;
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return initialSearchOptions;
 
-  const startsWith = [];
-  const includes = [];
-  const fromClasses = [];
+    const startsWith = [];
+    const includes = [];
+    const fromClasses = [];
 
-  for (const item of initialSearchOptions) {
-    const label = item.label.toLowerCase();
+    for (const item of initialSearchOptions) {
+      const label = item.label.toLowerCase();
 
-    if (label.startsWith(term)) {
-      startsWith.push(item);
-    } else if (label.includes(term)) {
-      includes.push(item);
-    } else if (
-      filteredClasses.some(
-        (cls) =>
-          cls.Category?.toLowerCase() === label ||
-          cls.SubCategory?.toLowerCase() === label
-      )
-    ) {
-      fromClasses.push(item);
+      if (label.startsWith(term)) {
+        startsWith.push(item);
+      } else if (label.includes(term)) {
+        includes.push(item);
+      } else if (
+        filteredClasses.some(
+          (cls) =>
+            cls.Category?.toLowerCase() === label ||
+            cls.SubCategory?.toLowerCase() === label
+        )
+      ) {
+        fromClasses.push(item);
+      }
     }
-  }
 
-  return [...startsWith, ...includes, ...fromClasses];
-}, [searchTerm, filteredClasses]);
-
+    return [...startsWith, ...includes, ...fromClasses];
+  }, [searchTerm, filteredClasses]);
 
   useEffect(() => {
     if (Object.keys(router.query).length && initialSearchOptions.length) {
@@ -507,7 +511,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           </div>
 
           <AnimatePresence>
-            {activeDropdown === "sub" && !isShrunk && (
+            {hasMounted && activeDropdown === "sub" && !isShrunk && (
               <motion.div
                 className="menu-dropdown left-0 max-w-[400px] !pr-0 overflow-auto"
                 initial="hidden"
@@ -608,7 +612,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           </AnimatePresence>
 
           <AnimatePresence>
-            {activeDropdown === "picker" && !isShrunk && (
+            {hasMounted && activeDropdown === "picker" && !isShrunk && (
               <motion.div
                 className="menu-dropdown right-0 !w-fit z-50"
                 initial="hidden"
