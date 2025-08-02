@@ -20,7 +20,6 @@ import TeacherSearch from "./TeacherSearch";
 import { categories as categoryData } from "../utils/categories";
 import dynamic from "next/dynamic";
 import MusicSelector from "../home-components/MusicSelector";
-import { motion } from "framer-motion";
 
 const Player = dynamic(
   () => import("@lottiefiles/react-lottie-player").then((mod) => mod.Player),
