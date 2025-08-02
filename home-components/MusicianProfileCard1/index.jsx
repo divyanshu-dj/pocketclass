@@ -32,13 +32,14 @@ function MusicianProfileCard1({ instructor, router }) {
                 <img
                   src={getCategoryIcon(instructor?.Category, specialization)}
                   alt={specialization}
+                  loading="lazy"
                   className="w-4 h-4"
                 />
               )}
               <p className="text-base font-bold text-[#7d797a] break-words">
                 {instructor?.category?.split(" ")[0]}
               </p>
-              <img src="/assets/image_7a2617f3.png" alt="" className="h-1 w-1 block" />
+              <img src="/assets/image_7a2617f3.png" loading="lazy" alt="" className="h-1 w-1 block" />
               <p className="text-base font-bold text-[#7d797a] break-words">{specialization}</p>
             </div>
           </div>

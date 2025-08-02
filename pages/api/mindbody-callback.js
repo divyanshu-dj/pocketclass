@@ -37,13 +37,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Token exchange failed', details: data });
     }
 
+
     const queryParams = new URLSearchParams({
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       expires_in: String(data.expires_in),
     }).toString();
 
-    res.redirect(`/mindbody-success?${queryParams}`);
+    res.redirect(302, `/mindbody-success?${queryParams}`);
   } catch (err) {
     console.error('Mindbody token error:', err);
     res.status(500).send('Token exchange failed');

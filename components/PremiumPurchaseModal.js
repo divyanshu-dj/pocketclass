@@ -211,9 +211,10 @@ const PremiumPurchaseModal = ({
                 Subscription Details
               </h5>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Monthly recurring: $5.95 CAD per month</li>
+                <li>• Free trial: 30 days (start immediately)</li>
+                <li>• After trial: $5.95 CAD per month</li>
                 <li>• Automatic renewal: Yes (cancel anytime)</li>
-                <li>• Access: Immediate activation after payment</li>
+                <li>• No payment required until trial ends</li>
                 <li>
                   • Cancellation: Cancel anytime, access until period ends
                 </li>
@@ -231,7 +232,7 @@ const PremiumPurchaseModal = ({
               ) : (
                 <>
                   <CreditCardIcon className="w-5 h-5 hidden md:block" />
-                  <span>Start Premium Subscription - $5.95/month</span>
+                  <span>Start 30-Day Free Trial</span>
                 </>
               )}
             </button>
@@ -241,10 +242,10 @@ const PremiumPurchaseModal = ({
           <div className="p-6">
             <div className="mb-4">
               <h4 className="text-lg font-semibold text-gray-900">
-                Complete Your Subscription
+                Setup Payment Method
               </h4>
               <p className="text-sm text-gray-600">
-                Monthly: $5.95 CAD (recurring)
+                30-day free trial starts immediately. No payment until trial ends.
               </p>
             </div>
 
@@ -294,25 +295,44 @@ const PremiumCheckoutForm = ({
     setMessage("");
 
     try {
-      const result = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/automations?subscription=success`,
-        },
-        redirect: "if_required",
-      });
+      let result;
+      
+      if (intentType === "setup") {
+        // For trial subscriptions, we confirm the setup intent
+        result = await stripe.confirmSetup({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/automations?trial=success`,
+          },
+          redirect: "if_required",
+        });
+      } else {
+        // For immediate payments, use confirmPayment
+        result = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/automations?subscription=success`,
+          },
+          redirect: "if_required",
+        });
+      }
 
       if (result.error) {
         setMessage(result.error.message);
-        console.error("Subscription error:", result.error);
+        console.error("Payment/Setup error:", result.error);
         onError();
       } else {
-        toast.success("Premium subscription activated! 🎉");
+        if (intentType === "setup") {
+          toast.success("Free trial activated! 🎉");
+          window.location.href = "/automations?trial=success";
+        } else {
+          toast.success("Premium subscription activated! 🎉");
+          window.location.href = "/automations?subscription=success";
+        }
         onSuccess();
-        window.location.href = "/automations?subscription=success";
       }
     } catch (error) {
-      console.error("Error processing subscription:", error);
+      console.error("Error processing payment/setup:", error);
       setMessage("An unexpected error occurred.");
       onError();
     } finally {
@@ -337,9 +357,9 @@ const PremiumCheckoutForm = ({
       >
         {loading
           ? "Processing..."
-          : `${
-              intentType === "payment" ? "Subscribe Now" : "Set up Subscription"
-            } - $5.95/month`}
+          : intentType === "setup" 
+            ? "Start Free Trial" 
+            : "Subscribe Now - $5.95/month"}
       </button>
     </form>
   );

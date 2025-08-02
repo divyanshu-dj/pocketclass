@@ -300,6 +300,20 @@ const InstructorOnboarding = () => {
               </button>
             </div>
           )}
+
+          {step.id === 'profile' && isCompleted && userData?.isInstructor && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = '/';
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          )}
         </div>
       );
     });
