@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/router";
 import { SearchIcon } from "@heroicons/react/solid";
