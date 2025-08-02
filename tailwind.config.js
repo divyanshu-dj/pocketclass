@@ -6,6 +6,16 @@ module.exports = {
      "./home-components/**/*.{js,ts,jsx,tsx}",
      "./class-detail-components/**/*.{js,ts,jsx,tsx}"
   ],
+  safelist: [
+    'opacity-0',
+    'opacity-100',
+    'translate-y-0',
+    '-translate-y-10',
+    'group-hover:opacity-100',
+    'group-hover:opacity-0',
+    'block',
+    'hidden',
+  ],
   theme: {
     extend: {
       colors: {
