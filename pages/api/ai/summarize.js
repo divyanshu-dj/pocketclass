@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     // Initialize the LLM with Gemini 1.5 Flash
     const llm = new ChatGoogleGenerativeAI({
       apiKey,
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
     });
 
     // Create a prompt template for summarization
