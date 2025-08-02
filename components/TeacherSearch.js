@@ -83,11 +83,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
   const { activeStyle, updateIndicator, resetActiveBG } = useActiveIndicator();
 
   const dropdownVariants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      transition: { duration: 0.15, ease: "easeInOut" },
-    },
     visible: {
       opacity: 1,
       y: 0,
@@ -510,7 +505,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
             {activeDropdown === "sub" && !isShrunk && (
               <motion.div
                 className="menu-dropdown left-0 max-w-[400px] !pr-0 overflow-auto"
-                initial="hidden"
                 animate="visible"
                 exit="exit"
                 variants={dropdownVariants}
@@ -611,7 +605,6 @@ const TeacherSearch = ({ expandMenu, user }) => {
             {activeDropdown === "picker" && !isShrunk && (
               <motion.div
                 className="menu-dropdown right-0 !w-fit z-50"
-                initial="hidden"
                 animate="visible"
                 exit="exit"
                 variants={dropdownVariants}
