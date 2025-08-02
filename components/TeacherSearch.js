@@ -513,6 +513,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           <AnimatePresence>
             {hasMounted && activeDropdown === "sub" && !isShrunk && (
               <motion.div
+                key="subDropdown"
                 className="menu-dropdown left-0 max-w-[400px] !pr-0 overflow-auto"
                 initial="hidden"
                 animate="visible"
@@ -614,6 +615,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
           <AnimatePresence>
             {hasMounted && activeDropdown === "picker" && !isShrunk && (
               <motion.div
+                key="pickerDropdown"
                 className="menu-dropdown right-0 !w-fit z-50"
                 initial="hidden"
                 animate="visible"
