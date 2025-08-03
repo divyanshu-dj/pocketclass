@@ -12,6 +12,8 @@ import { useFormik } from "formik";
 import { classSchema } from "../../Validation/createClass";
 import imageCompression from "browser-image-compression";
 import ToggleSwitch from "../../components/toggle";
+import AIEnhancedField from "../../components/AIEnhancedField";
+import { Switch } from "antd";
 
 const LocationMap = dynamic(() => import("../../components/LocationMap"), {
   ssr: false,
@@ -134,6 +136,7 @@ export default function UpdateClass() {
     groupPrice: "",
     latitude: "",
     longitude: "",
+    firstFree: false,
   });
   const [packages, setPackages] = useState([]);
   const [addressError, setAddressError] = useState(null);
@@ -179,7 +182,10 @@ export default function UpdateClass() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const classData = docSnap.data();
-          setForm(classData);
+          setForm({
+            ...classData,
+            firstFree: classData.firstFree || false,
+          });
           if (!classData.subCategory && classData.Type) {
             setForm((prev) => ({
               ...prev,
@@ -521,27 +527,25 @@ export default function UpdateClass() {
               About Class
             </div> */}
             <div className="w-full flex flex-row gap-4 max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Class Name</label>
-                <input
-                  required
-                  name="className"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="e.g., Beginner Tennis for Adults"
-                  type={"text"}
-                  value={form.Name}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Name: e.target.value });
-                  }}
-                />
-                {!form.Name && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.className}
-                  </div>
-                )}
-              </div>
+              <AIEnhancedField
+                fieldName="Name"
+                label="Class Name"
+                placeholder="e.g., Beginner Tennis for Adults"
+                value={form.Name}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Name: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                required
+              />
+              {!form.Name && (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.className}
+                </div>
+              )}
             </div>
             <div className="flex flex-row gap-4 flex-wrap w-full max-w-[750px]">
               <div className="flex-grow">
@@ -632,30 +636,66 @@ export default function UpdateClass() {
                   )}
               </div>
             </div>
-            <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Description</label>
-                <textarea
-                  required
-                  name="description"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Write a brief overview of your class. Highlight what students will learn, the skills they'll develop, or the unique value your class offers. e.g., Learn the basics of tennis, including forehand, backhand, and serving techniques, in a fun and supportive environment."
-                  type={"text"}
-                  value={form.Description}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Description: e.target.value });
-                  }}
-                />
-                {((formik.touched.description && formik.errors.description) ||
-                  !form.Description ||
-                  form.Description.trim() === "") && (
-                  <div className="text-red-500 text-sm">
-                    Description is required
-                  </div>
-                )}
+            <div>
+              <div className="flex flex-row gap-4 w-full max-w-[750px]">
+                <div className="flex-grow">
+                  <label className="text-lg font-bold">Enable a first free class</label>
+                </div>
+                <div className="flex items-center">
+                  <Switch
+                    checked={form.firstFree}
+                    onChange={(checked) => {
+                      setForm({ ...form, firstFree: checked });
+                    }}
+                    style={{
+                      backgroundColor: form.firstFree ? "#E63F2B" : undefined,
+                    }}
+                    className={`${
+                      form.firstFree ? "bg-logo-red" : "bg-gray-200"
+                    } relative flex  items-center rounded-full w-11`}
+                  >
+                    <span className="sr-only">Enable a first free class</span>
+                    <span
+                      className={`${
+                        form.firstFree ? "translate-x-6" : "translate-x-1"
+                      } inline-block w-4 h-4 transform bg-white rounded-full transition`}
+                    />
+                  </Switch>
+                </div>
               </div>
+              <div className="gap-4 text-justify w-full max-w-[750px] text-gray-500 text-sm mt-1">
+                Let new students experience your class risk-free! By enabling
+                "First Class Free," you'll attract more first-time students and
+                convert curious browsers into long-term learners. This offer
+                only applies to new students booking with you for the first time.
+                <br />
+                <b>Pro Tip:</b> Instructors who offer a free trial typically see
+                2x higher conversion and increased return bookings.
+              </div>
+            </div>
+            <div className="flex flex-row gap-4 w-full max-w-[750px]">
+              <AIEnhancedField
+                fieldName="Description"
+                label="Description"
+                placeholder="Write a brief overview of your class. Highlight what students will learn, the skills they'll develop, or the unique value your class offers. e.g., Learn the basics of tennis, including forehand, backhand, and serving techniques, in a fun and supportive environment."
+                value={form.Description}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Description: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+                required
+              />
+              {((formik.touched.description && formik.errors.description) ||
+                !form.Description ||
+                form.Description.trim() === "") && (
+                <div className="text-red-500 text-sm">
+                  Description is required
+                </div>
+              )}
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
@@ -683,33 +723,28 @@ export default function UpdateClass() {
             </div>
 
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Pricing Description</label>
-                <textarea
-                  required
-                  name="pricing"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Provide additional pricing details if applicable. e.g., Discounts for group sessions or bulk bookings."
-                  value={form.Pricing}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Pricing: e.target.value });
-                  }}
-                />
-                {formik.touched.pricing && formik.errors.pricing && (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.pricing}
-                  </div>
-                )}
-                {((formik.touched.pricing && formik.errors.pricing) ||
-                  !form.Pricing ||
-                  form.Pricing.trim() === "") && (
-                  <div className="text-red-500 text-sm">
-                    Pricing description is required
-                  </div>
-                )}
-              </div>
+              <AIEnhancedField
+                fieldName="Pricing"
+                label="Pricing Description"
+                placeholder="Provide additional pricing details if applicable. e.g., Discounts for group sessions or bulk bookings."
+                value={form.Pricing}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Pricing: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+                required
+              />
+              {((formik.touched.pricing && formik.errors.pricing) ||
+                !form.Pricing ||
+                form.Pricing.trim() === "") && (
+                <div className="text-red-500 text-sm">
+                  Pricing description is required
+                </div>
+              )}
             </div>
             {/* <div className="flex flex-row gap-4 w-full max-w-[750px]">
               <div className="flex-grow">
@@ -795,57 +830,52 @@ export default function UpdateClass() {
               About Instructor
             </div> */}
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">
-                  Experience (Optional)
-                </label>
-                <textarea
-                  required
-                  name="experience"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
-                  value={form.Experience}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, Experience: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="Experience"
+                label="Experience (Optional)"
+                placeholder="Share your teaching or professional experience in this field. e.g., 5+ years as a professional tennis coach with certifications from the National Tennis Association."
+                value={form.Experience}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, Experience: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">About (Optional)</label>
-                <textarea
-                  required
-                  name="about"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Introduce yourself to potential students. Share your background, qualifications, and passion for teaching. e.g., I'm a certified tennis coach who loves helping beginners find their rhythm and passion for the sport!"
-                  value={form.About}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, About: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="About"
+                label="About (Optional)"
+                placeholder="Introduce yourself to potential students. Share your background, qualifications, and passion for teaching. e.g., I'm a certified tennis coach who loves helping beginners find their rhythm and passion for the sport!"
+                value={form.About}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, About: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
             <div className="flex flex-row gap-4 w-full max-w-[750px]">
-              <div className="flex-grow">
-                <label className="text-lg font-bold">Fun Fact (Optional)</label>
-                <textarea
-                  required
-                  name="funfact"
-                  className="w-full border-2 border-gray-100 rounded-xl p-3 mt-1 bg-transparent focus:outline-none focus:border-logo-red focus:ring-1 focus:ring-logo-red"
-                  placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
-                  value={form.FunFact}
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    setForm({ ...form, FunFact: e.target.value });
-                  }}
-                />
-              </div>
+              <AIEnhancedField
+                fieldName="FunFact"
+                label="Fun Fact (Optional)"
+                placeholder="Share a fun or interesting fact about yourself! e.g., I once coached a player who went on to compete nationally!"
+                value={form.FunFact}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  setForm({ ...form, FunFact: e.target.value });
+                }}
+                onBlur={formik.handleBlur}
+                category={form.Category}
+                subCategory={form.SubCategory}
+                multiline
+              />
             </div>
             <div className="w-full max-w-[750px]">
               <div className="text-xl font-bold mb-4">Location of Lesson</div>
