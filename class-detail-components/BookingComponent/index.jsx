@@ -218,8 +218,33 @@ export default function index({
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        setError("Invalid voucher code");
-        return;
+        const qWithoutUser = query(vouchersRef, where("code", "==", voucher));
+        const querySnapshotWithoutUser = await getDocs(qWithoutUser);
+        if (querySnapshotWithoutUser.empty) {
+          setError("Invalid voucher code");
+          return;
+        }
+        if (querySnapshotWithoutUser.docs.length >= 1) {
+          const validVoucher = querySnapshotWithoutUser.docs.find(
+            (doc) => (doc.data().userId == "flfvcddUUCSGuScW6dpfCp9Hxnm2")
+          );
+          if (!validVoucher) {
+            setError("Invalid voucher code");
+            return;
+          }
+          // If a valid voucher is found, you can use it
+          if (validVoucher.data().remainingUses === 0) {
+            setError("Voucher usage limit reached");
+            return;
+          }
+          setDiscount(validVoucher.data().discountValue);
+          setDiscountId(validVoucher.id);
+          setDiscountType(validVoucher.data().discountType || "percentage");
+          setVoucherVerified(true);
+          setError(null);
+          toast.success("Voucher applied successfully!");
+          return;
+        }
       }
 
       // Include ID in voucherData
@@ -2195,110 +2220,109 @@ END:VCALENDAR`.trim();
                 )}
 
                 {/* Add Subtotal */}
-                {(!freeClassEnabled ||
-                  selectedPackage != null) && (
-                    <>
-                      <div className="flex flex-row w-full justify-between border-t pt-2 mt-2">
+                {(!freeClassEnabled || selectedPackage != null) && (
+                  <>
+                    <div className="flex flex-row w-full justify-between border-t pt-2 mt-2">
+                      <p>
+                        <strong>Subtotal:</strong>
+                      </p>
+                      <p>
+                        $
+                        {(() => {
+                          const basePrice = selectedPackage?.num_sessions
+                            ? selectedPackage.Price -
+                              (
+                                ((selectedPackage?.Discount ??
+                                  selectedPackage?.discountPercentage) *
+                                  selectedPackage?.Price) /
+                                100
+                              ).toFixed(2)
+                            : selectedSlot.classId
+                            ? classData.groupPrice
+                            : classData.Price;
+
+                          const voucherDiscount = voucherVerified
+                            ? discountType === "percentage"
+                              ? ((discount * basePrice) / 100).toFixed(2)
+                              : discount
+                            : 0;
+
+                          return (basePrice - voucherDiscount).toFixed(2);
+                        })()}
+                      </p>
+                    </div>
+
+                    {/* Add Processing Fee */}
+                    <div className="flex flex-row w-full justify-between">
+                      <div className="flex items-center gap-2">
                         <p>
-                          <strong>Subtotal:</strong>
+                          <strong>Processing Fee:</strong>
                         </p>
-                        <p>
-                          $
-                          {(() => {
-                            const basePrice = selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                                (
-                                  ((selectedPackage?.Discount ??
-                                    selectedPackage?.discountPercentage) *
-                                    selectedPackage?.Price) /
-                                  100
-                                ).toFixed(2)
-                              : selectedSlot.classId
-                              ? classData.groupPrice
-                              : classData.Price;
-
-                            const voucherDiscount = voucherVerified
-                              ? discountType === "percentage"
-                                ? ((discount * basePrice) / 100).toFixed(2)
-                                : discount
-                              : 0;
-
-                            return (basePrice - voucherDiscount).toFixed(2);
-                          })()}
-                        </p>
-                      </div>
-
-                      {/* Add Processing Fee */}
-                      <div className="flex flex-row w-full justify-between">
-                        <div className="flex items-center gap-2">
-                          <p>
-                            <strong>Processing Fee:</strong>
-                          </p>
-                          <a
-                            href="https://stripe.com/en-ca/pricing"
-                            target="_blank"
-                            className="relative group"
+                        <a
+                          href="https://stripe.com/en-ca/pricing"
+                          target="_blank"
+                          className="relative group"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-gray-500 cursor-help"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-gray-500 cursor-help"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                              <div className="text-center">
-                                <div className="font-semibold mb-1">
-                                  Fee Breakdown:
-                                </div>
-                                <div>2.9% - Stripe Variable Fee</div>
-                                <div>$0.30 - Stripe Fixed Fee</div>
-                                <div>$0.50 - Platform Fee</div>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                            <div className="text-center">
+                              <div className="font-semibold mb-1">
+                                Fee Breakdown:
                               </div>
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              <div>2.9% - Stripe Variable Fee</div>
+                              <div>$0.30 - Stripe Fixed Fee</div>
+                              <div>$0.50 - Platform Fee</div>
                             </div>
-                          </a>
-                        </div>
-                        <p>
-                          $
-                          {(() => {
-                            const basePrice = selectedPackage?.num_sessions
-                              ? selectedPackage.Price -
-                                (
-                                  ((selectedPackage?.Discount ??
-                                    selectedPackage?.discountPercentage) *
-                                    selectedPackage?.Price) /
-                                  100
-                                ).toFixed(2)
-                              : selectedSlot.classId
-                              ? classData.groupPrice
-                              : classData.Price;
-
-                            const voucherDiscount = voucherVerified
-                              ? discountType === "percentage"
-                                ? ((discount * basePrice) / 100).toFixed(2)
-                                : discount
-                              : 0;
-
-                            const subtotal = basePrice - voucherDiscount;
-                            const processingFee = (
-                              subtotal * 0.029 +
-                              0.8
-                            ).toFixed(2);
-
-                            return processingFee;
-                          })()}
-                        </p>
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                          </div>
+                        </a>
                       </div>
-                    </>
-                  )}
+                      <p>
+                        $
+                        {(() => {
+                          const basePrice = selectedPackage?.num_sessions
+                            ? selectedPackage.Price -
+                              (
+                                ((selectedPackage?.Discount ??
+                                  selectedPackage?.discountPercentage) *
+                                  selectedPackage?.Price) /
+                                100
+                              ).toFixed(2)
+                            : selectedSlot.classId
+                            ? classData.groupPrice
+                            : classData.Price;
+
+                          const voucherDiscount = voucherVerified
+                            ? discountType === "percentage"
+                              ? ((discount * basePrice) / 100).toFixed(2)
+                              : discount
+                            : 0;
+
+                          const subtotal = basePrice - voucherDiscount;
+                          const processingFee = (
+                            subtotal * 0.029 +
+                            0.8
+                          ).toFixed(2);
+
+                          return processingFee;
+                        })()}
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 {/* Update Total to include processing fee */}
                 <div className="flex flex-row w-full justify-between border-t pt-2 mt-2 font-bold text-lg">
