@@ -491,13 +491,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                     {!userData?.isInstructor || currentView === "student" ? (
                       <div />
                     ) : (
-                      <Image
-                        priority={true}
-                        src="/Rolling-1s-200px.svg"
-                        width={30}
-                        height={30}
-                        alt="Loading"
-                      />
+                      <></>
                     )}
                   </div>
 
