@@ -9,6 +9,7 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { MenuIcon, UserCircleIcon } from "@heroicons/react/solid";
@@ -175,6 +176,48 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    const checkAutomations = async () => {
+      if (userData && userData.isInstructor && !userData.automations) {
+        // Update userData to include automations
+        const query = doc(db, "Users", user?.uid);
+        await updateDoc(query, {
+          automations: {
+            reminders: {
+              upcomingClass: {
+                enabled: true,
+                timeDelay: "24h",
+                customTime: "24h",
+                couponCode: "",
+                personalMessage: "",
+                mailsSent: 0,
+              },
+            },
+            classUpdates: {
+              newBooking: {
+                enabled: true,
+                timeDelay: "immediate",
+                customTime: "immediate",
+                couponCode: "",
+                personalMessage: "",
+                mailsSent: 0,
+              },
+            },
+          },
+        });
+
+        setUserData((prev) => ({
+          ...prev,
+          automations: {
+            welcomeEmail: false,
+            classReminder: false,
+            paymentReminder: false,
+          },
+        }));
+      }
+    };
+    checkAutomations();
+  }, [userData]);
   const toggleDropDown = () => {
     setDropDown(!showDropDown);
   };
