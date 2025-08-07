@@ -8,14 +8,11 @@ import {
   getDoc,
   onSnapshot,
   where,
-  orderBy,
-  limit,
 } from "firebase/firestore";
-import { useEffect, useState, useRef } from "react";
-import InstructorSection from "../InstructorSection/index";
-import { db } from "../../firebaseConfig";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import InstructorSection from "../InstructorSection";
+import { db, auth } from "../../firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../../firebaseConfig";
 
 function RecommendedClassesSection({
   activeFilter = null,
@@ -27,422 +24,267 @@ function RecommendedClassesSection({
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user] = useAuthState(auth);
-  const scrollContainerRef = useRef(null);
+  const scrollRef = useRef(null);
+  const [displayRec, setDisplayRec] = useState(true);
 
-  const [displayrec, setDisplayRec] = useState(true);
-
-  useEffect(() => {
-    const filteredClasses = activeFilter
-      ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
-      : classes;
-    onClassesLoad?.(filteredClasses.length);
-  }, [classes, activeFilter, onClassesLoad]);
-
-  // Fetch reviews
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "Reviews"), (snapshot) => {
       setReviews(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     });
-
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const fetchRecommendedClasses = async () => {
+    const fetchRecommendations = async () => {
+      setLoading(true);
       try {
-        // Get user's recently viewed classes for recommendation analysis
-        const recentlyViewedClasses =
-          JSON.parse(localStorage.getItem("recentlyViewedClasses")) || [];
+        let localViewed = JSON.parse(localStorage.getItem("recentlyViewedClasses")) || [];
+        let firestoreViewed = [];
+        let booked = [];
 
-        let userRecentlyViewed = [];
-        let userBookedClasses = [];
+        if (user?.uid) {
+          const userDoc = await getDoc(firestoreDoc(db, "Users", user.uid));
+          firestoreViewed = userDoc?.data()?.recentlyViewedClasses || [];
 
-        if (user && user.uid) {
-          // Get user's recently viewed classes from Firestore
-          const userViewedClassesRef = firestoreDoc(db, "Users", user.uid);
-          const userViewedClassesDoc = await getDoc(userViewedClassesRef);
-          if (userViewedClassesDoc.exists()) {
-            const userViewedClassesData = userViewedClassesDoc.data();
-            if (userViewedClassesData.recentlyViewedClasses) {
-              userRecentlyViewed = userViewedClassesData.recentlyViewedClasses;
-            }
-          }
-
-          // Get user's booked classes for collaborative filtering
           const bookingsQuery = query(
             collection(db, "Bookings"),
             where("studentId", "==", user.uid)
           );
-          const bookingsSnapshot = await getDocs(bookingsQuery);
-          userBookedClasses = bookingsSnapshot.docs.map(doc => ({
-            classId: doc.data().classId,
-            timestamp: doc.data().timestamp,
-            ...doc.data()
-          }));
+          const bookingsSnap = await getDocs(bookingsQuery);
+          booked = bookingsSnap.docs.map((doc) => doc.data());
         }
 
-        // Combine and get unique categories/subcategories from viewed classes
-        const allViewedClasses = [...recentlyViewedClasses, ...userRecentlyViewed];
-        if (allViewedClasses.length === 0 && userBookedClasses.length === 0) {
+        const allViewed = [...localViewed, ...firestoreViewed];
+        if (!allViewed.length && !booked.length) {
           setDisplayRec(false);
           return;
         }
 
-        const viewedClassIds = allViewedClasses.map(item => typeof item === 'string' ? item : item.id);
-        const bookedClassIds = userBookedClasses.map(booking => booking.classId);
+        const viewedIds = new Set(allViewed.map((v) => typeof v === "string" ? v : v.id));
+        const bookedIds = new Set(booked.map((b) => b.classId));
 
-        // Get categories and subcategories from viewed and booked classes
-        const viewedCategories = new Set();
-        const viewedSubCategories = new Set();
-        const bookedCategories = new Set();
-        const bookedSubCategories = new Set();
+        const extractMeta = async (ids, categorySet, subCatSet, typeSet) => {
+          await Promise.all([...ids].slice(0, 10).map(async (id) => {
+            const docSnap = await getDoc(firestoreDoc(db, "classes", id));
+            if (!docSnap.exists()) return;
+            const data = docSnap.data();
+            if (data.Category) categorySet.add(data.Category);
+            if (data.SubCategory) subCatSet.add(data.SubCategory);
+            if (data.Type) typeSet.add(data.Type);
+          }));
+        };
 
-        // Analyze viewed classes
-        if (viewedClassIds.length > 0) {
-          const viewedClassesData = await Promise.all(
-            viewedClassIds.slice(0, 10).map(async (classId) => {
-              try {
-                const classRef = firestoreDoc(db, "classes", classId);
-                const classDoc = await getDoc(classRef);
-                if (classDoc.exists()) {
-                  const data = classDoc.data();
-                  if (data.Category) viewedCategories.add(data.Category);
-                  if (data.SubCategory) viewedSubCategories.add(data.SubCategory);
-                  if (data.Type) viewedCategories.add(data.Type);
-                  return data;
-                }
-              } catch (error) {
-                console.error(`Error fetching viewed class ${classId}:`, error);
-              }
-              return null;
-            })
-          );
-        }
+        const bookedCategories = new Set(), bookedSubCategories = new Set(), bookedTypes = new Set();
+        const viewedCategories = new Set(), viewedSubCategories = new Set(), viewedTypes = new Set();
 
-        // Analyze booked classes
-        if (bookedClassIds.length > 0) {
-          const bookedClassesData = await Promise.all(
-            bookedClassIds.slice(0, 10).map(async (classId) => {
-              try {
-                const classRef = firestoreDoc(db, "classes", classId);
-                const classDoc = await getDoc(classRef);
-                if (classDoc.exists()) {
-                  const data = classDoc.data();
-                  if (data.Category) bookedCategories.add(data.Category);
-                  if (data.SubCategory) bookedSubCategories.add(data.SubCategory);
-                  if (data.Type) bookedCategories.add(data.Type);
-                  return data;
-                }
-              } catch (error) {
-                console.error(`Error fetching booked class ${classId}:`, error);
-              }
-              return null;
-            })
-          );
-        }
+        await Promise.all([
+          extractMeta(viewedIds, viewedCategories, viewedSubCategories, viewedTypes),
+          extractMeta(bookedIds, bookedCategories, bookedSubCategories, bookedTypes)
+        ]);
 
-        // Get user's location for proximity scoring
+        // Location
         let userLocation = null;
         if (navigator.geolocation) {
           try {
-            const position = await new Promise((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-            });
-            userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-          } catch (error) {
-            console.log("Could not get user location:", error);
-          }
+            const pos = await new Promise((res, rej) =>
+              navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
+            );
+            userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          } catch {}
         }
 
-        // Fetch all classes for recommendation
-        const classesQuery = query(collection(db, "classes"));
-        const classesSnapshot = await getDocs(classesQuery);
+        // Fetch all classes + bookings
+        const [allClassSnap, allBookingsSnap] = await Promise.all([
+          getDocs(query(collection(db, "classes"))),
+          getDocs(collection(db, "Bookings")),
+        ]);
 
-        // Get all bookings for collaborative filtering
-        const allBookingsQuery = query(collection(db, "Bookings"));
-        const allBookingsSnapshot = await getDocs(allBookingsQuery);
-        const allBookings = allBookingsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        const allBookings = allBookingsSnap.docs.map((doc) => doc.data());
 
-        const classesWithInstructors = await Promise.all(
-          classesSnapshot.docs.map(async (doc) => {
-            const classData = {
-              id: doc.id,
-              ...doc.data(),
-            };
+        const recommendations = await Promise.all(
+          allClassSnap.docs.map(async (doc) => {
+            const data = { id: doc.id, ...doc.data() };
+            if (viewedIds.has(data.id) || bookedIds.has(data.id)) return null;
 
-            // Skip if this class is already viewed or booked
-            if (viewedClassIds.includes(classData.id) || bookedClassIds.includes(classData.id)) {
-              return null;
-            }
+            const instructorDoc = await getDoc(firestoreDoc(db, "Users", data.classCreator));
+            const instructor = instructorDoc.exists() ? instructorDoc.data() : {};
 
-            if (classData.classCreator) {
-              const instructorRef = firestoreDoc(
-                db,
-                "Users",
-                classData.classCreator
-              );
-              const instructorDoc = await getDoc(instructorRef);
-              if (instructorDoc.exists()) {
-                classData.name = classData.Name || "N/A";
-                classData.instructorImage = instructorDoc.data().profileImage;
-                classData.profileImage = classData.Images?.[0];
-                classData.category = classData.Category || "N/A";
-                classData.instructorName = instructorDoc.data().firstName;
-                classData.instructorData = instructorDoc.data();
-              }
-            }
+            data.name = data.Name || "N/A";
+            data.instructorImage = instructor.profileImage;
+            data.profileImage = data.Images?.[0] || null;
+            data.category = data.Category || "N/A";
+            data.instructorName = instructor.firstName;
+            data.instructorData = instructor;
 
-            // Calculate average rating for this class
-            const classReviews = reviews.filter(
-              (rev) => rev.classID === classData.id
-            );
-            const avgRating =
-              classReviews.length > 0
-                ? classReviews.reduce(
-                  (acc, rev) =>
-                    acc +
-                    (rev.qualityRating +
-                      rev.recommendRating +
-                      rev.safetyRating) /
-                    3,
-                  0
+            // Ratings
+            const classReviews = reviews.filter((r) => r.classID === data.id);
+            const avgRating = classReviews.length
+              ? classReviews.reduce((acc, r) =>
+                  acc + (r.qualityRating + r.recommendRating + r.safetyRating) / 3, 0
                 ) / classReviews.length
-                : 0;
+              : 0;
 
-            classData.averageRating = avgRating;
-            classData.reviewCount = classReviews.length;
+            data.averageRating = avgRating;
+            data.reviewCount = classReviews.length;
 
-            // Get class bookings for collaborative filtering
-            const classBookings = allBookings.filter(booking => booking.classId === classData.id);
-            const classBookingUsers = classBookings.map(booking => booking.studentId);
+            // Bookings for this class
+            const thisClassBookings = allBookings.filter(b => b.classId === data.id);
+            const bookingUsers = thisClassBookings.map(b => b.studentId);
 
-            // Calculate recommendation score using hybrid approach
+            // 1. Collaborative Filtering
             let bookingSimilarity = 0;
-            let viewingBehavior = 0;
-            let contentMatch = 0;
-            let classQuality = 0;
-            let locationProximity = 0;
-            let currentOpenClassSimilarity = 0;
-
-            // 1. Collaborative Filtering (Booking Similarity) - Weight: 0.3
-            if (userBookedClasses.length > 0) {
-              // Find users who booked similar classes
+            if (booked.length) {
               const similarUsers = new Set();
-              userBookedClasses.forEach(userBooking => {
-                const usersWhoBookedSame = allBookings
-                  .filter(booking => booking.classId === userBooking.classId)
-                  .map(booking => booking.studentId);
-                usersWhoBookedSame.forEach(userId => similarUsers.add(userId));
-              });
-
-              // Check if similar users booked this class
-              const similarUserBookings = classBookingUsers.filter(userId => similarUsers.has(userId));
-              bookingSimilarity = Math.min(similarUserBookings.length / Math.max(classBookingUsers.length, 1), 1) * 10;
+              booked.forEach(b =>
+                allBookings.filter(ab => ab.classId === b.classId)
+                  .forEach(ab => similarUsers.add(ab.studentId))
+              );
+              const overlap = bookingUsers.filter(u => similarUsers.has(u)).length;
+              bookingSimilarity = Math.min(overlap / (bookingUsers.length || 1), 1) * 10;
             }
 
-            // 2. Behavioral Signals (View-Based) - Weight: 0.2
-            const viewFrequency = allViewedClasses.filter(viewed =>
-              (typeof viewed === 'string' ? viewed : viewed.id) === classData.id
+            // 2. View Frequency
+            const viewedFreq = allViewed.filter(
+              (v) => (typeof v === "string" ? v : v.id) === data.id
             ).length;
-            viewingBehavior = Math.min(viewFrequency * 2, 10);
+            const viewingBehavior = Math.min(viewedFreq * 2, 10);
 
-            // 3. Content-Based Filtering - Weight: 0.2
-            let categoryMatch = 0;
-            let subcategoryMatch = 0;
-
-            // Subcategory similarity is more important than category
-            if (bookedSubCategories.has(classData.SubCategory) || viewedSubCategories.has(classData.SubCategory)) {
-              subcategoryMatch = 10; // High weight for subcategory match
+            // 3. Content Matching
+            let categoryScore = 0, subCatScore = 0;
+            if (bookedSubCategories.has(data.SubCategory) || viewedSubCategories.has(data.SubCategory))
+              subCatScore = 10;
+            if (bookedCategories.has(data.Category) || viewedCategories.has(data.Category) ||
+                bookedTypes.has(data.Type) || viewedTypes.has(data.Type))
+              categoryScore = 6;
+            if (currentClassData) {
+              if (data.SubCategory === currentClassData.SubCategory) subCatScore += 20;
+              if (data.Category === currentClassData.Category || data.Type === currentClassData.Type) categoryScore += 6;
             }
-            if (bookedCategories.has(classData.Category) || bookedCategories.has(classData.Type) ||
-              viewedCategories.has(classData.Category) || viewedCategories.has(classData.Type)) {
-              categoryMatch = 6; // Lower weight for category match
-            }
+            const contentMatch = subCatScore + categoryScore;
 
-            if (currentClassData && classData.SubCategory === currentClassData.SubCategory) {
-              subcategoryMatch += 20; // Boost for current class subcategory match
-            } 
-            if (currentClassData && classData.Category === currentClassData.Category) {
-              categoryMatch += 6; // Boost for current class category match
-            } else if (currentClassData && classData.Type === currentClassData.Type) {
-              categoryMatch += 6; // Boost for current class type match
-            }
-            
+            // 4. Quality Score
+            const quality = Math.min(
+              (data.instructorData.rating || 0) * 1.5 +
+              avgRating * 1.5 +
+              Math.min(classReviews.length * 0.3, 3) +
+              Math.min(thisClassBookings.length * 0.2, 2) +
+              (data.TopRated ? 3 : 0),
+              10
+            );
 
-            contentMatch = subcategoryMatch + categoryMatch;
-
-            // 4. Class Quality & Popularity - Weight: 0.15
-            let qualityScore = 0;
-
-            // Instructor rating
-            const instructorRating = classData.instructorData?.rating || 0;
-            qualityScore += instructorRating * 1.5;
-
-            // Class rating
-            qualityScore += avgRating * 1.5;
-
-            // Review count (social proof)
-            qualityScore += Math.min(classReviews.length * 0.3, 3);
-
-            // Booking count (popularity)
-            qualityScore += Math.min(classBookings.length * 0.2, 2);
-
-            // TopRated bonus
-            if (classData.TopRated) {
-              qualityScore += 3;
-            }
-
-            classQuality = Math.min(qualityScore, 10);
-
-            // 5. Location Score - Weight: 0.15
-            if (classData.Mode === "Online") {
-              locationProximity = 8; // Online classes get high proximity score
-            } else if (userLocation && classData.latitude && classData.longitude) {
-              // Calculate distance using Haversine formula
-              const R = 6371; // Earth's radius in km
-              const dLat = (classData.latitude - userLocation.lat) * Math.PI / 180;
-              const dLon = (classData.longitude - userLocation.lng) * Math.PI / 180;
-              const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(classData.latitude * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            // 5. Location Score
+            let locationScore = 0;
+            if (data.Mode === "Online") {
+              locationScore = 8;
+            } else if (userLocation && data.latitude && data.longitude) {
+              const toRad = (deg) => deg * Math.PI / 180;
+              const R = 6371;
+              const dLat = toRad(data.latitude - userLocation.lat);
+              const dLon = toRad(data.longitude - userLocation.lng);
+              const a = Math.sin(dLat / 2) ** 2 +
+                        Math.cos(toRad(userLocation.lat)) *
+                        Math.cos(toRad(data.latitude)) *
+                        Math.sin(dLon / 2) ** 2;
               const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-              const distance = R * c;
+              const dist = R * c;
 
-              // Scoring: closer = higher score
-              if (distance <= 5) locationProximity = 10;
-              else if (distance <= 10) locationProximity = 8;
-              else if (distance <= 20) locationProximity = 6;
-              else if (distance <= 50) locationProximity = 4;
-              else locationProximity = 2;
-            } else {
-              locationProximity = 0; // No location data
+              if (dist <= 5) locationScore = 10;
+              else if (dist <= 10) locationScore = 8;
+              else if (dist <= 20) locationScore = 6;
+              else if (dist <= 50) locationScore = 4;
+              else locationScore = 2;
             }
 
-            // Final recommendation score with weights
-            const recommendationScore =
+            data.recommendationScore = (
               0.3 * bookingSimilarity +
               0.2 * viewingBehavior +
               0.2 * contentMatch +
-              0.15 * classQuality +
-              0.15 * locationProximity;
+              0.15 * quality +
+              0.15 * locationScore
+            );
 
-            classData.recommendationScore = recommendationScore;
-            classData.scoreBreakdown = {
-              bookingSimilarity,
-              viewingBehavior,
-              contentMatch,
-              classQuality,
-              locationProximity
-            };
-
-            return classData;
+            return data;
           })
         );
 
-        // Filter out null values and sort by recommendation score
-        const validClasses = classesWithInstructors
-          .filter(classItem => classItem !== null)
-          .sort((a, b) => {
-            // Primary sort: recommendation score
-            if (b.recommendationScore !== a.recommendationScore) {
-              return b.recommendationScore - a.recommendationScore;
-            }
-            // Secondary sort: average rating
-            return b.averageRating - a.averageRating;
-          });
+        const validClasses = recommendations
+          .filter(Boolean)
+          .sort((a, b) =>
+            b.recommendationScore !== a.recommendationScore
+              ? b.recommendationScore - a.recommendationScore
+              : b.averageRating - a.averageRating
+          );
 
-        // Show top recommendations
         setClasses(validClasses.slice(0, 20));
-
-      } catch (error) {
-        console.error("Error fetching recommended classes:", error);
+      } catch (e) {
+        console.error("Recommendation error:", e);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecommendedClasses();
+    fetchRecommendations();
   }, [reviews, user]);
 
-  const displayedClasses = activeFilter
-    ? classes.filter((classItem) => ((classItem.Type === activeFilter) || (classItem.SubCategory === activeFilter)))
-    : classes;
+  const displayedClasses = useMemo(() => {
+    return activeFilter
+      ? classes.filter(c => c.Type === activeFilter || c.SubCategory === activeFilter)
+      : classes;
+  }, [classes, activeFilter]);
 
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
+  useEffect(() => {
+    onClassesLoad?.(displayedClasses.length);
+  }, [displayedClasses, onClassesLoad]);
 
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
+  const scrollLeft = useCallback(() => {
+    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+  }, []);
+  const scrollRight = useCallback(() => {
+    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+  }, []);
 
-  if (!displayrec) {
-    return null;
-  }
+  if (!displayRec) return null;
 
-
-  // Always show recommendations section
   return (
-    <div className={`box-border flex justify-start items-stretch flex-col w-[100.00%] py-8 ${currentClassData ? 'px-0' : 'section-spacing'}`}>
-      <div className="">
-        <div>
-          {!activeFilter && (
-            <p className="section-heading !text-left">{currentClassData?"Similar Classes":"Recommended"}</p>
-          )}
-        </div>
-      </div>
+    <div className={`flex flex-col w-full py-8 ${currentClassData ? "px-0" : "section-spacing"}`}>
+      {!activeFilter && (
+        <p className="section-heading !text-left">
+          {currentClassData ? "Similar Classes" : "Recommended"}
+        </p>
+      )}
       <div className="relative">
-        {/* Left scroll arrow */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
-
-        {/* Right scroll arrow */}
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow hover:bg-gray-50"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="#261f22" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
 
         <div
-          ref={scrollContainerRef}
-          id="classes-recommended"
-          className="gap-8 max-w-[100%] box-border mt-8 overflow-x-auto flex px-12"
+          ref={scrollRef}
+          className="gap-8 max-w-full mt-8 overflow-x-auto flex px-12"
         >
           {loading
-            ? Array(4)
-              .fill(null)
-              .map((_, index) => (
-                <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
-                  <InstructorSection key={index} loading={true} />
+            ? Array(4).fill(0).map((_, i) => (
+                <div key={i} className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
+                  <InstructorSection loading />
                 </div>
               ))
-            : displayedClasses.map((classItem) => (
-              <div className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
-                <InstructorSection
-                  key={classItem.id}
-                  classId={classItem.id}
-                  instructor={classItem}
-                  loading={false}
-                />
-              </div>
-            ))}
+            : displayedClasses.map((item) => (
+                <div key={item.id} className="dm1:w-[300px] w-[250px] shrink-0 border border-gray-200 rounded-2xl">
+                  <InstructorSection instructor={item} classId={item.id} />
+                </div>
+              ))}
         </div>
       </div>
     </div>

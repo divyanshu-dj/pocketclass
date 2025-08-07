@@ -1,7 +1,5 @@
 import { useState } from "react";
 import MusicClassroomLayout from "../MusicClassroomLayout";
-import React from "react";
-import NewHeader from "../../components/NewHeader";
 import {categories} from "../../utils/categories";
 
 function AuthenticatedHeader() {
