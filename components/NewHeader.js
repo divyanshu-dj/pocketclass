@@ -43,9 +43,22 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
   const [classCreated, setClassCreated] = useState(true);
   const [scheduleCreated, setScheduleCreated] = useState(true);
   const [scrollLock, setScrollLock] = useState(false);
+  const [scroll, setScroll] = useState(true);
 
   const videoRefs = useRef([]);
   const [currentView, setCurrentView] = useState("student");
+
+  useEffect(() => {
+    if (!scroll) {
+      document.body.style.overflow = "hidden"; // disable scroll
+    } else {
+      document.body.style.overflow = ""; // restore scroll
+    }
+
+    return () => {
+      document.body.style.overflow = ""; // restore on unmount
+    };
+  }, [scroll]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -936,6 +949,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
           <TeacherSearch
             isShrunk={isMenuShrunk}
             isMenuSmall={isMenuSmall}
+            setScroll={setScroll}
             expandMenu={() => {
               setIsMenuShrunk(false);
               playerRefs.current.forEach((player) => {

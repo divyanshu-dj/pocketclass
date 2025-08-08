@@ -67,7 +67,7 @@ const ClearSearchIcon = React.memo(({ classes, onClick }) => (
   </div>
 ));
 
-const TeacherSearch = ({ expandMenu, user }) => {
+const TeacherSearch = ({ expandMenu, user, setScroll }) => {
   const router = useRouter();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,10 +78,20 @@ const TeacherSearch = ({ expandMenu, user }) => {
   const [selectedRange, setSelectedRange] = useState();
   const [isShrunk, setIsShrunk] = useState(false);
   const [isMenuSmall, setIsMenuSmall] = useState(true);
+  const inputRef = useRef(null);
 
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
   const { activeStyle, updateIndicator, resetActiveBG } = useActiveIndicator();
+
+  useEffect(()=>{
+    if(!activeDropdown){
+      setScroll(true)
+    }
+    else{
+      setScroll(false);
+    }
+  },[activeDropdown])
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -90,24 +100,12 @@ const TeacherSearch = ({ expandMenu, user }) => {
       }
     };
 
-    const handleScroll = () => {
-      setActiveDropdown(null);
-    };
-
-    const handleResize = () => {
-      setActiveDropdown(null);
-    };
-
     document.addEventListener("mousedown", handleOutsideClick);
     document.addEventListener("touchstart", handleOutsideClick);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
       document.removeEventListener("touchstart", handleOutsideClick);
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -422,6 +420,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
                 handleOptionClick("sub", 0);
                 if (activeDropdown !== "sub") {
                   setActiveDropdown("sub");
+                  inputRef.current.focus();
                 }
               }}
             >
@@ -439,6 +438,7 @@ const TeacherSearch = ({ expandMenu, user }) => {
                   type="text"
                   placeholder="Explore your interests"
                   value={searchTerm}
+                  ref={inputRef}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                     if (activeDropdown !== "sub") {
