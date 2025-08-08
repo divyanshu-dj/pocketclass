@@ -55,7 +55,6 @@ function DynamicButtonSection({
     try {
       // Check if chatroom exists
       const chatRoomRef = collection(db, "chatrooms");
-      console.log(studentId, instructorId, classId);
       const q = query(
         chatRoomRef,
         where("student", "==", studentId),
