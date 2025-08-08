@@ -501,7 +501,7 @@ function FitnessClassDetailsSection({
           <DynamicButtonSection
             classId={classId}
             classData={classData}
-            instructorId={classCreatorData?.userUid}
+            instructorId={classData?.classCreator}
           />
         </div>
       </div>
