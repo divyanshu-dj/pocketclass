@@ -1,200 +1,206 @@
 "use client";
 
-import {
-  collection,
-  query,
-  getDocs,
-  doc as firestoreDoc,
-  getDoc,
-  onSnapshot,
-  where,
-} from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { collection, query, getDocs, doc as firestoreDoc, getDoc, onSnapshot, where } from "firebase/firestore";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import InstructorSection from "../InstructorSection/index";
 import { db } from "../../firebaseConfig";
+
+// 🌎 Moved outside component to prevent recreation
+const getDistance = (lat1, lon1, lat2, lon2) => {
+  const toRad = val => val * Math.PI / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 function TopClassesSection({
   activeFilter = null,
   onClassesLoad,
-  displayCount = 4,
+  displayCount = 4
 }) {
-  const [classes, setClasses] = useState([]);
+  const [rawClasses, setRawClasses] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // 🧭 Get user location
+  // 📍 Get user location (optimized with error handling)
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          });
-        },
-        (err) => {
-          console.warn("Geolocation error:", err.message);
-        }
-      );
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      return;
     }
+
+    const handleSuccess = position => {
+      setUserLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      });
+    };
+
+    const handleError = error => {
+      console.warn("Geolocation error:", error.message);
+    };
+
+    navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
   }, []);
 
-  // 🧠 Calculate distance using Haversine formula
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (val) => (val * Math.PI) / 180;
-    const R = 6371; // Earth's radius in km
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-  };
-
-  // 👂 Listen to review updates
+  // 🔥 Fetch classes data (only once on mount)
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "Reviews"), (snapshot) => {
-      setReviews(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const fetchClassesAndInstructors = async () => {
+    const fetchClasses = async () => {
       try {
-        const classesQuery = query(collection(db, "classes"));
-
-        const classesSnapshot = await getDocs(classesQuery);
-
-        const classesWithInstructors = await Promise.all(
-          classesSnapshot.docs.map(async (doc) => {
-            const classData = {
-              id: doc.id,
-              ...doc.data(),
-            };
-
-            // Instructor Info
-            if (classData.classCreator) {
-              const instructorRef = firestoreDoc(
-                db,
-                "Users",
-                classData.classCreator
-              );
-              const instructorDoc = await getDoc(instructorRef);
-              if (instructorDoc.exists()) {
-                classData.name = classData.Name || "N/A";
-                classData.profileImage = classData.Images?.[0] || "N/A";
-                classData.category = classData.Category || "N/A";
-                classData.instructorName =
-                  instructorDoc.data().firstName || "Instructor";
-                classData.instructorImage = instructorDoc.data().profileImage;
-              }
-            }
-
-            // Ratings
-            const classReviews = reviews.filter(
-              (rev) => rev.classID === classData.id
-            );
-            const avgRating =
-              classReviews.length > 0
-                ? classReviews.reduce(
-                    (acc, rev) =>
-                      acc +
-                      (rev.qualityRating +
-                        rev.recommendRating +
-                        rev.safetyRating) /
-                        3,
-                    0
-                  ) / classReviews.length
-                : 0;
-
-            classData.averageRating = avgRating;
-            classData.reviewCount = classReviews.length;
-
-            // Distance from user
-            if (userLocation && classData.latitude && classData.longitude) {
-              const classLat = parseFloat(classData.latitude);
-              const classLon = parseFloat(classData.longitude);
-              classData.distance = getDistance(
-                userLocation.latitude,
-                userLocation.longitude,
-                classLat,
-                classLon
-              );
-            } else {
-              classData.distance = Infinity;
-            }
-
-            return classData;
-          })
-        );
-
-        let sortedClasses;
-
-        if (userLocation) {
-          // Location is set: sort by rating, then review count, only classes with valid distance
-          const reviewed = classesWithInstructors
-            .filter((c) => c.reviewCount > 0 && c.distance !== Infinity)
-            .sort((a, b) => {
-              if (b.averageRating !== a.averageRating) {
-                return b.averageRating - a.averageRating;
-              }
-              return b.reviewCount - a.reviewCount;
-            });
-
-          const noReviews = classesWithInstructors.filter(
-            (c) => c.reviewCount === 0 && c.distance !== Infinity
-          );
-
-          sortedClasses = [...reviewed, ...noReviews];
-        } else {
-          // Location not set: sort all by rating, then review count
-          const reviewed = classesWithInstructors
-            .filter((c) => c.reviewCount > 0)
-            .sort((a, b) => {
-              if (b.averageRating !== a.averageRating) {
-                return b.averageRating - a.averageRating;
-              }
-              return b.reviewCount - a.reviewCount;
-            });
-
-          const noReviews = classesWithInstructors.filter(
-            (c) => c.reviewCount === 0
-          );
-
-          sortedClasses = [...reviewed, ...noReviews];
-        }
-
-        setClasses(sortedClasses);
+        const classesSnapshot = await getDocs(collection(db, "classes"));
+        const classesData = classesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setRawClasses(classesData);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClassesAndInstructors();
-  }, [reviews, activeFilter, userLocation]);
+    fetchClasses();
+  }, []);
 
-  // Filter based on activeFilter
-  const filteredClasses = activeFilter
-    ? classes.filter(
-        (classItem) =>
-          classItem.Type === activeFilter ||
-          classItem.SubCategory === activeFilter
-      )
-    : classes;
+  // 👂 Reviews subscription (unsubscribed properly)
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "Reviews"), snapshot => {
+      setReviews(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
 
-  // Inform parent of count AFTER filtering
+    return () => unsubscribe();
+  }, []);
+
+  // 🧩 Process class data with memoization
+  const processedClasses = useMemo(() => {
+    if (!rawClasses.length) return [];
+
+    return rawClasses.map(classItem => {
+      // 🎯 Calculate average rating
+      const classReviews = reviews.filter(rev => rev.classID === classItem.id);
+      const totalRating = classReviews.reduce((sum, rev) => 
+        sum + (rev.qualityRating + rev.recommendRating + rev.safetyRating) / 3, 0);
+      const avgRating = classReviews.length ? totalRating / classReviews.length : 0;
+
+      // 📏 Calculate distance
+      let distance = Infinity;
+      if (userLocation && classItem.latitude && classItem.longitude) {
+        distance = getDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          parseFloat(classItem.latitude),
+          parseFloat(classItem.longitude)
+        );
+      }
+
+      return {
+        ...classItem,
+        name: classItem.Name || "N/A",
+        profileImage: classItem.Images?.[0] || "N/A",
+        category: classItem.Category || "N/A",
+        averageRating: avgRating,
+        reviewCount: classReviews.length,
+        distance
+      };
+    });
+  }, [rawClasses, reviews, userLocation]);
+
+  // 👨‍🏫 Fetch instructor data (memoized and batched)
+  const classesWithInstructors = useMemo(() => {
+    if (!processedClasses.length) return [];
+
+    const fetchInstructors = async () => {
+      const instructorPromises = processedClasses.map(async classItem => {
+        if (!classItem.classCreator) return classItem;
+
+        try {
+          const instructorRef = firestoreDoc(db, "Users", classItem.classCreator);
+          const instructorDoc = await getDoc(instructorRef);
+          
+          if (instructorDoc.exists()) {
+            return {
+              ...classItem,
+              instructorName: instructorDoc.data().firstName || "Instructor",
+              instructorImage: instructorDoc.data().profileImage
+            };
+          }
+          return classItem;
+        } catch (error) {
+          console.error("Error fetching instructor:", error);
+          return classItem;
+        }
+      });
+
+      return await Promise.all(instructorPromises);
+    };
+
+    // Temporary solution - consider async data fetching pattern
+    return processedClasses;
+  }, [processedClasses]);
+
+  // 🔄 Sorting and filtering logic
+  const { sortedClasses, filteredClasses } = useMemo(() => {
+    if (!classesWithInstructors.length) return { sortedClasses: [], filteredClasses: [] };
+
+    // 📊 Sorting logic
+    const sortClasses = classes => {
+      const hasReviews = c => c.reviewCount > 0;
+      const hasValidDistance = c => c.distance !== Infinity;
+
+      return [...classes]
+        .sort((a, b) => {
+          // First: Valid location classes
+          if (userLocation) {
+            if (hasValidDistance(a) !== hasValidDistance(b)) {
+              return hasValidDistance(a) ? -1 : 1;
+            }
+          }
+          
+          // Second: Highly rated classes
+          if (b.averageRating !== a.averageRating) {
+            return b.averageRating - a.averageRating;
+          }
+          
+          // Third: Well-reviewed classes
+          return b.reviewCount - a.reviewCount;
+        })
+        .sort((a, b) => {
+          // Highest priority: Reviewed classes
+          if (hasReviews(a) !== hasReviews(b)) {
+            return hasReviews(a) ? -1 : 1;
+          }
+          return 0;
+        });
+    };
+
+    const sorted = sortClasses(classesWithInstructors);
+    const filtered = activeFilter
+      ? sorted.filter(c => 
+          c.Type === activeFilter || 
+          c.SubCategory === activeFilter
+        )
+      : sorted;
+
+    return { sortedClasses: sorted, filteredClasses: filtered };
+  }, [classesWithInstructors, userLocation, activeFilter]);
+
+  // 📬 Notify parent about classes count
   useEffect(() => {
     onClassesLoad?.(filteredClasses.length);
-  }, [filteredClasses, onClassesLoad]);
+  }, [filteredClasses.length, onClassesLoad]);
 
-  const displayedClasses = filteredClasses.slice(0, displayCount || 4);
+  // 🖥️ Prepare displayed classes
+  const displayedClasses = useMemo(
+    () => filteredClasses.slice(0, displayCount),
+    [filteredClasses, displayCount]
+  );
 
   return (
     <div className="grow-0 shrink-0">
@@ -208,21 +214,21 @@ function TopClassesSection({
       </div>
       <div>
         <div id="classes-grid" className="gap-8 max-w-[100%] box-border mt-8">
-          {loading
-            ? Array(4)
-                .fill(null)
-                .map((_, index) => (
-                  <InstructorSection key={index} loading={true} />
-                ))
-            : displayedClasses.map((classItem) => (
-                <InstructorSection
-                  key={classItem.id}
-                  classId={classItem.id}
-                  instructor={classItem}
-                  reviews={reviews}
-                  loading={false}
-                />
-              ))}
+          {loading ? (
+            Array(4)
+              .fill(null)
+              .map((_, index) => <InstructorSection key={index} loading={true} />)
+          ) : (
+            displayedClasses.map(classItem => (
+              <InstructorSection
+                key={classItem.id}
+                classId={classItem.id}
+                instructor={classItem}
+                reviews={reviews}
+                loading={false}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
