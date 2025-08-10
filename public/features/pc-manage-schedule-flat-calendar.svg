@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="840" viewBox="0 0 1440 840" role="img" aria-label="PocketClass Manage Schedule - Flat Calendar View">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+    <style><![CDATA[
+      .bg { fill: #f6f7f9; }
+      .panel { fill: #ffffff; }
+      .muted { fill: #e5e7eb; }
+      .brand { fill: #ff6b3d; }
+      .nav-title { font: 700 16px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #111827; }
+      .small { font: 500 12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #6b7280; }
+      .title { font: 700 18px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #111827; }
+      .day { font: 600 13px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #374151; }
+      .time { font: 500 12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #9ca3af; }
+      .chip { fill: #22c55e; }           /* occupied slot */
+      .chip2 { fill: #a7f3d0; }          /* lighter slot */
+      .chip3 { fill: #bbf7d0; }          /* alt shade */
+      .gridline { stroke: #e5e7eb; stroke-width: 1; }
+      .header { fill: #ffffff; }
+      .headerbar { fill: #ffffff; }
+      .tab { fill: #f3f4f6; }
+      .tab-active { fill: #10b981; }
+      .tab-text { font: 600 12px Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #111827; }
+      .tab-text-on { fill: #ffffff; }
+    ]]></style>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" x="0" y="0" width="1440" height="840"/>
+
+  <!-- Top header -->
+  <rect class="headerbar" x="0" y="0" width="1440" height="72"/>
+  <!-- Logo block -->
+  <g transform="translate(28,20)">
+    <rect x="0" y="0" width="170" height="34" rx="8" class="muted"/>
+  </g>
+  <!-- Search -->
+  <g transform="translate(520,16)">
+    <rect x="0" y="0" width="420" height="40" rx="20" fill="#ffffff" stroke="#e5e7eb"/>
+    <circle cx="24" cy="20" r="10" class="muted"/>
+    <rect x="44" y="12" width="200" height="16" rx="8" class="muted"/>
+    <rect x="260" y="12" width="140" height="16" rx="8" class="muted"/>
+  </g>
+  <!-- Icons -->
+  <g transform="translate(1250,20)">
+    <circle cx="0" cy="16" r="12" class="muted"/>
+    <circle cx="40" cy="16" r="12" class="muted"/>
+    <circle cx="88" cy="16" r="18" class="muted"/>
+  </g>
+
+  <!-- Left sidebar: only Instructor Panel card -->
+  <g transform="translate(0,72)">
+    <rect x="0" y="0" width="264" height="768" class="panel"/>
+    <g transform="translate(20,24)">
+      <rect x="0" y="0" width="224" height="56" rx="12" fill="#fff7ed" stroke="#fed7aa"/>
+      <circle cx="28" cy="28" r="12" class="brand"/>
+      <text x="52" y="24" class="nav-title">Instructor Panel</text>
+      <text x="52" y="42" class="small">Manage your classes</text>
+    </g>
+  </g>
+
+  <!-- Right main calendar surface -->
+  <g transform="translate(284,96)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1128" height="696" rx="14" class="panel"/>
+
+    <!-- Calendar header controls -->
+    <g transform="translate(20,18)">
+      <rect x="0" y="0" width="200" height="36" rx="10" class="tab"/>
+      <rect x="208" y="0" width="120" height="36" rx="10" class="tab-active"/>
+      <text x="244" y="23" class="tab-text tab-text-on">Week</text>
+      <rect x="336" y="0" width="160" height="36" rx="10" class="tab"/>
+      <text x="372" y="23" class="tab-text">Common Schedule</text>
+    </g>
+
+    <!-- Day row -->
+    <g transform="translate(20,70)">
+      <rect x="60" y="0" width="1028" height="36" rx="8" class="header"/>
+      <!-- Days -->
+      <g class="day">
+        <text x="88" y="24">03 Sun</text>
+        <text x="238" y="24">04 Mon</text>
+        <text x="388" y="24">05 Tue</text>
+        <text x="538" y="24">06 Wed</text>
+        <text x="688" y="24" fill="#10b981">07 Thu</text>
+        <text x="838" y="24">08 Fri</text>
+        <text x="988" y="24">09 Sat</text>
+      </g>
+      <!-- top accent strip -->
+      <rect x="60" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+      <rect x="210" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+      <rect x="360" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+      <rect x="510" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+      <rect x="660" y="-10" width="146" height="6" rx="3" fill="#10b981"/>
+      <rect x="810" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+      <rect x="960" y="-10" width="146" height="6" rx="3" fill="#ef4444"/>
+    </g>
+
+    <!-- Time column + grid -->
+    <g transform="translate(20,120)">
+      <!-- times -->
+      <g class="time">
+        <text x="0" y="24">7AM</text>
+        <text x="0" y="84">8AM</text>
+        <text x="0" y="144">9AM</text>
+        <text x="0" y="204">10AM</text>
+        <text x="0" y="264">11AM</text>
+        <text x="0" y="324">12PM</text>
+        <text x="0" y="384">1PM</text>
+        <text x="0" y="444">2PM</text>
+        <text x="0" y="504">3PM</text>
+        <text x="0" y="564">4PM</text>
+        <text x="0" y="624">5PM</text>
+      </g>
+      <!-- vertical grid lines -->
+      <g transform="translate(60,0)">
+        <rect x="0" y="0" width="1028" height="600" fill="#fff"/>
+        <g class="gridline">
+          <line x1="146" y1="0" x2="146" y2="600"/>
+          <line x1="292" y1="0" x2="292" y2="600"/>
+          <line x1="438" y1="0" x2="438" y2="600"/>
+          <line x1="584" y1="0" x2="584" y2="600"/>
+          <line x1="730" y1="0" x2="730" y2="600"/>
+          <line x1="876" y1="0" x2="876" y2="600"/>
+        </g>
+        <!-- horizontal grid lines -->
+        <g class="gridline">
+          <line x1="0" y1="60" x2="1028" y2="60"/>
+          <line x1="0" y1="120" x2="1028" y2="120"/>
+          <line x1="0" y1="180" x2="1028" y2="180"/>
+          <line x1="0" y1="240" x2="1028" y2="240"/>
+          <line x1="0" y1="300" x2="1028" y2="300"/>
+          <line x1="0" y1="360" x2="1028" y2="360"/>
+          <line x1="0" y1="420" x2="1028" y2="420"/>
+          <line x1="0" y1="480" x2="1028" y2="480"/>
+          <line x1="0" y1="540" x2="1028" y2="540"/>
+        </g>
+
+        <!-- Flat blocks (no text) -->
+        <!-- Column widths: 146 each -->
+        <!-- 11AM-3PM on Sun-Wed -->
+        <g>
+          <rect class="chip"  x="16"   y="264" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="16"   y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="16"   y="384" width="114" height="60" rx="10"/>
+
+          <rect class="chip"  x="162"  y="264" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="162"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="162"  y="384" width="114" height="60" rx="10"/>
+
+          <rect class="chip"  x="308"  y="264" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="308"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="308"  y="384" width="114" height="60" rx="10"/>
+
+          <rect class="chip"  x="454"  y="264" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="454"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="454"  y="384" width="114" height="60" rx="10"/>
+        </g>
+
+        <!-- Thu column with light highlight -->
+        <rect x="600" y="0" width="146" height="600" fill="#ecfeff" opacity="0.5" rx="8"/>
+        <g>
+          <rect class="chip"  x="616"  y="264" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="616"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="616"  y="384" width="114" height="60" rx="10"/>
+          <rect class="chip3" x="616"  y="444" width="114" height="60" rx="10"/>
+        </g>
+
+        <!-- Fri & Sat lighter blocks -->
+        <g>
+          <rect class="chip2" x="762"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="762"  y="384" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="762"  y="444" width="114" height="60" rx="10"/>
+
+          <rect class="chip2" x="908"  y="324" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="908"  y="384" width="114" height="60" rx="10"/>
+          <rect class="chip2" x="908"  y="444" width="114" height="60" rx="10"/>
+        </g>
+
+      </g>
+    </g>
+  </g>
+</svg>

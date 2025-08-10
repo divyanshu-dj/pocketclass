@@ -14,9 +14,24 @@
         opacity: 0;
         transform: translateX(30px) scale(0.95);
     }
+    50% {
+        opacity: 0.7;
+        transform: translateX(15px) scale(0.98);
+    }
     100% {
         opacity: 1;
         transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes fadeOutSlide {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.95);
     }
 }
 
@@ -55,6 +70,14 @@
   transform: translateX(0);
 }
 
+.testimonial-panel-content.entering {
+  animation: fadeInSlide 600ms ease-out forwards;
+}
+
+.testimonial-panel-content.exiting {
+  animation: fadeOutSlide 300ms ease-in forwards;
+}
+
 .smooth-flex {
   transition-property: flex-basis, max-width;
   transition-duration: 700ms;
@@ -65,6 +88,17 @@
 /* Smooth testimonial content transitions */
 .testimonial-content {
   animation: fadeInSlide 600ms ease-out forwards;
+}
+
+/* Staggered animation for testimonial elements */
+.testimonial-quote {
+  animation: fadeInSlide 700ms ease-out 100ms forwards;
+  opacity: 0;
+}
+
+.testimonial-author {
+  animation: fadeInSlide 700ms ease-out 200ms forwards;
+  opacity: 0;
 }
 
 /* Mobile-specific improvements */
@@ -87,3 +121,18 @@
     touch-action: manipulation;
   }
 }
+
+@keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 3s ease-in-out infinite 1.5s;
+        }

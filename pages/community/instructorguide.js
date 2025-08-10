@@ -1,10 +1,7 @@
-import React from "react";
+
 import Footer from "/components/Footer";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
-import LargeCard from "/components/LargeCard";
-import NewHeader from "../../components/NewHeader";
 import "../../styles/Instructorguide.module.css";
 import { useState, useRef, useEffect } from "react";
 import VideoPlayer from "../../components/VideoPlayer";
@@ -49,132 +46,57 @@ export default function InstructorGuide() {
   const features = [
     {
       title: "Message Automations",
-      description: "Keep students engaged and informed automatically. \nSend pre-class reminders, cancellation notices, birthday vouchers, and follow-up prompts. \nFully customizable templates save you hours.",
-      icon: (
-        <svg viewBox="0 0 64 64" className="w-16 h-16">
-          <g fill="none" stroke="currentColor" strokeWidth="2">
-            {/* Chat bubble */}
-            <path d="M48 16H16c-4 0-8 4-8 8v16c0 4 4 8 8 8h8l8 8 8-8h8c4 0 8-4 8-8V24c0-4-4-8-8-8z" className="fill-blue-50" />
-            {/* Clock */}
-            <circle cx="32" cy="28" r="6" className="fill-white" />
-            <path d="M32 25v3l2 2" />
-            {/* Magic wand */}
-            <path d="M42 10l2 2-6 6-2-2z" className="stroke-purple-500" />
-            <circle cx="44" cy="8" r="1" className="fill-purple-500" />
-            <circle cx="46" cy="12" r="1" className="fill-purple-500" />
-            <circle cx="40" cy="12" r="1" className="fill-purple-500" />
-          </g>
-        </svg>
-      )
+      description: "Keep students engaged and informed automatically. Send pre-class reminders, cancellation notices, birthday vouchers, and follow-up prompts. Fully customizable templates save you hours.",
+      image: "/features/pc-upcoming-class-reminder-muted-bg.svg",
+      mockup: "automation-interface"
     },
     {
       title: "Notes & Progress Tracking",
-      description: "Track each student’s journey with detailed notes. \nLeverage AI to refine your notes, generate titles, and make progress tracking effortless.",
-      icon: (
-        <svg viewBox="0 0 64 64" className="w-16 h-16">
-          <g fill="none" stroke="currentColor" strokeWidth="2">
-            {/* Notepad */}
-            <rect x="18" y="12" width="28" height="36" rx="2" className="fill-yellow-50" />
-            <path d="M24 20h16M24 28h12M24 36h16" />
-            {/* AI sparkles */}
-            <circle cx="12" cy="16" r="2" className="fill-blue-400" />
-            <circle cx="52" cy="24" r="2" className="fill-purple-400" />
-            <circle cx="52" cy="40" r="2" className="fill-green-400" />
-            <circle cx="12" cy="44" r="2" className="fill-pink-400" />
-            {/* Lines connecting sparkles */}
-            <path d="M14 16l4 4M50 26l-4 4M50 38l-4-4M14 42l4-4" className="stroke-gray-300 stroke-1" />
-          </g>
-        </svg>
-      )
+      description: "Track each student's journey with detailed notes. Leverage AI to refine your notes, generate titles, and make progress tracking effortless.",
+      image: "/features/pocketclass_notes_hero_full.svg",
+      mockup: "notes-interface"
     },
     {
       title: "Smart Calendar & Integrations",
-      description: "Set your availability once and let PocketClass handle the rest. \nAccept real-time bookings across platforms with integrated scheduling.",
-      icon: (
-        <svg viewBox="0 0 64 64" className="w-16 h-16">
-          <g fill="none" stroke="currentColor" strokeWidth="2">
-            {/* Calendar */}
-            <rect x="12" y="16" width="40" height="32" rx="2" className="fill-green-50" />
-            <path d="M12 24h40" />
-            <path d="M20 12v8M44 12v8" />
-            <circle cx="24" cy="32" r="2" className="fill-logo-red" />
-            <circle cx="32" cy="32" r="1" className="fill-gray-400" />
-            <circle cx="40" cy="32" r="1" className="fill-gray-400" />
-            <circle cx="24" cy="40" r="1" className="fill-gray-400" />
-            <circle cx="32" cy="40" r="1" className="fill-gray-400" />
-            {/* Connection lines */}
-            <path d="M54 20c4 0 8 0 8 4v8c0 4-4 4-8 4" className="stroke-blue-500" />
-            <text x="56" y="30" className="text-xs font-bold fill-blue-500">G</text>
-          </g>
-        </svg>
-      )
+      description: "Set your availability once and let PocketClass handle the rest. Accept real-time bookings across platforms with integrated scheduling.",
+      image: "/features/pc-manage-schedule-flat-calendar.svg",
+      mockup: "calendar-interface"
     },
     {
       title: "Custom Class Pages with Payments",
-      description: "Showcase your classes with beautifully designed pages. \nAccept secure payments directly from students, complete with built-in protections.",
-      icon: (
-        <svg viewBox="0 0 64 64" className="w-16 h-16">
-          <g fill="none" stroke="currentColor" strokeWidth="2">
-            {/* Laptop */}
-            <rect x="12" y="20" width="40" height="24" rx="2" className="fill-gray-50" />
-            <rect x="8" y="44" width="48" height="4" rx="2" className="fill-gray-200" />
-            {/* Book Now button */}
-            <rect x="22" y="28" width="20" height="8" rx="4" className="fill-logo-red stroke-logo-red" />
-            <text x="32" y="34" textAnchor="middle" className="text-xs fill-white font-bold">Book</text>
-            {/* Credit card */}
-            <rect x="46" y="16" width="12" height="8" rx="1" className="fill-blue-100 stroke-blue-400" />
-            <path d="M48 18h8M48 20h4" className="stroke-blue-400" />
-          </g>
-        </svg>
-      )
+      description: "Showcase your classes with beautifully designed pages. Accept secure payments directly from students, complete with built-in protections.",
+      image: "/features/pc-client-dashboard-hero.svg",
+      mockup: "custom-class-pages-interface"
     },
     {
       title: "Retention & Sales Tools",
       description: "Tiered reputation, loyalty programs, and analytics to keep students coming back.",
-      icon: (
-        <svg viewBox="0 0 64 64" className="w-16 h-16">
-          <g fill="none" stroke="currentColor" strokeWidth="2">
-            {/* Chart with upward arrow */}
-            <path d="M12 48L24 36L36 40L48 24L52 28" className="stroke-green-500 strokeWidth-3" />
-            <path d="M48 28l4-4v4h-4" className="fill-green-500" />
-            {/* Student avatars */}
-            <circle cx="16" cy="12" r="4" className="fill-blue-200" />
-            <circle cx="28" cy="8" r="4" className="fill-pink-200" />
-            <circle cx="40" cy="12" r="4" className="fill-purple-200" />
-            <circle cx="52" cy="8" r="4" className="fill-green-200" />
-            {/* Connection lines */}
-            <path d="M16 16l8 16M28 12l8 20M40 16l8 16M52 12l-4 8" className="stroke-gray-300 stroke-1" />
-          </g>
-        </svg>
-      )
+      image: "/features/calendar.svg",
+      mockup: "retention-sales-tools-interface"
     }
   ];
 
   const testimonials = [
     {
       id: 1,
-      quote: "PocketClass transformed how I run my yoga studio. The automated reminders and easy booking system have increased my class attendance by 40%.",
-      name: "Sarah Chen",
-      title: "Yoga Instructor",
-      avatar: "https://cdn.prod.website-files.com/67c1d30d11d3d1eef8282474/67fc1f607b9984abe648899b_1722477119043-2.avif",
-
+      quote: "PocketClass lets me track every client’s progress and keep notes organized. It’s saved me hours each week and made my sessions feel more personalized.",
+      name: "Ethan Williams",
+      title: "Fitness Instructor",
+      avatar: "/EthanTestimonial.jpg",
     },
     {
       id: 2,
-      quote: "The payment integration is seamless, and I love how the AI helps me track my students' progress. It's like having a personal assistant.",
-      name: "Marcus Rodriguez",
-      title: "Guitar Teacher",
-      avatar: "https://cdn.prod.website-files.com/67c1d30d11d3d1eef8282474/6800446f6a42673e8571e537_jesse_zhang_decagon.avif",
-
+      quote: "Students can book me instantly based on my real-time availability. Automated messages on PocketClass also helps me reduce cancellations and retain students.",
+      name: "DJ Sean Gunn",
+      title: "DJ Instructor",
+      avatar: "/SeanTestimonial.jpg",
     },
     {
       id: 3,
-      quote: "Managing multiple instructors and classes used to be chaos. PocketClass brought everything together in one beautiful platform.",
-      name: "Emma Thompson",
-      title: "Dance Studio Owner",
-      avatar: "https://cdn.prod.website-files.com/67c1d30d11d3d1eef8282474/67fc21b8a8421e53648583e1_Hannah%20Chapiro%20Headshot.avif",
-
-
+      quote: "Easy payments and extra visibility brought me more students than I expected. PocketClass makes running my business effortless.",
+      name: "Coach Wit",
+      title: "Golf Instructor",
+      avatar: "/WitTestimonial.jpg",
     }
   ];
 
@@ -321,6 +243,18 @@ export default function InstructorGuide() {
     }
   };
 
+  const FeatureImage = ({ src, alt }) => {
+    return (
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 h-64 flex items-center justify-center overflow-hidden">
+        <img 
+          src={src} 
+          alt={alt}
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white">
       <Head>
@@ -429,31 +363,54 @@ export default function InstructorGuide() {
       </section>
 
       {/* Feature Highlights Section */}
-      <section id="features-section" className="py-16 sm:py-20 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Everything you need to succeed
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Professional tools that help you focus on what you do best — teaching
-            </p>
+      <section id="features-section" className="py-10 lg:py-32 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl mb-6">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              <div className="w-4 h-4 bg-gradient-to-br from-purple-600 to-blue-600 rounded-sm"></div>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="group relative bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="text-logo-red mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">{feature.title}</h3>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-logo-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-            ))}
-          </div>
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Native AI-powered teaching
+          </h2>
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+            Work with a co-pilot you can trust to manage your classes and interact with your students.
+          </p>
         </div>
-      </section>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-20">
+          {features.slice(0, 2).map((feature, index) => (
+            <div key={index} className="group">
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                <FeatureImage src={feature.image} alt={feature.title} />
+                <div className="mt-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {features.slice(2, 4).map((feature, index) => (
+            <div key={index + 2} className="group">
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                <FeatureImage src={feature.image} alt={feature.title} />
+                <div className="mt-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
 
       {/* Verification Process Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
@@ -863,23 +820,6 @@ export default function InstructorGuide() {
           title={selectedVideo.title}
         />
       )}
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float-delayed 3s ease-in-out infinite 1.5s;
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="840" viewBox="0 0 1440 840">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <style><![CDATA[
+      .panel { fill: #ffffff; }
+      .muted { fill: #e5e7eb; }
+      .day { font: 600 13px Inter, system-ui, sans-serif; fill: #374151; }
+      .time { font: 500 12px Inter, system-ui, sans-serif; fill: #9ca3af; }
+      .chip { fill: #22c55e; }
+      .chip2 { fill: #a7f3d0; }
+      .chip3 { fill: #bbf7d0; }
+      .gridline { stroke: #e5e7eb; stroke-width: 1; }
+      .header { fill: #ffffff; }
+      .tab { fill: #f3f4f6; }
+      .tab-active { fill: #10b981; }
+      .tab-text { font: 600 12px Inter, system-ui, sans-serif; fill: #111827; }
+      .tab-text-on { fill: #ffffff; }
+    ]]></style>
+  </defs>
+
+  <!-- Calendar container -->
+  <g transform="translate(156,96)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1128" height="600" rx="14" class="panel"/>
+
+    <!-- Calendar header controls -->
+    <g transform="translate(20,18)">
+      <rect x="0" y="0" width="200" height="36" rx="10" class="tab"/>
+      <rect x="208" y="0" width="120" height="36" rx="10" class="tab-active"/>
+      <text x="244" y="23" class="tab-text tab-text-on">Week</text>
+      <rect x="336" y="0" width="160" height="36" rx="10" class="tab"/>
+      <text x="372" y="23" class="tab-text">Common Schedule</text>
+    </g>
+
+    <!-- Day row -->
+    <g transform="translate(20,70)">
+      <rect x="60" y="0" width="1028" height="36" rx="8" class="header"/>
+      <g class="day">
+        <text x="88" y="24">03 Sun</text>
+        <text x="238" y="24">04 Mon</text>
+        <text x="388" y="24">05 Tue</text>
+        <text x="538" y="24">06 Wed</text>
+        <text x="688" y="24" fill="#10b981">07 Thu</text>
+        <text x="838" y="24">08 Fri</text>
+        <text x="988" y="24">09 Sat</text>
+      </g>
+      <rect x="660" y="-10" width="146" height="6" rx="3" fill="#10b981"/>
+    </g>
+
+    <!-- Time column + grid (cutoff at 4PM / y=504) -->
+    <g transform="translate(20,120)">
+      <g class="time">
+        <text x="0" y="24">7AM</text>
+        <text x="0" y="84">8AM</text>
+        <text x="0" y="144">9AM</text>
+        <text x="0" y="204">10AM</text>
+        <text x="0" y="264">11AM</text>
+        <text x="0" y="324">12PM</text>
+        <text x="0" y="384">1PM</text>
+        <text x="0" y="444">2PM</text>
+        
+      </g>
+      <g transform="translate(60,0)">
+        <rect x="0" y="0" width="1028" height="444" fill="#fff"/>
+        <!-- vertical grid lines -->
+        <g class="gridline">
+          <line x1="146" y1="0" x2="146" y2="444"/>
+          <line x1="292" y1="0" x2="292" y2="444"/>
+          <line x1="438" y1="0" x2="438" y2="444"/>
+          <line x1="584" y1="0" x2="584" y2="444"/>
+          <line x1="730" y1="0" x2="730" y2="444"/>
+          <line x1="876" y1="0" x2="876" y2="444"/>
+        </g>
+        <!-- horizontal grid lines -->
+        <g class="gridline">
+          <line x1="0" y1="60" x2="1028" y2="60"/>
+          <line x1="0" y1="120" x2="1028" y2="120"/>
+          <line x1="0" y1="180" x2="1028" y2="180"/>
+          <line x1="0" y1="240" x2="1028" y2="240"/>
+          <line x1="0" y1="300" x2="1028" y2="300"/>
+          <line x1="0" y1="360" x2="1028" y2="360"/>
+          <line x1="0" y1="420" x2="1028" y2="420"/>
+          
+        </g>
+
+        <!-- Example event blocks -->
+        <!-- Example event blocks -->
+        <rect class="chip"  x="16"   y="144" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="162"  y="204" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="308"  y="144" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="454"  y="204" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="600"  y="144" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="746"  y="204" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="892"  y="144" width="114" height="60" rx="10"/>
+
+        <rect class="chip"  x="16"   y="264" width="114" height="60" rx="10"/>
+        <rect class="chip3" x="162"  y="324" width="114" height="60" rx="10"/>
+        <rect class="chip2" x="308"  y="384" width="114" height="60" rx="10"/>
+        <rect class="chip"  x="616"  y="264" width="114" height="60" rx="10"/>
+      </g>
+    </g>
+  </g>
+</svg>

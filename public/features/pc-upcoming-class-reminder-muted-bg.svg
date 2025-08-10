@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="PocketClass - Upcoming Class Reminder Modal with Background">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+    <style><![CDATA[
+      .bg { fill: #f6f7f9; }
+      .card { fill: #fff; stroke: #e6e7eb; }
+      .muted { fill: #e5e7eb; }
+      .accent { fill: #ff6b3d; }
+      .accent-pill { fill: #fee2e2; }
+      .accent-text { font: 600 12px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #b91c1c; }
+      .nav-text { font: 600 13px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #374151; }
+      .small { font: 500 11px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #6b7280; }
+      .title { font: 700 20px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #1f2937; }
+      .subtitle { font: 500 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #6b7280; }
+      .h2 { font: 700 18px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #111827; }
+      .body { font: 400 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #374151; }
+      .chip { fill: #ecfdf5; stroke: #a7f3d0; }
+      .chip-text { font: 600 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #065f46; }
+      .divider { stroke: #e5e7eb; }
+      .btn { fill: #f9fafb; stroke: #e5e7eb; }
+      .btn-text { font: 600 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; fill: #111827; }
+      .x { stroke: #6b7280; stroke-width: 2; }
+      .overlay { fill: rgba(0,0,0,0.35); }
+    ]]></style>
+  </defs>
+
+  <!-- App background -->
+  <rect class="bg" x="0" y="0" width="1280" height="720"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1280" height="64" fill="#ffffff" opacity="0.35" />
+  <!-- Logo -->
+  <rect x="20" y="16" width="160" height="32" rx="6" class="muted"/>
+  <!-- Search -->
+  <rect x="540" y="12" width="360" height="40" rx="20" fill="#ffffff" stroke="#e5e7eb"/>
+  <circle cx="560" cy="32" r="10" class="muted"/>
+  <rect x="580" y="24" width="180" height="16" rx="8" class="muted"/>
+  <!-- Bell + Avatar -->
+  <circle cx="1120" cy="32" r="12" class="muted"/>
+  <circle cx="1160" cy="32" r="12" class="muted"/>
+  <circle cx="1200" cy="32" r="18" class="muted"/>
+
+  <!-- Sidebar -->
+  <rect x="0" y="64" width="260" height="656" fill="#ffffff" opacity="0.35" />
+  <!-- Sidebar items -->
+  <g transform="translate(24,92)">
+    <circle r="10" cx="20" cy="20" class="muted"/>
+    <text x="44" y="24" class="nav-text">My Profile</text>
+
+    <g transform="translate(0,44)">
+      <circle r="10" cx="20" cy="20" class="muted"/>
+      <text x="44" y="24" class="nav-text">My Classes</text>
+    </g>
+
+    <g transform="translate(0,88)">
+      <circle r="10" cx="20" cy="20" class="muted"/>
+      <text x="44" y="24" class="nav-text">Create Class</text>
+    </g>
+
+    <g transform="translate(0,132)">
+      <rect x="-8" y="-8" width="208" height="44" rx="10" fill="#fff7ed" stroke="#fed7aa"/>
+      <circle r="10" cx="20" cy="20" class="accent"/>
+      <text x="44" y="24" class="nav-text">Automations</text>
+    </g>
+
+    <g transform="translate(0,176)">
+      <circle r="10" cx="20" cy="20" class="muted"/>
+      <text x="44" y="24" class="nav-text">Class Bookings</text>
+    </g>
+
+    <g transform="translate(0,220)">
+      <circle r="10" cx="20" cy="20" class="muted"/>
+      <text x="44" y="24" class="nav-text">My Clients</text>
+    </g>
+  </g>
+
+  <!-- Background content area -->
+  <g transform="translate(276,88)" opacity="0.45">
+    <!-- Banner -->
+    <rect x="0" y="0" width="940" height="86" rx="12" class="card"/>
+    <rect x="24" y="18" width="300" height="16" rx="8" class="muted"/>
+    <rect x="24" y="44" width="520" height="14" rx="7" class="muted"/>
+    <rect x="870" y="26" width="48" height="34" rx="8" class="btn"/>
+    <text x="894" y="48" font-size="11" fill="#6b7280" text-anchor="middle">Upgrade</text>
+
+    <!-- "Upcoming Class Reminder" automation card (enabled) -->
+    <g transform="translate(0,110)">
+      <rect width="940" height="120" rx="14" class="card"/>
+      <rect x="24" y="26" width="240" height="18" rx="9" class="muted"/>
+      <rect x="24" y="54" width="520" height="14" rx="7" class="muted"/>
+      <!-- toggle ON -->
+      <g transform="translate(860,36)">
+        <rect width="60" height="28" rx="14" fill="#fef2f2" stroke="#fecaca"/>
+        <circle cx="18" cy="14" r="12" fill="#ef4444"/>
+      </g>
+      <rect x="24" y="78" width="180" height="20" rx="10" class="accent-pill"/>
+      <text x="34" y="93" class="accent-text">Upcoming Class Reminder</text>
+    </g>
+
+    <!-- Another automation card (disabled) -->
+    <g transform="translate(0,244)" opacity="0.45">
+      <rect width="940" height="120" rx="14" class="card"/>
+      <rect x="24" y="26" width="220" height="18" rx="9" class="muted"/>
+      <rect x="24" y="54" width="500" height="14" rx="7" class="muted"/>
+      <!-- toggle OFF -->
+      <g transform="translate(860,36)">
+        <rect width="60" height="28" rx="14" fill="#e5e7eb"/>
+        <circle cx="42" cy="14" r="12" fill="#9ca3af"/>
+      </g>
+      <rect x="24" y="78" width="160" height="20" rx="10" fill="#f3f4f6" stroke="#e5e7eb"/>
+      <text x="34" y="93" class="small">Post-Class Survey</text>
+    </g>
+
+    <!-- Third automation card (enabled) -->
+    <g transform="translate(0,378)" opacity="0.45">
+      <rect width="940" height="120" rx="14" class="card"/>
+      <rect x="24" y="26" width="260" height="18" rx="9" class="muted"/>
+      <rect x="24" y="54" width="520" height="14" rx="7" class="muted"/>
+      <!-- toggle ON -->
+      <g transform="translate(860,36)">
+        <rect width="60" height="28" rx="14" fill="#fef2f2" stroke="#fecaca"/>
+        <circle cx="18" cy="14" r="12" fill="#ef4444"/>
+      </g>
+      <rect x="24" y="78" width="190" height="20" rx="10" class="accent-pill"/>
+      <text x="34" y="93" class="accent-text">New Booking Confirmation</text>
+    </g>
+  </g>
+
+  <!-- Dim overlay to push background back -->
+  <rect x="0" y="0" width="1280" height="720" fill="#000" opacity="0.35"/>
+
+  <!-- MODAL (same as previous, centered) -->
+  <g filter="url(#shadow)">
+    <rect x="160" y="70" width="960" height="580" rx="12" class="card"/>
+    <!-- Header -->
+    <g transform="translate(188,98)">
+      <rect x="0" y="0" width="36" height="36" rx="8" fill="#ffefe9" stroke="#ffb79a"/>
+      <path d="M8 11h20v14H8z" fill="#fff" stroke="#ff7f50" stroke-width="1"/>
+      <path d="M10 14h16" stroke="#ff7f50" stroke-width="2"/>
+      <path d="M10 18h16" stroke="#ff7f50" stroke-width="2"/>
+      <path d="M10 22h9" stroke="#ff7f50" stroke-width="2"/>
+      <text x="52" y="15" class="title">Upcoming Class Reminder</text>
+      <text x="52" y="36" class="subtitle">Configure settings, preview email, and view stats</text>
+    </g>
+    <!-- Close -->
+    <g transform="translate(1070,96)">
+      <line x1="0" y1="0" x2="16" y2="16" class="x"/>
+      <line x1="16" y1="0" x2="0" y2="16" class="x"/>
+    </g>
+    <!-- Tabs -->
+    <g transform="translate(180,160)">
+      <rect x="0" y="0" width="130" height="40" rx="8" fill="#ffffff"/>
+      <text x="18" y="25" class="subtitle" fill="#ef4444">• Description</text>
+      <rect x="140" y="0" width="140" height="40" rx="8" fill="#f3f4f6"/>
+      <text x="158" y="25" class="subtitle">Email Preview</text>
+      <rect x="296" y="0" width="100" height="40" rx="8" fill="#f3f4f6"/>
+      <text x="314" y="25" class="subtitle">Stats</text>
+    </g>
+    <line x1="180" y1="206" x2="1116" y2="206" class="divider"/>
+
+    <!-- Body -->
+    <g transform="translate(180,226)">
+      <text x="0" y="0" class="h2">How it Works</text>
+      <text x="0" y="28" class="body">This automation sends a friendly reminder email to students 24 hours before their scheduled class. The email includes</text>
+      <text x="0" y="48" class="body">class details, instructor information, and options to reschedule or cancel if needed. This helps reduce no-shows and</text>
+      <text x="0" y="68" class="body">ensures students are prepared for their upcoming session.</text>
+
+      <text x="0" y="112" class="h2">When it Triggers</text>
+      <g transform="translate(0,128)">
+        <circle r="5" class="accent"/>
+        <text x="14" y="5" class="body">24 hours before class start time</text>
+      </g>
+
+      <text x="0" y="182" class="h2">Key Benefits</text>
+
+      <g transform="translate(0,200)">
+        <rect class="chip" x="0" y="0" width="430" height="46" rx="10"/>
+        <circle cx="22" cy="23" r="9" fill="#10b981"/>
+        <path d="M18 23l4 4 8-8" fill="none" stroke="#fff" stroke-width="2"/>
+        <text class="chip-text" x="44" y="28">Reduces no-shows by 40%</text>
+
+        <rect class="chip" x="0" y="58" width="430" height="46" rx="10"/>
+        <circle cx="22" cy="81" r="9" fill="#10b981"/>
+        <path d="M18 81l4 4 8-8" fill="none" stroke="#fff" stroke-width="2"/>
+        <text class="chip-text" x="44" y="86">Improves class attendance rates</text>
+      </g>
+
+      <g transform="translate(470,200)">
+        <rect class="chip" x="0" y="0" width="430" height="46" rx="10"/>
+        <circle cx="22" cy="23" r="9" fill="#10b981"/>
+        <path d="M18 23l4 4 8-8" fill="none" stroke="#fff" stroke-width="2"/>
+        <text class="chip-text" x="44" y="28">Gives students time to reschedule if needed</text>
+
+        <rect class="chip" x="0" y="58" width="430" height="46" rx="10"/>
+        <circle cx="22" cy="81" r="9" fill="#10b981"/>
+        <path d="M18 81l4 4 8-8" fill="none" stroke="#fff" stroke-width="2"/>
+        <text class="chip-text" x="44" y="86">Provides important class details</text>
+      </g>
+
+      <text x="0" y="332" class="small">Template: upcomingClassReminder.html</text>
+    </g>
+
+    <!-- Footer -->
+    <g transform="translate(1060,600)">
+      <rect class="btn" x="-84" y="-12" width="84" height="36" rx="10"/>
+      <text class="btn-text" x="-60" y="11">Close</text>
+    </g>
+  </g>
+</svg>
