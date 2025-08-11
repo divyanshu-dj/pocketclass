@@ -1,47 +1,20 @@
 
 import Footer from "/components/Footer";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
-import "../../styles/Instructorguide.module.css";
-import { useState, useRef, useEffect } from "react";
+import styles from "../../styles/Instructorguide.module.css";
+import React, { useState, useRef, useEffect } from "react";
 import VideoPlayer from "../../components/VideoPlayer";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function InstructorGuide() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0); // Separate state for mobile
+  const [hoveredIndex, setHoveredIndex] = useState(0);
   // Video player states
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [videoThumbnails, setVideoThumbnails] = useState({});
   const videoRefs = useRef({});
-
-  const videos = [
-    {
-      id: 'step1',
-      title: 'Set Up Your Instructor Profile',
-      src: '/tutorials/Step1.mp4',
-      description: 'Learn how to create and optimize your instructor profile on PocketClass'
-    },
-    {
-      id: 'step2',
-      title: 'Create Your Class',
-      src: '/tutorials/Step2.mp4',
-      description: 'Step-by-step guide to creating and publishing your first class'
-    },
-    {
-      id: 'step3',
-      title: 'Manage Your Schedule',
-      src: '/tutorials/Step3.mp4',
-      description: 'How to set your availability and manage your class schedule'
-    },
-    {
-      id: 'step4',
-      title: 'Receive Payments through Stripe',
-      src: '/tutorials/Step4.mp4',
-      description: 'Learn how to set up secure payments and get paid through Stripe'
-    }
-  ];
 
   const features = [
     {
@@ -100,83 +73,32 @@ export default function InstructorGuide() {
     }
   ];
 
-  const displayIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
-  const currentTestimonial = testimonials[displayIndex];
-  
-  // For mobile, use separate state management
-  const mobileDisplayIndex = mobileActiveIndex;
-  const currentMobileTestimonial = testimonials[mobileDisplayIndex];
-
-
-  const renderDesktopLayout = () => {
-  const elements = [];
-
-  testimonials.forEach((testimonial, index) => {
-    // Image Column
-    elements.push(
-      <div
-        key={`image-${testimonial.id}`}
-        className="cursor-pointer relative overflow-hidden smooth-flex"
-        style={{
-          flex: index === displayIndex ? '0 0 20rem' : '1 1 0',
-          maxWidth: index === displayIndex ? '20rem' : '100%',
-        }}
-        onClick={() => setActiveIndex(index)}
-        onMouseEnter={() => setHoveredIndex(index)}
-      >
-        <div className="relative h-full w-full">
-          <img
-            src={testimonial.avatar}
-            alt={testimonial.name}
-            className="w-full h-full object-cover smooth-img"
-            style={{
-              transition: 'transform 700ms cubic-bezier(.2,.9,.2,1)',
-              transform: index === displayIndex ? 'scale(1.02)' : 'scale(1)'
-            }}
-          />
-
-          {/* Overlay for inactive */}
-          <div 
-            className="absolute inset-0 bg-black transition-opacity duration-700 ease-out"
-            style={{
-              opacity: index !== displayIndex ? 0.3 : 0
-            }}
-          />
-        </div>
-      </div>
-    );
-
-    // Testimonial Column
-    if (index === displayIndex) {
-      elements.push(
-        <div
-          key={`testimonial-${testimonial.id}`}
-          className="flex-1 bg-gray-50 p-8 flex flex-col justify-center min-w-96 border-l border-gray-100"
-        >
-          <div 
-            key={currentTestimonial.id} // This key change triggers smooth React re-render
-            className="testimonial-content"
-          >
-            <blockquote className="text-xl lg:text-2xl font-semibold text-gray-900 leading-relaxed mb-8">
-              "{currentTestimonial.quote}"
-            </blockquote>
-            <div className="space-y-2 border-t border-gray-200 pt-6">
-              <div className="text-lg font-bold text-gray-900">
-                {currentTestimonial.name}
-              </div>
-              <div className="text-gray-600 font-medium">
-                {currentTestimonial.title}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+  const videos = [
+    {
+      id: 'step1',
+      title: 'Set Up Your Instructor Profile',
+      src: '/tutorials/Step1.mp4',
+      description: 'Learn how to create and optimize your instructor profile on PocketClass'
+    },
+    {
+      id: 'step2',
+      title: 'Create Your Class',
+      src: '/tutorials/Step2.mp4',
+      description: 'Step-by-step guide to creating and publishing your first class'
+    },
+    {
+      id: 'step3',
+      title: 'Manage Your Schedule',
+      src: '/tutorials/Step3.mp4',
+      description: 'How to set your availability and manage your class schedule'
+    },
+    {
+      id: 'step4',
+      title: 'Receive Payments through Stripe',
+      src: '/tutorials/Step4.mp4',
+      description: 'Learn how to set up secure payments and get paid through Stripe'
     }
-  });
-
-  return elements;
-};
-
+  ];
 
   // Generate video thumbnail from video element
   const generateThumbnail = (videoElement, videoId) => {
@@ -236,7 +158,7 @@ export default function InstructorGuide() {
   const scrollToFeatures = () => {
     const featuresSection = document.getElementById('features-section');
     if (featuresSection) {
-      featuresSection.scrollIntoView({ 
+      featuresSection.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
@@ -246,10 +168,13 @@ export default function InstructorGuide() {
   const FeatureImage = ({ src, alt }) => {
     return (
       <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 h-64 flex items-center justify-center overflow-hidden">
-        <img 
-          src={src} 
+        <img
+          src={src}
           alt={alt}
           className="max-w-full max-h-full object-contain"
+          style={{
+            imageRendering: 'crisp-edges', // or 'pixelated' for pixel art
+          }}
         />
       </div>
     );
@@ -269,7 +194,7 @@ export default function InstructorGuide() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.05)_50%,transparent_75%,transparent_100%)]"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-24 sm:pb-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pt-24 sm:pb-32">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             <div className="max-w-2xl">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -281,13 +206,13 @@ export default function InstructorGuide() {
                 All-in-one scheduling, payments, marketing, and student retention tools —
                 built for sport, music, and art instructors.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <div className="mt-8 flex lg:flex-row sm:flex-col gap-4">
                 <Link href="/instructor-onboarding">
-                  <button className="bg-logo-red text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                  <button className="bg-logo-red text-white px-4 py-2 sm:py-4 rounded-xl text-lg font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
                     Create Your Instructor Profile
                   </button>
                 </Link>
-                <button 
+                <button
                   onClick={scrollToFeatures}
                   className="bg-white text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
                 >
@@ -317,7 +242,7 @@ export default function InstructorGuide() {
             </div>
 
             {/* Hero Illustration */}
-            <div className="relative h-96 sm:h-[500px] lg:h-[600px] flex items-center justify-center mt-12 lg:mt-0">
+            <div className="relative h-96 sm:h-[400px] lg:h-[600px] flex items-center justify-center lg:mt-0 sm:mx-4">
               <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
                 {/* Central instructor figure */}
                 <div className="relative z-5 bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-gray-100 mx-4 sm:mx-8 my-4 sm:my-8">
@@ -331,27 +256,27 @@ export default function InstructorGuide() {
                 </div>
 
                 {/* Floating icons around the instructor */}
-                <div className="absolute -top-2 sm:-top-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-xl flex items-center justify-center shadow-lg animate-float">
+                <div className={`absolute -top-2 sm:-top-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float']}`}>
                   <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                   </svg>
                 </div>
 
-                <div className="absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-xl flex items-center justify-center shadow-lg animate-float-delayed">
+                <div className={`absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float-delayed']}`}>
                   <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                     <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
                   </svg>
                 </div>
 
-                <div className="absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-xl flex items-center justify-center shadow-lg animate-float">
+                <div className={`absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float']}`}>
                   <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                     <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                   </svg>
                 </div>
 
-                <div className="absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 rounded-xl flex items-center justify-center shadow-lg animate-float-delayed">
+                <div className={`absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float-delayed']}`}>
                   <svg className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
@@ -363,54 +288,58 @@ export default function InstructorGuide() {
       </section>
 
       {/* Feature Highlights Section */}
-      <section id="features-section" className="py-10 lg:py-32 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl mb-6">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-gradient-to-br from-purple-600 to-blue-600 rounded-sm"></div>
+      <section id="features-section" className="py-7 lg:py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white shadow-lg m-6 overflow-hidden">
+              <Image
+                src="/Teacher.png"
+                alt="Illustration of a Teacher"
+                width={70} // smaller & consistent size
+                height={70}
+                className="object-contain"
+              />
             </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Native AI-powered teaching
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+              Work with a co-pilot you can trust to manage your classes and interact with your students.
+            </p>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Native AI-powered teaching
-          </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-            Work with a co-pilot you can trust to manage your classes and interact with your students.
-          </p>
-        </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-20">
-          {features.slice(0, 2).map((feature, index) => (
-            <div key={index} className="group">
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
-                <FeatureImage src={feature.image} alt={feature.title} />
-                <div className="mt-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-20">
+            {features.slice(0, 2).map((feature, index) => (
+              <div key={index} className="group">
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                  <FeatureImage src={feature.image} alt={feature.title} />
+                  <div className="mt-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Bottom Features */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {features.slice(2, 4).map((feature, index) => (
-            <div key={index + 2} className="group">
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
-                <FeatureImage src={feature.image} alt={feature.title} />
-                <div className="mt-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+          {/* Bottom Features */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {features.slice(2, 4).map((feature, index) => (
+              <div key={index + 2} className="group">
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                  <FeatureImage src={feature.image} alt={feature.title} />
+                  <div className="mt-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed text-lg">{feature.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* Verification Process Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
@@ -552,7 +481,7 @@ export default function InstructorGuide() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 sm:mb-4">Instructor Onboarding Guides</h1>
           <p className="text-sm sm:text-base text-gray-700 mb-6">
-            Watch these quick walkthroughs to learn how to set up your PocketClass profile, 
+            Watch these quick walkthroughs to learn how to set up your PocketClass profile,
             schedule classes, and stand out to more students.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -572,17 +501,17 @@ export default function InstructorGuide() {
                         className="hidden"
                         muted
                       />
-                      
-                      <div 
-                        className="relative pb-[62.5%] h-0 cursor-pointer group"
+
+                      <div
+                        className={`relative pb-[62.5%] h-0 ${styles['cursor-pointer']} group`}
                         onClick={() => openVideo(video)}
                       >
                         <div className="absolute top-0 left-0 w-full h-full rounded-md shadow-md overflow-hidden">
                           {videoThumbnails[video.id] ? (
                             // Show generated thumbnail
                             <div className="relative w-full h-full">
-                              <img 
-                                src={videoThumbnails[video.id]} 
+                              <img
+                                src={videoThumbnails[video.id]}
                                 alt={video.title}
                                 className="w-full h-full object-cover"
                               />
@@ -593,7 +522,7 @@ export default function InstructorGuide() {
                             // Loading state with gradient
                             <div className="w-full h-full bg-gradient-to-br from-[#E63F2B] to-[#FF6B5A] group-hover:from-[#D63426] group-hover:to-[#FF5A47] transition-all duration-300" />
                           )}
-                          
+
                           {/* Play button overlay */}
                           <div className="absolute inset-0 flex items-center justify-center text-white">
                             <div className="text-center">
@@ -627,12 +556,13 @@ export default function InstructorGuide() {
               </div>
             ))}
           </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-      {/* Social Proof Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Testimonial Section */}
+      <section className={`py-16 lg:py-24 bg-white`}>
+        <div className=" w-full max-w-7xl mx-auto">
+
           {/* Header */}
           <div className="text-center mb-12 lg:mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
@@ -640,153 +570,105 @@ export default function InstructorGuide() {
             </h2>
           </div>
 
-          {/* Desktop Layout - Dynamic Positioning */}
-          <div className="hidden lg:block">
-            <div
-              className="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-7xl mx-auto"
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <div className="flex h-96">
-                {renderDesktopLayout()}
-              </div>
-            </div>
-          </div>
 
-          {/* Tablet Layout*/}
-          <div className="hidden md:block lg:hidden">
-            <div
-              className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto"
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {/* Profile Images Row */}
-              <div className="flex h-48">
-                {testimonials.map((testimonial, index) => (
-                  <div
-                    key={testimonial.id}
-                    className="cursor-pointer transition-all duration-700 ease-out relative overflow-hidden"
-                    style={{
-                      flex: index === displayIndex ? '1' : '0 0 8rem',
-                      maxWidth: index === displayIndex ? '100%' : '8rem',
-                    }}
-                    onClick={() => setActiveIndex(index)}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                  >
-                    <img
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out"
-                      style={{
-                        transform: index === displayIndex ? 'scale(1.02)' : 'scale(1)'
-                      }}
-                    />
+          {/* Desktop Layout*/}
+          <div
+            className="hidden md:flex items-stretch gap-6 bg-white rounded-2xl shadow-lg overflow-hidden p-6 h-[480px]"
+            role="region"
+            aria-label="Customer testimonials"
+          >
+            {testimonials.map((t, idx) => {
+              const isActive = idx === hoveredIndex;
+              const IMAGE_W = 224; // w-56
+              const PANEL_W = 520; // desired panel width
+              const INNER_GAP = 24; // spacing between image and panel inside the item
+              const targetWidth = isActive ? IMAGE_W + PANEL_W + INNER_GAP : IMAGE_W;
 
-                    <div 
-                      className="absolute inset-0 bg-black transition-opacity duration-700 ease-out"
-                      style={{
-                        opacity: index !== displayIndex ? 0.3 : 0
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Active Testimonial */}
-              <div className="p-8 bg-gray-50">
-                <div 
-                  key={currentTestimonial.id}
-                  className="testimonial-content"
+              return (
+                <motion.div
+                  key={t.id}
+                  onMouseEnter={() => setHoveredIndex(idx)}
+                  className={`relative flex-none h-full rounded-lg overflow-hidden cursor-pointer ${isActive ? "shadow-2xl" : "shadow"}`}
+                  aria-label={`Show testimonial for ${t.name}`}
+                  style={{ width: IMAGE_W }}
+                  animate={{ width: targetWidth }}
+                  transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }}
                 >
-                  <blockquote className="text-xl font-semibold text-gray-900 leading-relaxed mb-6">
-                    "{currentTestimonial.quote}"
-                  </blockquote>
-                  <div className="space-y-1 border-t border-gray-200 pt-4">
-                    <div className="font-bold text-gray-900 text-lg">
-                      {currentTestimonial.name}
+                  <div className="h-full w-full flex">
+                    {/* Image */}
+                    <div className="w-56 h-full flex-none overflow-hidden">
+                      <img
+                        src={t.avatar}
+                        alt={t.name}
+                        className="w-full h-full object-cover block"
+                      />
                     </div>
-                    <div className="text-gray-600 font-medium">
-                      {currentTestimonial.title}
+
+                    {/* Panel */}
+                    <div
+                      className="h-full flex-none bg-white border-l border-gray-100"
+                      style={{ width: PANEL_W, marginLeft: INNER_GAP / 2, paddingLeft: INNER_GAP / 2 }}
+                    >
+                      <motion.div
+                        className="h-full p-6 flex flex-col"
+                        initial={false}
+                        animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 8 }}
+                        transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+                      >
+                        <blockquote className="text-2xl lg:text-3xl leading-tight font-semibold text-gray-900 mb-4">
+                          “{t.quote}”
+                        </blockquote>
+                        <div className="mt-auto pt-4 border-t border-gray-100">
+                          <div className="font-semibold text-gray-900">{t.name}</div>
+                          <div className="text-gray-500 text-sm">{t.title}</div>
+                        </div>
+                      </motion.div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              );
+            })}
           </div>
 
-          {/* Mobile Layout*/}
+          {/* Mobile Layout */}
           <div className="md:hidden">
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              {/* Profile Images Row */}
-              <div className="flex h-32">
-                {testimonials.map((testimonial, index) => (
-                  <div
-                    key={testimonial.id}
-                    className="cursor-pointer transition-all duration-700 ease-out relative overflow-hidden"
-                    style={{
-                      flex: index === mobileDisplayIndex ? '1' : '0 0 5rem',
-                      maxWidth: index === mobileDisplayIndex ? '100%' : '5rem',
-                    }}
-                    onClick={() => setMobileActiveIndex(index)}
-                  >
+            <div className="flex overflow-x-auto snap-x snap-mandatory mx-4 space-x-4 pb-4">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.id}
+                  className="snap-start shrink-0 w-[85%] max-w-sm bg-white rounded-2xl shadow-lg overflow-hidden"
+                >
+                  {/* Image */}
+                  <div className="relative w-full aspect-[5/6]">
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out"
-                      style={{
-                        transform: index === mobileDisplayIndex ? 'scale(1.02)' : 'scale(1)'
-                      }}
+                      className="w-full h-full object-cover object-center"
                     />
-
-                    <div 
-                      className="absolute inset-0 bg-black transition-opacity duration-700 ease-out"
-                      style={{
-                        opacity: index !== mobileDisplayIndex ? 0.4 : 0
-                      }}
-                    />
+                    {testimonial.company && (
+                      <div className="absolute bottom-4 left-4 bg-white px-3 py-1 rounded-full shadow text-sm font-semibold">
+                        {testimonial.company}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
 
-              {/* Active Testimonial */}
-              <div className="p-6 bg-gray-50">
-                <div 
-                  key={currentMobileTestimonial.id}
-                  className="testimonial-content"
-                >
-                  <blockquote className="text-lg font-semibold text-gray-900 leading-relaxed mb-4">
-                    "{currentMobileTestimonial.quote}"
-                  </blockquote>
-                  <div className="space-y-1 border-t border-gray-200 pt-4">
-                    <div className="font-bold text-gray-900">
-                      {currentMobileTestimonial.name}
-                    </div>
-                    <div className="text-gray-600 text-sm font-medium">
-                      {currentMobileTestimonial.title}
+                  {/* Testimonial Text */}
+                  <div className="p-6">
+                    <blockquote className="text-lg font-semibold text-gray-900 leading-relaxed mb-4">
+                      "{testimonial.quote}"
+                    </blockquote>
+                    <div className="space-y-1 border-t border-gray-200 pt-4">
+                      <div className="font-bold text-gray-900">{testimonial.name}</div>
+                      <div className="text-gray-600 text-sm font-medium">{testimonial.title}</div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
-
-          {/* Navigation Dots */}
-          <div className="flex justify-center mt-12 space-x-3">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setActiveIndex(index);
-                  setMobileActiveIndex(index); // Update both states
-                }}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${index === activeIndex
-                    ? 'bg-gray-900 scale-110'
-                    : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                aria-label={`Show testimonial from ${testimonials[index].name}`}
-              />
-            ))}
           </div>
         </div>
       </section>
+
 
       {/* Final CTA Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-logo-red to-red-600 text-white relative overflow-hidden">
