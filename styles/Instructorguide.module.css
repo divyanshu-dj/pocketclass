@@ -1,138 +1,15 @@
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInSlide {
-    0% {
-        opacity: 0;
-        transform: translateX(30px) scale(0.95);
-    }
-    50% {
-        opacity: 0.7;
-        transform: translateX(15px) scale(0.98);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-@keyframes fadeOutSlide {
-    0% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-20px) scale(0.95);
-    }
-}
-
-@keyframes mobileSlideIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.96);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.animate-slideIn {
-    animation: slideIn 0.6s ease-out forwards;
-}
-
-.smooth-img {
-  will-change: transform;
-  transition: transform 700ms cubic-bezier(.2,.9,.2,1);
-}
-
-.testimonial-panel-content {
-  transition: opacity 400ms ease-in-out, transform 400ms ease-in-out;
-  will-change: opacity, transform;
-}
-
-.testimonial-panel-content.transitioning {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.testimonial-panel-content.stable {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.testimonial-panel-content.entering {
-  animation: fadeInSlide 600ms ease-out forwards;
-}
-
-.testimonial-panel-content.exiting {
-  animation: fadeOutSlide 300ms ease-in forwards;
-}
-
-.smooth-flex {
-  transition-property: flex-basis, max-width;
-  transition-duration: 700ms;
-  transition-timing-function: cubic-bezier(.2,.9,.2,1);
-  will-change: flex-basis, max-width;
-}
-
-/* Smooth testimonial content transitions */
-.testimonial-content {
-  animation: fadeInSlide 600ms ease-out forwards;
-}
-
-/* Staggered animation for testimonial elements */
-.testimonial-quote {
-  animation: fadeInSlide 700ms ease-out 100ms forwards;
-  opacity: 0;
-}
-
-.testimonial-author {
-  animation: fadeInSlide 700ms ease-out 200ms forwards;
-  opacity: 0;
-}
-
-/* Mobile-specific improvements */
-@media (max-width: 768px) {
-  .testimonial-content {
-    animation: mobileSlideIn 500ms ease-out forwards;
-  }
-  
-  /* Prevent text selection on mobile for smoother interactions */
-  .testimonial-content * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-  
-  /* Improve touch targets */
-  .cursor-pointer {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-}
 
 @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float-delayed 3s ease-in-out infinite 1.5s;
-        }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.animate-float-delayed {
+  animation: float-delayed 3s ease-in-out infinite 1.5s;
+}
