@@ -573,7 +573,7 @@ export default function InstructorGuide() {
 
           {/* Desktop Layout*/}
           <div
-            className="flex sm:hidden md:hidden items-stretch gap-6 bg-white rounded-2xl shadow-lg overflow-hidden p-6 h-[480px]"
+            className="hidden md:flex items-stretch gap-6 bg-white rounded-2xl shadow-lg overflow-hidden p-6 h-[480px]"
             role="region"
             aria-label="Customer testimonials"
           >
