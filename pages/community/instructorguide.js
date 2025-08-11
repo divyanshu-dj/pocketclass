@@ -194,7 +194,7 @@ export default function InstructorGuide() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.05)_50%,transparent_75%,transparent_100%)]"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pt-24 sm:pb-32">
+  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pt-20 sm:pb-16">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             <div className="max-w-2xl">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -245,7 +245,7 @@ export default function InstructorGuide() {
             <div className="relative h-96 sm:h-[400px] lg:h-[600px] flex items-center justify-center lg:mt-0 sm:mx-4">
               <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
                 {/* Central instructor figure */}
-                <div className="relative z-5 bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-gray-100 mx-4 sm:mx-8 my-4 sm:my-8">
+                <div className="relative z-10 bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-gray-100 mx-4 sm:mx-8 my-4 sm:my-8">
                   <div className="text-center">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-logo-red rounded-full mx-auto mb-3 flex items-center justify-center text-white text-lg sm:text-xl font-bold">
                       👨‍🏫
@@ -288,7 +288,7 @@ export default function InstructorGuide() {
       </section>
 
       {/* Feature Highlights Section */}
-      <section id="features-section" className="py-7 lg:py-32 bg-gray-50">
+      <section id="features-section" className="py-7 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16">
@@ -577,7 +577,7 @@ export default function InstructorGuide() {
             role="region"
             aria-label="Customer testimonials"
           >
-            {testimonials.map((t, idx) => {
+    {testimonials.map((t, idx) => {
               const isActive = idx === hoveredIndex;
               const IMAGE_W = 224; // w-56
               const PANEL_W = 520; // desired panel width
@@ -587,12 +587,19 @@ export default function InstructorGuide() {
               return (
                 <motion.div
                   key={t.id}
-                  onMouseEnter={() => setHoveredIndex(idx)}
+                  onMouseOver={() => setHoveredIndex(idx)}
+                  onClick={() => setHoveredIndex(idx)}
+                  onFocus={() => setHoveredIndex(idx)}
                   className={`relative flex-none h-full rounded-lg overflow-hidden cursor-pointer ${isActive ? "shadow-2xl" : "shadow"}`}
                   aria-label={`Show testimonial for ${t.name}`}
-                  style={{ width: IMAGE_W }}
-                  animate={{ width: targetWidth }}
-                  transition={{ duration: 0.9, ease: [0.22, 0.8, 0.2, 1] }}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setHoveredIndex(idx);
+                  }}
+                  style={{
+                    width: isActive ? targetWidth : IMAGE_W,
+                    transition: 'width 0.9s cubic-bezier(0.22, 0.8, 0.2, 1)'
+                  }}
                 >
                   <div className="h-full w-full flex">
                     {/* Image */}
@@ -609,12 +616,8 @@ export default function InstructorGuide() {
                       className="h-full flex-none bg-white border-l border-gray-100"
                       style={{ width: PANEL_W, marginLeft: INNER_GAP / 2, paddingLeft: INNER_GAP / 2 }}
                     >
-                      <motion.div
-                        className="h-full p-6 flex flex-col"
-                        initial={false}
-                        animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 8 }}
-                        transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
-                      >
+          <div className="h-full p-6 flex flex-col transition-opacity duration-300"
+            style={{ opacity: isActive ? 1 : 0 }}>
                         <blockquote className="text-2xl lg:text-3xl leading-tight font-semibold text-gray-900 mb-4">
                           “{t.quote}”
                         </blockquote>
@@ -622,7 +625,7 @@ export default function InstructorGuide() {
                           <div className="font-semibold text-gray-900">{t.name}</div>
                           <div className="text-gray-500 text-sm">{t.title}</div>
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
