@@ -194,7 +194,7 @@ export default function InstructorGuide() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.05)_50%,transparent_75%,transparent_100%)]"></div>
-  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pt-20 sm:pb-16">
+  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-11 sm:pt-20 sm:pb-16">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             <div className="max-w-2xl">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
