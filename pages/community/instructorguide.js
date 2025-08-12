@@ -55,21 +55,21 @@ export default function InstructorGuide() {
       quote: "PocketClass lets me track every client’s progress and keep notes organized. It’s saved me hours each week and made my sessions feel more personalized.",
       name: "Ethan Williams",
       title: "Fitness Instructor",
-      avatar: "/EthanTestimonial.jpg",
+      avatar: "/EthanTestimonial.webp",
     },
     {
       id: 2,
       quote: "Students can book me instantly based on my real-time availability. Automated messages on PocketClass also helps me reduce cancellations and retain students.",
       name: "DJ Sean Gunn",
       title: "DJ Instructor",
-      avatar: "/SeanTestimonial.jpg",
+      avatar: "/SeanTestimonial.webp",
     },
     {
       id: 3,
       quote: "Easy payments and extra visibility brought me more students than I expected. PocketClass makes running my business effortless.",
       name: "Coach Wit",
       title: "Golf Instructor",
-      avatar: "/WitTestimonial.jpg",
+      avatar: "/WitTestimonial.webp",
     }
   ];
 
@@ -172,6 +172,7 @@ export default function InstructorGuide() {
           src={src}
           alt={alt}
           className="max-w-full max-h-full object-contain"
+          loading="lazy"
           style={{
             imageRendering: 'crisp-edges', // or 'pixelated' for pixel art
           }}
@@ -236,12 +237,15 @@ export default function InstructorGuide() {
             <div className="absolute top-32 -right-40 w-64 h-64 bg-gradient-to-bl from-orange-150 via-peach-50 to-transparent opacity-25 rounded-full blur-xl"></div>
             <div className="relative mx-auto w-full max-w-7xl rounded-3xl border border-gray-300/70 shadow-2xl overflow-hidden bg-white">
               <Image
-                src="/assets/dashboard/dashboard_1.png"
+                src="/assets/dashboard/dashboard_2.webp"
                 alt="PocketClass dashboard preview"
                 width={1280}
-                height={768}
+                height={800}
                 sizes="(min-width: 1280px) 1280px, (min-width: 1024px) 1024px, 100vw"
                 className="w-full h-auto block"
+                priority
+                placeholder="blur"
+                blurDataURL="data:image/webp;base64,UklGRpoAAABXRUJQVlA4WAoAAAAQAAAADwAABwAAQUxQSDIAAAARL0AmbZurmr57yyIiqE8oiG0bejIYEQTgqiDA9vqnsUSI6H+oAERp2HZ65qP/VIAWAFZQOCBCAAAA8AEAnQEqEAAIAAVAfCWkAALp8sF8rgRgAP7o9FDvMCkMde9PK7euH5M1m6VWoDXf2FkP3BqV0ZYbO6NA/VFIAAAA"
               />
             </div>
           </div>
@@ -261,6 +265,7 @@ export default function InstructorGuide() {
                 width={70} // smaller & consistent size
                 height={70}
                 className="object-contain"
+                loading="lazy"
               />
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
@@ -476,6 +481,7 @@ export default function InstructorGuide() {
                                 src={videoThumbnails[video.id]}
                                 alt={video.title}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
                               />
                               {/* Dark overlay for better text visibility */}
                               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300" />
@@ -570,6 +576,7 @@ export default function InstructorGuide() {
                         src={t.avatar}
                         alt={t.name}
                         className="w-full h-full object-cover block"
+                        loading="lazy"
                       />
                     </div>
 
@@ -609,6 +616,7 @@ export default function InstructorGuide() {
                       src={testimonial.avatar}
                       alt={testimonial.name}
                       className="w-full h-full object-cover object-center"
+                      loading="lazy"
                     />
                     {testimonial.company && (
                       <div className="absolute bottom-4 left-4 bg-white px-3 py-1 rounded-full shadow text-sm font-semibold">
