@@ -79,6 +79,14 @@ export default function Schedule() {
   const [showPopup, setShowPopup] = useState(false);
   const { id } = router.query;
 
+  // Display helper: keep digits, drop leading zeros; returns a string to show in inputs
+  const stripLeadingZeros = (val) => {
+    const s = String(val ?? "");
+    const digits = s.replace(/\D/g, "");
+    if (!digits) return "0";
+    return digits.replace(/^0+(?=\d)/, "");
+  };
+
   const handleEventClick = (event) => {
     setSelectedBooking(event);
   };
@@ -187,28 +195,19 @@ export default function Schedule() {
   }, [user]);
 
   useEffect(() => {
-    if (
-      isScheduleLoaded &&
-      loaded === true &&
-      generalAvailability &&
-      adjustedAvailability &&
-      selectedTimeZone &&
-      typeof appointmentDuration === "number" &&
-      typeof minDays === "number" &&
-      typeof maxDays === "number" &&
-      id
-    ) {
+    if (isScheduleLoaded && user && id) {
       console.log("All conditions met, saving schedule...");
       saveSchedule(db, user, generalAvailability, adjustedAvailability);
     }
   }, [
     generalAvailability,
     adjustedAvailability,
-    loaded,
+    isScheduleLoaded,
     appointmentDuration,
     selectedTimeZone,
     minDays,
     maxDays,
+    id,
   ]);
 
   const addVacation = () => {
@@ -339,8 +338,8 @@ export default function Schedule() {
           setGeneralAvailability(data.generalAvailability || []);
           setAdjustedAvailability(mergedAdjusted);
           setAppointmentDuration(data.appointmentDuration || 30);
-          setMinDays(data.minDays || 1);
-          setMaxDays(data.maxDays || 30);
+          setMinDays(Number(data.minDays ?? 1));
+          setMaxDays(Number(data.maxDays ?? 30));
           setSelectedTimeZone(data.timezone || "America/Toronto");
           setLoaded(true);
         }
@@ -352,8 +351,8 @@ export default function Schedule() {
             setGeneralAvailability(data.generalAvailability || []);
             setAdjustedAvailability(data.adjustedAvailability || []);
             setAppointmentDuration(data.appointmentDuration || 30);
-            setMinDays(data.minDays || 1);
-            setMaxDays(data.maxDays || 30);
+            setMinDays(Number(data.minDays ?? 1));
+            setMaxDays(Number(data.maxDays ?? 30));
             setSelectedTimeZone(data.timezone || "America/Toronto");
           }
         }
@@ -722,7 +721,6 @@ export default function Schedule() {
 
     // ✅ Set all generated events except vacation ones
     setEvents(newEvents);
-    setLoaded(true);
   };
 
   // time slots from 30 minutes to 3 hours slotOptions
@@ -1717,8 +1715,13 @@ export default function Schedule() {
             </label>
             <input
               type="number"
-              value={minDays}
-              onChange={(e) => setMinDays(e.target.value)}
+              value={stripLeadingZeros(minDays)}
+              min={0}
+              step={1}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setMinDays(Number.isNaN(v) ? 0 : v);
+              }}
               className="w-full border rounded p-2"
             />
           </div>
@@ -1731,8 +1734,13 @@ export default function Schedule() {
             </label>
             <input
               type="number"
-              value={maxDays}
-              onChange={(e) => setMaxDays(e.target.value)}
+              value={stripLeadingZeros(maxDays)}
+              min={0}
+              step={1}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setMaxDays(Number.isNaN(v) ? 0 : v);
+              }}
               className="w-full border rounded p-2"
             />
           </div>
