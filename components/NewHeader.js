@@ -841,9 +841,9 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
                                     income.
                                   </div>
                                 </div>
-                                <div className="flex h-full items-center justify-center w-12 bg-gray-100 rounded-lg shrink-0">
+                                <div className="flex h-full items-center justify-center w-12 rounded-lg shrink-0">
                                   <img
-                                    src="/assets/Teacher.png"
+                                    src="/Teacher_icon_transparent_bg.svg"
                                     alt="Teacher"
                                     className="w-10 h-10"
                                   />

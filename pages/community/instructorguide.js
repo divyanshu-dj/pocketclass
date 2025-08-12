@@ -190,102 +190,64 @@ export default function InstructorGuide() {
         />
         <link rel="icon" href="/pc_favicon.ico" />
       </Head>
-
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.05)_50%,transparent_75%,transparent_100%)]"></div>
-  <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-11 sm:pt-20 sm:pb-16">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            <div className="max-w-2xl">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Grow Your{' '}
-                <span className="text-logo-red">Coaching Business</span>{' '}
-                with PocketClass
+      <section className="relative overflow-hidden py-14 sm:py-20 bg-gradient-to-b from-gray-50 via-white to-white">
+        {/* subtle grid/shine background */}
+        <div className="pointer-events-none absolute inset-0 [background:radial-gradient(60%_40%_at_10%_10%,rgba(230,63,43,0.08),transparent_60%),radial-gradient(40%_30%_at_90%_20%,rgba(59,130,246,0.08),transparent_60%)]" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top content */}
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start max-w-6xl mx-auto">
+            <div className="lg:col-span-7">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight max-w-3xl">
+                Grow your <span className="text-logo-red">classes</span>. Keep your <span className="text-logo-red">time</span>.
               </h1>
-              <p className="mt-6 text-xl text-gray-600 leading-relaxed">
-                All-in-one scheduling, payments, marketing, and student retention tools —
-                built for sport, music, and art instructors.
+            </div>
+            <div className="lg:col-span-5 lg:ml-auto max-w-md">
+              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+                From real-time bookings to automated messaging and secure payments, PocketClass handles the admin so you can focus on teaching.
               </p>
-              <div className="mt-8 flex lg:flex-row sm:flex-col gap-4">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link href="/instructor-onboarding">
-                  <button className="bg-logo-red text-white px-4 py-2 sm:py-4 rounded-xl text-lg font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-                    Create Your Instructor Profile
+                  <button className="bg-logo-red text-white px-6 py-3 sm:py-3.5 rounded-xl text-base sm:text-lg font-semibold hover:bg-red-600 transition-all shadow-lg hover:shadow-xl">
+                    Try it for free
                   </button>
                 </Link>
                 <button
                   onClick={scrollToFeatures}
-                  className="bg-white text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  className="bg-white text-gray-800 px-6 py-3 sm:py-3.5 rounded-xl text-base sm:text-lg font-semibold border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
                 >
-                  See How It Works
+                  See how it works
                 </button>
               </div>
-              <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-8 text-sm text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Free to start</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Setup in 10 minutes</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>No monthly fees</span>
-                </div>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>Free to start</span>
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>Setup in 10 minutes</span>
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>No monthly fees</span>
               </div>
             </div>
+          </div>
 
-            {/* Hero Illustration */}
-            <div className="relative h-96 sm:h-[400px] lg:h-[600px] flex items-center justify-center lg:mt-0 sm:mx-4">
-              <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
-                {/* Central instructor figure */}
-                <div className="relative z-10 bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-gray-100 mx-4 sm:mx-8 my-4 sm:my-8">
-                  <div className="text-center">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-logo-red rounded-full mx-auto mb-3 flex items-center justify-center text-white text-lg sm:text-xl font-bold">
-                      👨‍🏫
-                    </div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Your Teaching Hub</h3>
-                    <p className="text-gray-600 mt-1 text-xs sm:text-sm">Everything you need in one place</p>
-                  </div>
-                </div>
-
-                {/* Floating icons around the instructor */}
-                <div className={`absolute -top-2 sm:-top-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float']}`}>
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                  </svg>
-                </div>
-
-                <div className={`absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float-delayed']}`}>
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-                    <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
-                  </svg>
-                </div>
-
-                <div className={`absolute -bottom-2 sm:-bottom-4 -left-2 sm:-left-4 w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float']}`}>
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-
-                <div className={`absolute -bottom-2 sm:-bottom-4 -right-2 sm:-right-4 w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 rounded-xl flex items-center justify-center shadow-lg ${styles['animate-float-delayed']}`}>
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                </div>
-              </div>
+          {/* Dashboard preview */}
+          <div className="mt-10 sm:mt-14 relative">
+            {/* Organic orange gradient backgrounds */}
+            <div className="absolute -top-20 -left-32 w-96 h-96 bg-gradient-to-br from-orange-200 via-orange-100 to-transparent opacity-40 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-16 -right-24 w-80 h-80 bg-gradient-to-tl from-amber-200 via-orange-50 to-transparent opacity-30 rounded-full blur-2xl"></div>
+            <div className="absolute top-32 -right-40 w-64 h-64 bg-gradient-to-bl from-orange-150 via-peach-50 to-transparent opacity-25 rounded-full blur-xl"></div>
+            <div className="relative mx-auto w-full max-w-7xl rounded-3xl border border-gray-300/70 shadow-2xl overflow-hidden bg-white">
+              <Image
+                src="/assets/dashboard/dashboard_1.png"
+                alt="PocketClass dashboard preview"
+                width={1280}
+                height={768}
+                sizes="(min-width: 1280px) 1280px, (min-width: 1024px) 1024px, 100vw"
+                className="w-full h-auto block"
+              />
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Feature Highlights Section */}
       <section id="features-section" className="py-7 bg-gray-50">
@@ -294,7 +256,7 @@ export default function InstructorGuide() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white shadow-lg m-6 overflow-hidden">
               <Image
-                src="/Teacher.png"
+                src="/Teacher_icon_transparent_bg.svg"
                 alt="Illustration of a Teacher"
                 width={70} // smaller & consistent size
                 height={70}
@@ -577,7 +539,7 @@ export default function InstructorGuide() {
             role="region"
             aria-label="Customer testimonials"
           >
-    {testimonials.map((t, idx) => {
+            {testimonials.map((t, idx) => {
               const isActive = idx === hoveredIndex;
               const IMAGE_W = 224; // w-56
               const PANEL_W = 520; // desired panel width
@@ -616,8 +578,8 @@ export default function InstructorGuide() {
                       className="h-full flex-none bg-white border-l border-gray-100"
                       style={{ width: PANEL_W, marginLeft: INNER_GAP / 2, paddingLeft: INNER_GAP / 2 }}
                     >
-          <div className="h-full p-6 flex flex-col transition-opacity duration-300"
-            style={{ opacity: isActive ? 1 : 0 }}>
+                      <div className="h-full p-6 flex flex-col transition-opacity duration-300"
+                        style={{ opacity: isActive ? 1 : 0 }}>
                         <blockquote className="text-2xl lg:text-3xl leading-tight font-semibold text-gray-900 mb-4">
                           “{t.quote}”
                         </blockquote>
