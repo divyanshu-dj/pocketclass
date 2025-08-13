@@ -58,7 +58,7 @@ function SuperInstructorCard({
     }
   };
   return (
-    <div className="-z-0 relative h-full w-full overflow-hidden rounded-2xl">
+    <div className="-z-0 relative h-full w-full overflow-hidden rounded-2xl bg-white/50 backdrop-blur-[20px] backdrop-saturate-150 border border-white/30 shadow-[0_8px_24px_rgba(0,0,0,0.05)] p-6">
       <div className="absolute inset-3 sm:inset-4 -z-10 rounded-2xl overflow-hidden">
         {/* Background Image */}
         <img  
@@ -83,10 +83,10 @@ function SuperInstructorCard({
       </div>
 
   <div className="box-border flex justify-start h-full w-full items-stretch flex-row grow-0 shrink-0 basis-auto pt-4 pb-[172px] px-4 relative bg-center -z-1">
-    <div className="box-border absolute top-5 left-5 right-3 z-20 flex justify-between items-center">
+    <div className="box-border absolute top-2 left-2 right-3 z-20 flex justify-between items-center">
           <div className="w-[55.15%] grow-0 shrink-0 basis-auto box-border pb-3.5">
             {superInstructor && (
-      <Button className="bg-white [font-family:'DM_Sans',sans-serif] text-sm font-bold text-[#261f22] cursor-pointer inline-flex items-center px-3 py-1 rounded-full shadow-sm border border-white/60">
+      <Button className="bg-white [font-family:'DM_Sans',sans-serif] text-sm font-bold text-[#261f22] cursor-pointer inline-flex items-center px-2 py-1 rounded-full shadow-sm border border-white/60">
                 Super Instructor
               </Button>
             )}

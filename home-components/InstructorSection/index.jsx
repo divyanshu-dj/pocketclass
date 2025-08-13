@@ -64,7 +64,7 @@ function InstructorSection({ classId, instructor, loading, reviews }) {
       href={`/classes/id=${classId}`}
       className="box-border cursor-pointer h-full w-full"
     >
-      <div className="w-full h-full bg-white box-border flex flex-col justify-between rounded-2xl pb-2">
+      <div className="w-full h-full bg-white box-border flex flex-col justify-between rounded-2xl pb-2 shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]">
         {/* Top Section - grows to fit content */}
         <div className="flex-grow mb-2">
           <div className="box-border">
