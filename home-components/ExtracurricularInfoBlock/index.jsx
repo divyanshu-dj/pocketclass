@@ -11,9 +11,9 @@ function ExtracurricularInfoBlock() {
             </p>
           </div>
 
-        {/* Orange oval gradient in center fading to white */}
+        {/* Lighter, subtle center oval glow */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_50%,rgba(251,146,60,0.3),rgba(249,115,22,0.2)_40%,rgba(255,255,255,0.8)_70%,rgba(255,255,255,1)_85%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_48%_at_50%_50%,rgba(251,146,60,0.24)_0%,rgba(251,146,60,0.14)_18%,rgba(251,146,60,0.08)_34%,rgba(251,146,60,0.05)_50%,rgba(251,146,60,0.03)_66%,rgba(251,146,60,0.015)_78%,rgba(251,146,60,0)_92%)]" />
         </div>
 
         <div className="absolute left-0 right-0 top-0 bottom-0 opacity-20">
