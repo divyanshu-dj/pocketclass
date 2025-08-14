@@ -31,7 +31,7 @@ function TeachingPassionBanner() {
           Join thousands of instructors who've already transformed their teaching business
         </p>
         <Link href="/instructor-onboarding">
-          <button className="bg-orange-500 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation">
+          <button className="bg-logo-red text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation">
             Sign Up Free
           </button>
         </Link>

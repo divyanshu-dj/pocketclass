@@ -9,7 +9,6 @@ function ClassroomLayout() {
     <div className="flex justify-start items-stretch flex-col gap-[120px] md:gap-[100px]">
       <ClassOverviewLayout />
       <InstructorFinderView />
-      
       <ExtracurricularCard />
       <TeachingPassionBanner />
     </div>
