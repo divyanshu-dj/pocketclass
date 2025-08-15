@@ -307,27 +307,27 @@ function InstructorFinderView() {
   }, [parentsTestimonials, enriched]);
 
   const Card = ({ item }) => (
-    <div className="w-[280px] md:w-[310px] lg:w-[340px] h-72 shrink-0 bg-white border border-gray-200 rounded-xl flex flex-col mr-5 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 text-[#1e1e1e]">
-      <div className="p-5 pb-3 flex flex-col flex-1 overflow-hidden">
-        <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2 shrink-0">
+    <div className="w-[280px] md:w-[310px] lg:w-[340px] h-72 shrink-0 bg-white border border-gray-200 rounded-xl flex flex-col mr-5 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 text-[#1e1e1e]">
+      <div className="p-5 pb-3 flex flex-col flex-1 ">
+        <div className="flex items-center justify-between text-[11px] text-gray-600 mb-2 shrink-0">
           <span className="font-medium">{item.name || 'Anonymous'}</span>
           {item.date && <span>{item.date}</span>}
         </div>
-        <p className="text-[13px] leading-relaxed text-gray-700 overflow-hidden line-clamp-6 flex-1">
+        <p className="text-[13px] leading-relaxed text-gray-800 overflow-hidden line-clamp-6 flex-1">
           {item.review}
         </p>
       </div>
-      <div className="flex items-center gap-3 px-5 py-3 bg-white border-t border-gray-200 shrink-0">
+      <div className="flex items-center gap-3 px-5 py-3 bg-gray-50 border-t border-gray-200 shrink-0">
         {item.avatar ? (
-          <img src={item.avatar} alt={item.name} className="w-9 h-9 rounded-full object-cover" />
+          <img src={item.avatar} alt={item.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200" />
         ) : (
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700 uppercase">
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-700 uppercase ring-2 ring-gray-200">
             {(item.name || 'NA').slice(0, 2)}
           </div>
         )}
         <div className="flex flex-col">
-          <span className="text-sm font-semibold">{item.name || 'Anonymous'}</span>
-          <span className="text-[11px] tracking-wide text-gray-500">Coached by {item.taughtBy}</span>
+          <span className="text-sm font-semibold text-gray-800">{item.name || 'Anonymous'}</span>
+          <span className="text-[11px] tracking-wide text-gray-600">Coached by {item.taughtBy}</span>
         </div>
       </div>
     </div>
@@ -335,22 +335,36 @@ function InstructorFinderView() {
 
   return (
     // Full-bleed section: spans entire viewport width with no side padding/margins while preventing horizontal scrollbar
-    <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden py-14 md:py-20 bg-gradient-to-br from-orange-100 via-orange-50 to-amber-100">
-      <div className="pointer-events-none absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_30%,rgba(255,176,59,0.35),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(255,140,0,0.25),transparent_65%)]" />
-      <div className="text-center max-w-2xl mx-auto mb-12 px-4 md:px-0">
-        <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#261f22]">Find the right instructor for you</h2>
-        <p className="mt-4 text-base md:text-lg font-medium text-slate-600">With over 30 instructors and 100+ learners</p>
+    <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden py-14 md:py-20 bg-orange-25">
+      {/* Dynamic radial pattern background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_25%_25%,rgba(255,165,0,0.12),transparent_40%)]" />
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_75%_15%,rgba(255,140,0,0.08),transparent_35%)]" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_15%_85%,rgba(255,200,87,0.10),transparent_45%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_85%_75%,rgba(255,178,102,0.09),transparent_40%)]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_center,rgba(255,220,180,0.06),transparent_60%)]" />
       </div>
-      <div className="w-full flex flex-col overflow-hidden">
+      {/* Floating geometric shapes */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-orange-200/20 blur-xl" />
+        <div className="absolute top-40 right-20 w-24 h-24 rounded-full bg-amber-200/15 blur-lg" />
+        <div className="absolute bottom-32 left-1/4 w-40 h-40 rounded-full bg-orange-100/25 blur-2xl" />
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 rounded-full bg-yellow-200/20 blur-xl" />
+      </div>
+      <div className="text-center max-w-2xl mx-auto mb-12 px-4 md:px-0 relative z-10">
+        <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#261f22] drop-shadow-sm">Find the right instructor for you</h2>
+        <p className="mt-4 text-base md:text-lg font-medium text-slate-700">With over 30 instructors and 100+ learners</p>
+      </div>
+      <div className="w-full flex flex-col overflow-hidden relative z-10">
         {loading && (
-          <div className="text-center text-xs tracking-wide text-gray-500 py-4">Loading testimonials...</div>
+          <div className="text-center text-xs tracking-wide text-gray-600 py-4">Loading testimonials...</div>
         )}
         {!loading && (
           <>
-            <Marquee speed={40} gradient={false} className="mb-10" pauseOnHover>
+            <Marquee speed={40} gradient={false} className="mb-10">
               {topRow.map((item, i) => <Card key={`top-${i}`} item={item} />)}
             </Marquee>
-            <Marquee speed={40} direction="right" gradient={false} pauseOnHover>
+            <Marquee speed={40} direction="right" gradient={false}>
               {bottomRow.map((item, i) => <Card key={`bottom-${i}`} item={item} />)}
             </Marquee>
           </>

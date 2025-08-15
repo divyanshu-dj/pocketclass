@@ -272,7 +272,7 @@ function RecommendedClassesSection({
 
         <div
           ref={scrollRef}
-          className="gap-8 max-w-full mt-8 overflow-x-auto flex px-12"
+          className="gap-8 max-w-full mt-8 overflow-x-auto overflow-y-hidden flex px-12 hide-x-scrollbar"
         >
           {loading
             ? Array(4).fill(0).map((_, i) => (

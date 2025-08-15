@@ -462,7 +462,7 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
         )}
 
       <div
-        className={`transition-all flex flex-col dm2:gap-1 bg-white pb-4 dm2:pb-[2rem] sticky top-0 w-full dm2:z-50 z-[900] transition-all duration-1000 hide-x-scrollbar ${
+        className={`flex flex-col dm2:gap-1 bg-white pb-4 dm2:pb-[2rem] fixed top-0 left-0 right-0 w-full dm2:z-50 z-[1000] transition-all duration-1000 hide-x-scrollbar shadow-sm ${
           isMenuShrunk
             ? "h-[90px] dm2:h-[100px]"
             : `${isMenuSmall ? "h-auto dm2:h-[100px]" : "h-auto"}`
@@ -959,7 +959,9 @@ const NewHeader = ({ activeCategory, handleCategorySelection }) => {
             user={user}
           />
         </div>
-      </div>
+  </div>
+  {/* Spacer to offset fixed header height */}
+  <div aria-hidden="true" style={{ height: "var(--navbar-height)" }} />
       {isHome && <MusicSelector selectedCategory={activeKey} />}
     </>
   );
