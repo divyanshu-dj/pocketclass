@@ -133,7 +133,7 @@ function RecentlyViewedSection({ activeFilter = null, onClassesLoad }) {
   if (!loading && classes.length === 0) return null;
 
   return (
-    <div className="mt-6 flex flex-col w-full section-spacing py-8">
+    <div className="mt-6 flex flex-col w-full section-spacing py-8 overflow-x-hidden">
       {!activeFilter && (
         <p className="section-heading !text-left">Recently Viewed</p>
       )}

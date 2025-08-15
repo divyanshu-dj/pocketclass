@@ -246,7 +246,7 @@ function RecommendedClassesSection({
   if (!displayRec) return null;
 
   return (
-    <div className={`flex flex-col w-full py-8 ${currentClassData ? "px-0" : "section-spacing"}`}>
+    <div className={`flex flex-col w-full py-8 overflow-x-hidden ${currentClassData ? "px-0" : "section-spacing"}`}>
       {!activeFilter && (
         <p className="section-heading !text-left">
           {currentClassData ? "Similar Classes" : "Recommended"}

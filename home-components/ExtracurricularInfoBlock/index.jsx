@@ -3,7 +3,7 @@ import ExtracurricularBanner from "../ExtracurricularBanner";
 function ExtracurricularInfoBlock() {
   return (
     // Full-bleed section: backgrounds span viewport, inner content centered and constrained
-    <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden flex flex-col items-center">
+    <section className="relative left-1/2 -translate-x-1/2 w-screen flex flex-col items-center overflow-x-hidden">
       {/* Background layers */}
       <div className="absolute inset-0 pointer-events-none z-0">
         {/* Radial gradient glow full width */}

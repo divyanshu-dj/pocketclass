@@ -6,7 +6,7 @@ import CarousselSlider from "../../components/CarousselSlider";
 
 function InstructorInfoSection({ activeFilter }) {
   return (
-    <div>
+    <div className="">
       <TopInstructorsSectionWithButton activeFilter={activeFilter} />
       <ExtracurricularInfoBlock />
       <CarousselSlider/>

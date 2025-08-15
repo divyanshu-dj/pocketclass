@@ -11,7 +11,7 @@ function TopInstructorsSectionWithButton({ activeFilter }) {
   }
 
   return (
-    <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden py-8">
+    <section className="relative left-1/2 -translate-x-1/2 w-screen px-4 md:px-6 lg:px-8 py-8 overflow-x-hidden">
       {/* Full-bleed gradient layers */}
       <div className="pointer-events-none absolute inset-0 opacity-80">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_120%_at_0%_50%,rgba(251,146,60,0.15),rgba(249,115,22,0.1)_40%,rgba(59,130,246,0.05)_70%,transparent_85%)]" />

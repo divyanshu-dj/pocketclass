@@ -335,7 +335,7 @@ function InstructorFinderView() {
 
   return (
     // Full-bleed section: spans entire viewport width with no side padding/margins while preventing horizontal scrollbar
-    <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden py-14 md:py-20 bg-orange-25">
+    <section className="relative left-1/2 -translate-x-1/2 w-screen py-14 md:py-20 bg-orange-25 overflow-x-hidden">
       {/* Dynamic radial pattern background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_25%_25%,rgba(255,165,0,0.12),transparent_40%)]" />
@@ -355,7 +355,7 @@ function InstructorFinderView() {
         <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#261f22] drop-shadow-sm">Find the right instructor for you</h2>
         <p className="mt-4 text-base md:text-lg font-medium text-slate-700">With over 30 instructors and 100+ learners</p>
       </div>
-      <div className="w-full flex flex-col overflow-hidden relative z-10">
+      <div className="w-full flex flex-col relative z-10">
         {loading && (
           <div className="text-center text-xs tracking-wide text-gray-600 py-4">Loading testimonials...</div>
         )}
